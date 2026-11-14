@@ -13,6 +13,7 @@ import {
 import { calendarRangeSchema } from "../../../../packages/domain/src/index.ts";
 import { jevActionPrefixOf, parseJevAction } from "../../../../packages/domain/src/jev.ts";
 import { computerInstructions, computerTools } from "../computer-tools.ts";
+import { mcpInstructions, mcpTools } from "../mcp/tools.ts";
 import { connectedAppsNote, connectorInstructions, connectorTools } from "../connectors/index.ts";
 import type { Config } from "../config.ts";
 import { deboInstructions, deboTools } from "../debo/index.ts";
@@ -165,13 +166,15 @@ export class ConversationAgent extends AbstractAgent {
           this.service.connectors?.configured
             ? this.service.connectors.connectedNames(this.owner)
             : Promise.resolve([] as string[]),
+          this.service.mcp?.names(this.owner) ?? Promise.resolve([] as string[]),
         ]),
       ),
     ).pipe(
-      mergeMap(([persona, legacyGoogle, apps]) =>
+      mergeMap(([persona, legacyGoogle, apps, servers]) =>
         this.liveRun(input, choiceContinuation, requestKey, jev, latestText, persona, {
           legacyGoogle,
           apps,
+          servers,
         }),
       ),
     );
@@ -183,7 +186,7 @@ export class ConversationAgent extends AbstractAgent {
     jev: JevService | null,
     latestText: string,
     persona: Persona | null,
-    ctx: { legacyGoogle: boolean; apps: string[] },
+    ctx: { legacyGoogle: boolean; apps: string[]; servers: string[] },
   ): Observable<BaseEvent> {
     const jevMode = this.config.jevMode ?? "off";
     const key = (name: string, value: unknown) =>
@@ -212,6 +215,13 @@ export class ConversationAgent extends AbstractAgent {
       // Connected apps (Slack, Notion...): reads run, changes wait for the person's yes.
       ...(this.service.connectors?.configured
         ? connectorTools(this.service.connectors, this.service.actions, this.owner, {
+            signal: browserAbort.signal,
+            key,
+          })
+        : []),
+      // The person's own tool servers (MCP): every call waits for a yes unless allowed to read.
+      ...(ctx.servers.length && this.service.mcp
+        ? mcpTools(this.service.mcp, this.service.actions, this.owner, {
             signal: browserAbort.signal,
             key,
           })
@@ -395,6 +405,7 @@ export class ConversationAgent extends AbstractAgent {
         (this.service.connectors?.configured
           ? connectorInstructions + connectedAppsNote(ctx.apps)
           : "") +
+        (ctx.servers.length ? mcpInstructions(ctx.servers) : "") +
         computerInstructions(this.config.computerProvider) +
         (this.config.webSearchEnabled ? searchInstructions : ""),
     });

@@ -33,6 +33,7 @@ import type { Files } from "../files.ts";
 import { backgroundFailure } from "../log.ts";
 import { SearchService } from "../search.ts";
 import type { ConnectorService } from "../connectors/service.ts";
+import type { McpService } from "../mcp/service.ts";
 import type { DeboService } from "../debo/service.ts";
 import type { WorkspaceService } from "../workspace.ts";
 import { analyzeSpending } from "./finance.ts";
@@ -56,6 +57,8 @@ export class AgentService {
   debo?: DeboService;
   /** Connected apps (Composio). Set by createApp; unset in bare test fixtures. */
   connectors?: ConnectorService;
+  /** The person's own tool servers (MCP). */
+  mcp?: McpService;
   readonly worker: TaskWorker;
   readonly search: SearchService;
   private maintenance?: ReturnType<typeof setInterval>;

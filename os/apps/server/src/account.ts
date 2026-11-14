@@ -5,6 +5,7 @@ import { AppError } from "./errors.ts";
 import type { ConnectorService } from "./connectors/index.ts";
 import type { DeboService } from "./debo/index.ts";
 import type { Files } from "./files.ts";
+import type { McpService } from "./mcp/service.ts";
 
 /** Kinds that hold secrets or session state. They are never part of a person's export. */
 const NEVER_EXPORTED = new Set(["credentials", "sessions"]);
@@ -19,6 +20,7 @@ export function accountRoutes(
   files: Files,
   debo?: DeboService,
   connectors?: ConnectorService,
+  mcp?: McpService,
 ) {
   const app = new Hono<{ Variables: { owner: string } }>();
   app.get("/export", async (c) => {
@@ -27,7 +29,24 @@ export function accountRoutes(
     const journal = (await debo?.exportMine(c.get("owner"))) ?? null;
     // Which apps are connected, and since when. Never a token: Debo does not hold them.
     const apps = (await connectors?.exportMine(c.get("owner"))) ?? null;
-    return c.json({ exportedAt: new Date().toISOString(), records: rows, journal, connectedApps: apps });
+    // The person's own tool servers: name, address, tools and when each last worked. Never the secret.
+    const toolServers = mcp
+      ? (await mcp.list(c.get("owner"))).map((s) => ({
+          name: s.name,
+          url: s.url,
+          tools: s.tools.map((t) => t.name),
+          lastOk: s.lastOk,
+          lastAt: s.lastAt,
+          addedAt: s.createdAt,
+        }))
+      : null;
+    return c.json({
+      exportedAt: new Date().toISOString(),
+      records: rows.filter((row) => row.kind !== "mcp_servers"),
+      journal,
+      connectedApps: apps,
+      toolServers,
+    });
   });
   app.delete("/", async (c) => {
     const owner = c.get("owner");

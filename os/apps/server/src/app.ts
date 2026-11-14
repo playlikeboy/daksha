@@ -25,6 +25,8 @@ import {
   createConnectors,
 } from "./connectors/index.ts";
 import type { Config } from "./config.ts";
+import { McpService } from "./mcp/service.ts";
+import { mcpRoutes } from "./mcp/routes.ts";
 import type { Store } from "./db.ts";
 import { createDebo, type DeboService, deboRoutes } from "./debo/index.ts";
 import { agentRoutes } from "./engine/routes.ts";
@@ -58,6 +60,8 @@ export async function createApp(
     debo?: DeboService;
     /** Connected apps (Composio). Tests pass one built on a fake backend. */
     connectors?: ConnectorService;
+    /** The person's own tool servers. Tests pass one with a fake network. */
+    mcp?: McpService;
   } = {},
 ) {
   await resolveComputerDeployment(config);
@@ -70,12 +74,15 @@ export async function createApp(
     ? { service: options.connectors, backend: null }
     : createConnectors(config, { googleConnected: (owner) => workspace.connected(owner) });
   const connectors = made.service;
+  const mcp = options.mcp ?? new McpService(db, { encryptionKey: config.encryptionKey });
   const actions = new ActionService(db, {
     execute: (owner, input, connectionId, targetVersion) =>
       input.kind === "journal.add"
         ? debo.executeProposal(owner, input.data.text)
         : input.kind === "connector.call"
-          ? connectors.executeApproved(owner, input.data)
+          ? input.data.toolkit.startsWith("mcp:")
+            ? mcp.executeApproved(owner, input.data)
+            : connectors.executeApproved(owner, input.data)
           : workspace.execute(owner, input, connectionId, targetVersion),
     prepare: (owner, input, connectionId) => workspace.prepare(owner, input, connectionId),
     connected: (owner) => workspace.connected(owner),
@@ -86,6 +93,7 @@ export async function createApp(
   const agent = new AgentService(db, config, workspace, files, actions, browser, computer);
   agent.debo = debo;
   agent.connectors = connectors;
+  agent.mcp = mcp;
   const threads = new ThreadStore(db);
   const runner = new DatabaseAgentRunner(threads);
   const runtime = makeRuntime(config, agent, auth, runner);
@@ -240,8 +248,9 @@ export async function createApp(
   });
   app.route("/api/voice", voiceTokenRoutes(options.voiceEnv));
   app.route("/api/persona", personaRoutes(new PersonaStore(db)));
-  app.route("/api/account", accountRoutes(db, files, debo, connectors));
+  app.route("/api/account", accountRoutes(db, files, debo, connectors, mcp));
   app.route("/api/connectors", connectorRoutes(connectors));
+  app.route("/api/mcp", mcpRoutes(mcp));
   app.route("/api/agent", agentRoutes(agent));
   app.route("/api/debo", deboRoutes(debo));
   app.route("/api/computer", computerRoutes(computer, files));
@@ -442,5 +451,5 @@ export async function createApp(
   app.get("/", (c) =>
     c.json({ name: "Debo", app: "http://localhost:8081", health: "/api/health" }),
   );
-  return { app, auth, files, actions, workspace, agent, computer, debo, connectors };
+  return { app, auth, files, actions, workspace, agent, computer, debo, connectors, mcp };
 }
