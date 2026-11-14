@@ -33,8 +33,12 @@ const tsvector = customType<{ data: string }>({
   },
 });
 
-/** What a source is. A voice or video entry keeps its transcript as the text. */
-export type SourceKind = "journal" | "voice" | "video";
+/**
+ * What a source is. A voice or video entry keeps its transcript as the text.
+ * A voice_call is one live conversation with Debo: its text is the call
+ * written out line by line (see voice-call.ts).
+ */
+export type SourceKind = "journal" | "voice" | "video" | "voice_call";
 
 /** One thing the person gave Debo: a journal entry, a voice note or a video. */
 export const sources = pgTable(
@@ -51,6 +55,9 @@ export const sources = pgTable(
     happenedAt: timestamp("happened_at", { withTimezone: true }).notNull().defaultNow(),
     createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
     updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
+    // Voice calls only: when the text was last made searchable and read for memories.
+    // Null, or older than updated_at, means the call still needs that work.
+    ingestedAt: timestamp("ingested_at", { withTimezone: true }),
   },
   (t) => [index("sources_user_happened_idx").on(t.userId, t.happenedAt)],
 );

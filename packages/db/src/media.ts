@@ -372,13 +372,13 @@ export async function listJournalItems(
       .where(
         and(
           eq(sources.userId, userId),
-          inArray(sources.kind, ["journal", "voice", "video"]),
+          inArray(sources.kind, ["journal", "voice", "video", "voice_call"]),
           pattern ? sql`${sources.text} ilike ${pattern}` : undefined,
         ),
       )
       .orderBy(desc(sources.happenedAt))
       .limit(limit);
-    const ids = rows.filter((r) => r.kind !== "journal").map((r) => r.id);
+    const ids = rows.filter((r) => r.kind === "voice" || r.kind === "video").map((r) => r.id);
     const records = ids.length
       ? await db
           .select(mediaColumns)

@@ -1,6 +1,6 @@
 // Journal entries and keyword search over them.
 // Every function takes userId and filters by it. Callers cannot skip that.
-import { and, asc, cosineDistance, desc, eq, ilike, inArray, isNotNull, isNull, lt, sql } from "drizzle-orm";
+import { and, asc, cosineDistance, desc, eq, ilike, inArray, isNotNull, isNull, lt, ne, sql } from "drizzle-orm";
 import { z } from "zod";
 import { withDb } from "./client";
 import { chunks, type SourceKind, sources } from "./schema";
@@ -93,7 +93,8 @@ export async function updateEntry(
       const updated = await tx
         .update(sources)
         .set({ text, title: titleFrom(text), updatedAt: new Date() })
-        .where(and(eq(sources.id, sourceId), eq(sources.userId, userId)))
+        // A voice call is a record of what was said: it is deleted, not rewritten.
+        .where(and(eq(sources.id, sourceId), eq(sources.userId, userId), ne(sources.kind, "voice_call")))
         .returning({ id: sources.id });
       if (updated.length === 0) return false;
       await tx.delete(chunks).where(and(eq(chunks.sourceId, sourceId), eq(chunks.userId, userId)));

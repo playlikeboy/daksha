@@ -43,6 +43,13 @@
       "when": 1794648941303,
       "tag": "0005_journal_media",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1794677694987,
+      "tag": "0006_voice_calls",
+      "breakpoints": true
     }
   ]
 }

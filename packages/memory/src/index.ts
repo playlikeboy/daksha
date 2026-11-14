@@ -15,6 +15,7 @@
 //
 // Mem0's own model calls run on Mem0's side, so they are not in our `usage`.
 import { z } from "zod";
+import { CALL_INSTRUCTIONS, type ConversationTurn, conversationMessages, hasPersonTurn } from "./conversation";
 
 type Mem0Module = typeof import("mem0ai");
 type Mem0Client = InstanceType<Mem0Module["MemoryClient"]>;
@@ -176,6 +177,28 @@ export function createMemory(env: Record<string, string | undefined>) {
       return eventId.success ? eventId.data.eventId : null;
     },
 
+    /**
+     * Send a voice call to Mem0. The person's turns are "user" messages and
+     * Debo's are "assistant" context, with instructions never to save Debo's
+     * words. Same run id and source id as an entry, so forgetSource works.
+     */
+    async rememberFromConversation(input: {
+      userId: string;
+      sourceId: string;
+      turns: ConversationTurn[];
+    }): Promise<string | null> {
+      if (!hasPersonTurn(input.turns)) return null;
+      const m = await mem0();
+      const reply = (await m.add(conversationMessages(input.turns), {
+        userId: input.userId,
+        runId: input.sourceId,
+        metadata: { source_id: input.sourceId },
+        customInstructions: CALL_INSTRUCTIONS,
+      })) as unknown;
+      const eventId = z.object({ eventId: z.string() }).safeParse(reply);
+      return eventId.success ? eventId.data.eventId : null;
+    },
+
     /** Everything Debo knows about this person, each with its source, newest first. */
     async list(userId: string): Promise<Memory[]> {
       const memories = (await allFor(userId)).map(toMemory).filter((x): x is Memory => x !== null);
@@ -237,3 +260,4 @@ export function createMemory(env: Record<string, string | undefined>) {
 export type MemoryStore = NonNullable<ReturnType<typeof createMemory>>;
 
 export { speakToPerson } from "./wording";
+export { type ConversationTurn, hasPersonTurn } from "./conversation";
