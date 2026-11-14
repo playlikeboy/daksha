@@ -109,6 +109,10 @@ export async function createApp(
       credentials: true,
     }),
   );
+  // Recordings in binding mode go up and come down through here, streamed. The link's signed token
+  // is the sign-in, and it fixes the exact size, so this sits before the 12 MB limit and the per-address
+  // limit below (a recording goes up in several parts and is played with many range requests).
+  if (debo.blobRoutes) app.route("/api/media-blob", debo.blobRoutes);
   app.use(
     "*",
     bodyLimit({

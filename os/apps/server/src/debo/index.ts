@@ -2,8 +2,9 @@ import type { Config } from "../config.ts";
 import { ffmpegTools, fakeAudioTools } from "./audio.ts";
 import { type MediaDeps } from "./media-service.ts";
 import { memoryStore } from "./dev-store.ts";
+import { type BindingStore, bindingStore } from "./binding-store.ts";
 import { r2ConfigFromEnv, r2Store } from "./object-store.ts";
-import { cloudflareWhisper, fakeTranscriber } from "./transcriber.ts";
+import { bindingWhisper, cloudflareWhisper, fakeTranscriber } from "./transcriber.ts";
 import { type DeboBackend, deboDatabaseUrl, realBackend } from "./backend.ts";
 import { devMemoryBackend } from "./dev-backend.ts";
 import { DeboService } from "./service.ts";
@@ -27,21 +28,35 @@ export function devMemoryRequested(env: Record<string, string | undefined> = pro
 }
 
 /**
- * Where recordings are kept and who writes them out, from the environment:
- * R2_ACCOUNT_ID, R2_ACCESS_KEY_ID, R2_SECRET_ACCESS_KEY, R2_BUCKET (the bucket),
- * and CF_AI_API_TOKEN for the speech service (Cloudflare Workers AI, same account).
- * Without the bucket there are no recordings. Without the token recordings are
- * kept but nothing can be written out.
+ * Where recordings are kept and who writes them out, from the environment.
+ *
+ * Storage, first match wins:
+ *  1. R2_ACCOUNT_ID, R2_ACCESS_KEY_ID, R2_SECRET_ACCESS_KEY (and R2_BUCKET): presigned links, the app
+ *     talks to R2 directly.
+ *  2. MEDIA_BACKEND=binding with MEDIA_BINDING_URL and SESSION_SIGNING_KEY: the Worker's R2 binding,
+ *     reached through the private host media.internal. No keys; the app uploads and plays through this server.
+ * Speech: CF_AI_API_TOKEN (REST, with the R2 account id), else AI_BACKEND=binding with AI_BINDING_URL
+ * (the Worker's AI binding).
+ * Without storage there are no recordings. Without speech, recordings are kept but nothing is written out.
  */
-export function mediaFromEnv(env: Record<string, string | undefined>): MediaDeps | undefined {
+export function mediaFromEnv(env: Record<string, string | undefined>, publicUrl = ""): MediaDeps | undefined {
   const r2 = r2ConfigFromEnv(env);
-  if (!r2) return undefined;
   const apiToken = env.CF_AI_API_TOKEN?.trim();
-  return {
-    store: r2Store(r2),
-    audio: ffmpegTools(),
-    transcriber: apiToken ? cloudflareWhisper({ accountId: r2.accountId, apiToken }) : undefined,
-  };
+  const secret = env.SESSION_SIGNING_KEY?.trim();
+  const mediaUrl = env.MEDIA_BINDING_URL?.trim();
+  const aiUrl = env.AI_BINDING_URL?.trim();
+  const useBindings = env.MEDIA_BACKEND?.trim() === "binding" && mediaUrl && secret && publicUrl;
+  const store = r2 ? r2Store(r2) : useBindings ? bindingStore({ mediaUrl, publicUrl, secret }) : undefined;
+  if (!store) return undefined;
+  const transcriber =
+    r2 && apiToken
+      ? cloudflareWhisper({ accountId: r2.accountId, apiToken })
+      : env.AI_BACKEND?.trim() === "binding" && aiUrl
+        ? bindingWhisper(aiUrl)
+        : undefined;
+  // Through this server, a part must stay under every request limit on the way. 8 MiB: above R2's 5 MiB
+  // minimum, below the 12 MB general limit, and small enough to retry cheaply on a phone connection.
+  return { store, audio: ffmpegTools(), transcriber, ...(r2 ? {} : { partBytes: 8 * 1024 * 1024 }) };
 }
 
 /**
@@ -80,5 +95,8 @@ export function createDebo(
     return service;
   }
   const url = config.mode === "sample" ? env.DEBO_DATABASE_URL?.trim() || undefined : deboDatabaseUrl(env);
-  return new DeboService(url ? realBackend(url, env) : null, [], url ? mediaFromEnv(env) : undefined);
+  const made = url ? mediaFromEnv(env, config.publicUrl) : undefined;
+  const service = new DeboService(url ? realBackend(url, env) : null, [], made);
+  if (made && "routes" in made.store) service.blobRoutes = (made.store as BindingStore).routes();
+  return service;
 }

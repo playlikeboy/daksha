@@ -99,6 +99,8 @@ export class DeboService {
   private sweeper?: ReturnType<typeof setInterval>;
   /** Sample mode only: the in-memory bucket, to be served at /api/dev-r2. Never set in a live workspace. */
   devStore?: import("hono").Hono;
+  /** Binding mode only: uploads to and playback from the private bucket, through this server. Served at /api/media-blob. */
+  blobRoutes?: import("hono").Hono;
 
   /**
    * `backend` is null when there is no Debo database. `localOwners` are extra

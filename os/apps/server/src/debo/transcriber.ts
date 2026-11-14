@@ -47,7 +47,33 @@ export function cloudflareWhisper(
   fetchImpl: typeof fetch = fetch,
   sleep: (ms: number) => Promise<void> = (ms) => new Promise((r) => setTimeout(r, ms)),
 ): Transcriber {
-  const url = `https://api.cloudflare.com/client/v4/accounts/${encodeURIComponent(config.accountId)}/ai/run/${MODEL}`;
+  return whisper(
+    `https://api.cloudflare.com/client/v4/accounts/${encodeURIComponent(config.accountId)}/ai/run/${MODEL}`,
+    { Authorization: `Bearer ${config.apiToken}` },
+    fetchImpl,
+    sleep,
+  );
+}
+
+/**
+ * The same model through the Worker's AI binding, with no API token. The Worker
+ * answers `POST <url>/run` (see os/infra/cloudflare/api/src/media.ts) with the
+ * same { success, result } shape as the REST API, so the same reader is used.
+ */
+export function bindingWhisper(
+  url: string,
+  fetchImpl: typeof fetch = fetch,
+  sleep: (ms: number) => Promise<void> = (ms) => new Promise((r) => setTimeout(r, ms)),
+): Transcriber {
+  return whisper(`${url.replace(/\/$/, "")}/run`, {}, fetchImpl, sleep);
+}
+
+function whisper(
+  url: string,
+  auth: Record<string, string>,
+  fetchImpl: typeof fetch,
+  sleep: (ms: number) => Promise<void>,
+): Transcriber {
   return {
     name: "Cloudflare Workers AI (Whisper large v3 turbo)",
     async transcribe(audio, options = {}) {
@@ -65,7 +91,7 @@ export function cloudflareWhisper(
         try {
           response = await fetchImpl(url, {
             method: "POST",
-            headers: { Authorization: `Bearer ${config.apiToken}`, "Content-Type": "application/json" },
+            headers: { ...auth, "Content-Type": "application/json" },
             body,
             signal: options.signal ?? AbortSignal.timeout(120_000),
           });
