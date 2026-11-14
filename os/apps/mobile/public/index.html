@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="%LANG_ISO_CODE%">
+  <head>
+    <meta charset="utf-8" />
+    <meta httpEquiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
+    <title>%WEB_TITLE%</title>
+    <meta name="description" content="A friendly assistant that remembers your life. Ask about your own life and see where every answer came from." />
+
+    <!-- Install as an app. The manifest makes Chrome open Debo in its own window, with no address bar. -->
+    <link rel="manifest" href="/manifest.webmanifest" />
+    <meta name="theme-color" content="#F1F1F1" />
+    <meta name="application-name" content="Debo" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-title" content="Debo" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <link rel="icon" href="/favicon-32.png" type="image/png" sizes="32x32" />
+    <link rel="icon" href="/favicon.ico" sizes="48x48" />
+    <link rel="apple-touch-icon" href="/icons/apple-touch-icon.png" />
+
+    <!-- Share picture. -->
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="Debo" />
+    <meta property="og:url" content="https://my.debo.life" />
+    <meta property="og:title" content="Debo: a friendly assistant that remembers your life" />
+    <meta property="og:description" content="Ask about your own life. Every answer shows where it came from." />
+    <meta property="og:image" content="https://my.debo.life/og.png?v=2" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:image:alt" content="Debo, a small red tomato, next to a phone showing the app, and the words: a friendly assistant that remembers your life" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="Debo: a friendly assistant that remembers your life" />
+    <meta name="twitter:description" content="Ask about your own life. Every answer shows where it came from." />
+    <meta name="twitter:image" content="https://my.debo.life/og.png?v=2" />
+    <meta name="twitter:image:alt" content="Debo, a small red tomato, next to a phone showing the app, and the words: a friendly assistant that remembers your life" />
+
+    <!-- Debo does not nag people to install it. Chrome would show its own small install bar; this keeps it away.
+         Installing still works from the browser menu. The app's menu has a quiet "Get the app" link instead. -->
+    <script>
+      window.addEventListener("beforeinstallprompt", function (event) {
+        event.preventDefault();
+      });
+    </script>
+
+    <!-- The `react-native-web` recommended style reset: https://necolas.github.io/react-native-web/docs/setup/#root-element -->
+    <style id="expo-reset">
+      /* These styles make the body full-height */
+      html,
+      body {
+        height: 100%;
+      }
+      /* These styles disable body scrolling if you are using <ScrollView> */
+      body {
+        overflow: hidden;
+      }
+      /* These styles make the root element full-height */
+      #root {
+        display: flex;
+        height: 100%;
+        flex: 1;
+      }
+    </style>
+  </head>
+
+  <body>
+    <noscript>
+      You need to enable JavaScript to run this app.
+    </noscript>
+    <!-- The root element for your Expo app. -->
+    <div id="root"></div>
+  </body>
+</html>

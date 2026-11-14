@@ -36,6 +36,12 @@ pnpm --dir apps/mobile build:android
 
 The `build:ios` and `build:android` commands validate and export platform JavaScript/Hermes bundles. They do not create signed installable apps. `ios` and `android` run Expo’s native development-build workflows and need the platform toolchains.
 
+## Installing the web app
+
+`public/` is copied as is into the web export. It holds `manifest.webmanifest` (name, `display: standalone`, `start_url` and `scope` `/`, icons, screenshots), the icons, `og.png` and a `_headers` file for Cloudflare. `public/index.html` is Expo's page template: it links the manifest and icons, sets the theme colour and iPhone home screen tags, and stops Chrome's own install bar (`beforeinstallprompt`). Without a manifest Chrome only makes a shortcut, which opens as a normal tab with the address bar. Debo shows no install prompt of its own. The menu has a quiet "Get the app" row that opens the landing page's download section, and hides it in the installed app and the phone builds (`src/get-app.ts`).
+
+Make the icons and install screenshots again with `node scripts/icons/build-icons.mjs`, and the share picture with `node scripts/og/build-og.mjs` (both from the repo root).
+
 ## Phone builds and releases
 
 The workflow [`.github/workflows/release-mobile.yml`](../../../.github/workflows/release-mobile.yml) builds the phone apps in GitHub Actions, because building needs the Android SDK (and Xcode for iOS). Each build runs `expo prebuild` (the `android/` and `ios/` folders are generated and not committed) with `EXPO_PUBLIC_API_URL=https://api.debo.life`.

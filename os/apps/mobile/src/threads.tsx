@@ -1,6 +1,7 @@
 import {
   Archive,
   CalendarDays,
+  Download,
   FileText,
   MessageCircle,
   Monitor,
@@ -10,6 +11,7 @@ import {
 } from "lucide-react-native";
 import { createContext, type ReactNode, useContext, useEffect, useRef, useState } from "react";
 import { ActivityIndicator, Pressable, Text, View } from "react-native";
+import { isInstalledApp, openGetApp } from "./get-app";
 import { useSavedThreads } from "./thread-list";
 import { Button, colors, ErrorNotice, Field, LinkRow, Sheet, s } from "./ui";
 import { useWorkspace } from "./workspace";
@@ -330,6 +332,17 @@ export function ThreadsSheet({ onClose }: { onClose: () => void }) {
         <LinkRow icon={CalendarDays} title="Calendar" onPress={() => go("calendar")} />
         <LinkRow icon={FileText} title="Files" onPress={() => go("files")} />
         <LinkRow icon={Settings2} title="Apps & settings" onPress={() => go("apps")} />
+        {!isInstalledApp() && (
+          <LinkRow
+            icon={Download}
+            title="Get the app"
+            detail="Opens the download page"
+            onPress={() => {
+              onClose();
+              openGetApp();
+            }}
+          />
+        )}
         <Button small icon={RefreshCw} onPress={() => void mutate(refresh)}>
           Refresh
         </Button>

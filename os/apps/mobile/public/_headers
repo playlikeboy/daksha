@@ -1,0 +1,9 @@
+# Read by Cloudflare static assets. The install file gets its proper type, and nothing that
+# decides which app version opens is kept for long, so a new release shows up at once.
+/manifest.webmanifest
+  Content-Type: application/manifest+json
+  Cache-Control: public, max-age=0, must-revalidate
+/index.html
+  Cache-Control: public, max-age=0, must-revalidate
+/icons/*
+  Cache-Control: public, max-age=86400
