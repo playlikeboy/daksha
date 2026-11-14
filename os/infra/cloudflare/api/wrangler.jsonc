@@ -37,6 +37,11 @@
   // Private path to the browser worker. No public URL is involved.
   "services": [{ "binding": "BROWSER", "service": "debo-os-browser" }],
 
+  // Voice notes and videos, with no keys or tokens: the private bucket and Workers AI as bindings.
+  // The API container reaches them only through media.internal and ai.internal (see src/index.ts).
+  "r2_buckets": [{ "binding": "MEDIA", "bucket_name": "debo-journal-media" }],
+  "ai": { "binding": "AI" },
+
   // Keeps durable tasks moving: wakes the container, which restarts the task loop.
   // Remove to let the container sleep when idle (tasks then wait for the next visit).
   "triggers": { "crons": ["*/5 * * * *"] },
@@ -54,8 +59,7 @@
     "TASK_WORKER_ENABLED": "true",
     "TRUST_PROXY": "true",
     "API_SLEEP_AFTER": "10m",
-    // The private R2 bucket for voice notes and videos. It must be created first: see os/docs/JOURNAL-MEDIA.md.
-    // The API reaches it over R2's S3 address with the R2 secrets, so no wrangler binding is needed.
+    // Only used if the optional R2 keys are set (presigned links mode). Binding mode uses the MEDIA binding above.
     "R2_BUCKET": "debo-journal-media",
     // Overridden at deploy time with --var (the workflow does this).
     "PUBLIC_API_URL": "https://debo-os-api.workers.dev",

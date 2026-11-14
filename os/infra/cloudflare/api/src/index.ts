@@ -4,10 +4,16 @@ import { Container, getContainer } from "@cloudflare/containers";
 // on the Worker entry and refuses to start the container without it.
 export { ContainerProxy } from "@cloudflare/containers";
 
+import { AI_HOST, type AiLike, handleAi, handleMedia, MEDIA_HOST, type R2BucketLike } from "./media.ts";
+
 interface Env {
   API: DurableObjectNamespace<DeboApi>;
   /** Service binding to the private debo-os-browser Worker. */
   BROWSER: Fetcher;
+  /** The private R2 bucket for voice notes and videos. Reached only through media.internal. */
+  MEDIA?: R2BucketLike;
+  /** Workers AI, for writing out recordings. Reached only through ai.internal. */
+  AI?: AiLike;
   API_SLEEP_AFTER?: string;
   [name: string]: unknown;
 }
@@ -83,6 +89,16 @@ export class DeboApi extends Container<Env> {
     // The API calls http://browser.internal. The Containers runtime intercepts that
     // hostname (below) and hands the request to the private browser Worker.
     if (env.BROWSER) vars.BROWSER_WORKER_URL = `http://${BROWSER_HOST}`;
+    // Recordings through bindings: no R2 keys and no API token. The API calls these made-up
+    // hosts; the Containers runtime hands the requests to the handlers below.
+    if (env.MEDIA) {
+      vars.MEDIA_BACKEND = "binding";
+      vars.MEDIA_BINDING_URL = `http://${MEDIA_HOST}`;
+    }
+    if (env.AI) {
+      vars.AI_BACKEND = "binding";
+      vars.AI_BINDING_URL = `http://${AI_HOST}`;
+    }
     this.envVars = vars;
   }
 
@@ -101,6 +117,10 @@ export class DeboApi extends Container<Env> {
 // offline (HTTP 530 for browser.internal).
 DeboApi.outboundByHost = {
   [BROWSER_HOST]: (request: Request, env: Env) => env.BROWSER.fetch(request),
+  [MEDIA_HOST]: (request: Request, env: Env) =>
+    env.MEDIA ? handleMedia(request, env.MEDIA) : new Response("No bucket", { status: 503 }),
+  [AI_HOST]: (request: Request, env: Env) =>
+    env.AI ? handleAi(request, env.AI) : new Response("No AI binding", { status: 503 }),
 };
 
 const api = (env: Env) => getContainer(env.API, "main");
