@@ -116,13 +116,19 @@ export function readConnectorTool(name: "find_app_tools" | "use_app_tool", resul
   const v = value as Record<string, unknown>;
   if (typeof v.error === "string") return { kind: "error", message: v.error };
   if (name === "find_app_tools") {
-    const tools = Array.isArray(v.tools) ? (v.tools as { app?: unknown }[]) : [];
+    const tools = Array.isArray(v.tools) ? (v.tools as { app?: unknown; server?: unknown }[]) : [];
     if (!tools.length)
       return {
         kind: "none",
         message: typeof v.message === "string" ? v.message : "I found no matching tools.",
       };
-    const apps = [...new Set(tools.map((t) => (typeof t.app === "string" ? t.app : "")).filter(Boolean))];
+    const apps = [
+      ...new Set(
+        tools
+          .map((t) => (typeof t.app === "string" ? t.app : typeof t.server === "string" ? t.server : ""))
+          .filter(Boolean),
+      ),
+    ];
     return { kind: "found", apps, count: tools.length };
   }
   if (typeof v.actionId === "string" && typeof v.status === "string")

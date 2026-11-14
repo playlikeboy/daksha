@@ -640,9 +640,11 @@ function ReviewDetail({ initial }: { initial: ActionProposal }) {
               <Text style={s.muted}>This needs no further details.</Text>
             )}
             <Text style={s.small}>
-              {d.risk === "destructive"
-                ? `This can delete something in ${appName}, and it may not be possible to undo.`
-                : `This changes something in ${appName}.`}
+              {String(d.toolkit).startsWith("mcp:")
+                ? `${appName} is a tool server you added. It receives exactly the values above, and Debo does not control what it does with them.`
+                : d.risk === "destructive"
+                  ? `This can delete something in ${appName}, and it may not be possible to undo.`
+                  : `This changes something in ${appName}.`}
             </Text>
           </>
         ) : journal ? (

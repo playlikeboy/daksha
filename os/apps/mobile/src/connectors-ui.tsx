@@ -441,8 +441,9 @@ export function ConnectorToolCard({
 }) {
   const { workspace, open, refresh, notify } = useWorkspace();
   const view = loading ? undefined : readConnectorTool(name, result);
-  const tool = (args as { tool?: unknown } | undefined)?.tool;
-  const guess = appFromToolName(tool) ?? "your apps";
+  const given = args as { tool?: unknown; server?: unknown } | undefined;
+  const guess =
+    (typeof given?.server === "string" ? given.server : appFromToolName(given?.tool)) ?? "your apps";
   const label = loading
     ? name === "find_app_tools"
       ? "Looking for the right tool…"

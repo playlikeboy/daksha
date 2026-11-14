@@ -97,13 +97,24 @@ export function WorkspaceTools() {
       ),
     });
   // Apps the person connected (Slack, Notion...): which app was used, and any change waiting for a yes.
-  for (const name of ["find_app_tools", "use_app_tool"] as const)
+  // The person's own tool servers use the same card.
+  for (const name of [
+    "find_app_tools",
+    "use_app_tool",
+    "find_server_tools",
+    "use_server_tool",
+  ] as const)
     useRenderTool({
       name,
       description: "Show which connected app Debo used",
       parameters: displayParameters,
       render: ({ args, result, status }) => (
-        <ConnectorToolCard name={name} args={args} result={result} loading={status !== "complete"} />
+        <ConnectorToolCard
+          name={name.replace("server", "app") as "find_app_tools" | "use_app_tool"}
+          args={args}
+          result={result}
+          loading={status !== "complete"}
+        />
       ),
     });
   useRenderTool({

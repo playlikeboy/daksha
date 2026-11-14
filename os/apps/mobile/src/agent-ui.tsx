@@ -36,6 +36,7 @@ import type {
 } from "../../../packages/domain/src/agent";
 import { useAgentWorkspace } from "./agent-workspace";
 import { ConnectAppsSection } from "./connectors-ui";
+import { ToolServersSection } from "./mcp-ui";
 import { ActivityScreen, ConnectionsScreen } from "./screens";
 import {
   Button,
@@ -1824,6 +1825,7 @@ export function AppsScreen() {
       />
       <ConnectionsScreen query={query} />
       <ConnectAppsSection query={query} />
+      <ToolServersSection />
       <Text style={s.heading}>More from Debo</Text>
       <Card style={{ paddingVertical: 3, backgroundColor: colors.subtle }}>
         {shortcuts
