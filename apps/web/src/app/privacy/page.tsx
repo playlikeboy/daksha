@@ -222,6 +222,13 @@ export default function PrivacyPage() {
               The call itself is carried by LiveKit, Deepgram and Cartesia, as described above in this page. Debo does not
               store the audio.
             </>,
+            <>
+              You can minimise a call to a small bar and use the rest of the app while you talk. The microphone stays on
+              while the bar is there, and the bar always says whether it is on. On the web, the call keeps going if you
+              switch tabs or minimise the window, and stops when you close the tab. On iPhone the call is allowed to
+              continue when the app is in the background or the screen is locked, and iOS shows its orange microphone
+              dot. Press End, or Mute, at any time.
+            </>,
           ]}
         />
         <h3 className="mt-6 font-semibold">Voice notes, videos and speaking into the text</h3>
