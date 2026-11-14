@@ -25,13 +25,22 @@ You need Node 22, ffmpeg (with libx264 and libvpx-vp9), and the Playwright that 
 
    Set `FFMPEG=/path/to/ffmpeg` if ffmpeg is not on your PATH. `--only 12,30.5` renders just those seconds as JPEGs, for checking.
 
-3. Check the result by eye (a contact sheet with one frame per second is enough), then make the web files:
+3. The renderer writes full-range JPEG colour, so re-encode each cut to the standard TV range before you publish it (otherwise the file reports `yuvj420p`):
 
    ```
-   ffmpeg -i build/out/launch-h.mp4 -c:v libvpx-vp9 -crf 34 -b:v 0 -row-mt 1 -an apps/site/public/debo-launch.webm
+   ffmpeg -i build/out/launch-h.mp4 -vf "scale=in_range=pc:out_range=tv,format=yuv420p" -c:v libx264 -preset slow -crf 20 -maxrate 6M -bufsize 12M -color_range tv -movflags +faststart final-h.mp4
    ```
 
-   The poster is the frame at 11.5 s. Copy `launch-h.mp4` to `apps/site/public/debo-launch.mp4`.
+   Do the same for the vertical cut (`launch-v.mp4` to `final-v.mp4`).
+
+4. Check the result by eye (a contact sheet with one frame per second is enough), then make the web files from `final-h.mp4`:
+
+   ```
+   ffmpeg -i final-h.mp4 -c:v libvpx-vp9 -crf 35 -b:v 0 -row-mt 1 -an -pix_fmt yuv420p apps/site/public/debo-launch.webm
+   ffmpeg -ss 6.2 -i final-h.mp4 -frames:v 1 -vf scale=1280:-1 -c:v libwebp -quality 85 apps/site/public/debo-launch-poster.webp
+   ```
+
+   Copy `final-h.mp4` to `apps/site/public/debo-launch.mp4` and `final-v.mp4` to `apps/site/public/debo-launch-vertical.mp4`.
 
 ## Rules the edit keeps
 

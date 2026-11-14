@@ -76,8 +76,8 @@ function buildTimeline(M, L) {
       sub: "Say it out loud, or type when you can't." },
     { t0: 51.2, t1: 61.2 - 4.2, x: left, y: top, w: tw, size: head, subSize: sub, lines: [{ text: "See, fix or forget anything it knows." }],
       sub: "Every memory shows the entry it came from." },
-    { t0: 57.4, t1: 61.8, x: left, y: top, w: tw, size: head, subSize: sub, badge: "Coming soon", lines: [{ text: "Your apps, only with your yes." }],
-      sub: "Debo will ask before it sends, posts or changes anything outside Debo." },
+    { t0: 57.4, t1: 61.8, x: left, y: top, w: tw, size: head, subSize: sub, lines: [{ text: "Your apps, only with your yes." }],
+      sub: "Debo asks before it sends, posts or changes anything outside Debo." },
     // End card
     { t0: 64.0, t1: 99, x: 0, y: 0, w: W, center: true, cy: V ? 1230 : 700, color: "#fff", size: V ? 170 : 150,
       lines: [{ text: "Debo" }], sub: "A friendly assistant that remembers your life.", subSize: V ? 46 : 50, subDelay: 0.45, noExit: true },
@@ -94,6 +94,7 @@ function buildTimeline(M, L) {
     { t0: 33.6, t1: 37.4, text: "A plan built from what you wrote", target: [58, 770], pos: V ? cp : hp(760) },
     { t0: 42.2, t1: 44.9, text: "Type if you can't talk", target: [72, 1268], pos: V ? cp : hp(790) },
     { t0: 48.2, t1: 50.6, text: "A kind answer, in plain words", target: [40, 945], pos: V ? cp : hp(760) },
+    { t0: 58.4, t1: 61.4, text: "Gmail, Calendar and many more", target: [52, 1260], pos: V ? cp : hp(760) },
     { t0: 52.4, t1: 56.6, text: "Fix anything that is wrong", target: [78, 990], pos: V ? cp : hp(720) },
     { t0: 53.2, t1: 56.6, text: "Forget anything you want gone", target: [78, 1097], pos: V ? { x: 540, y: 565, center: true } : hp(820) },
   ];
