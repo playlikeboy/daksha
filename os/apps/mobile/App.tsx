@@ -36,6 +36,7 @@ import {
 import { AgentWorkspaceProvider, useAgentWorkspace } from "./src/agent-workspace";
 import { API_URL, createSession, FuseApi } from "./src/api";
 import { ChatScreen, WorkspaceTools } from "./src/chat";
+import { deboCharacter } from "./src/debo-character-store";
 import { DeboFaceGallery } from "./src/debo-face-gallery";
 import { useTaskMood } from "./src/debo-mood-hooks";
 import { deboMood } from "./src/debo-mood-store";
@@ -412,6 +413,13 @@ function WorkspaceShell({
       (task) => task.status === "waiting_approval" || task.status === "waiting_input",
     ) || data?.tasks.find((task) => task.status === "running");
   const agentName = data?.identity.name || "Debo";
+  // Every face in the app follows the character saved in the account.
+  const savedCharacter = data?.identity.character;
+  useEffect(() => {
+    if (!data) return;
+    deboCharacter.set(savedCharacter);
+    deboCharacter.setName(agentName);
+  }, [data, savedCharacter, agentName]);
   const status = activeTask
     ? activeTask.status === "waiting_approval"
       ? `Ready to review · ${activeTask.title}`

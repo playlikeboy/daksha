@@ -26,6 +26,7 @@ import {
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { duration } from "./astryx-tokens";
+import { useAssistantName } from "./debo-character-store";
 import { DeboFace, useReducedMotion } from "./debo-face";
 import { deboLevels, deboMood } from "./debo-mood-store";
 import { spokenStatus, stateWords, type TalkLine, useTalkCall, useTalkState } from "./debo-talk-session";
@@ -193,8 +194,9 @@ export function TalkPopup({ onClose }: { onClose: () => void }) {
     await talk.send(text);
   }
 
-  const words = stateWords({ status, micOn, agentState, reconnecting });
-  const spoken = spokenStatus({ status, micOn, agentState, reconnecting });
+  const assistant = useAssistantName();
+  const words = stateWords({ status, micOn, agentState, reconnecting, name: assistant });
+  const spoken = spokenStatus({ status, micOn, agentState, reconnecting, name: assistant });
   const shown = lines.filter((line) => line.text);
   const recent = shown.slice(typing ? -1 : -2);
   const latestSources = [...lines].reverse().find((line) => line.sources.length > 0)?.sources ?? [];
@@ -276,7 +278,7 @@ export function TalkPopup({ onClose }: { onClose: () => void }) {
             <View style={{ flex: 1, alignItems: "center", justifyContent: "center", gap: spacing[3] }}>
               <Pressable
                 accessibilityRole="button"
-                accessibilityLabel={live ? "Debo" : "Start talking"}
+                accessibilityLabel={live ? assistant : "Start talking"}
                 disabled={live || status === "connecting"}
                 onPress={() => void talk.start()}
                 style={{ width: orb * 1.4, height: orb * 1.4, alignItems: "center", justifyContent: "center" }}
@@ -499,7 +501,7 @@ export function TalkPopup({ onClose }: { onClose: () => void }) {
                     >
                       {line.text ? (
                         <>
-                          <Text style={s.small}>{line.who === "you" ? "You" : "Debo"}</Text>
+                          <Text style={s.small}>{line.who === "you" ? "You" : assistant}</Text>
                           <Text style={[s.text, { flexShrink: 1 }]}>{line.text}</Text>
                         </>
                       ) : null}

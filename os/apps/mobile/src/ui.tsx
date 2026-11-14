@@ -26,6 +26,8 @@ import {
   spacing,
   textStyle,
 } from "./astryx-tokens";
+import { useAssistantName } from "./debo-character-store";
+import { type CharacterId, characters } from "./debo-characters";
 import { DeboFace } from "./debo-face";
 import type { Mood } from "./debo-mood";
 import { colors } from "./palette";
@@ -451,30 +453,35 @@ class MascotFallback extends Component<{ size: number; children: ReactNode }, { 
 }
 
 /**
- * Debo, the little red tomato, drawn in code so her face can move (see debo-face.tsx).
- * She follows the shared mood, so the header, chat and voice popup always agree.
+ * The character the person talks to (Debo by default), drawn in code so its face can move
+ * (see debo-face.tsx). It follows the shared mood, so the header, chat and voice popup
+ * always agree.
  */
 export function Mascot({
   size = 42,
   variant = "sky",
+  character,
   mood,
   interactive,
 }: {
   size?: number;
   variant?: "sky" | "sand" | "lilac";
+  /** Draw this character instead of the one the person chose (the picker). */
+  character?: CharacterId;
   /** Show this mood instead of the shared one. */
   mood?: Mood;
   /** Tapping her gives a small reaction. */
   interactive?: boolean;
 }) {
-  // Soft Neutral-theme tints behind Debo. The mascot art itself is never recoloured.
+  const assistantName = useAssistantName();
+  // Soft Neutral-theme tints behind the character. The character art itself is never recoloured.
   const palette = {
     sky: colors.blue,
     sand: colors.orange,
     lilac: colors.lavender,
   }[variant];
   return (
-    <View accessibilityLabel="Debo" style={{ width: size, height: size }}>
+    <View accessibilityLabel={character ? characters[character].name : assistantName} style={{ width: size, height: size }}>
       <View
         style={{
           position: "absolute",
@@ -487,7 +494,7 @@ export function Mascot({
         }}
       />
       <MascotFallback size={size}>
-        <DeboFace size={size} mood={mood} interactive={interactive} />
+        <DeboFace size={size} character={character} mood={mood} interactive={interactive} />
       </MascotFallback>
     </View>
   );

@@ -49,14 +49,15 @@ export interface TalkDeps {
 const MIC_BLOCKED = "Debo can't use your microphone. Allow it in your settings, or type to Debo below.";
 
 /** The words under Debo. Short, and always true to what is happening. */
-export function stateWords(input: Pick<TalkState, "status" | "micOn" | "agentState" | "reconnecting">): string {
-  const { status, micOn, agentState, reconnecting } = input;
+export function stateWords(input: Pick<TalkState, "status" | "micOn" | "agentState" | "reconnecting"> & { name?: string },
+): string {
+  const { status, micOn, agentState, reconnecting, name = "Debo" } = input;
   if (status === "idle") return "Tap to start";
   if (status === "connecting") return "Connecting…";
   if (status === "ended") return "Conversation ended";
   if (status === "error") return "Not connected";
   if (reconnecting) return "Trying to reconnect…";
-  if (agentState === "speaking") return "Debo is speaking";
+  if (agentState === "speaking") return `${name} is speaking`;
   if (agentState === "thinking") return "Thinking…";
   if (!micOn) return "Microphone off";
   if (agentState === "listening") return "Listening";
@@ -64,8 +65,9 @@ export function stateWords(input: Pick<TalkState, "status" | "micOn" | "agentSta
 }
 
 /** What a screen reader hears. It says the microphone state every time. */
-export function spokenStatus(input: Pick<TalkState, "status" | "micOn" | "agentState" | "reconnecting">): string {
-  const { status, micOn, agentState, reconnecting } = input;
+export function spokenStatus(input: Pick<TalkState, "status" | "micOn" | "agentState" | "reconnecting"> & { name?: string },
+): string {
+  const { status, micOn, agentState, reconnecting, name = "Debo" } = input;
   const agentWords: Record<string, string> = {
     listening: "Listening",
     thinking: "Thinking",
@@ -73,7 +75,7 @@ export function spokenStatus(input: Pick<TalkState, "status" | "micOn" | "agentS
     initializing: "Getting ready",
   };
   return status === "idle"
-    ? "Microphone off. Debo is not listening."
+    ? `Microphone off. ${name} is not listening.`
     : status === "connecting"
       ? "Connecting. Microphone off for now."
       : status === "ended"
@@ -83,8 +85,8 @@ export function spokenStatus(input: Pick<TalkState, "status" | "micOn" | "agentS
           : reconnecting
             ? "Trying to reconnect."
             : micOn
-              ? `Microphone on. ${agentWords[agentState] ?? "Waiting for Debo to join"}.`
-              : "Microphone off. Debo can't hear you, but you can type.";
+              ? `Microphone on. ${agentWords[agentState] ?? `Waiting for ${name} to join`}.`
+              : `Microphone off. ${name} can't hear you, but you can type.`;
 }
 
 /** The label of the minimised bar: always whether the microphone is on, and how to open it. */
