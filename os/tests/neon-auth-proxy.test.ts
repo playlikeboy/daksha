@@ -5,7 +5,7 @@ import { neonAuthProxy } from "../apps/server/src/neon-auth-proxy.ts";
 
 const BASE = "https://auth.example.test/neondb/auth";
 
-function setup(answer: (request: Request) => Response) {
+function setup(answer: (request: Request) => Response, nativeOrigin?: string) {
   const seen: Request[] = [];
   const fake = (async (input: RequestInfo | URL, init?: RequestInit) => {
     const request = new Request(input as string, init);
@@ -13,7 +13,7 @@ function setup(answer: (request: Request) => Response) {
     return answer(request);
   }) as typeof fetch;
   const app = new Hono();
-  app.route("/api/neon-auth", neonAuthProxy(BASE, fake));
+  app.route("/api/neon-auth", neonAuthProxy(BASE, fake, nativeOrigin));
   return { app, seen };
 }
 
@@ -54,6 +54,24 @@ describe("sign-in pass-through to Neon Auth", () => {
     for (const path of ["/api/neon-auth/..%2Fadmin", "/api/neon-auth/a/../../b", "/api/neon-auth/.well-known/x", "/api/neon-auth/"])
       assert.equal((await app.request(path)).status, 404, path);
     assert.equal(seen.length, 0);
+  });
+
+  test("fills in the app's Origin for a phone, which sends none", async () => {
+    const { app, seen } = setup(() => new Response("{}"), "https://my.debo.life");
+    await app.request("/api/neon-auth/get-session", { headers: { cookie: "a=1" } });
+    assert.equal((seen[0] as Request).headers.get("origin"), "https://my.debo.life");
+  });
+
+  test("never invents an Origin for a browser request", async () => {
+    const { app, seen } = setup(() => new Response("{}"), "https://my.debo.life");
+    await app.request("/api/neon-auth/get-session", { headers: { "sec-fetch-site": "cross-site" } });
+    assert.equal((seen[0] as Request).headers.get("origin"), null);
+  });
+
+  test("keeps the Origin a caller sent", async () => {
+    const { app, seen } = setup(() => new Response("{}"), "https://my.debo.life");
+    await app.request("/api/neon-auth/get-session", { headers: { origin: "https://www.debo.life" } });
+    assert.equal((seen[0] as Request).headers.get("origin"), "https://www.debo.life");
   });
 
   test("says so plainly when Neon Auth cannot be reached", async () => {
