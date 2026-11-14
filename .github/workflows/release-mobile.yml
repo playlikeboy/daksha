@@ -1,0 +1,196 @@
+# Build the Debo phone apps and, on a version tag, publish them as a GitHub Release.
+#
+# What it makes:
+#   Android  debo-<version>.apk  (and debo.apk, the same file under a fixed name so
+#            https://github.com/playlikeboy/debo.life/releases/latest/download/debo.apk works).
+#            It is TEST-SIGNED with the debug key Expo's template uses, unless the four
+#            Android signing secrets below exist. It cannot go to Google Play as it is.
+#   iOS      debo-<version>-ios-simulator.zip: an UNSIGNED build that only runs in the
+#            iOS Simulator on a Mac. It does not install on an iPhone. An iPhone build
+#            needs the owner's paid Apple Developer account (see os/apps/mobile/README.md).
+#
+# When it runs:
+#   a pushed tag v*         build both, then publish a GitHub Release with the files
+#   workflow_dispatch       build both, keep them as run artifacts, no release
+#   push to mobile-release  same as workflow_dispatch (a place to test this file)
+#
+# The release is a normal release, not a pre-release, on purpose: GitHub's
+# /releases/latest address ignores pre-releases, and the landing page links to it.
+#
+# Secrets (names only). None is required. If all four Android ones exist, the APK is signed
+# with that key instead of the debug key:
+#   ANDROID_KEYSTORE_BASE64    the upload keystore file, base64 encoded
+#   ANDROID_KEYSTORE_PASSWORD  its store password
+#   ANDROID_KEY_ALIAS          the key alias inside it
+#   ANDROID_KEY_PASSWORD       the key password
+name: Release mobile
+
+on:
+  push:
+    tags: ["v*"]
+    branches: [mobile-release]
+  workflow_dispatch:
+
+concurrency:
+  group: release-mobile-${{ github.ref }}
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+env:
+  # The API address is baked into the app at build time.
+  EXPO_PUBLIC_API_URL: https://api.debo.life
+
+jobs:
+  android:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    outputs:
+      version: ${{ steps.version.outputs.version }}
+    env:
+      ANDROID_KEYSTORE_BASE64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
+      ANDROID_KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+      ANDROID_KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
+      ANDROID_KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: pnpm/action-setup@v4
+        with:
+          package_json_file: os/package.json
+
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 22
+
+      - uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          java-version: 17
+
+      - name: Read the version
+        id: version
+        run: |
+          version=$(node -p "require('./os/apps/mobile/app.json').expo.version")
+          echo "version=$version" >> "$GITHUB_OUTPUT"
+          if [ "${GITHUB_REF_TYPE}" = "tag" ] && [ "${GITHUB_REF_NAME}" != "v$version" ]; then
+            echo "::warning::Tag ${GITHUB_REF_NAME} does not match the app version $version in os/apps/mobile/app.json. The files are named after the app version."
+          fi
+
+      - name: Install
+        run: pnpm --dir os install --frozen-lockfile
+
+      - name: Make the Android project
+        working-directory: os/apps/mobile
+        run: pnpm exec expo prebuild --platform android --no-install
+
+      - name: Build the APK
+        working-directory: os/apps/mobile/android
+        run: |
+          signing=""
+          if [ -n "$ANDROID_KEYSTORE_BASE64" ] && [ -n "$ANDROID_KEYSTORE_PASSWORD" ] && [ -n "$ANDROID_KEY_ALIAS" ] && [ -n "$ANDROID_KEY_PASSWORD" ]; then
+            echo "$ANDROID_KEYSTORE_BASE64" | base64 -d > "$RUNNER_TEMP/release.keystore"
+            signing="-Pandroid.injected.signing.store.file=$RUNNER_TEMP/release.keystore -Pandroid.injected.signing.store.password=$ANDROID_KEYSTORE_PASSWORD -Pandroid.injected.signing.key.alias=$ANDROID_KEY_ALIAS -Pandroid.injected.signing.key.password=$ANDROID_KEY_PASSWORD"
+            echo "Signing with the owner's key."
+          else
+            echo "::notice::No signing secrets set: the APK is test-signed with the debug key."
+          fi
+          # Phones only (arm64 and 32-bit arm), to keep the file and the build time down.
+          ./gradlew assembleRelease --no-daemon -PreactNativeArchitectures=arm64-v8a,armeabi-v7a $signing
+
+      - name: Name and check the APK
+        env:
+          VERSION: ${{ steps.version.outputs.version }}
+        run: |
+          mkdir -p out
+          apk=$(ls os/apps/mobile/android/app/build/outputs/apk/release/*.apk | head -n 1)
+          cp "$apk" "out/debo-$VERSION.apk"
+          cp "$apk" out/debo.apk
+          ls -l out
+          # The Android SDK is on the runner. Show the package and the signer.
+          build_tools=$(ls -d "$ANDROID_HOME"/build-tools/* | sort -V | tail -n 1)
+          "$build_tools/aapt" dump badging out/debo.apk | grep -E "^package:|^application-label:|^uses-permission:" || true
+          "$build_tools/apksigner" verify --print-certs out/debo.apk | head -n 3
+          "$build_tools/aapt" dump badging out/debo.apk | grep -q "package: name='life.debo.app'"
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: android-apk
+          path: out/*.apk
+          if-no-files-found: error
+
+  ios-simulator:
+    runs-on: macos-15
+    timeout-minutes: 75
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: pnpm/action-setup@v4
+        with:
+          package_json_file: os/package.json
+
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 22
+
+      - name: Install
+        run: pnpm --dir os install --frozen-lockfile
+
+      - name: Make the iOS project
+        working-directory: os/apps/mobile
+        run: pnpm exec expo prebuild --platform ios --no-install
+
+      - name: Build for the iOS Simulator (unsigned)
+        working-directory: os/apps/mobile/ios
+        run: |
+          pod install
+          xcodebuild -workspace Debo.xcworkspace -scheme Debo -configuration Release \
+            -sdk iphonesimulator -destination 'generic/platform=iOS Simulator' \
+            -derivedDataPath build ARCHS=arm64 ONLY_ACTIVE_ARCH=NO \
+            CODE_SIGNING_ALLOWED=NO build | tail -n 40
+
+      - name: Zip the app
+        run: |
+          version=$(node -p "require('./os/apps/mobile/app.json').expo.version")
+          mkdir -p out
+          cd os/apps/mobile/ios/build/Build/Products/Release-iphonesimulator
+          ditto -c -k --sequesterRsrc --keepParent Debo.app "$GITHUB_WORKSPACE/out/debo-$version-ios-simulator.zip"
+          ls -l "$GITHUB_WORKSPACE/out"
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: ios-simulator
+          path: out/*.zip
+          if-no-files-found: error
+
+  release:
+    # Only on a version tag. The simulator build is optional: a failure there does not stop the Android release.
+    if: ${{ !cancelled() && startsWith(github.ref, 'refs/tags/v') && needs.android.result == 'success' }}
+    needs: [android, ios-simulator]
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: actions/download-artifact@v5
+        with:
+          path: files
+          merge-multiple: true
+
+      - name: Publish the release
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_REPO: ${{ github.repository }}
+          VERSION: ${{ needs.android.outputs.version }}
+        run: |
+          ls -l files
+          sed "s/__VERSION__/$VERSION/g" .github/release-mobile-notes.md > notes.md
+          files=(files/*)
+          if gh release view "$GITHUB_REF_NAME" >/dev/null 2>&1; then
+            gh release upload "$GITHUB_REF_NAME" "${files[@]}" --clobber
+          else
+            gh release create "$GITHUB_REF_NAME" "${files[@]}" \
+              --title "Debo $VERSION (early test build)" --notes-file notes.md --verify-tag
+          fi
