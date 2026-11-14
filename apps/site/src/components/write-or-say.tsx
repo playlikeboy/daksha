@@ -55,9 +55,9 @@ export function WriteOrSay() {
         </VStack>
         <VStack gap={3} paddingBlockStart={4} hAlign="start">
           <Heading level={3}>Voice and video journal</Heading>
-          <Badge variant="warning" label="Coming soon" />
+          <Badge variant="info" label="New, early version" />
           <Text as="p" type="large" weight="normal" color="secondary" textWrap="pretty">
-            Record a voice or video note and have it kept as an entry. This is being built. It does not work yet.
+            Record a voice or video note, or add one you already have. Debo keeps it as an entry and writes out the words so you can search and ask about it. This part is new and has had little real-world testing.
           </Text>
         </VStack>
       </Grid>

@@ -18,17 +18,18 @@ export function Apps() {
           />
         </VStack>
         <VStack gap={4} hAlign="start">
-          <Badge variant="warning" label="Coming soon" />
+          <Badge variant="info" label="New, early version" />
           <Heading level={2} type="display-2" weight="bold" id="apps-title" textWrap="balance">
             Connect your apps
           </Heading>
           <Text type="large" weight="normal" as="p" color="secondary" textWrap="pretty">
-            Later, you will be able to let Debo read from places like your mail and calendar, so it can answer
-            from more than your journal. This is being built and is not ready to use.
+            Connect places like your mail and calendar, so Debo can answer from more than your journal. You
+            sign in on the app's own page, and Debo never sees your password. This part is new and has had
+            little real-world testing.
           </Text>
           <Text as="p" type="large" weight="normal" color="secondary" textWrap="pretty">
-            Debo will ask you first, and will tell you what it wants to read and why. Before it sends, posts,
-            pays, deletes or changes anything outside Debo, it will wait for a clear yes.
+            Once you connect an app, Debo can look things up in it when you ask. Before it sends, posts, pays,
+            deletes or changes anything outside Debo, it waits for a clear yes from you on the screen.
           </Text>
         </VStack>
       </Grid>
