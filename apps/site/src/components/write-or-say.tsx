@@ -41,7 +41,7 @@ export function WriteOrSay() {
             src="/shots/talk-light.webp"
             width={780}
             height={1688}
-            alt="The Talk to Debo screen. The red tomato sits above the words Tap to start and Microphone off. Two buttons: Start talking and Not now."
+            alt="A voice call with Debo. The red tomato sits above the word Listening and Microphone on. Debo has said: Hey! I'm here. What's on your mind? Buttons below: Mic on, Stop Debo, Type and End."
           />
           <VStack gap={1} hAlign="center">
             <HStack gap={2} vAlign="center">

@@ -41,7 +41,7 @@ export function Hero() {
               src="/shots/chat-light.webp"
               width={780}
               height={1688}
-              alt="The Debo app. A person asks what they planted on the balcony. Debo answers: basil and mint, with a source chip that reads Journal, 11 November."
+              alt="The Debo app. Debo answers a question about getting ready for Mum's visit and a Goa trip: clean the spare room before Mum arrives, talk to Neha and Aarav, and it says plainly that the journal does not give Mum's arrival date."
               isPriority
             />
           </VStack>

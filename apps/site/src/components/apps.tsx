@@ -14,7 +14,7 @@ export function Apps() {
             src="/shots/apps-light.webp"
             width={780}
             height={1688}
-            alt="The Apps screen in Debo. A search box sits above a list with Debo's computer under Connected, and Gmail and Google Calendar under Not connected yet, each with a Connect button."
+            alt="The Apps screen in Debo. A search box sits above Debo's computer under Connected. Below, under Connect your apps, a list of apps starts with Gmail, marked Connected."
           />
         </VStack>
         <VStack gap={4} hAlign="start">
