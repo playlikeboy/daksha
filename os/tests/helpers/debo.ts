@@ -52,8 +52,8 @@ export function fakeBackend(
           .sort((a, b) => b.happenedAt.getTime() - a.happenedAt.getTime())
           .slice(0, limit);
       },
-      async create(owner, text) {
-        const entry: Entry = { id: randomUUID(), title: text.split("\n")[0]?.slice(0, 60) ?? "", text, happenedAt: new Date() };
+      async create(owner, text, happenedAt) {
+        const entry: Entry = { id: randomUUID(), title: text.split("\n")[0]?.slice(0, 60) ?? "", text, happenedAt: happenedAt ?? new Date() };
         entries.set(owner, [...mine(owner), entry]);
         return entry;
       },

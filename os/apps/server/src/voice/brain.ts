@@ -46,3 +46,6 @@ export const VOICE_ERROR_MESSAGE =
 
 /** Said out loud whenever a turn prepared something for the person to approve on screen. */
 export const APPROVAL_MESSAGE = " I've put that on your screen to approve.";
+
+/** Said when the model talked about a review but no tool created one, so nobody waits for a button. */
+export const NO_APPROVAL_MESSAGE = " Sorry, nothing is waiting for your approval after all.";

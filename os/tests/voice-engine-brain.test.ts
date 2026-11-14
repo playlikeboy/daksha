@@ -9,6 +9,7 @@ import type { AgentService } from "../apps/server/src/engine/service.ts";
 import type { ThreadStore } from "../apps/server/src/threads.ts";
 import {
   APPROVAL_MESSAGE,
+  NO_APPROVAL_MESSAGE,
   VOICE_ERROR_MESSAGE,
   type VoiceBrainEvent,
 } from "../apps/server/src/voice/brain.ts";
@@ -72,6 +73,14 @@ test("voice brain: journal sources from tools come out as chips before the words
   assert.deepEqual(events[0], { type: "sources", sources });
   const matched = await go(brain([result({ matches: [{ source: sources[0] }] }), ...text("Yes.")]));
   assert.deepEqual(matched[0], { type: "sources", sources });
+});
+
+test("voice brain: it never claims a review that no tool created", async () => {
+  const claimed = await go(brain(text("[[feel:calm]] Okay, it is on your screen to approve.")));
+  assert.equal(claimed.some((e) => e.type === "say" && e.text === NO_APPROVAL_MESSAGE), true);
+  const saved = await go(brain([result({ status: "saved", entryId: "e1", sources: [{ id: "e1", label: "Journal, 14 November" }] }), ...text("[[feel:happy]] Done, saved to today's journal.")]));
+  assert.equal(saved.some((e) => e.type === "say"), false);
+  assert.deepEqual(saved.find((e) => e.type === "sources"), { type: "sources", sources: [{ id: "e1", label: "Journal, 14 November" }] });
 });
 
 test("voice brain: a prepared review is always announced out loud, never completed", async () => {

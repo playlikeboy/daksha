@@ -9,6 +9,7 @@ import { threadOwner } from "../thread-runner.ts";
 import type { ThreadStore } from "../threads.ts";
 import {
   APPROVAL_MESSAGE,
+  NO_APPROVAL_MESSAGE,
   VOICE_ERROR_MESSAGE,
   type VoiceBrain,
   type VoiceBrainEvent,
@@ -16,6 +17,9 @@ import {
   type VoiceSource,
 } from "./brain.ts";
 import { EmotionFilter } from "./emotion.ts";
+
+/** Words that say "a review is waiting on your screen". Only true if a tool really made one. */
+const CLAIMS_REVIEW = /(on your screen|approve button|waiting for your (ok|approval|yes)|ready for your approval|needs? your approval)/i;
 
 /** How many earlier messages of the call the agent sees. */
 const CONTEXT_MESSAGES = 40;
@@ -178,6 +182,10 @@ export class EngineVoiceBrain implements VoiceBrain {
     if (approval && !/screen/i.test(spokenText)) {
       spoke = true;
       yield { type: "say", text: APPROVAL_MESSAGE };
+    } else if (!approval && CLAIMS_REVIEW.test(spokenText)) {
+      // The model talked about a review that no tool created: say so, so nobody waits for a button.
+      spoke = true;
+      yield { type: "say", text: NO_APPROVAL_MESSAGE };
     }
     yield { type: "done", status: spoke ? "answered" : "unknown" };
   }

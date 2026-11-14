@@ -314,40 +314,39 @@ test("search_my_journal and ask_my_life return sources, and only the owner's own
   });
 });
 
-test("add_journal_entry only prepares a review; the entry is saved after approval", async () => {
+test("add_journal_entry saves at once, for the right day, and returns a chip (14 November 2026 rule)", async () => {
   const backend = fakeBackend();
-  const { byName, actions } = toolsFor(ALICE, backend);
+  const { byName } = toolsFor(ALICE, backend);
   const result = (await byName("add_journal_entry")({ text: "Started piano lessons today" })) as {
     status: string;
-    actionId: string;
-    title: string;
+    entryId: string;
+    sources: { id: string; label: string }[];
   };
-  assert.equal(result.status, "awaiting_review");
-  assert.equal(result.title, "Add to your journal");
-  assert.equal(backend.entriesOf(ALICE).length, 0, "nothing is saved before approval");
-
-  // The same call again (a retry) returns the same review, not a second one.
-  const again = (await byName("add_journal_entry")({ text: "Started piano lessons today" })) as { actionId: string };
-  assert.equal(again.actionId, result.actionId);
-
-  const proposal = await db.get<{ hash: string; kind: string; data: { text: string } }>(ALICE, "actions", result.actionId);
-  assert.equal(proposal?.kind, "journal.add");
-  assert.equal(proposal?.data.text, "Started piano lessons today");
-  const done = await actions.decide(ALICE, result.actionId, proposal?.hash ?? "", "approve");
-  assert.equal(done.status, "succeeded");
-  assert.equal(backend.entriesOf(ALICE).length, 1);
+  assert.equal(result.status, "saved");
+  assert.equal(backend.entriesOf(ALICE).length, 1, "saved with no review step");
   assert.equal(backend.entriesOf(ALICE)[0]?.text, "Started piano lessons today");
+  assert.equal(result.sources[0]?.id, result.entryId);
+  assert.match(result.sources[0]?.label ?? "", /^Journal, /);
+
+  // The same call again (a retry) returns the same entry, not a second one.
+  const again = (await byName("add_journal_entry")({ text: "Started piano lessons today" })) as { entryId: string };
+  assert.equal(again.entryId, result.entryId);
+  assert.equal(backend.entriesOf(ALICE).length, 1);
+
+  // A day can be given; a future day is refused in plain words.
+  const past = (await byName("add_journal_entry")({ text: "Went to the sea", day: "2026-11-10" })) as { day: string; sources: { label: string }[] };
+  assert.equal(past.day, "2026-11-10");
+  assert.equal(past.sources[0]?.label, "Journal, 10 November");
+  const future = (await byName("add_journal_entry")({ text: "Tomorrow", day: "2999-01-01" })) as { error?: string };
+  assert.match(future.error ?? "", /not in the future/);
+  assert.equal(backend.entriesOf(ALICE).length, 2);
 });
 
-test("a denied journal review saves nothing, and other people cannot decide it", async () => {
+test("an entry saved by the agent is only ever the owner's", async () => {
   const backend = fakeBackend();
-  const { byName, actions } = toolsFor(ALICE, backend);
-  const result = (await byName("add_journal_entry")({ text: "Something private" })) as { actionId: string };
-  const proposal = await db.get<{ hash: string }>(ALICE, "actions", result.actionId);
-  await assert.rejects(() => actions.decide(BOB, result.actionId, proposal?.hash ?? "", "approve"), /not found/i);
-  const denied = await actions.decide(ALICE, result.actionId, proposal?.hash ?? "", "deny");
-  assert.equal(denied.status, "denied");
-  assert.equal(backend.entriesOf(ALICE).length, 0);
+  const alice = toolsFor(ALICE, backend);
+  await alice.byName("add_journal_entry")({ text: "Private thing" });
+  assert.equal(backend.entriesOf(BOB).length, 0);
 });
 
 test("tools report 'not set up' and bad input as plain results, never as crashes", async () => {

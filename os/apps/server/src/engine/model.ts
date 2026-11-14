@@ -322,27 +322,19 @@ export async function executeModelTask(
           ),
           tool(
             "prepare_journal_entry",
-            "Prepare a journal entry in the person's own words for a separate user review. Nothing is saved until they approve.",
+            "Save a journal entry in the person's own words right now. It only changes their own data inside Debo, so no review is needed.",
             addJournalEntryInput,
-            async ({ text }) => {
-              service.debo?.assertReady(owner);
-              const key = createHash("sha256").update(text).digest("hex");
-              const action = await service.actions.propose(
-                owner,
-                { kind: "journal.add", data: { text } },
-                `${task.id}:${key}`,
-                task.id,
-              );
-              if (action.status === "succeeded") {
-                task = await ctx.checkpoint({
-                  state: { ...task.state, approvalResult: action.result },
-                  actionId: null,
-                });
-                return { status: "succeeded", actionId: action.id, result: action.result };
+            async ({ text, day }) => {
+              try {
+                const entry = await service.debo?.createEntry(
+                  owner,
+                  { text, ...(day ? { happenedAt: `${day}T12:00:00.000Z` } : {}) },
+                  "debo",
+                );
+                return { status: "saved", entryId: entry?.id };
+              } catch (error) {
+                return { error: error instanceof Error ? error.message : "Could not save." };
               }
-              task = await ctx.checkpoint({ actionId: action.id });
-              outcome = { status: "waiting_approval", actionId: action.id };
-              return { status: "waiting_approval", actionId: action.id };
             },
           ),
         ]
