@@ -13,6 +13,7 @@ import { randomUUID } from "node:crypto";
 import { fileURLToPath } from "node:url";
 import { z } from "zod";
 import { DeboVoiceAgent } from "./agent.ts";
+import { readVoiceChoice } from "./brain.ts";
 
 const Env = z.object({
   // The Debo app's server. Voice runs through the same agent as chat there.
@@ -41,11 +42,14 @@ export default defineAgent({
     }
     const sessionId = randomUUID();
 
+    // The voice and speed this person chose (Settings), else the env defaults.
+    const chosen = readVoiceChoice(participant.metadata);
+    const speed = chosen?.speed ?? env.VOICE_TTS_SPEED;
     const tts = new inference.TTS({
       model: "cartesia/sonic-3",
-      voice: env.VOICE_TTS_VOICE,
+      voice: chosen?.voice ?? env.VOICE_TTS_VOICE,
       language: env.VOICE_TTS_LANGUAGE,
-      ...(env.VOICE_TTS_SPEED ? { modelOptions: { speed: env.VOICE_TTS_SPEED } } : {}),
+      ...(speed ? { modelOptions: { speed } } : {}),
     });
     const session = new voice.AgentSession({
       stt: new inference.STT({ model: "deepgram/nova-3", language: "multi" }),
@@ -74,7 +78,7 @@ export default defineAgent({
         room: ctx.room,
         tts,
         emotion: env.VOICE_EMOTION === "on",
-        speed: env.VOICE_TTS_SPEED,
+        speed,
       }),
       room: ctx.room,
     });

@@ -102,3 +102,20 @@ export function recentHistory(turns: Turn[], maxTurns = 6, maxChars = 2000): Tur
   }
   return picked;
 }
+
+/**
+ * The voice and speed the person chose, carried in the participant metadata of the signed
+ * token (set by /api/voice/token, never by the browser). Anything odd gives undefined, so
+ * the built-in voice is used.
+ */
+export function readVoiceChoice(metadata: string | undefined): { voice: string; speed: number } | undefined {
+  if (!metadata) return undefined;
+  try {
+    const value = z
+      .object({ voice: z.string().uuid(), speed: z.number().min(0.6).max(1.5) })
+      .parse(JSON.parse(metadata));
+    return value;
+  } catch {
+    return undefined;
+  }
+}

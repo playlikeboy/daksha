@@ -19,6 +19,7 @@ import {
   Target,
   Users,
   X,
+  SlidersHorizontal,
 } from "lucide-react-native";
 import { useEffect, useRef, useState } from "react";
 import { ActivityIndicator, Image, Linking, Pressable, Text, View } from "react-native";
@@ -1873,6 +1874,12 @@ export function AppsScreen() {
             />
           ))}
       </Card>
+      <LinkRow
+        icon={SlidersHorizontal}
+        title="Voice, personality and notes"
+        detail="How she talks and what she knows"
+        onPress={() => open({ type: "talk-settings" })}
+      />
       <Button onPress={() => setSettings(!settings)}>
         {settings ? "Close settings" : "Name, voice and notes"}
       </Button>

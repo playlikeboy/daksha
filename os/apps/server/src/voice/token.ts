@@ -15,11 +15,17 @@ export interface VoiceSession {
  * - It lasts 10 minutes and joins that one room only.
  * - It asks LiveKit to send the "debo-voice" agent into the room.
  */
-export async function mintVoiceSession(config: VoiceConfig, owner: string): Promise<VoiceSession> {
+export async function mintVoiceSession(
+  config: VoiceConfig,
+  owner: string,
+  voice?: { voice: string; speed: number },
+): Promise<VoiceSession> {
   const room = `debo-${crypto.randomUUID()}`;
   const token = new AccessToken(config.apiKey, config.apiSecret, {
     identity: owner,
     ttl: VOICE_TOKEN_TTL,
+    // The person's chosen voice and speed. The agent reads it when it joins; it is signed with the token.
+    ...(voice ? { metadata: JSON.stringify(voice) } : {}),
   });
   token.addGrant({
     room,

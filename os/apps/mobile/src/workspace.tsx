@@ -23,6 +23,7 @@ export type Detail =
   | { type: "delegate"; goalId?: string; milestoneId?: string }
   | { type: "notifications" }
   | { type: "computer" }
+  | { type: "talk-settings" }
   | { type: "menu" };
 export interface WorkspaceContextValue {
   workspace: Workspace;

@@ -35,6 +35,7 @@ import { AppError } from "./errors.ts";
 import { Files } from "./files.ts";
 import { GoogleAuth } from "./google-auth.ts";
 import { PersonaStore, personaRoutes } from "./persona.ts";
+import { TalkSettingsStore, talkSettingsRoutes, voiceFor } from "./talk-settings.ts";
 import { neonAuthProxy } from "./neon-auth-proxy.ts";
 import { rateLimit } from "./rate-limit.ts";
 import { DatabaseAgentRunner, threadOwner } from "./thread-runner.ts";
@@ -254,8 +255,17 @@ export async function createApp(
     );
     return c.json(snapshot);
   });
-  app.route("/api/voice", voiceTokenRoutes(options.voiceEnv, (owner) => debo.callEnded(owner)));
+  app.route("/api/voice", voiceTokenRoutes(
+      options.voiceEnv,
+      (owner) => debo.callEnded(owner),
+      // The voice and speed this person chose, sent to the agent inside the signed token.
+      async (owner) => voiceFor(await talkSettings.get(owner).catch(() => null), await characterOf(owner)),
+    ));
   app.route("/api/persona", personaRoutes(new PersonaStore(db)));
+  const talkSettings = new TalkSettingsStore(db);
+  const characterOf = async (owner: string) =>
+    (await db.get<{ character?: string }>(owner, "agent-settings", "identity").catch(() => null))?.character;
+  app.route("/api/talk-settings", talkSettingsRoutes(talkSettings, characterOf));
   app.route("/api/account", accountRoutes(db, files, debo, connectors, mcp));
   app.route("/api/connectors", connectorRoutes(connectors));
   app.route("/api/mcp", mcpRoutes(mcp));

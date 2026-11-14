@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { EMOTIONS, readEvents, recentHistory } from "./brain.ts";
+import { EMOTIONS, readEvents, readVoiceChoice, recentHistory } from "./brain.ts";
 
 function streamOf(chunks: string[]) {
   const encoder = new TextEncoder();
@@ -10,6 +10,17 @@ function streamOf(chunks: string[]) {
     },
   });
 }
+
+describe("readVoiceChoice", () => {
+  it("reads a good choice and ignores anything odd", () => {
+    const id = "9626c31c-bec5-4cca-baa8-f8ba9e84c8bc";
+    expect(readVoiceChoice(JSON.stringify({ voice: id, speed: 1.1 }))).toEqual({ voice: id, speed: 1.1 });
+    expect(readVoiceChoice(undefined)).toBeUndefined();
+    expect(readVoiceChoice("not json")).toBeUndefined();
+    expect(readVoiceChoice(JSON.stringify({ voice: "x", speed: 1 }))).toBeUndefined();
+    expect(readVoiceChoice(JSON.stringify({ voice: id, speed: 5 }))).toBeUndefined();
+  });
+});
 
 describe("readEvents", () => {
   it("reads events split across chunks and skips bad lines", async () => {

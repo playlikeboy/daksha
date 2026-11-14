@@ -57,10 +57,12 @@ import {
   Sheet,
   timeLabel,
 } from "./ui";
+import { TalkSettingsSheet } from "./talk-settings-ui";
 import { type Detail, useWorkspace } from "./workspace";
 export function Details({ detail }: { detail: Detail }) {
   const { close, navigate } = useWorkspace();
   if (detail.type === "computer") return <ComputerSheet />;
+  if (detail.type === "talk-settings") return <TalkSettingsSheet />;
   if (detail.type === "task") return <TaskDetail taskId={detail.taskId} />;
   if (detail.type === "delegate")
     return (

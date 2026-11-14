@@ -10,7 +10,7 @@
 // the small bar (debo-talk-pill.tsx) while the call goes on. The chevron, Escape
 // and a swipe down collapse a live call; only End ends it. With no call, they
 // just close.
-import { ChevronDown, Keyboard, MessageCircle, Mic, MicOff, PhoneOff, Square } from "lucide-react-native";
+import { ChevronDown, Keyboard, SlidersHorizontal, MessageCircle, Mic, MicOff, PhoneOff, Square } from "lucide-react-native";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
   Animated,
@@ -36,7 +36,7 @@ import { Button, Card, Chip, colors, ErrorNotice, Field, fontSize, radius, s, sp
 import { useWorkspace } from "./workspace";
 
 export function TalkPopup({ onClose }: { onClose: () => void }) {
-  const { navigate, notify } = useWorkspace();
+  const { navigate, notify, open } = useWorkspace();
   const { width, height } = useWindowDimensions();
   const insets = useSafeAreaInsets();
   const reduceMotion = useReducedMotion();
@@ -279,6 +279,14 @@ export function TalkPopup({ onClose }: { onClose: () => void }) {
               <View
                 style={{ width: 40, height: 4, borderRadius: radius.full, backgroundColor: colors.lineStrong }}
               />
+              <Pressable
+                accessibilityRole="button"
+                accessibilityLabel={`How ${assistant} talks: voice, personality and notes`}
+                onPress={() => open({ type: "talk-settings" })}
+                style={{ width: spacing[11], height: spacing[11], alignItems: "center", justifyContent: "center" }}
+              >
+                <SlidersHorizontal size={22} color={colors.muted} strokeWidth={1.8} />
+              </Pressable>
               {live || shown.length > 0 ? (
                 <Pressable
                   accessibilityRole="button"

@@ -8,6 +8,7 @@ import {
   Plus,
   RefreshCw,
   Settings2,
+  SlidersHorizontal,
 } from "lucide-react-native";
 import { createContext, type ReactNode, useContext, useEffect, useRef, useState } from "react";
 import { ActivityIndicator, Pressable, Text, View } from "react-native";
@@ -331,6 +332,15 @@ export function ThreadsSheet({ onClose }: { onClose: () => void }) {
         />
         <LinkRow icon={CalendarDays} title="Calendar" onPress={() => go("calendar")} />
         <LinkRow icon={FileText} title="Files" onPress={() => go("files")} />
+        <LinkRow
+          icon={SlidersHorizontal}
+          title="Voice, personality and notes"
+          detail="How she talks and what she knows"
+          onPress={() => {
+            onClose();
+            open({ type: "talk-settings" });
+          }}
+        />
         <LinkRow icon={Settings2} title="Apps & settings" onPress={() => go("apps")} />
         {!isInstalledApp() && (
           <LinkRow

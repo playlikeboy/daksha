@@ -91,12 +91,18 @@ export function voiceAgentRoutes(brain: VoiceBrain, env: () => Env = () => proce
  * POST /api/voice/token. Mount it AFTER the owner sign-in check: it reads the
  * signed-in owner from the context. The app never chooses its own identity.
  */
-export function voiceTokenRoutes(env: () => Env = () => process.env, onEnded?: (owner: string) => void) {
+export function voiceTokenRoutes(
+  env: () => Env = () => process.env,
+  onEnded?: (owner: string) => void,
+  voiceOf?: (owner: string) => Promise<{ voice: string; speed: number }>,
+) {
   const app = new Hono<{ Variables: { owner: string } }>();
   app.post("/token", async (c) => {
     const config: VoiceConfig | undefined = readVoiceConfig(env());
     if (!config) throw new AppError(VOICE_NOT_SET_UP, 503);
-    return c.json(await mintVoiceSession(config, c.get("owner")));
+    const owner = c.get("owner");
+    const chosen = await voiceOf?.(owner).catch(() => undefined);
+    return c.json(await mintVoiceSession(config, owner, chosen));
   });
   // The app says the call ended. Debo then reads the call once: search pieces and memories.
   // The agent keeps no session with the app, so this covers all of this person's open calls.
