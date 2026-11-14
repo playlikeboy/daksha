@@ -71,7 +71,9 @@ export function ChatTitle({ id }: { id: string }) {
       show(thread.name);
       setEditing(false);
     } catch (e) {
-      setError(errorText(e));
+      setError(
+        /not found/i.test(errorText(e)) ? "Send your first message, then you can name this chat." : errorText(e),
+      );
     } finally {
       setBusy(false);
     }

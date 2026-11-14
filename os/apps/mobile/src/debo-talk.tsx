@@ -304,7 +304,13 @@ export function TalkPopup({ onClose }: { onClose: () => void }) {
             </View>
 
             {/* The orb: Debo, a halo that follows her voice, and a ring that follows yours. */}
-            <View style={{ flex: 1, alignItems: "center", justifyContent: "center", gap: spacing[3] }}>
+            <ScrollView
+              style={{ flex: 1 }}
+              contentContainerStyle={{ flexGrow: 1, alignItems: "center", justifyContent: "center", gap: spacing[3] }}
+              showsVerticalScrollIndicator={false}
+            >
+              {/* Anything that needs a yes is shown first, on top of the call, never only behind it. */}
+              <TalkApprovals />
               <Pressable
                 accessibilityRole="button"
                 accessibilityLabel={live ? assistant : "Start talking"}
@@ -403,9 +409,6 @@ export function TalkPopup({ onClose }: { onClose: () => void }) {
 
               <ErrorNotice error={problem} />
 
-              {/* Anything that needs a yes is shown here, on top of the call, never only behind it. */}
-              <TalkApprovals />
-
               {/* Live captions: the last one or two lines, the older one faded. */}
               {recent.length > 0 && (
                 <View accessibilityLiveRegion="polite" accessibilityLabel="Live captions" style={{ gap: spacing[1], alignSelf: "stretch" }}>
@@ -427,7 +430,7 @@ export function TalkPopup({ onClose }: { onClose: () => void }) {
                   ))}
                 </View>
               )}
-            </View>
+            </ScrollView>
 
             {/* The keyboard panel slides up above the controls. */}
             {live && typing && (

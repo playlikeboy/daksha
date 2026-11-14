@@ -75,7 +75,7 @@ export function TalkApprovals() {
       accessibilityLabel="Waiting for your yes"
       style={{ alignSelf: "stretch", gap: spacing[2] }}
     >
-      {waiting.slice(0, 2).map((action) => (
+      {waiting.slice(0, 1).map((action) => (
         <Card key={action.id} style={{ padding: spacing[3], gap: spacing[2], backgroundColor: colors.subtle }}>
           <Text style={[s.small, { color: colors.blueDark, fontWeight: "600" }]}>Waiting for your yes</Text>
           <Text style={[s.text, { fontWeight: "600" }]}>{action.title}</Text>
@@ -95,8 +95,8 @@ export function TalkApprovals() {
           </View>
         </Card>
       ))}
-      {waiting.length > 2 && (
-        <Text style={[s.small, { textAlign: "center" }]}>{waiting.length - 2} more waiting in Tasks.</Text>
+      {waiting.length > 1 && (
+        <Text style={[s.small, { textAlign: "center" }]}>{waiting.length - 1} more waiting in Tasks.</Text>
       )}
       <ErrorNotice error={error} />
     </View>
