@@ -153,7 +153,11 @@ export async function createApp(
     }),
   );
   if (config.neonAuthBaseUrl)
-    app.route("/api/neon-auth", neonAuthProxy(config.neonAuthBaseUrl, options.neonAuthFetch));
+    app.route("/api/neon-auth", neonAuthProxy(
+        config.neonAuthBaseUrl,
+        options.neonAuthFetch,
+        [...origins].find((origin) => origin.startsWith("https://")),
+      ));
   let loginWindow = 0,
     loginAttempts = 0;
   app.post("/api/session", async (c) => {
