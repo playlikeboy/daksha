@@ -18,6 +18,11 @@ const TITLE = "Debo: a friendly assistant that remembers your life";
 const DESCRIPTION =
   "Write things down or say them out loud. Ask Debo about your own life and see the source of every answer. You can see, fix, download and delete everything.";
 
+// Made by scripts/og/build-og.mjs. The ?v= changes when the picture changes, so chat apps fetch it again.
+const OG_IMAGE = "https://about.debo.life/og.png?v=2";
+const OG_ALT =
+  "Debo, a small red tomato, next to a phone showing the app, and the words: a friendly assistant that remembers your life";
+
 export const metadata: Metadata = {
   metadataBase: new URL("https://about.debo.life"),
   title: { default: TITLE, template: "%s | Debo" },
@@ -32,10 +37,10 @@ export const metadata: Metadata = {
     description: DESCRIPTION,
     images: [
       {
-        url: "/og.png",
+        url: OG_IMAGE,
         width: 1200,
         height: 630,
-        alt: "Debo, a small red tomato, and the words: a friendly assistant that remembers your life",
+        alt: OG_ALT,
       },
     ],
   },
@@ -43,7 +48,7 @@ export const metadata: Metadata = {
     card: "summary_large_image",
     title: TITLE,
     description: DESCRIPTION,
-    images: ["/og.png"],
+    images: [{ url: OG_IMAGE, width: 1200, height: 630, alt: OG_ALT }],
   },
 };
 

@@ -1,0 +1,54 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<!-- Source of the share image (1200x630). Rendered to PNG by build-og.mjs. Colours are the Astryx Neutral
+     light tokens used by the app (os/apps/mobile/src/astryx-tokens.ts). The script swaps the upper-case words in the font urls and the two img tags
+     for file addresses before rendering. -->
+<style>
+  :root {
+    --body: #F1F1F1;      /* backgroundBody */
+    --ink: #1B1B1B;       /* accent, the near-black */
+    --text: #000000;      /* textPrimary */
+    --muted: #474747;     /* textSecondary */
+    --blue-soft: #B9D7FF; /* infoMuted */
+    --blue-ink: #003978;  /* onInfoMuted */
+  }
+  @font-face { font-family: Figtree; font-weight: 500; src: url("FONT_DIR/figtree-latin-500-normal.woff2"); }
+  @font-face { font-family: Figtree; font-weight: 600; src: url("FONT_DIR/figtree-latin-600-normal.woff2"); }
+  @font-face { font-family: Figtree; font-weight: 700; src: url("FONT_DIR/figtree-latin-700-normal.woff2"); }
+  * { box-sizing: border-box; margin: 0; }
+  html, body { width: 1200px; height: 630px; overflow: hidden; }
+  body {
+    font-family: Figtree, system-ui, sans-serif;
+    color: var(--text);
+    /* backgroundRed (#FFC4BE) as a soft glow behind the phone */
+    background:
+      radial-gradient(620px 520px at 945px 280px, rgba(255, 196, 190, 0.75), rgba(255, 196, 190, 0) 70%),
+      var(--body);
+    position: relative;
+  }
+  .copy { position: absolute; left: 84px; top: 0; bottom: 0; width: 650px; display: flex; flex-direction: column; justify-content: center; }
+  .brand { display: flex; align-items: center; gap: 26px; }
+  .brand img { width: 136px; height: 136px; display: block; }
+  .name { font-size: 112px; font-weight: 700; letter-spacing: -3px; line-height: 1; }
+  .tag { margin-top: 34px; font-size: 54px; font-weight: 600; line-height: 1.12; letter-spacing: -1.2px; color: var(--ink); }
+  .sub { margin-top: 24px; font-size: 29px; font-weight: 500; line-height: 1.3; color: var(--muted); }
+  .chip { margin-top: 34px; align-self: flex-start; font-size: 25px; font-weight: 600; color: var(--blue-ink);
+          background: var(--blue-soft); padding: 8px 20px; border-radius: 999px; }
+  .phone { position: absolute; left: 800px; top: 56px; width: 308px; height: 640px; background: var(--ink);
+           border-radius: 50px; padding: 11px; box-shadow: 0 30px 60px rgba(27, 27, 27, 0.22), 0 6px 14px rgba(27, 27, 27, 0.12); }
+  .phone .screen { width: 100%; height: 100%; border-radius: 40px; overflow: hidden; background: var(--body); }
+  .phone img { width: 100%; display: block; }
+</style>
+</head>
+<body>
+  <div class="copy">
+    <div class="brand"><img src="TOMATO" alt="" /><div class="name">Debo</div></div>
+    <div class="tag">A friendly assistant that remembers your life</div>
+    <div class="sub">SUBLINE</div>
+    CHIP
+  </div>
+  <div class="phone"><div class="screen"><img src="SHOT" alt="" /></div></div>
+</body>
+</html>

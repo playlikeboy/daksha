@@ -25,7 +25,7 @@ const JSON_LD = {
       operatingSystem: "Web",
       description:
         "A friendly assistant that remembers your life. Write a journal or talk out loud, then ask about your own past and plans. Every answer shows its source.",
-      image: "https://about.debo.life/og.png",
+      image: "https://about.debo.life/og.png?v=2",
     },
     {
       "@type": "FAQPage",
