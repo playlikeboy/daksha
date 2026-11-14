@@ -1,8 +1,8 @@
 # Journal recordings: voice notes, videos and speaking
 
-Status: built and run end to end in sample mode with a fake bucket and a fake speech engine (14 November 2026). **Not yet run against real R2 or real Workers AI.** See "Not checked yet" at the end.
+Status: built and run end to end in sample mode with a fake bucket and a fake speech engine, and in tests with a fake Worker standing in for Cloudflare (14 November 2026). **Not yet run against real R2 or real Workers AI.** See "Not checked yet" at the end.
 
-This is what the Journal screen does beyond typing, how it is stored, what it costs, and what the owner must set up before it works.
+This is what the Journal screen does beyond typing, how it is stored, what it costs, and what is needed to make it work. On Cloudflare it needs no owner-made keys or tokens, only the two bindings in `api/wrangler.jsonc`.
 
 ## What a person can do
 
@@ -28,24 +28,27 @@ Cost of this choice: words appear a few seconds after you speak, not as you spea
 Limits: 30 clips a minute and 600 a day per person (about 100 minutes), in server memory, so a restart resets them. Dictation does not count against the daily AI token limit, because it uses a different service with its own cost. Clips are not stored.
 On the phone: not built. Use the microphone on the keyboard to dictate. In-app dictation needs a native audio module (below).
 
-### Upload route: straight to R2 with short-lived links
+### Upload route: through the API, into R2 by binding (default)
 
-Chosen: the app asks the API for upload links, sends the file straight to a private R2 bucket, then tells the API it is done. Big files (over 32 MB) go up in 16 MB parts; each part is retried up to three times.
-Why: the API runs in a small container (1/4 vCPU, 1 GiB) and the request limit on the API is 12 MB. Passing 200 MB through it would be slow and could run it out of memory. R2 accepts presigned links over its S3 address ([docs](https://developers.cloudflare.com/r2/api/s3/presigned-urls/)), so the API only signs links and never touches the bytes. The alternative, a private Worker with an R2 binding behind `outboundByHost`, would still carry every byte through the container's network path.
-How it stays private:
-- The bucket has no public address and no custom domain.
-- Object names are made on the server: `<owner id>/<random id>.<ext>`. The app never names a file.
-- Every call looks the recording up by owner first. Someone else's id gets "I couldn't find that recording".
-- Upload links last 2 hours and are signed for the exact size, so they take only that many bytes. After upload the server checks the real size with a HEAD request and deletes the file if it is wrong or over the limit.
-- Playback links last 1 hour and are made only for the owner.
-Signing uses [`aws4fetch`](https://github.com/mhart/aws4fetch) (about 3 KB, no AWS SDK).
+Chosen: the API Worker binds the private bucket (`MEDIA`) and Workers AI (`AI`). The API runs in a container, and the container reaches them through two made-up private hosts that the Worker answers (outbound interception, the same trick used for `browser.internal`): `http://media.internal` (the bucket) and `http://ai.internal` (Whisper). Code: `os/infra/cloudflare/api/src/media.ts` (the handlers), `apps/server/src/debo/binding-store.ts` (the server side).
+Why: nobody has to make R2 keys or an AI token, so there is no secret to leak or rotate. R2 binding calls need no signatures.
+There are no presigned links in this mode, so the app sends the file to Debo's API and plays from it. The "links" the API hands out look the same as before, but point at `https://api.debo.life/api/media-blob/<token>`:
+- A token names one action on one object (put, one part, or get), the exact size for uploads, and an expiry (2 hours to upload, 1 hour to play, 24 hours for the data download). It is signed with a key derived from `SESSION_SIGNING_KEY`, so it survives a container restart and nobody can make one. It works as a plain link, so `<audio>`, `<video>` and the phone player need no sign-in header.
+- The API only issues a token after checking the recording's owner, exactly as before. Someone else's id gets "I couldn't find that recording".
+- Bodies are streamed: browser to API to Worker to R2, never held whole in memory. An upload without a declared length is refused (411), as is a length different from the signed size.
+- Playback supports HTTP `Range`, so audio and video can seek. The API passes the range to the Worker, which uses R2's range reads.
+- These routes sit before the API's general 12 MB request limit and its per-address limit, because the token is the check and a recording is many requests. Everything else keeps both.
+- Part size is 8 MiB in this mode (a 200 MB file is at most 25 parts; R2 needs at least 5 MiB for all parts but the last, and all equal). Files up to 32 MB go up in one request. Each part is retried up to three times by the app.
+- `media.internal` accepts only keys shaped `<owner id>/<random id>.<ext>`, so even a bug in the API cannot name anything else.
+Presigned mode is still there. If `R2_ACCOUNT_ID`, `R2_ACCESS_KEY_ID` and `R2_SECRET_ACCESS_KEY` are all set, the API uses it instead: the app talks to R2 directly with signed links (2 hour upload, 1 hour playback, signed for the exact size), 16 MB parts, and the API never carries the bytes. That needs an R2 API token and the bucket CORS rule below. It uses [`aws4fetch`](https://github.com/mhart/aws4fetch) (about 3 KB, no AWS SDK). How it is chosen: keys present means presigned; else `MEDIA_BACKEND=binding` (which the Worker sets when it has the `MEDIA` binding) means binding; else no recordings.
+How it stays private (both modes): the bucket has no public address and no custom domain; object names are made on the server; every call looks the recording up by owner first; after upload the server checks the real size with a HEAD and deletes the file if it is wrong or over the limit.
 
 ### Transcription: Cloudflare Workers AI Whisper
 
-Chosen: `@cf/openai/whisper-large-v3-turbo` over the REST API ([model page](https://developers.cloudflare.com/workers-ai/models/whisper-large-v3-turbo/)). It takes base64 audio and returns text, segments with start and end times, and the detected language.
+Chosen: `@cf/openai/whisper-large-v3-turbo`, through the Worker's `AI` binding (host `ai.internal`, same inputs as the REST API; with `CF_AI_API_TOKEN` set it uses the REST API instead) ([model page](https://developers.cloudflare.com/workers-ai/models/whisper-large-v3-turbo/)). It takes base64 audio and returns text, segments with start and end times, and the detected language.
 Why: the account is already on Cloudflare, so no new company hears the audio, and the price is low (below). The model detects the language, so English, Hindi and a mix work as well as Whisper allows. Voice-activity filtering is on, so silence does not turn into invented words. Hindi comes back in Devanagari script.
 Behind a small interface (`Transcriber` in `transcriber.ts`) with a fake for tests: another engine (Deepgram and others) can replace it by writing one function.
-Long audio: the model page gives no file size or length limit, so we do not rely on one. ffmpeg first turns the file into a small mono 16 kHz mp3 (for video, only the sound is kept: `-vn`). The mp3 is cut into 5 minute pieces that overlap by 4 seconds. Each piece is written out (two at a time) and the pieces are joined at the middle of each overlap, so no words repeat or drop. Segment times are kept in the database. Paragraph breaks go at pauses of 2 seconds or more.
+Long audio: the model page gives no file size or length limit (for the binding either), so we do not rely on one. ffmpeg first turns the file into a small mono 16 kHz mp3 (for video, only the sound is kept: `-vn`). The mp3 is cut into 5 minute pieces that overlap by 4 seconds. Each piece is written out (two at a time) and the pieces are joined at the middle of each overlap, so no words repeat or drop. Segment times are kept in the database. Paragraph breaks go at pauses of 2 seconds or more.
 The same file added twice is written out once (a SHA-256 of the file is kept, per person).
 
 ## How a recording is saved
@@ -85,6 +88,7 @@ One new table, `media` (migration `0005_journal_media.sql`). The words stay in `
 | `POST /media/uploads` | start an upload; returns links |
 | `POST /media/uploads/:id/complete` | finish; saves the entry |
 | `GET /entries/:id/playback` | a one-hour link to play the recording |
+| `PUT /api/media-blob/:token`, `GET /api/media-blob/:token` | binding mode only: upload a file or part, play with Range. The signed token is the sign-in |
 | `GET /entries/:id/transcript` | status, words, language, timed segments |
 | `POST /entries/:id/transcript/retry` | try the words again |
 | `POST /transcribe` | dictation: one short clip in, words out. Not stored. Max 3 MB |
@@ -110,12 +114,15 @@ Prices checked on 14 November 2026. They change: check the pages.
 | R2 reads (Class B) | $0.36 per million (first 10 million free) | same |
 | R2 download to the internet | free | same |
 
-Examples: one hour of speech costs about $0.03 to write out. A person at the daily cap (4 hours) costs at most about $0.12 a day. A 1-hour voice note is roughly 15 MB as webm or 60 MB as m4a, so 100 hours of notes is a few GB, under $0.10 a month after the free 10 GB. An upload costs a handful of write operations (one, plus one per 16 MB part). Dictation costs the same per minute as recordings. The API container's CPU for ffmpeg is on top and has not been measured.
+Examples: one hour of speech costs about $0.03 to write out. A person at the daily cap (4 hours) costs at most about $0.12 a day. A 1-hour voice note is roughly 15 MB as webm or 60 MB as m4a, so 100 hours of notes is a few GB, under $0.10 a month after the free 10 GB. An upload costs a handful of write operations (one, plus one per part: 8 MiB through the binding, 16 MB in presigned mode). Binding calls bill like the same R2 operations. Workers AI through the binding is billed at the same per-minute price. In binding mode the bytes also pass through the API Worker and container, so download is no longer straight from R2: R2 itself does not charge for it, and Workers requests are billed per request, not per byte (check [Workers pricing](https://developers.cloudflare.com/workers/platform/pricing/)). Dictation costs the same per minute as recordings. The API container's CPU for ffmpeg is on top and has not been measured.
 
-## Owner setup (nothing here has been done)
+## Setup
 
-1. **Bucket.** `npx wrangler r2 bucket create debo-journal-media` (add `--location apac` to keep it near India; check `npx wrangler r2 bucket create --help` for the flag). Do not enable public access or a custom domain.
-2. **CORS** on the bucket, so the browser at `https://my.debo.life` may upload and play. Dashboard: R2, the bucket, Settings, CORS Policy, Add CORS policy, JSON tab:
+Nothing to create by hand, apart from the bucket, which already exists (`debo-journal-media`, private, location apac).
+
+1. **Deploy.** Push to main. `deploy.yml` applies the migration; `deploy-os.yml` builds the API image (with ffmpeg), and `wrangler deploy` attaches the two bindings declared in `api/wrangler.jsonc` (`r2_buckets` to `debo-journal-media`, `ai`). The Worker then passes `MEDIA_BACKEND=binding` and `AI_BACKEND=binding` to the container, and the Journal shows Speak, Record and Add. The deploy token (`CLOUDFLARE_API_TOKEN`) must be allowed to attach R2 buckets and Workers AI to a Worker; if the deploy fails with a permission error, add those to the token.
+2. **Check by hand** (see "Not checked yet"): add a short voice note at https://my.debo.life, see the words appear, play it and seek, delete it, and look in the bucket to see the object is gone.
+3. **Bucket CORS** is only needed in presigned mode (the browser then talks to R2 directly). The existing rule for `https://my.debo.life` stays. Dashboard: R2, the bucket, Settings, CORS Policy, JSON tab:
    ```json
    [
      {
@@ -127,19 +134,8 @@ Examples: one hour of speech costs about $0.03 to write out. A person at the dai
      }
    ]
    ```
-   `ExposeHeaders: ETag` is required: without it a big upload cannot be joined. The same policy can be set with `npx wrangler r2 bucket cors set debo-journal-media --file cors.json`; wrangler's file uses its own shape (see the [docs](https://developers.cloudflare.com/r2/buckets/cors/)), so the dashboard is the safer route. Add `http://localhost:8081` only on a dev bucket.
-3. **R2 API token.** Dashboard, R2, Overview, Account Details, API Tokens, Manage, Create Account API token, permission **Object Read & Write**, scoped to `debo-journal-media` only. Copy the Access Key ID and Secret Access Key (the secret shows once).
-4. **Workers AI token.** Dashboard, My Profile, API Tokens, Create Token, the **Workers AI** template. It needs permission to run models. Copy the token.
-5. **GitHub secrets** (names only here; set the values yourself, never in a file):
-   ```sh
-   gh secret set R2_ACCESS_KEY_ID
-   gh secret set R2_SECRET_ACCESS_KEY
-   gh secret set CF_AI_API_TOKEN
-   ```
-   `CLOUDFLARE_ACCOUNT_ID` already exists and is used as the R2 account. The bucket name is a plain setting (`R2_BUCKET` in `api/wrangler.jsonc`).
-6. **Deploy.** Push to main. `deploy.yml` applies the migration; `deploy-os.yml` builds the API image (now with ffmpeg, about 100 MB larger), passes the secrets into the container, and deploys. Without the three secrets the Journal still works as text only: no Speak, Record or Add buttons appear.
-7. **Check by hand** (see "Not checked yet"): add a short voice note at https://my.debo.life, see the words appear, play it, delete it, and look in the bucket to see the object is gone.
-8. Optional: an R2 lifecycle rule to abort incomplete multipart uploads sooner than R2's default of 7 days. The server already clears its own unfinished uploads after a day.
+4. **Optional, presigned mode:** make an R2 token (Object Read & Write, scoped to the bucket) and `gh secret set R2_ACCESS_KEY_ID`, `gh secret set R2_SECRET_ACCESS_KEY`; optionally a Workers AI token as `CF_AI_API_TOKEN`. Names only here; set the values yourself, never in a file.
+5. Optional: an R2 lifecycle rule to abort incomplete multipart uploads sooner than R2's default of 7 days. The server already clears its own unfinished uploads after a day.
 
 ## Phone (iOS and Android)
 
@@ -152,8 +148,9 @@ None of the phone code has been run on a device. The released Android APK (built
 
 ## Not checked yet
 
-- Real R2: that presigned PUT links with a signed `Content-Length` and `Content-Type` are accepted, that presigned multipart `UploadPart` links work (R2's S3 page lists the operations but does not mention presigned part links), and that CORS and the exposed ETag work from `my.debo.life`. The code, the link shapes and the joining are tested with fakes only. If R2 refuses a signed `Content-Length`, remove it from `beginUpload` in `object-store.ts`; the server's size check after upload still protects the bucket.
-- Real Workers AI: the request shape follows the published schema; no call was made. Request size limits for the REST API are not published; 5 minute mp3 pieces are about 1.2 MB.
+- **Binding mode on real Cloudflare.** Tested only against fakes of `media.internal`, `ai.internal`, R2 and Workers AI. Not confirmed on the real platform: that a request body streams through outbound interception without being buffered or cut; that R2's `put` and `uploadPart` take the forwarded stream (they need a known length, so the API sets `Content-Length`; a body without one is buffered up to 16 MB in the Worker); that 8 MiB parts and 32 MB single uploads pass every hop; that range reads work for seeking; the AI binding's accepted audio size (5 minute mp3 pieces are about 1.2 MB, about 1.6 MB as base64); and that the deploy token may attach the bindings. If streaming through interception fails, lower `singleMaxBytes` and `partBytes` for the binding (in `mediaFromEnv`) so bodies stay small, or fall back to presigned mode.
+- Presigned mode, if used: that presigned PUT links with a signed `Content-Length` and `Content-Type` are accepted, that presigned multipart `UploadPart` links work (R2's S3 page lists the operations but does not mention presigned part links), and that CORS and the exposed ETag work from `my.debo.life`. If R2 refuses a signed `Content-Length`, remove it from `beginUpload` in `object-store.ts`.
+- Real Workers AI quality and the shape of the binding's answer (read the same way as the REST answer, inside a `{ success, result }` wrapper made by the Worker).
 - ffmpeg inside the container (the Docker image was not built here), and CPU time for an hour of audio on the small instance.
 - Whisper quality on Hindi and mixed speech.
 - iOS Safari recording (it records `audio/mp4`; not run), and Firefox.

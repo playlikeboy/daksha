@@ -65,8 +65,8 @@ The container entry (`api/src/index.ts`) passes a fixed list of names into the c
 | `NEON_AI_GATEWAY_BASE_URL`, `NEON_AI_GATEWAY_TOKEN` | same names | **create** (optional: search by meaning) | Neon AI Gateway |
 | `MEM0_API_KEY` | `MEM0_API_KEY` | exists | Mem0 |
 | `R2_ACCOUNT_ID` | `CLOUDFLARE_ACCOUNT_ID` | exists | Cloudflare R2 (voice notes and videos) |
-| `R2_ACCESS_KEY_ID`, `R2_SECRET_ACCESS_KEY` | same names | **create** (optional: without them the journal is text only) | Cloudflare R2 token for the bucket `debo-journal-media` |
-| `CF_AI_API_TOKEN` | `CF_AI_API_TOKEN` | **create** (optional: recordings are kept but not written out) | Cloudflare Workers AI |
+| `R2_ACCESS_KEY_ID`, `R2_SECRET_ACCESS_KEY` | same names | not needed: recordings use the `MEDIA` bucket binding. Optional, to switch to presigned links | Cloudflare R2 token for the bucket `debo-journal-media` |
+| `CF_AI_API_TOKEN` | `CF_AI_API_TOKEN` | not needed: speech uses the `AI` binding. Optional | Cloudflare Workers AI |
 | `LIVEKIT_URL`, `LIVEKIT_API_KEY`, `LIVEKIT_API_SECRET` | same names | exist | LiveKit |
 | `VOICE_AGENT_SECRET` | `VOICE_AGENT_SECRET` | exists (32+ characters) | LiveKit agent |
 | `TOKEN_ENCRYPTION_KEY` | `DEBO_OS_TOKEN_ENCRYPTION_KEY` | **create**: `openssl rand -base64 32` | os only |

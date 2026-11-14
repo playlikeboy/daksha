@@ -13,9 +13,12 @@
 #     DEBO_OS_TOKEN_ENCRYPTION_KEY                  - 32 random bytes, base64
 #     DEBO_OS_SESSION_SIGNING_KEY                   - 32 random bytes, base64
 #     DEBO_OS_WORKER_TOKEN                          - 32+ characters, shared API <-> browser
-#   Optional (voice notes and videos; without them the journal is text only):
+#   Voice notes and videos need NO secrets: the API Worker binds the private R2 bucket (MEDIA) and Workers AI (AI)
+#   and passes MEDIA_BACKEND=binding / AI_BACKEND=binding to the container (see os/docs/JOURNAL-MEDIA.md).
+#   The deploy token (CLOUDFLARE_API_TOKEN) must be allowed to attach both bindings.
+#   Optional (only to switch recordings to direct presigned R2 links and the Workers AI REST API instead):
 #     R2_ACCESS_KEY_ID, R2_SECRET_ACCESS_KEY        - an R2 API token for the debo-journal-media bucket only
-#     CF_AI_API_TOKEN                               - Workers AI token, to write out recordings and dictation
+#     CF_AI_API_TOKEN                               - Workers AI token
 #   Optional:
 #     NEON_AI_GATEWAY_BASE_URL, NEON_AI_GATEWAY_TOKEN - search by meaning (keyword search works without)
 name: Deploy OS

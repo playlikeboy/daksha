@@ -190,8 +190,10 @@ export default function PrivacyPage() {
           items={[
             <>
               The recording is stored in Cloudflare R2, in a private bucket with no public address. Only Debo&rsquo;s
-              server can reach it. Your phone or browser sends it straight to that bucket. When you play it, Debo gives
-              you a link that stops working after an hour, and only you can get one.
+              server can reach it. Your phone or browser sends the recording to Debo&rsquo;s server, which passes it on
+              to that bucket as it arrives and does not keep a copy of its own. When you play it, Debo gives you a link
+              that stops working after an hour, and only you can get one. The sound comes through Debo&rsquo;s server
+              too.
             </>,
             <>
               The words are written by Cloudflare Workers AI (a speech model called Whisper), so Cloudflare hears your
