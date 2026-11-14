@@ -24,7 +24,7 @@ One row per thing the person gave Debo. The original of every memory.
 |---|---|---|
 | id | uuid | |
 | user_id | uuid | |
-| kind | text | `journal`, `voice`, `document`, `photo`, `connector` |
+| kind | text | `journal`, `voice`, `video`, `voice_call` built; `document`, `photo`, `connector` planned |
 | title | text | Short name shown on source chips |
 | text | text | Full text: the entry, the transcript, the parsed document, the photo description |
 | file_key | text | Path in file storage (Neon Object Storage) for the original file, if any |
@@ -33,6 +33,9 @@ One row per thing the person gave Debo. The original of every memory.
 | fail_reason | text | Plain words the person can read |
 | connection_id | uuid | Set when it came from a connected app |
 | created_at | timestamptz | |
+| ingested_at | timestamptz | Built (migration `0006_voice_calls`, nullable). `voice_call` only: when the call was last read for search and memories. Null or older than the last turn means it still needs reading. |
+
+A `voice_call` source is one live conversation with Debo: its text is one line per turn, `[mm:ss] You: ...` / `[mm:ss] Debo: ...`. Its id is a hash of the person and the voice session. See `docs/VOICE.md`.
 
 ### media (built)
 The recording behind a `voice` or `video` source. The file is in a private Cloudflare R2 bucket, never in the database; the words are in `sources.text`. Columns: `id`, `user_id`, `source_id` (empty until the upload ends), `kind`, `object_key`, `mime_type`, `size_bytes`, `duration_ms`, `recorded_at`, `device` (jsonb: origin, file name, last-changed time; never location), `upload_state`, `upload_id`, `transcript_status` (`waiting`, `working`, `ready`, `failed`), `transcript_error`, `transcript_attempts`, `transcript_started_at`, `language`, `segments` (jsonb), `content_hash`, `created_at`. See `os/docs/JOURNAL-MEDIA.md`.

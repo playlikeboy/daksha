@@ -51,6 +51,10 @@ export default function PrivacyPage() {
           items={[
             <>Your name, email and password. Your password passes through Debo on its way to our sign-in service, which stores only a hashed version. Debo never stores or logs it.</>,
             <>Your journal entries.</>,
+            <>
+              Voice calls with Debo in the new app, written out as text: what you said and what Debo said, in order, with
+              how far into the call each line was said. The sound of your voice is not kept.
+            </>,
             <>Short pieces of each entry, made so Debo can search them.</>,
             <>
               Your chats with Debo: each question you ask in the chat and Debo&rsquo;s reply, with links to the entries
@@ -106,8 +110,8 @@ export default function PrivacyPage() {
         <p>
           In the new app, a call works like chat. What you say, as text, goes to the same assistant that answers in
           chat, so it can use your journal, your tasks and the apps you connected, and the AI that writes the answer
-          (Anthropic) receives it as it does for a typed question. Each call is saved as a chat that you can read and
-          delete in Chat. Anything that sends, posts, creates, changes or deletes still waits for your yes on screen.
+          (Anthropic) receives it as it does for a typed question. Each call is saved as a chat that you can read in
+          Chat, and also as a voice call in your journal, described below. Anything that sends, posts, creates, changes or deletes still waits for your yes on screen.
           If you ask Debo to act as someone, for example a friend, the role you asked for is saved with your account
           so she keeps it next time. You can see it, change it or stop it in the Apps screen, under &ldquo;A role for Debo&rdquo;, and it is removed when you
           delete your account.
@@ -181,6 +185,42 @@ export default function PrivacyPage() {
               &ldquo;Download my data&rdquo; in the new app gives you one file with your entries, memories and what you made
               there. For each voice note or video it lists the details and the words, and a link that downloads the
               recording itself. That link works for 24 hours, so keep the file private.
+            </>,
+          ]}
+        />
+        <h3 className="mt-6 font-semibold">Voice calls with Debo</h3>
+        <p>
+          Every call you make from the Talk screen is saved as text. There is no setting to turn this off. The Talk
+          screen says so before the microphone starts.
+        </p>
+        <List
+          items={[
+            <>
+              What is saved: your words and Debo&rsquo;s words, as text, in Debo&rsquo;s database at Neon (the same place
+              as your journal entries). Never the sound. While a call is on, each line is saved as it is said. If you
+              close the tab or lose the connection, the call is still saved.
+            </>,
+            <>
+              Debo learns from it like from a journal entry. When the call ends (or, if it never says so, when it has been
+              quiet for ten minutes), the text is cut into short pieces for search, and those pieces go to the Neon AI
+              Gateway (run by Databricks) to be turned into numbers for searching by meaning. The text of the call also
+              goes to Mem0, which picks out lasting facts. Only what you said can become a memory. Debo&rsquo;s own lines are
+              sent along only so your short answers make sense, and Mem0 is told not to save them. A role Debo played is
+              not a fact about you. When you later ask a question, matching pieces go to Anthropic, as for any entry.
+            </>,
+            <>
+              Answers that used a call say &ldquo;Voice call&rdquo; and the date. Opening that source shows the call.
+              Calls where you said almost nothing are deleted, not kept.
+            </>,
+            <>
+              You can read every call in your journal in the new app, and it is part of &ldquo;Download my data&rdquo;. To
+              delete one, delete it there: the call, its search pieces, the memories that came only from it, and its copy
+              in Chat are deleted. &ldquo;Delete my data&rdquo; and deleting your account remove every call. Deleting only
+              the Chat copy does not remove the call from your journal.
+            </>,
+            <>
+              The call itself is carried by LiveKit, Deepgram and Cartesia, as described above in this page. Debo does not
+              store the audio.
             </>,
           ]}
         />
