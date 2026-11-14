@@ -6,7 +6,7 @@ import type {
   AgentMemory,
   AgentNotification,
 } from "../../../../packages/domain/src/agent.ts";
-import { createTaskSchema } from "../../../../packages/domain/src/agent.ts";
+import { agentCharacters, createTaskSchema } from "../../../../packages/domain/src/agent.ts";
 import { AppError } from "../errors.ts";
 import type { AgentService } from "./service.ts";
 
@@ -129,6 +129,7 @@ export function agentRoutes(service: AgentService): Hono<{ Variables: { owner: s
         name: z.string().trim().min(1).max(80),
         tone: z.enum(["warm", "concise", "thoughtful"]),
         avatar: z.enum(["sky", "sand", "lilac"]).optional(),
+        character: z.enum(agentCharacters).optional(),
         showChatUpdates: z.boolean().optional(),
       })
       .parse(await c.req.json());

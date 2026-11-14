@@ -115,10 +115,16 @@ export interface AgentNotification {
   createdAt: string;
   read: boolean;
 }
+/** The characters a person can talk to. The drawings live in apps/mobile (debo-characters.ts). */
+export const agentCharacters = ["debo", "diya", "anaya", "mishti"] as const;
+export type AgentCharacter = (typeof agentCharacters)[number];
 export interface AgentIdentity {
   name: string;
   tone: "warm" | "concise" | "thoughtful";
+  /** The colour behind the face. */
   avatar?: "sky" | "sand" | "lilac";
+  /** Who the person talks to. Missing means the default, Debo. */
+  character?: AgentCharacter;
   showChatUpdates?: boolean;
 }
 export interface AgentWorkspace {
