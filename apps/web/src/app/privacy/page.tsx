@@ -111,10 +111,17 @@ export default function PrivacyPage() {
           In the new app, a call works like chat. What you say, as text, goes to the same assistant that answers in
           chat, so it can use your journal, your tasks and the apps you connected, and the AI that writes the answer
           (Anthropic) receives it as it does for a typed question. Each call is saved as a chat that you can read in
-          Chat, and also as a voice call in your journal, described below. Anything that sends, posts, creates, changes or deletes still waits for your yes on screen.
+          Chat, and also as a voice call in your journal, described below. Anything that sends, posts or changes something outside Debo, and anything that deletes your data, still waits for your yes on screen. Saving to your own journal does not: Debo does it at once and tells you, and you can delete it.
           If you ask Debo to act as someone, for example a friend, the role you asked for is saved with your account
           so she keeps it next time. You can see it, change it or stop it in the Apps screen, under &ldquo;A role for Debo&rdquo;, and it is removed when you
           delete your account.
+        </p>
+        <p>
+          In the new app you can also choose a voice and speed for Debo and write a few notes about yourself (what to
+          call you, your city, people, how you like things), under &ldquo;How she talks and what she knows&rdquo;. They
+          are saved with your account. The notes are sent to the assistant model with your questions, as your own words,
+          so she can be personal; the voice choice is sent to LiveKit with the call. Both are in &ldquo;Download my
+          data&rdquo; and are deleted with your account.
         </p>
         <p>
           We have not yet checked LiveKit&rsquo;s, Deepgram&rsquo;s or Cartesia&rsquo;s terms on training AI and on how

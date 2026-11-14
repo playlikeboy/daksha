@@ -227,3 +227,11 @@ Check before relying on it: R2's presigned multipart part links and the signed C
 Choice: in the Debo app every voice call is kept as one `voice_call` source. Each turn is a plain database write; the costly reading (search pieces, meaning search, memories) runs once per call, when the app says it ended or, failing that, after ten quiet minutes. Memories come only from the person's own turns. Audio is still never stored. This changes `docs/VOICE.md` rule 2, which was "ask before saving a conversation": the Talk screen now says plainly, before the microphone starts, that the call is saved as text and Debo learns from it.
 Why: a call is some of the most personal speech Debo hears, and the owner wants Debo to learn from it like from a journal entry. Control stays with the person through reading, export and delete (the delete also removes the memories and the chat copy), not through a switch.
 Check before relying on it: Mem0 must obey the instruction not to save Debo's lines; try a role-play call against the real service and read What Debo knows. The privacy page was updated the same day.
+
+## 28. Changes inside Debo are done at once; leaving Debo, and deleting, still need a tap
+
+2026-11-14 · decided (the owner's request, after a call where the agent said an approve button would come and none showed)
+
+Choice: anything that only changes the person's own data inside Debo (a journal entry, a memory, tasks, goals, notes, the role, a rename) is done immediately in chat and in voice, then said plainly with a chip that opens it. The on-screen yes stays for anything that leaves Debo (connected apps, custom tool servers, email, calendar, browser or computer actions that submit or pay) and for deleting or forgetting the person's data. This replaces the earlier rule that a journal entry only prepared a review.
+Why: the review step was friction for something the person can see and undo, and during a call the review had nowhere to be seen. Delete stays where it is, so every save is easy to undo.
+Check before relying on it: nothing was run against a real model; see that she composes a good entry from "write what we just talked about in today's journal".
