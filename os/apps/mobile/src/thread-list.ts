@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useState } from "react";
+import { rememberChatName } from "./routes";
 import { useWorkspace } from "./workspace";
 
 export interface SavedThread {
@@ -34,6 +35,7 @@ export function useSavedThreads(enabled: boolean, limit = 20) {
       .request<Page>(query)
       .then((page) => {
         if (!active) return;
+        for (const t of page.threads) rememberChatName(t.id, t.name);
         setThreads(page.threads);
         setCursor(page.nextCursor);
       })

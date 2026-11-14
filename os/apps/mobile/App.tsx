@@ -42,6 +42,7 @@ import { useTaskMood } from "./src/debo-mood-hooks";
 import { deboMood } from "./src/debo-mood-store";
 import { PersonaSetting } from "./src/debo-persona-setting";
 import { ReactionsSetting } from "./src/debo-reactions-setting";
+import { ChatTitle } from "./src/chat-title";
 import { TalkPopup } from "./src/debo-talk";
 import { requestTalkAutoStart } from "./src/debo-talk-consent";
 import { TalkPill } from "./src/debo-talk-pill";
@@ -583,9 +584,7 @@ function WorkspaceShell({
                     <ActivityIndicator color={colors.blueDark} />
                   ) : null}
                   {!threadsLoading && selection.id !== mainId && (
-                    <Text style={[s.small, { textAlign: "center", marginBottom: 8 }]}>
-                      Side chat
-                    </Text>
+                    <ChatTitle id={selection.id} />
                   )}
                   {visited.map((thread) => (
                     <View

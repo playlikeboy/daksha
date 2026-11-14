@@ -332,6 +332,11 @@ export async function createApp(
       }),
     );
   });
+  app.get("/api/threads/:id", async (c) => {
+    const thread = await threads.get(c.get("owner"), assertThreadId(c.req.param("id")));
+    if (!thread) throw new AppError("Conversation not found", 404);
+    return c.json({ id: thread.id, name: thread.name, archived: thread.archived, updatedAt: thread.updatedAt });
+  });
   app.patch("/api/threads/:id", async (c) => {
     const body = z.object({ name: z.string() }).parse(await c.req.json());
     return c.json(await threads.rename(c.get("owner"), assertThreadId(c.req.param("id")), body.name));

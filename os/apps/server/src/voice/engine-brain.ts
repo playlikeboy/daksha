@@ -21,6 +21,9 @@ import { EmotionFilter } from "./emotion.ts";
 /** Words that say "a review is waiting on your screen". Only true if a tool really made one. */
 const CLAIMS_REVIEW = /(on your screen|approve button|waiting for your (ok|approval|yes)|ready for your approval|needs? your approval)/i;
 
+const callDay = (date: Date) =>
+  date.toLocaleDateString("en-GB", { day: "numeric", month: "long", timeZone: "UTC" });
+
 /** How many earlier messages of the call the agent sees. */
 const CONTEXT_MESSAGES = 40;
 
@@ -52,6 +55,12 @@ export class EngineVoiceBrain implements VoiceBrain {
     // The chat copy is named after the call's own id, so deleting the call can find and delete it.
     const threadId = `voice-${callSourceId(owner, question.sessionId)}`;
     const runId = randomUUID();
+    // The chat copy of a call is named after the day, like its journal source: "Voice call, 14 November".
+    try {
+      await this.threads.ensure(owner, threadId, "default", `Voice call, ${callDay(new Date())}`);
+    } catch {
+      // The name is a nicety; the call goes on without it.
+    }
     let earlier: Message[] = [];
     try {
       earlier = (await this.threads.history(owner, threadId)).messages;

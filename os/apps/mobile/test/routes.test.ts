@@ -66,3 +66,27 @@ test("Talk is not a tab in the bottom bar, but /talk still opens it", async () =
   assert.ok(!nav.includes('id: "talk"'));
   assert.deepEqual(parsePath("/talk"), { section: "talk" });
 });
+
+test("a chat address shows a readable name, the id after it is the truth, and old addresses still work", async () => {
+  const { rememberChatName, slugify } = await import("../src/routes.ts");
+  const id = "1b4e28ba-2fa1-4c3d-9a10-6f7d5c1e2b34";
+  assert.equal(slugify("Trip to Goa!  (March)"), "trip-to-goa-march");
+  assert.equal(slugify("   "), "");
+  assert.ok(slugify("x".repeat(200)).length <= 40);
+  // Without a known name the address is the old plain one.
+  assert.equal(pathFor("chat", { threadId: id }), `/chat/${id}`);
+  rememberChatName(id, "Trip to Goa");
+  assert.equal(pathFor("chat", { threadId: id }), `/chat/trip-to-goa-${id}`);
+  assert.deepEqual(parsePath(`/chat/trip-to-goa-${id}`), { section: "chat", threadId: id });
+  assert.deepEqual(parsePath(`/chat/${id}`), { section: "chat", threadId: id });
+  // A wrong or missing slug still opens the same chat.
+  assert.deepEqual(parsePath(`/chat/anything-else-${id}`), { section: "chat", threadId: id });
+  assert.equal(titleFor({ section: "chat", threadId: id }), "Trip to Goa \u00b7 Debo");
+  // A voice call's chat has a readable address too.
+  const call = `voice-${"ab12".repeat(16)}`;
+  rememberChatName(call, "Voice call, 14 November");
+  assert.equal(pathFor("chat", { threadId: call }), `/chat/voice-call-14-november-${call}`);
+  assert.deepEqual(parsePath(`/chat/voice-call-14-november-${call}`), { section: "chat", threadId: call });
+  // Other ids (older chats) are left alone.
+  assert.deepEqual(parsePath("/chat/abc-123"), { section: "chat", threadId: "abc-123" });
+});

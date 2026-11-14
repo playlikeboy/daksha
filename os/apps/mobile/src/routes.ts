@@ -28,6 +28,37 @@ const SECTIONS = new Map<string, Section>(
 );
 const ID = /^[A-Za-z0-9_-]{1,100}$/;
 
+// ---- Readable chat addresses ----
+// A side chat is /chat/<slug>-<id>, for example /chat/trip-to-goa-1b4e28ba-2fa1-4c3d-9a10-6f7d5c1e2b34.
+// The id at the end is the truth; the slug is only for people to read, and it follows the chat's
+// name. An address with no slug (/chat/<id>, the old form) still opens the same chat.
+const UUID_TAIL = /(?:^|-)([0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})$/i;
+const CALL_TAIL = /(?:^|-)(voice-[0-9a-f]{16,64})$/i;
+const names = new Map<string, string>();
+
+/** "Trip to Goa!" becomes "trip-to-goa". Letters and numbers only, at most 40 characters. */
+export function slugify(name: string): string {
+  return name
+    .normalize("NFKD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "")
+    .slice(0, 40)
+    .replace(/-+$/g, "");
+}
+/** Remember a chat's name so its address and the page title can use it. */
+export function rememberChatName(id: string, name: string | null | undefined): void {
+  if (name?.trim()) names.set(id, name.trim());
+}
+export function chatNameOf(id: string): string | undefined {
+  return names.get(id);
+}
+/** The id inside /chat/<slug>-<id>, or the whole text for an old plain id. */
+export function threadIdFrom(part: string): string {
+  return UUID_TAIL.exec(part)?.[1] ?? CALL_TAIL.exec(part)?.[1] ?? part;
+}
+
 /** What the page title says for each screen, as in "Journal · Debo". */
 const NAMES: Partial<Record<Section, string>> = {
   chat: "Chat",
@@ -52,7 +83,13 @@ export function canonicalSection(section: Section): Section {
 export function pathFor(section: Section, params: RouteParams = {}): string {
   const name = PATHS[canonicalSection(section)] ?? "chat";
   const id = name === "chat" ? params.threadId : name === "journal" ? params.entryId : undefined;
-  return id && ID.test(id) ? `/${name}/${id}` : `/${name}`;
+  if (!id || !ID.test(id)) return `/${name}`;
+  if (name === "chat") {
+    const slug = slugify(names.get(id) ?? "");
+    const readable = slug && (UUID_TAIL.test(id) || CALL_TAIL.test(id)) ? `${slug}-${id}` : id;
+    return ID.test(readable) ? `/chat/${readable}` : `/chat/${id}`;
+  }
+  return `/${name}/${id}`;
 }
 
 function cleanPath(path: string): string[] {
@@ -78,7 +115,7 @@ export function parsePath(path: string): Route | null {
   const id = parts[1];
   if (id === undefined) return { section };
   if (!ID.test(id)) return null;
-  if (section === "chat") return { section, threadId: id };
+  if (section === "chat") return { section, threadId: threadIdFrom(id) };
   if (section === "journal") return { section, entryId: id };
   return null;
 }
@@ -95,5 +132,7 @@ export function pathFromUrl(url: string): string {
 
 export function titleFor(route: Route | null): string {
   if (!route) return "That page isn't here · Debo";
+  const chat = route.section === "chat" && route.threadId ? chatNameOf(route.threadId) : undefined;
+  if (chat) return `${chat} · Debo`;
   return `${NAMES[canonicalSection(route.section)] ?? "Debo"} · Debo`;
 }

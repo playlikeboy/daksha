@@ -201,6 +201,15 @@ test("rename, archive and restore change the list", async () => {
   assert.equal((await post(app, alice, "/api/threads/bad%20id", { name: "x" }, "PATCH")).status, 400);
 });
 
+test("one chat's name can be read, and only by its owner (for the address and page title)", async () => {
+  await chat(app, alice, "named-1", "Plan a trip to Goa in March");
+  const mine = await app.request("/api/threads/named-1", { headers: auth(alice) });
+  assert.equal(mine.status, 200);
+  assert.equal((await mine.json()).name, "Plan a trip to Goa in March");
+  assert.equal((await app.request("/api/threads/named-1", { headers: auth(bob) })).status, 404);
+  assert.equal((await app.request("/api/threads/never-made", { headers: auth(alice) })).status, 404);
+});
+
 test("the list pages with a cursor", async () => {
   for (const id of ["page-a", "page-b", "page-c"]) await chat(app, bob, id, "Show my calendar");
   const first = await list(app, bob, "?includeArchived=true&limit=2");
