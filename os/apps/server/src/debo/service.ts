@@ -6,6 +6,7 @@
 // - every change leaves a line in the activity record (ids only).
 import { type AskOutcome, UNKNOWN_MESSAGE } from "@debo/brain";
 import { speakToPerson } from "@debo/memory";
+import { callMinutes } from "@debo/db";
 import { z } from "zod";
 import { AppError } from "../errors.ts";
 import type { ActivityAction, ActivityItem, AskEvent, DeboBackend, Item, SourceKind } from "./backend.ts";
@@ -45,8 +46,10 @@ export const MemoryText = z
 export type EntryView = {
   id: string;
   /** What it is: something written, a voice note or a video. */
-  kind: "journal" | "voice" | "video";
+  kind: "journal" | "voice" | "video" | "call";
   title: string;
+  /** For a voice call: how many minutes it lasted. */
+  minutes?: number;
   text: string;
   happenedAt: string;
   /** The recording, for a voice note or video. */
@@ -89,14 +92,27 @@ export type DeboStatus = {
 
 const dayFormat = (date: Date) =>
   date.toLocaleDateString("en-GB", { day: "numeric", month: "long", timeZone: "UTC" });
-/** "Journal, 11 November", "Voice note, 11 November" or "Video, 11 November". */
+/** "Journal, 11 November", "Voice note, 11 November", "Video, 11 November" or "Voice call, 14 November". */
 export const chipLabel = (date: Date, kind: SourceKind = "journal") =>
-  `${kind === "voice" ? "Voice note" : kind === "video" ? "Video" : "Journal"}, ${dayFormat(date)}`;
+  `${kind === "voice" ? "Voice note" : kind === "video" ? "Video" : kind === "voice_call" ? "Voice call" : "Journal"}, ${dayFormat(date)}`;
+
+/** A call that got no turn for this long is over, whether or not the app said so. */
+export const CALL_IDLE_MS = 10 * 60_000;
+/** The app says a call ended. Wait this long for Debo's last words to be saved first. */
+const CALL_END_GRACE_MS = 2_000;
 
 export class DeboService {
   private readonly pending = new Set<Promise<unknown>>();
   private readonly recordings: MediaService | null;
   private sweeper?: ReturnType<typeof setInterval>;
+  /** Calls being read right now ("owner:id"), so two requests never read the same call twice at once. */
+  private readonly reading = new Set<string>();
+  /** When each person's idle calls were last looked for, so a busy screen does not ask every time. */
+  private readonly lastCallSweep = new Map<string, number>();
+  /** Set by the server: deleting a call also deletes its copy in Chat. */
+  onCallDeleted?: (owner: string, callId: string) => Promise<void>;
+  /** How long to wait after "call ended" for the last words to be saved. Tests set 0. */
+  callEndGraceMs = CALL_END_GRACE_MS;
   /** Sample mode only: the in-memory bucket, to be served at /api/dev-r2. Never set in a live workspace. */
   devStore?: import("hono").Hono;
   /** Binding mode only: uploads to and playback from the private bucket, through this server. Served at /api/media-blob. */
@@ -124,10 +140,14 @@ export class DeboService {
 
   /** Start the background upkeep: finish transcripts a stopped server left, clear unfinished uploads. */
   startBackground(everyMs = 5 * 60_000) {
-    if (!this.recordings || this.sweeper) return;
-    const recordings = this.recordings;
-    void recordings.sweep();
-    this.sweeper = setInterval(() => void recordings.sweep(), everyMs);
+    const calls = this.backend?.calls;
+    if ((!this.recordings && !calls) || this.sweeper) return;
+    const work = () => {
+      void this.recordings?.sweep();
+      void this.sweepAllCalls();
+    };
+    work();
+    this.sweeper = setInterval(work, everyMs);
     this.sweeper.unref?.();
   }
 
@@ -203,8 +223,9 @@ export class DeboService {
   private entryView(e: Item): EntryView {
     return {
       id: e.id,
-      kind: e.kind ?? "journal",
+      kind: e.kind === "voice_call" ? "call" : (e.kind ?? "journal"),
       title: e.title,
+      ...(e.kind === "voice_call" ? { minutes: callMinutes(e.text) } : {}),
       text: e.text,
       happenedAt: e.happenedAt.toISOString(),
       media: e.media && this.recordings ? this.recordings.view(e.media) : null,
@@ -240,7 +261,10 @@ export class DeboService {
     for (const entry of entries) {
       // The file goes first: if it cannot be deleted, the entry stays and the person can try again.
       if (entry.media) await this.recordings?.deleteFor(owner, entry.id);
-      if (await backend.entries.remove(owner, entry.id)) await backend.afterChange(owner, entry.id, "deleted");
+      if (await backend.entries.remove(owner, entry.id)) {
+        await backend.afterChange(owner, entry.id, "deleted");
+        if (entry.kind === "voice_call") await this.dropCallChat(owner, entry.id);
+      }
     }
     // Unfinished uploads and anything else under this person's folder.
     await this.recordings?.deleteAllFor(owner);
@@ -254,6 +278,7 @@ export class DeboService {
 
   async listEntries(owner: string, query: { find?: unknown; limit?: unknown } = {}): Promise<EntryView[]> {
     const backend = this.ready(owner);
+    this.sweepCalls(owner);
     const contains = FindText.parse(query.find ?? "") || undefined;
     const limit = z.coerce.number().int().min(1).max(500).catch(100).parse(query.limit ?? 100);
     return (await backend.entries.list(owner, { limit, contains })).map((e) => this.entryView(e));
@@ -261,6 +286,7 @@ export class DeboService {
 
   async createEntry(owner: string, input: unknown, actor: "you" | "debo" = "you"): Promise<EntryView> {
     const backend = this.ready(owner);
+    this.sweepCalls(owner);
     const { text, happenedAt } = z.object({ text: EntryText, happenedAt: HappenedAt.optional() }).parse(input);
     const entry = await backend.entries.create(owner, text, happenedAt);
     await this.record(backend, owner, actor, "saved", [entry.id]);
@@ -285,6 +311,98 @@ export class DeboService {
     if (!(await backend.entries.remove(owner, id))) throw new AppError(ENTRY_GONE, 404);
     await this.record(backend, owner, "you", "deleted", [id]);
     this.later(backend.afterChange(owner, id, "deleted"));
+    await this.dropCallChat(owner, id);
+  }
+
+  // ---- Voice calls ----
+  // Each turn is a plain database write. The costly part (search pieces and
+  // memories) runs once per call: when the app says the call ended, or, if it
+  // never does (closed tab), when the call has been quiet for CALL_IDLE_MS and
+  // the person next uses voice or the journal, or the background sweep runs.
+
+  /** A call's copy in Chat has the same words, so deleting the call deletes it too. */
+  private async dropCallChat(owner: string, callId: string) {
+    try {
+      await this.onCallDeleted?.(owner, callId);
+    } catch {
+      // The call itself is already gone; the chat copy can be deleted by hand.
+    }
+  }
+
+  get keepsCalls(): boolean {
+    return Boolean(this.backend?.calls);
+  }
+
+  /**
+   * Save one turn of a call. Never throws: a call must not break because saving
+   * failed. Returns the call's id, or null when nothing was saved.
+   */
+  async recordCallTurn(owner: string, sessionId: string, who: "person" | "debo", text: string): Promise<string | null> {
+    const calls = this.journalOf(owner)?.calls;
+    if (!calls) return null;
+    try {
+      return await calls.append(owner, sessionId, { who, text });
+    } catch (error) {
+      console.error("call turn not saved", { owner, reason: error instanceof Error ? error.name : "unknown" });
+      return null;
+    }
+  }
+
+  /** The app says the call ended: read this person's open calls once the last words are in. */
+  callEnded(owner: string): void {
+    const backend = this.journalOf(owner);
+    if (!backend?.calls) return;
+    const run = async () => {
+      if (this.callEndGraceMs > 0) await new Promise((r) => setTimeout(r, this.callEndGraceMs));
+      await this.ingestDue(owner, 0);
+    };
+    this.later(run());
+  }
+
+  /** Read this person's calls that have been quiet for a while. Cheap to call often. */
+  sweepCalls(owner: string): void {
+    if (!this.journalOf(owner)?.calls) return;
+    const now = Date.now();
+    if (now - (this.lastCallSweep.get(owner) ?? 0) < 60_000) return;
+    this.lastCallSweep.set(owner, now);
+    this.later(this.ingestDue(owner, CALL_IDLE_MS));
+  }
+
+  /** The background sweep, across people. */
+  async sweepAllCalls(): Promise<void> {
+    const calls = this.backend?.calls;
+    if (!calls) return;
+    try {
+      for (const call of await calls.due({ idleMs: CALL_IDLE_MS })) await this.ingestCall(call.userId, call.id);
+    } catch (error) {
+      console.error("call sweep failed", { reason: error instanceof Error ? error.name : "unknown" });
+    }
+  }
+
+  private async ingestDue(owner: string, idleMs: number): Promise<void> {
+    const calls = this.journalOf(owner)?.calls;
+    if (!calls) return;
+    try {
+      for (const call of await calls.due({ owner, idleMs })) await this.ingestCall(owner, call.id);
+    } catch (error) {
+      console.error("call reading failed", { owner, reason: error instanceof Error ? error.name : "unknown" });
+    }
+  }
+
+  private async ingestCall(owner: string, id: string): Promise<void> {
+    const backend = this.journalOf(owner);
+    if (!backend?.calls) return;
+    const key = `${owner}:${id}`;
+    if (this.reading.has(key)) return;
+    this.reading.add(key);
+    try {
+      const result = await backend.calls.ingest(owner, id);
+      if (result === "ingested") await this.record(backend, owner, "debo", "saved", [id]);
+    } catch (error) {
+      console.error("call not read", { owner, callId: id, reason: error instanceof Error ? error.name : "unknown" });
+    } finally {
+      this.reading.delete(key);
+    }
   }
 
   /** For the agent: pieces of entries that match, each with a source chip. Journal text is data. */

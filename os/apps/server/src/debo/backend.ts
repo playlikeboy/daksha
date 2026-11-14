@@ -6,6 +6,7 @@
 // Never log entry text, questions, answers or memories. Ids and counts only.
 import { type AskEvent, createBrain, dbStore } from "@debo/brain";
 import {
+  appendCallTurn,
   type ActivityAction,
   type ActivityItem,
   chunksForSource,
@@ -13,6 +14,8 @@ import {
   createEntry,
   deleteEntry,
   deleteMediaRecord,
+  callsToIngest,
+  type CallSpeaker,
   type Entry,
   exportMedia,
   failTranscript,
@@ -29,7 +32,9 @@ import {
   type MediaRecord,
   mediaToday,
   type NewMedia,
+  parseCall,
   pendingTranscripts,
+  prepareCallIngest,
   recordActivity,
   recordUsage,
   requeueTranscript,
@@ -45,7 +50,7 @@ import {
 import { createLlm } from "@debo/llm";
 import { createMemory, type Memory } from "@debo/memory";
 
-export type { ActivityAction, ActivityItem, AskEvent, Entry, FoundPiece, MediaRecord, Memory, NewMedia, SourceKind, Transcript };
+export type { CallSpeaker, ActivityAction, ActivityItem, AskEvent, Entry, FoundPiece, MediaRecord, Memory, NewMedia, SourceKind, Transcript };
 
 /** An entry in the journal list: written (no kind), or a voice note or video with its recording. */
 export type Item = Entry & { kind?: SourceKind; media?: MediaRecord | null };
@@ -87,6 +92,22 @@ export interface DeboMediaDb {
   export(owner: string): Promise<MediaRecord[]>;
 }
 
+/** Voice calls: one source per call, saved turn by turn and read once. */
+export interface DeboCallsDb {
+  /** A plain write, no AI. Returns the call's source id (null for an empty turn). */
+  append(owner: string, sessionId: string, turn: { who: CallSpeaker; text: string; at?: Date }): Promise<string | null>;
+  /**
+   * Calls that still need reading: never read, or changed since. `idleMs` leaves out
+   * calls that got a turn more recently. Without an owner it looks across people.
+   */
+  due(options: { owner?: string; idleMs: number; limit?: number }): Promise<{ id: string; userId: string }[]>;
+  /**
+   * Read one call: search pieces, meaning search, memories from the person's turns.
+   * Safe to run again: it replaces what it made before. "too-short" calls are deleted.
+   */
+  ingest(owner: string, id: string): Promise<"ingested" | "too-short" | "gone">;
+}
+
 export interface DeboBackend {
   entries: {
     list(owner: string, options: { limit: number; contains?: string }): Promise<Item[]>;
@@ -110,6 +131,8 @@ export interface DeboBackend {
   } | null;
   /** Voice notes and videos. Missing when recordings are not available. */
   media?: DeboMediaDb;
+  /** Voice calls. Missing when the backend cannot keep them. */
+  calls?: DeboCallsDb;
   activity: {
     list(owner: string, limit: number): Promise<ActivityItem[]>;
     record(owner: string, item: { actor: "you" | "debo"; action: ActivityAction; sourceIds?: string[] }): Promise<void>;
@@ -147,6 +170,21 @@ export function realBackend(url: string, env: Env): DeboBackend {
   const memory = createMemory(env);
   const llm = () => createLlm(env);
   const brain = () => createBrain({ store: dbStore(url), llm: llm() });
+
+  /** Search by meaning. Keyword search works without it, so a failure here loses nothing. */
+  async function embedSource(owner: string, sourceId: string) {
+    if (!gatewayConfigured(env)) return;
+    try {
+      const pieces = await chunksForSource(url, owner, sourceId);
+      if (pieces.length > 0) {
+        const { vectors, tokens } = await llm().embed(pieces.map((p) => p.text));
+        await setChunkEmbeddings(url, owner, sourceId, vectors);
+        await recordUsage(url, owner, { provider: "neon", units: tokens });
+      }
+    } catch (error) {
+      console.error("index entry failed", { owner, entryId: sourceId, reason: reason(error) });
+    }
+  }
 
   return {
     entries: {
@@ -196,6 +234,30 @@ export function realBackend(url: string, env: Env): DeboBackend {
       today: (owner) => mediaToday(url, owner),
       export: (owner) => exportMedia(url, owner),
     },
+    calls: {
+      append: (owner, sessionId, turn) => appendCallTurn(url, owner, sessionId, turn),
+      due: ({ owner, idleMs, limit }) => callsToIngest(url, { userId: owner, idleMs, limit }),
+      async ingest(owner, id) {
+        const prepared = await prepareCallIngest(url, owner, id);
+        if (prepared.status !== "ready") return prepared.status;
+        await embedSource(owner, id);
+        if (memory) {
+          try {
+            // Only the person's turns can become memories; Debo's go along as context.
+            const forgotten = await memory.forgetSource(owner, id, { keepEditedByUser: true });
+            const eventId = await memory.rememberFromConversation({
+              userId: owner,
+              sourceId: id,
+              turns: parseCall(prepared.text).map((t) => ({ who: t.who, text: t.text })),
+            });
+            console.info("call sent to memory", { owner, callId: id, forgotten, eventId });
+          } catch (error) {
+            console.error("remember call failed", { owner, callId: id, reason: reason(error) });
+          }
+        }
+        return "ingested";
+      },
+    },
     activity: {
       list: (owner, limit) => listActivity(url, owner, limit),
       record: (owner, item) => recordActivity(url, owner, item),
@@ -211,19 +273,7 @@ export function realBackend(url: string, env: Env): DeboBackend {
         }
         return;
       }
-      // Search by meaning. Keyword search works without it, so a failure here loses nothing.
-      if (gatewayConfigured(env)) {
-        try {
-          const pieces = await chunksForSource(url, owner, entryId);
-          if (pieces.length > 0) {
-            const { vectors, tokens } = await llm().embed(pieces.map((p) => p.text));
-            await setChunkEmbeddings(url, owner, entryId, vectors);
-            await recordUsage(url, owner, { provider: "neon", units: tokens });
-          }
-        } catch (error) {
-          console.error("index entry failed", { owner, entryId, reason: reason(error) });
-        }
-      }
+      await embedSource(owner, entryId);
       if (!memory) return;
       try {
         // Read fresh, so two quick edits both end with the latest words. Fixed memories stay.

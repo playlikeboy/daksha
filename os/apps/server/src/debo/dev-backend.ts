@@ -8,7 +8,8 @@
 // Tests for recordings use it too, together with the in-memory bucket
 // (dev-store.ts) and the fake speech engine (transcriber.ts).
 import { randomUUID } from "node:crypto";
-import type { ActivityItem, AskEvent, DeboBackend, DeboMediaDb, Item, MediaRecord, Memory } from "./backend.ts";
+import { callSourceId, callTitle, formatTurn, MIN_PERSON_WORDS, parseCall, personWords } from "@debo/db";
+import type { ActivityItem, AskEvent, DeboBackend, DeboCallsDb, DeboMediaDb, Item, MediaRecord, Memory } from "./backend.ts";
 import { chipLabel } from "./service.ts";
 
 const words = (text: string) => text.toLowerCase().match(/[a-z]{4,}/g) ?? [];
@@ -26,6 +27,8 @@ export function devMemoryBackend(): DeboBackend {
     const r = records.get(id);
     return r && r.userId === owner ? r : undefined;
   };
+  /** When each call last got a turn, and when it was last read. */
+  const callTimes = new Map<string, { updatedAt: number; ingestedAt: number | null }>();
   const matching = (owner: string, question: string) => {
     const wanted = new Set(words(question));
     return mine(owner).filter((e) => words(e.text).some((w) => wanted.has(w)));
@@ -150,7 +153,60 @@ export function devMemoryBackend(): DeboBackend {
     },
   };
 
+  const calls: DeboCallsDb = {
+    async append(owner, sessionId, turn) {
+      const text = turn.text.replace(/\s+/g, " ").trim();
+      if (!text) return null;
+      const id = callSourceId(owner, sessionId);
+      const at = turn.at ?? new Date();
+      const existing = mine(owner).find((e) => e.id === id);
+      if (existing) {
+        const seconds = (at.getTime() - existing.happenedAt.getTime()) / 1000;
+        existing.text += `\n${formatTurn(turn.who, text, seconds)}`;
+      } else {
+        entries.set(owner, [
+          ...mine(owner),
+          { id, kind: "voice_call", title: "Voice call", text: formatTurn(turn.who, text, 0), happenedAt: at },
+        ]);
+      }
+      callTimes.set(id, { updatedAt: at.getTime(), ingestedAt: callTimes.get(id)?.ingestedAt ?? null });
+      return id;
+    },
+    async due({ owner, idleMs, limit = 50 }) {
+      const cutoff = Date.now() - idleMs;
+      const found: { id: string; userId: string }[] = [];
+      for (const [userId, list] of entries) {
+        if (owner && userId !== owner) continue;
+        for (const e of list) {
+          const t = callTimes.get(e.id);
+          if (e.kind !== "voice_call" || !t) continue;
+          if ((t.ingestedAt === null || t.ingestedAt < t.updatedAt) && t.updatedAt <= cutoff) found.push({ id: e.id, userId });
+        }
+      }
+      return found.slice(0, limit);
+    },
+    async ingest(owner, id) {
+      const entry = mine(owner).find((e) => e.id === id && e.kind === "voice_call");
+      const t = callTimes.get(id);
+      if (!entry || !t) return "gone";
+      if (personWords(entry.text) < MIN_PERSON_WORDS) {
+        entries.set(owner, mine(owner).filter((e) => e !== entry));
+        return "too-short";
+      }
+      entry.title = callTitle(entry.text);
+      t.ingestedAt = t.updatedAt;
+      // Stands in for memory: only the person's own turns become memories, never Debo's.
+      const kept = (memories.get(owner) ?? []).filter((m) => m.sourceId !== id);
+      for (const turn of parseCall(entry.text))
+        if (turn.who === "person")
+          kept.push({ id: randomUUID(), text: turn.text.slice(0, 200), sourceId: id, editedByUser: false, createdAt: new Date().toISOString(), updatedAt: null });
+      memories.set(owner, kept);
+      return "ingested";
+    },
+  };
+
   return {
+    calls,
     entries: {
       async list(owner, { limit, contains }) {
         const needle = contains?.toLowerCase();

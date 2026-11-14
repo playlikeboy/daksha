@@ -239,7 +239,7 @@ export type Brain = ReturnType<typeof createBrain>;
 
 /** What a source chip calls where the words came from. Pieces from before kinds existed are journal entries. */
 function chipName(kind?: string) {
-  return kind === "voice" ? "Voice note" : kind === "video" ? "Video" : "Journal";
+  return kind === "voice" ? "Voice note" : kind === "video" ? "Video" : kind === "voice_call" ? "Voice call" : "Journal";
 }
 
 function formatDay(date: Date) {

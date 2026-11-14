@@ -103,7 +103,7 @@ describe("brain: askStream", () => {
   });
 
   it("names a voice note or a video as the source, not 'Journal'", async () => {
-    for (const [kind, label] of [["voice", "Voice note, 14 March"], ["video", "Video, 14 March"]] as const) {
+    for (const [kind, label] of [["voice", "Voice note, 14 March"], ["video", "Video, 14 March"], ["voice_call", "Voice call, 14 March"]] as const) {
       const { store } = fakeStore({ found: [{ ...piece, kind }] });
       const brain = createBrain({ store, llm: fakeLlm({ found: true }), log: quiet });
       const events = await collect(brain.askStream(ME, "Who did I walk with?"));

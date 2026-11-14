@@ -2,6 +2,7 @@ import assert from "node:assert/strict";
 import { test } from "node:test";
 import { type BaseEvent, EventType } from "@ag-ui/client";
 import type { AgentRunner } from "@copilotkit/runtime/v2";
+import { callSourceId } from "@debo/db";
 import { Observable } from "rxjs";
 import type { Config } from "../apps/server/src/config.ts";
 import type { AgentService } from "../apps/server/src/engine/service.ts";
@@ -53,7 +54,7 @@ const go = (b: EngineVoiceBrain) => all(b.answer(question, new AbortController()
 test("voice brain: runs in the person's own thread, strips the feeling tag and reports it", async () => {
   const seen: { thread?: string } = {};
   const events = await go(brain(text("[[feel:", "happy]] Aww, ", "hi you!"), seen));
-  assert.equal(seen.thread, "voice-s1");
+  assert.equal(seen.thread, `voice-${callSourceId(ME, "s1")}`);
   assert.deepEqual(events, [
     { type: "emotion", emotion: "happy" },
     { type: "text", delta: "Aww, " },

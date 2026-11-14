@@ -10,7 +10,7 @@ import { devMemoryBackend } from "./dev-backend.ts";
 import { DeboService } from "./service.ts";
 
 export { deboRoutes } from "./routes.ts";
-export { DeboService } from "./service.ts";
+export { CALL_IDLE_MS, DeboService } from "./service.ts";
 export { MediaService, type MediaDeps } from "./media-service.ts";
 export {
   addJournalEntryInput,

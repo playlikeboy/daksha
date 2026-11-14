@@ -209,7 +209,15 @@ export async function createApp(
   // Voice runs through the same agent, tools and saved conversations as chat, so
   // she can do everything chat can. Journal answers still carry source chips.
   const voiceBrain = options.voiceBrain ?? new EngineVoiceBrain(config, agent, runner, threads);
-  app.route("/api/voice", voiceAgentRoutes(voiceBrain, options.voiceEnv));
+  app.route(
+    "/api/voice",
+    voiceAgentRoutes(voiceBrain, options.voiceEnv, {
+      turn: (owner, sessionId, who, text) => debo.recordCallTurn(owner, sessionId, who, text),
+      sweep: (owner) => debo.sweepCalls(owner),
+    }),
+  );
+  // Deleting a call also deletes its copy in Chat (same words, same person).
+  debo.onCallDeleted = (owner, callId) => threads.remove(owner, `voice-${callId}`);
   // Sample mode only: the in-memory stand-in for the recordings bucket. Its links carry their own one-time token.
   if (debo.devStore) app.route("/api/dev-r2", debo.devStore);
   app.use("/api/*", async (c, next) => {
@@ -246,7 +254,7 @@ export async function createApp(
     );
     return c.json(snapshot);
   });
-  app.route("/api/voice", voiceTokenRoutes(options.voiceEnv));
+  app.route("/api/voice", voiceTokenRoutes(options.voiceEnv, (owner) => debo.callEnded(owner)));
   app.route("/api/persona", personaRoutes(new PersonaStore(db)));
   app.route("/api/account", accountRoutes(db, files, debo, connectors, mcp));
   app.route("/api/connectors", connectorRoutes(connectors));

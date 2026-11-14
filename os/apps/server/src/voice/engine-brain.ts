@@ -1,4 +1,5 @@
 import { randomUUID } from "node:crypto";
+import { callSourceId } from "@debo/db";
 import { type BaseEvent, EventType, type Message } from "@ag-ui/client";
 import type { AgentRunner } from "@copilotkit/runtime/v2";
 import type { Config } from "../config.ts";
@@ -44,7 +45,8 @@ export class EngineVoiceBrain implements VoiceBrain {
 
   async *answer(question: VoiceQuestion, signal: AbortSignal): AsyncGenerator<VoiceBrainEvent> {
     const owner = question.userId;
-    const threadId = `voice-${question.sessionId}`.slice(0, 128);
+    // The chat copy is named after the call's own id, so deleting the call can find and delete it.
+    const threadId = `voice-${callSourceId(owner, question.sessionId)}`;
     const runId = randomUUID();
     let earlier: Message[] = [];
     try {
