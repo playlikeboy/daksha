@@ -72,6 +72,7 @@ function eventDate(event: CalendarEvent) {
 }
 export function TodayScreen() {
   const { workspace: w, navigate, open, ask } = useWorkspace();
+  const linked = useGoogleLinked();
   const wide = useWindowDimensions().width > 1180;
   const pending = w.actions.filter((a) => a.status === "awaiting_review");
   const unread = w.mail.filter((m) => m.unread);
@@ -260,13 +261,16 @@ export function TodayScreen() {
           />
           {events.length ? (
             events.slice(0, 3).map((e, i) => <AgendaRow key={e.id} event={e} index={i} />)
-          ) : (
+          ) : linked ? (
             <Empty
               icon={CalendarDays}
               title="Nothing on your calendar today"
               detail="You have no events today."
             />
+          ) : (
+            <CalendarInApps />
           )}
+          {linked && (
           <Pressable
             onPress={() => open({ type: "event" })}
             style={[
@@ -283,6 +287,7 @@ export function TodayScreen() {
             <Plus size={15} color={colors.muted} />
             <Text style={s.small}>Make time for something</Text>
           </Pressable>
+          )}
         </Card>
         <Card style={{ flex: 1 }}>
           <SectionHeading
@@ -339,7 +344,7 @@ export function TodayScreen() {
             <Empty
               icon={Inbox}
               title="Inbox is quiet"
-              detail="Connect Google to bring your messages here."
+              detail="Connect Gmail in Apps, then ask Debo about your inbox in chat."
             />
           )}
         </Card>
@@ -473,8 +478,31 @@ export function AgendaRow({
     </Pressable>
   );
 }
+/** True when the older built-in Google connection is on, which is what the Mail and Calendar screens read. */
+function useGoogleLinked() {
+  const { workspace: w } = useWorkspace();
+  const google = w.connections.find((c) => c.id === "google");
+  return google?.status === "connected" || google?.status === "sample";
+}
+
+/** Shown instead of an empty Calendar when Google is not linked here: the way forward is Apps. */
+function CalendarInApps() {
+  const { navigate } = useWorkspace();
+  return (
+    <Empty
+      icon={CalendarDays}
+      title="Your calendar lives in Apps"
+      detail="Connect Google Calendar or Outlook under Connect your apps. Then ask Debo in chat or by voice, for example “what is on my calendar tomorrow?”."
+    >
+      <Button primary onPress={() => navigate("apps")}>
+        Connect your apps
+      </Button>
+    </Empty>
+  );
+}
+
 export function MailScreen() {
-  const { workspace: w, api, open } = useWorkspace();
+  const { workspace: w, api, open, navigate } = useWorkspace();
   const [query, setQuery] = useState("");
   const [tab, setTab] = useState("all");
   const [drafts, setDrafts] = useState<(EmailDraft & { id: string; createdAt: string })[]>([]);
@@ -615,9 +643,15 @@ export function MailScreen() {
             detail={
               query
                 ? "Try a different name or subject."
-                : "Connect Google in Connections to read your mail here."
+                : "Debo reads your mail through the apps you connect. Open Apps, connect Gmail, then ask Debo about your inbox in chat."
             }
-          />
+          >
+            {!query && (
+              <Button primary onPress={() => navigate("apps")}>
+                Connect your apps
+              </Button>
+            )}
+          </Empty>
         )}
       </Card>
     </View>
@@ -636,6 +670,7 @@ function plusDays(date: string, days: number) {
 }
 export function CalendarScreen() {
   const { workspace: w, api, open } = useWorkspace();
+  const linked = useGoogleLinked();
   const [date, setDate] = useState(todayDate());
   const [all, setAll] = useState(false);
   const [calendars, setCalendars] = useState<CalendarChoice[]>([]);
@@ -654,6 +689,7 @@ export function CalendarScreen() {
     return day;
   });
   useEffect(() => {
+    if (!linked) return;
     let active = true;
     void api
       .request<CalendarChoice[]>("/api/calendars")
@@ -670,8 +706,12 @@ export function CalendarScreen() {
     return () => {
       active = false;
     };
-  }, [api, retry]);
+  }, [api, retry, linked]);
   useEffect(() => {
+    if (!linked) {
+      setLoading(false);
+      return;
+    }
     let active = true;
     setLoading(true);
     setError("");
@@ -699,7 +739,7 @@ export function CalendarScreen() {
     return () => {
       active = false;
     };
-  }, [api, calendarId, date, all, zone, w, retry]);
+  }, [api, calendarId, date, all, zone, w, retry, linked]);
   function newEvent() {
     open({
       type: "event",
@@ -717,6 +757,12 @@ export function CalendarScreen() {
       },
     });
   }
+  if (!linked)
+    return (
+      <Card>
+        <CalendarInApps />
+      </Card>
+    );
   return (
     <View style={{ gap: 20 }}>
       <View style={[s.between, { gap: 12, flexWrap: "wrap" }]}>

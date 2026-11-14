@@ -17,6 +17,13 @@ export const CatalogueItemSchema = z.object({
   blurb: z.string(),
   logo: z.string().optional(),
   connectable: z.boolean(),
+  categories: z.array(z.string()).optional(),
+});
+export const CataloguePageSchema = z.object({
+  items: z.array(CatalogueItemSchema),
+  total: z.number(),
+  nextOffset: z.number().nullable(),
+  categories: z.array(z.object({ name: z.string(), count: z.number() })).optional(),
 });
 const OverviewSchema = z.object({
   configured: z.boolean(),
@@ -28,6 +35,7 @@ const LinkSchema = z.object({ id: z.string(), url: z.string(), name: z.string() 
 
 export type AppConnection = z.infer<typeof ConnectionSchema>;
 export type AppItem = z.infer<typeof CatalogueItemSchema>;
+export type CataloguePage = z.infer<typeof CataloguePageSchema>;
 export type ConnectorsOverview = z.infer<typeof OverviewSchema>;
 
 const UNREADABLE = "I couldn't read the list of apps. Try again in a moment.";
@@ -38,12 +46,21 @@ export async function loadConnectors(api: FuseApi): Promise<ConnectorsOverview> 
   return parsed.data;
 }
 
-export async function searchApps(api: FuseApi, query: string): Promise<AppItem[]> {
-  const parsed = z
-    .object({ items: z.array(CatalogueItemSchema) })
-    .safeParse(await api.request<unknown>(`/api/connectors/search?q=${encodeURIComponent(query)}`));
+/** One page of the whole catalogue: every app, or the ones that match words and a category. */
+export async function browseApps(
+  api: FuseApi,
+  options: { q?: string; category?: string; offset?: number; limit?: number },
+): Promise<CataloguePage> {
+  const params = new URLSearchParams();
+  if (options.q) params.set("q", options.q);
+  if (options.category) params.set("category", options.category);
+  params.set("offset", String(options.offset ?? 0));
+  params.set("limit", String(options.limit ?? 20));
+  const parsed = CataloguePageSchema.safeParse(
+    await api.request<unknown>(`/api/connectors/search?${params}`),
+  );
   if (!parsed.success) throw new Error(UNREADABLE);
-  return parsed.data.items;
+  return parsed.data;
 }
 
 /** Asks the server for the app's own sign-in page. `to` says where the page sends people after. */

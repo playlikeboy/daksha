@@ -3,17 +3,18 @@
 // Debo never sees the password. Colours and sizes come from ui.tsx tokens only.
 import { Link2, Search, ShieldCheck } from "lucide-react-native";
 import { useCallback, useEffect, useRef, useState } from "react";
-import { ActivityIndicator, AppState, Platform, Text, View } from "react-native";
+import { ActivityIndicator, AppState, Image, Platform, Text, View } from "react-native";
 import {
   type AppConnection,
   type AppItem,
   appFromToolName,
+  browseApps,
+  type CataloguePage,
   connectionsBySlug,
   type ConnectorsOverview,
   disconnectApp,
   loadConnectors,
   readConnectorTool,
-  searchApps,
   startConnect,
 } from "./connectors-data";
 import { dropSignInWindow, openSignInPage, reserveSignInWindow } from "./open-connect-link";
@@ -27,8 +28,13 @@ export function ConnectAppsSection({ query }: { query: string }) {
   const { api, notify } = useWorkspace();
   const [overview, setOverview] = useState<ConnectorsOverview>();
   const [error, setError] = useState("");
-  const [found, setFound] = useState<AppItem[] | undefined>();
-  const [searching, setSearching] = useState(false);
+  // The rest of the catalogue, a page at a time. `browsing` turns on when the person presses
+  // "Show more apps" or types in the search box.
+  const [browsing, setBrowsing] = useState(false);
+  const [category, setCategory] = useState<string>();
+  const [list, setList] = useState<{ key: string; page: CataloguePage; items: AppItem[] }>();
+  const [loadingList, setLoadingList] = useState(false);
+  const [listError, setListError] = useState("");
   const [busy, setBusy] = useState<string>();
   const [confirming, setConfirming] = useState<string>();
   const [watching, setWatching] = useState(false);
@@ -78,22 +84,58 @@ export function ConnectAppsSection({ query }: { query: string }) {
   }, [watching, refresh]);
 
   // One search box for the whole screen. Words narrow the first list at once, and also look
-  // through every app Debo can reach.
+  // through every app Debo can reach, a page at a time.
   const text = query.trim();
+  const searching = text.length >= 2;
+  const key = `${searching ? text : ""}|${category ?? ""}`;
+  const active = (searching || browsing) && Boolean(overview?.configured);
+  const [attempt, setAttempt] = useState(0);
   useEffect(() => {
-    if (text.length < 2 || !overview?.configured) {
-      setFound(undefined);
+    if (!active) {
+      setList(undefined);
       return;
     }
-    setSearching(true);
-    const timer = setTimeout(() => {
-      searchApps(api, text)
-        .then((items) => alive.current && setFound(items))
-        .catch((e) => alive.current && setError(errorText(e)))
-        .finally(() => alive.current && setSearching(false));
-    }, 350);
+    setLoadingList(true);
+    setListError("");
+    const timer = setTimeout(
+      () => {
+        browseApps(api, { q: searching ? text : undefined, category })
+          .then((page) => alive.current && setList({ key, page, items: page.items }))
+          .catch((e) => alive.current && setListError(errorText(e)))
+          .finally(() => alive.current && setLoadingList(false));
+      },
+      searching ? 350 : 0,
+    );
     return () => clearTimeout(timer);
-  }, [text, api, overview?.configured]);
+    // `key` already holds the search words and the category.
+  }, [active, key, api, attempt]);
+  async function showMore() {
+    const current = list;
+    if (!current || current.page.nextOffset === null) return;
+    setLoadingList(true);
+    setListError("");
+    try {
+      const page = await browseApps(api, {
+        q: searching ? text : undefined,
+        category,
+        offset: current.page.nextOffset,
+      });
+      if (alive.current)
+        setList((now) =>
+          now && now.key === current.key
+            ? {
+                key: now.key,
+                page: { ...page, categories: now.page.categories },
+                items: [...now.items, ...page.items],
+              }
+            : now,
+        );
+    } catch (e) {
+      if (alive.current) setListError(errorText(e));
+    } finally {
+      if (alive.current) setLoadingList(false);
+    }
+  }
 
   async function connect(item: { slug: string; name: string }) {
     setError("");
@@ -152,16 +194,17 @@ export function ConnectAppsSection({ query }: { query: string }) {
   const curated = (overview?.curated ?? []).filter(
     (item) => !words || `${item.name} ${item.slug}`.toLowerCase().includes(words),
   );
-  // Apps found by search that the first list does not already show.
+  // Apps from the catalogue that the first list does not already show.
   const shown = new Set(curated.map((item) => item.slug));
-  const more = (found ?? []).filter((item) => !shown.has(item.slug));
+  const current = list && list.key === key ? list : undefined;
+  const more = (current?.items ?? []).filter((item) => !shown.has(item.slug));
   // Connected apps that are in neither list still deserve a row, so they can be disconnected.
   const known = new Set([...shown, ...more.map((item) => item.slug)]);
   const extra = [...connections.values()].filter(
     (c) => !known.has(c.toolkit) && (!words || c.name.toLowerCase().includes(words)),
   );
 
-  const row = (item: AppItem | { slug: string; name: string; blurb: string; connectable: boolean }) => (
+  const row = (item: AppItem | { slug: string; name: string; blurb: string; connectable: boolean; logo?: string }) => (
     <AppRow
       key={item.slug}
       item={item}
@@ -194,22 +237,99 @@ export function ConnectAppsSection({ query }: { query: string }) {
           }),
         )}
         {curated.map((item) => row(item))}
-        {!curated.length && !more.length && !extra.length && !searching && (
-          <Text style={s.muted}>
-            {text ? `No app matches “${text}”.` : "No apps to show yet."}
-          </Text>
-        )}
       </View>
-      {text.length >= 2 && (
-        <View style={{ gap: spacing[2] }}>
+      {!searching && !browsing && (
+        <Button icon={Search} onPress={() => setBrowsing(true)}>
+          Show more apps
+        </Button>
+      )}
+      {active && (
+        <View style={{ gap: spacing[2] }} accessibilityLabel="All apps">
           <View style={[s.row, { gap: spacing[2] }]}>
             <Search size={16} color={colors.muted} />
             <Text style={s.small}>
-              {searching ? "Searching every app…" : more.length ? "More apps" : "No other apps found"}
+              {loadingList && !current
+                ? searching
+                  ? "Searching every app…"
+                  : "Loading apps…"
+                : current
+                  ? `${current.page.total} ${current.page.total === 1 ? "app" : "apps"}${searching ? ` match “${text}”` : " you can look through"}${category ? ` in ${category}` : ""}`
+                  : ""}
             </Text>
           </View>
+          {!!current?.page.categories?.length && (
+            <View
+              style={[s.row, { gap: spacing[2], flexWrap: "wrap" }]}
+              accessibilityLabel="Categories"
+            >
+              <Button small primary={!category} onPress={() => setCategory(undefined)}>
+                All
+              </Button>
+              {current.page.categories.map((c) => (
+                <Button
+                  key={c.name}
+                  small
+                  primary={category?.toLowerCase() === c.name.toLowerCase()}
+                  onPress={() => setCategory(c.name)}
+                >
+                  {c.name}
+                </Button>
+              ))}
+            </View>
+          )}
           {more.map((item) => row(item))}
+          {current && !more.length && !loadingList && !listError && (
+            <Text style={s.muted}>
+              {searching
+                ? `No app matches “${text}”${category ? ` in ${category}` : ""}. Try fewer letters or another word.`
+                : "No other apps to show."}
+            </Text>
+          )}
+          {loadingList && current && (
+            <View style={[s.row, { gap: spacing[3] }]} accessibilityLabel="Loading more apps">
+              <ActivityIndicator size="small" color={colors.blueDark} />
+              <Text style={s.muted}>Loading more apps…</Text>
+            </View>
+          )}
+          {!!listError && (
+            <View style={{ gap: spacing[2] }}>
+              <ErrorNotice error={listError} />
+              <Button small onPress={() => (current ? void showMore() : setAttempt(attempt + 1))}>
+                Try again
+              </Button>
+            </View>
+          )}
+          {current && current.page.nextOffset !== null && !loadingList && !listError && (
+            <Button onPress={() => void showMore()}>Show more apps</Button>
+          )}
+          {current && current.page.nextOffset === null && more.length > 0 && (
+            <Text style={s.small}>That is every app that matches.</Text>
+          )}
         </View>
+      )}
+    </View>
+  );
+}
+
+/** The app's logo from the provider, or its first letter when there is none or it will not load. */
+function AppLogo({ name, logo }: { name: string; logo?: string }) {
+  const [failed, setFailed] = useState(false);
+  return (
+    <View
+      accessibilityElementsHidden
+      importantForAccessibility="no-hide-descendants"
+      style={[s.iconBox, { backgroundColor: colors.subtle }]}
+    >
+      {logo && !failed ? (
+        <Image
+          source={{ uri: logo }}
+          resizeMode="contain"
+          onError={() => setFailed(true)}
+          style={{ width: spacing[7], height: spacing[7] }}
+          accessible={false}
+        />
+      ) : (
+        <Text style={[s.heading, { color: colors.blueDark }]}>{name.slice(0, 1)}</Text>
       )}
     </View>
   );
@@ -225,7 +345,7 @@ function AppRow({
   onKeep,
   onDisconnect,
 }: {
-  item: { slug: string; name: string; blurb: string; connectable: boolean };
+  item: { slug: string; name: string; blurb: string; connectable: boolean; logo?: string };
   connection?: AppConnection;
   busy: boolean;
   confirming: boolean;
@@ -238,13 +358,7 @@ function AppRow({
   return (
     <Card style={{ gap: spacing[3], padding: spacing[4] }}>
       <View style={[s.row, { gap: spacing[3], alignItems: "flex-start" }]}>
-        <View
-          accessibilityElementsHidden
-          importantForAccessibility="no-hide-descendants"
-          style={[s.iconBox, { backgroundColor: colors.subtle }]}
-        >
-          <Text style={[s.heading, { color: colors.blueDark }]}>{item.name.slice(0, 1)}</Text>
-        </View>
+        <AppLogo name={item.name} logo={item.logo} />
         <View style={{ flex: 1, gap: spacing[1] }}>
           <View style={[s.row, { gap: spacing[2], flexWrap: "wrap" }]}>
             <Text style={[s.text, { fontWeight: "600" }]}>{item.name}</Text>
@@ -262,7 +376,10 @@ function AppRow({
             </Text>
           )}
           {!item.connectable && !connection && (
-            <Text style={s.small}>Not available yet. Whoever runs this Debo needs to set it up.</Text>
+            <Text style={s.small}>
+              Can’t be connected from Debo yet. This app needs its own sign-in set up first by
+              whoever runs this Debo, so there is nothing to tap.
+            </Text>
           )}
         </View>
       </View>

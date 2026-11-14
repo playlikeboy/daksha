@@ -1817,10 +1817,10 @@ export function AppsScreen() {
     <View style={{ gap: 22 }}>
       <AgentStatus />
       <Field
-        label="Search apps"
+        label="Search all apps"
         value={query}
         onChangeText={setQuery}
-        placeholder="Search connectors"
+        placeholder="Try Slack, Notion, Stripe or Calendar"
       />
       <ConnectionsScreen query={query} />
       <ConnectAppsSection query={query} />
