@@ -28,6 +28,8 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { duration } from "./astryx-tokens";
 import { useAssistantName } from "./debo-character-store";
 import { DeboFace, useReducedMotion } from "./debo-face";
+import { hasAgreedToTalk, rememberAgreedToTalk, takeTalkAutoStart } from "./debo-talk-consent";
+import { TalkApprovals } from "./debo-talk-approvals";
 import { deboLevels, deboMood } from "./debo-mood-store";
 import { spokenStatus, stateWords, type TalkLine, useTalkCall, useTalkState } from "./debo-talk-session";
 import { Button, Card, Chip, colors, ErrorNotice, Field, fontSize, radius, s, spacing } from "./ui";
@@ -56,6 +58,25 @@ export function TalkPopup({ onClose }: { onClose: () => void }) {
     talk.popupOpen(true);
     talk.reset();
     return () => talk.popupOpen(false);
+  }, [talk]);
+
+  // Pressing Start talking is the person's yes to the text under it. It is remembered on this device,
+  // so pressing Debo's face at the top of the app can start straight away next time.
+  const begin = useCallback(async () => {
+    await rememberAgreedToTalk();
+    await talk.start();
+  }, [talk]);
+  // Opened from the top of the app: start at once, but only if they have agreed on this device before.
+  // The first time, the text below stays and waits for "Start talking".
+  useEffect(() => {
+    if (!takeTalkAutoStart()) return;
+    let cancelled = false;
+    void hasAgreedToTalk().then((agreed) => {
+      if (agreed && !cancelled) void talk.start();
+    });
+    return () => {
+      cancelled = true;
+    };
   }, [talk]);
 
   // Motion values: the popup rising, the keyboard panel, the transcript panel, the halo pulse.
@@ -280,7 +301,7 @@ export function TalkPopup({ onClose }: { onClose: () => void }) {
                 accessibilityRole="button"
                 accessibilityLabel={live ? assistant : "Start talking"}
                 disabled={live || status === "connecting"}
-                onPress={() => void talk.start()}
+                onPress={() => void begin()}
                 style={{ width: orb * 1.4, height: orb * 1.4, alignItems: "center", justifyContent: "center" }}
               >
                 <Animated.View
@@ -344,7 +365,7 @@ export function TalkPopup({ onClose }: { onClose: () => void }) {
                     at any time. You can also type to Debo instead.
                   </Text>
                   <View style={[s.row, { gap: spacing[3] }]}>
-                    <Button primary icon={Mic} onPress={() => void talk.start()}>
+                    <Button primary icon={Mic} onPress={() => void begin()}>
                       Start talking
                     </Button>
                     <Button onPress={requestClose}>Not now</Button>
@@ -354,7 +375,7 @@ export function TalkPopup({ onClose }: { onClose: () => void }) {
 
               {(status === "ended" || status === "error") && (
                 <View style={[s.row, { gap: spacing[3], flexWrap: "wrap", justifyContent: "center" }]}>
-                  <Button primary icon={Mic} onPress={() => void talk.start()}>
+                  <Button primary icon={Mic} onPress={() => void begin()}>
                     {status === "error" ? "Try again" : "Start again"}
                   </Button>
                   {status === "error" && (
@@ -373,6 +394,9 @@ export function TalkPopup({ onClose }: { onClose: () => void }) {
               )}
 
               <ErrorNotice error={problem} />
+
+              {/* Anything that needs a yes is shown here, on top of the call, never only behind it. */}
+              <TalkApprovals />
 
               {/* Live captions: the last one or two lines, the older one faded. */}
               {recent.length > 0 && (

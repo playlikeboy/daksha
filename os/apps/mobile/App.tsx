@@ -43,6 +43,7 @@ import { deboMood } from "./src/debo-mood-store";
 import { PersonaSetting } from "./src/debo-persona-setting";
 import { ReactionsSetting } from "./src/debo-reactions-setting";
 import { TalkPopup } from "./src/debo-talk";
+import { requestTalkAutoStart } from "./src/debo-talk-consent";
 import { TalkPill } from "./src/debo-talk-pill";
 import { reviewsWaiting } from "./src/debo-talk-call";
 import { TalkSessionProvider, useTalkState } from "./src/debo-talk-session";
@@ -475,10 +476,15 @@ function WorkspaceShell({
             <View pointerEvents="box-none" style={{ alignItems: "center", gap: 1 }}>
               <Pressable
                 accessibilityRole="button"
-                accessibilityLabel={`Open ${agentName} activity and approvals`}
+                accessibilityLabel={
+                  talkState.active ? `Open the conversation with ${agentName}` : `Talk to ${agentName}`
+                }
                 onPress={() => {
                   deboMood.tap();
-                  navigate("activity");
+                  // A call that is already going (minimised) is just opened again. Otherwise the
+                  // popup opens and starts the call, if this device has already seen the consent text.
+                  if (!talkState.active) requestTalkAutoStart();
+                  navigate("talk");
                 }}
                 style={({ pressed }) => ({
                   alignItems: "center",
