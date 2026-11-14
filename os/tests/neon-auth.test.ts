@@ -113,7 +113,7 @@ describe("Neon sign-in", () => {
   });
   test("health tells the app to show the email sign-in", async () => {
     const health = await (await call(undefined, "/api/health")).json();
-    assert.deepEqual(health.auth, { mode: "neon", neonAuthUrl: `${ORIGIN}/neondb/auth` });
+    assert.deepEqual(health.auth, { mode: "neon", neonAuthUrl: "http://localhost:8787/api/neon-auth" });
   });
 });
 

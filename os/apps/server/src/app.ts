@@ -33,6 +33,7 @@ import { AppError } from "./errors.ts";
 import { Files } from "./files.ts";
 import { GoogleAuth } from "./google-auth.ts";
 import { PersonaStore, personaRoutes } from "./persona.ts";
+import { neonAuthProxy } from "./neon-auth-proxy.ts";
 import { rateLimit } from "./rate-limit.ts";
 import { DatabaseAgentRunner, threadOwner } from "./thread-runner.ts";
 import { assertThreadId, ThreadStore } from "./threads.ts";
@@ -51,6 +52,8 @@ export async function createApp(
     voiceBrain?: VoiceBrain;
     /** Where voice settings are read from. Tests pass their own. */
     voiceEnv?: () => Record<string, string | undefined>;
+    /** Tests only: stands in for the network call to Neon Auth. */
+    neonAuthFetch?: typeof fetch;
     /** The personal journal. Tests pass a fake one. */
     debo?: DeboService;
     /** Connected apps (Composio). Tests pass one built on a fake backend. */
@@ -101,7 +104,7 @@ export async function createApp(
     cors({
       origin: (origin) => (origins.has(origin) ? origin : undefined),
       allowHeaders: ["Content-Type", "Authorization"],
-      exposeHeaders: ["ETag"],
+      exposeHeaders: ["ETag", "set-auth-jwt", "set-auth-token"],
       allowMethods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
       credentials: true,
     }),
@@ -138,11 +141,19 @@ export async function createApp(
       ok: true,
       mode: config.mode,
       // The app reads this to choose between the access-key and email sign-in screens.
-      auth: { mode: config.authMode ?? "access-key", neonAuthUrl: config.neonAuthBaseUrl },
+      // Sign-in goes through this server (see neon-auth-proxy.ts), so its cookie is not third-party.
+      auth: {
+        mode: config.authMode ?? "access-key",
+        neonAuthUrl: config.neonAuthBaseUrl
+          ? `${config.publicUrl.replace(/\/$/, "")}/api/neon-auth`
+          : undefined,
+      },
       agentConfigured: agentConfigured(config),
       browserConfigured: Boolean(config.workerUrl && config.workerToken),
     }),
   );
+  if (config.neonAuthBaseUrl)
+    app.route("/api/neon-auth", neonAuthProxy(config.neonAuthBaseUrl, options.neonAuthFetch));
   let loginWindow = 0,
     loginAttempts = 0;
   app.post("/api/session", async (c) => {
