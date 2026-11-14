@@ -8,7 +8,11 @@
     "orientation": "default",
     "userInterfaceStyle": "light",
     "newArchEnabled": true,
-    "ios": { "supportsTablet": true, "bundleIdentifier": "life.debo.app" },
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "life.debo.app",
+      "infoPlist": { "UIBackgroundModes": ["audio"] }
+    },
     "android": { "package": "life.debo.app" },
     "web": { "bundler": "metro", "name": "Debo: remembers your life" },
     "plugins": [
