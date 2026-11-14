@@ -21,6 +21,15 @@ Live mode with `NEON_AUTH_JWKS_URL` set must use `neon`. The server refuses to s
 
 Signed links for files and the browser console carry the owner and an HMAC over owner, path and expiry. They work per user and expire after 15 minutes.
 
+## Sign-in on a phone
+
+A phone app is not a browser, so two things differ.
+
+- **No Origin header.** React Native's networking sends no `Origin` header. The API's own check (`apps/server/src/app.ts`) only refuses a request whose `Origin` is present and not allowed, so a phone request with none passes. Neon Auth (Better Auth) can refuse a cookie request that has none, and its trusted origins are only `https://debo.life`, `https://www.debo.life` and `https://my.debo.life`. So the pass-through (`neon-auth-proxy.ts`) fills in the app's own address (the first `https://` entry of `ALLOWED_ORIGINS`, `https://my.debo.life` in production) as `Origin` when the caller sent neither `Origin` nor `Sec-Fetch-Site`. Browsers always send `Sec-Fetch-Site`, so this never applies to a browser request. Tests: `tests/neon-auth-proxy.test.ts`.
+- **The cookie.** The session cookie is kept by the phone's own network layer (iOS and Android cookie stores) and sent back because every call uses `credentials: "include"`. The app builds are pointed at `https://api.debo.life`.
+
+Not verified: none of this has run on a real phone or against the live Neon Auth from a phone. If a phone shows "Your session ended" straight after signing in, the first things to check are whether Neon Auth still sets the cookie as `SameSite=None; Secure` and whether the phone's cookie store keeps a `Partitioned` cookie.
+
 ## Settings
 
 | Name | Meaning |
