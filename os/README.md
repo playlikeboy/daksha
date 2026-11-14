@@ -84,7 +84,7 @@ Open [localhost:8081](http://localhost:8081). The API runs at [localhost:8787/ap
 3. In **Menu → Delegate task → Finance**, use **Try example transactions** to create an interactive spending tracker.
 4. Start the [browser worker](#browser-worker) and configure a model, then ask **“Check out Hacker News for cool stuff”** or **“Summarize copilotkit.ai”**. Follow the browser inline and use **Take control** to open its session. For a model-free version of this flow, follow the [AI Mock demo setup](docs/DEMO.md#run-the-agent-browser-demo).
 
-For iOS or Android, use `pnpm --dir apps/mobile ios` or `pnpm --dir apps/mobile android`. Xcode or Android tooling is required. The PDF reader needs an Expo development build; use [native setup](apps/mobile/README.md).
+For iOS or Android, use `pnpm --dir apps/mobile ios` or `pnpm --dir apps/mobile android`. Xcode or Android tooling is required. For Debo, GitHub Actions builds an Android APK and publishes it on the repository's Releases page; see [phone builds](apps/mobile/README.md#phone-builds-and-releases). The PDF reader needs an Expo development build; use [native setup](apps/mobile/README.md).
 
 ## Deploy on Render
 

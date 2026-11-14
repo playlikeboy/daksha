@@ -5,233 +5,158 @@
 <p align="center"><strong>A friendly assistant that remembers your life, and always shows where it learned it.</strong></p>
 
 <p align="center">
-  <a href="https://debo.life">Website</a> ·
+  <a href="https://about.debo.life">Website</a> ·
+  <a href="https://my.debo.life">Open the app</a> ·
   <a href="https://debo.life/privacy">Privacy</a> ·
-  <a href="./docs/ROADMAP.md">Roadmap</a> ·
-  <a href="./docs/DECISIONS.md">Decisions</a>
-</p>
-
-<p align="center">
-  <a href="https://github.com/playlikeboy/debo.life/actions/workflows/deploy.yml"><img src="https://github.com/playlikeboy/debo.life/actions/workflows/deploy.yml/badge.svg" alt="Deploy status"></a>
-  <img src="https://img.shields.io/badge/status-early%20version-ffd23f?labelColor=1b1f4b" alt="Status: early version">
-  <img src="https://img.shields.io/badge/licence-not%20chosen-c9d0f2?labelColor=1b1f4b" alt="Licence: not chosen">
+  <a href="https://github.com/playlikeboy/debo.life/releases/latest">Android app</a> ·
+  <a href="./docs/ROADMAP.md">Roadmap</a>
 </p>
 
 ## What Debo is
 
-Debo keeps the bits of your life in one place: what you write today, and later your voice notes, papers and photos. You can ask it anything about your own life in plain words, like "When did Riya move to Pune?" or "What did the doctor say in March?".
+Debo keeps the bits of your life in one place: your journal, your voice notes and videos, and later your papers and photos. You ask it about your own life in plain words, by text or by voice, like "When did Riya move to Pune?" or "What did the doctor say in March?".
 
-Every answer links to the entry it came from. If Debo has nothing about a question, it says so instead of guessing. You can see, fix and forget anything Debo knows, download all of it, or delete your account and everything with it.
+Every answer links to the entry it came from. If Debo has nothing about a question, it says so instead of guessing. You can see, fix and forget what Debo knows, download your data, and delete it.
 
-Debo is for people who want to remember their own life better without building a system for it. You do not need to be technical. If you already keep a journal or record voice notes and can never find anything again, Debo is for you.
+Debo is early. Do not treat any feature as finished until you have checked it in the code or the app. What is built and what is only planned is in [`docs/ROADMAP.md`](./docs/ROADMAP.md) and [`os/docs/FEATURES.md`](./os/docs/FEATURES.md); where the two disagree, the code is the truth.
 
-## What works today
+## Where it lives
 
-Debo is an early version. The landing page is at [about.debo.life](https://about.debo.life) and the app is at [my.debo.life](https://my.debo.life). [debo.life](https://debo.life) sends people to those two and keeps the privacy page and the server routes. Some parts are built and some are still planned.
-
-| Feature | Status | Notes |
-|---|---|---|
-| Accounts | Built | Sign up with email and password, and confirm your email with a 6-number code. Sign in with your password, a code by email, or a link by email. |
-| Journal | Built | Write, edit and delete entries on your own journal page. A draft is kept in your browser, with a word count and "Find an entry". |
-| Ask about your life | Built | Answers come only from your own entries, with source chips that open the entry. No source, no answer. |
-| Search by meaning and by words | Built | Keyword search and meaning search (embeddings in Postgres with pgvector), merged. |
-| Chat with Debo | Built | `/home/chat`. Answers stream in word by word. Chats are saved, and you can come back to them or delete them. |
-| What Debo knows | Built | `/home/memories`. Memories picked out of your entries, each with its source. Fix or forget any of them. Runs on the hosted Mem0 Platform, and is switched off when no Mem0 key is set. |
-| What Debo did | Built | `/home/activity`. A plain list of what Debo saved, changed, deleted and answered. Ids and times only, never your words. |
-| Download everything | Built | A zip with each entry as Markdown, your chats and your activity record. It opens without Debo. |
-| Delete your account | Built | Deletes your entries, chats, memories, files, records and sign-in, right away. |
-| Daily AI limit | Built | Each person has a daily limit, so one account cannot run up the bill. |
-| Privacy page | Built | [debo.life/privacy](https://debo.life/privacy) says what is stored, where, and who else sees it. |
-| Voice notes, papers and photos | Planned | Phase 1. File storage is set up; uploads are not built yet. |
-| Talk to Debo by voice | Planned | Phase 3. The LiveKit worker is wired but switched off. |
-| Connect your apps | Planned | Phase 4. The Composio wrapper is wired but switched off. |
-| Use Debo's memory in other AI tools (MCP) | Planned | Phase 4. Libraries installed, no code yet. |
-| Plans and "use your own key" | Planned | Phase 5. |
-
-The full plan, in order, is in [`docs/ROADMAP.md`](./docs/ROADMAP.md).
-
-<p align="center">
-  <img src="./docs/assets/landing.png" alt="The Debo landing page: the headline 'Hi, I'm Debo. I'll remember your life, so you can stop trying to.', buttons to create an account or sign in, and an example answer with source chips." width="90%">
-</p>
-
-## Seven promises
-
-Debo is still early, so not all of these are true yet. They are the rules it is being built by.
-
-1. **Your data is yours.** We will not sell it, share it or show ads against it.
-2. **No AI training on your life.** Not by us, and we will pick AI providers who agree to the same.
-3. **Debo shows its sources.** Every answer links to where it came from. No source, no answer.
-4. **You can fix or forget anything.** Forgetting really deletes it.
-5. **You can leave with everything.** Download all of it, or delete your account and all of it goes.
-6. **Debo asks first.** Before reading from a new app or doing anything outside Debo.
-7. **Nothing happens in secret.** Debo keeps a plain list of what it did, and you can read all of it.
-
-How we keep them is in [`docs/PRIVACY-AND-TRUST.md`](./docs/PRIVACY-AND-TRUST.md).
-
-## How it works
-
-```mermaid
-flowchart LR
-  you([Your browser]) --> worker["Cloudflare Worker<br/>Next.js 16 via OpenNext"]
-  worker --> auth["Neon Auth<br/>sign-in (managed Better Auth)"]
-  worker --> hyper["Cloudflare Hyperdrive"] --> pg[("Neon Postgres<br/>entries, chats, records<br/>pgvector embeddings")]
-  worker --> files[("Neon Object Storage<br/>files, private")]
-  worker --> gateway["Neon AI Gateway<br/>embeddings, backup answers"]
-  worker --> anthropic["Anthropic<br/>writes answers"]
-  worker --> mem0["Mem0 Platform<br/>memories"]
-  auth -->|"send.otp, send.magic_link webhook"| worker
-  worker --> email["Cloudflare Email<br/>codes and sign-in links from mail.debo.life"]
-```
-
-- **One answer pipeline.** Every question, from the home page or the chat, goes through `apps/web/src/lib/ask.ts`. It searches only your own entries, checks your daily limit, asks the model to answer from those pieces only, and records usage and activity.
-- **One door for models.** Only `@debo/llm` calls a model: Anthropic first, the Neon AI Gateway if Anthropic fails.
-- **Your data stays tied to you.** Every table that holds your data has your user id, and deleting your account deletes all of it.
-
-Why each choice was made is in [`docs/DECISIONS.md`](./docs/DECISIONS.md).
-
-## Tech stack
-
-| Job | Used |
+| What | Address |
 |---|---|
-| Web app | Next.js 16 App Router, React 19, TypeScript, Tailwind CSS 4, on Cloudflare Workers through OpenNext |
-| Workspace | pnpm workspaces, Turborepo |
-| Database | Neon Postgres with pgvector, Drizzle ORM, node-postgres, Cloudflare Hyperdrive |
-| Sign-in | Neon Auth (managed Better Auth), `@neon/auth` |
-| File storage | Neon Object Storage (S3 API) |
-| Answers and embeddings | Anthropic and the Neon AI Gateway, through the AI SDK, behind `@debo/llm` |
-| Memory | Mem0 Platform, behind `@debo/memory` |
-| Chat | CopilotKit with AG-UI, on our own answer pipeline |
-| Background jobs | Inngest (installed, not used yet) |
-| Voice | LiveKit Agents (wired, switched off) |
-| Connectors | Composio (wired, switched off) |
-| Validation | Zod |
-| Tests | Vitest, Playwright |
+| Landing page | https://about.debo.life (https://debo.life redirects people here) |
+| The app (web, installable to a phone's home screen) | https://my.debo.life |
+| The API the app talks to | https://api.debo.life |
+| Investor site | https://pitch.debo.life |
+| Privacy page | https://debo.life/privacy |
+| Android app (early test build) | [GitHub Releases](https://github.com/playlikeboy/debo.life/releases/latest), file `debo.apk` |
+
+There is no iPhone app yet. On an iPhone, use https://my.debo.life in Safari and choose Share, then Add to Home Screen.
 
 ## What is in this repo
 
+There are two pnpm workspaces. The root one holds the landing page and the older code. `os/` is the newer app and is a workspace of its own.
+
 ```
-apps/
-  web/           The website and the app: Next.js on Cloudflare Workers
-  voice-agent/   LiveKit voice worker, switched off until its keys are set
-  mcp-server/    MCP server for other AI tools (libraries installed, no code yet)
-packages/
-  db/            Database schema, migrations and queries. The only package that talks to Postgres.
-  llm/           Model calls, embeddings and the answer rules
-  memory/        What Debo knows, through the Mem0 Platform
-  ingest/        File storage and making entries searchable
-  connectors/    Connect other apps through Composio, switched off
-  recall/        Recall test set: made-up entries and questions
-  ui/            Shared components (planned, no code yet)
-docs/            The plan, the rules and the decisions
+apps/                    root workspace
+  site/                  Landing page (about.debo.life). Next.js on Cloudflare Workers, Astryx components.
+  pitch/                 Investor site (pitch.debo.life). Same stack.
+  web/                   The retired first app. Its screens now send people to the new app.
+                         It still serves /privacy (debo.life/privacy) and the /api routes.
+  voice-agent/           LiveKit voice worker. Its own project, outside the workspace.
+  mcp-server/            Planned: Debo's memory for other AI tools. Libraries installed, no working server.
+packages/                root workspace
+  db/  llm/  memory/  ingest/  connectors/  recall/  brain/  tools/   Shared code (db is the only one that talks to Postgres)
+  ui/                    Planned, no code yet
+os/                      The new app. Its own workspace, from its own lockfile.
+  apps/server/           The API (Hono): sign-in pass-through, journal, chat, voice, files
+  apps/mobile/           The app: one Expo / React Native codebase for the web, Android and iOS
+  apps/worker/           Browser worker (Playwright and Chromium) the agent uses
+  apps/computer/         Optional Linux sandbox for the agent, off unless configured
+  infra/cloudflare/      Cloudflare Worker and container setup for the API, app and browser worker
+docs/                    Product, rules and decisions for the whole project
+os/docs/                 Docs for the new app
 ```
 
 Package rules are in [`docs/MONOREPO.md`](./docs/MONOREPO.md).
 
-## Quick start
+## Run and test each part
 
-You need Node 22 or newer, pnpm 10 and the [Neon CLI](https://neon.com/docs/reference/neon-cli).
+You need Node 22 or newer. The root workspace uses pnpm 10; `os/` uses pnpm 11.19.0 (`npx -y pnpm@11.19.0 ...` works).
+
+**Landing page and investor site** (no environment variables needed):
 
 ```bash
 pnpm install
-pnpm dev
+pnpm --filter @debo/site dev          # http://localhost:3000
+pnpm --filter @debo/site typecheck
+pnpm --filter @debo/pitch dev
+pnpm --filter @debo/pitch typecheck
+node apps/pitch/scripts/check.mjs http://localhost:3000 out   # checks every pitch page at phone and desktop width
 ```
 
-Open http://localhost:3000. The landing page needs no environment variables.
-
-To sign in and use the app, you also need a Neon project:
+**Everything in the root workspace:**
 
 ```bash
-neon login          # opens a browser to sign in to Neon
-neon env pull       # in the repo root; writes the Neon values into .env
+pnpm typecheck
+pnpm build
+pnpm test                             # Vitest in each package that has tests
+pnpm --filter @debo/recall recall     # checks search finds the right entries
 ```
 
-Then add the values Neon does not make for you to `.env`:
+**The retired web app** (`apps/web`) needs a Neon project and keys; see [`docs/SETUP.md`](./docs/SETUP.md). Its end-to-end test is `pnpm --filter @debo/web test:e2e`.
 
-- `NEON_AUTH_COOKIE_SECRET`: make one with `openssl rand -base64 32`
-- `ANTHROPIC_API_KEY`: your Anthropic API key
-- `MEM0_API_KEY`: optional; without it, "What Debo knows" is switched off
-
-Create the tables and start the app:
+**The new app** (`os/`):
 
 ```bash
-pnpm --filter @debo/db db:migrate
-pnpm dev
+cd os
+npx -y pnpm@11.19.0 install --frozen-lockfile
+cp .env.example .env
+npx -y pnpm@11.19.0 dev               # the API on http://localhost:8787
+npx -y pnpm@11.19.0 dev:web           # the app on http://localhost:8081 (second terminal)
+npx -y pnpm@11.19.0 test              # server and app tests
+npx -y pnpm@11.19.0 typecheck
 ```
 
-`.env` is git-ignored. The full list of accounts and values is in [`docs/SETUP.md`](./docs/SETUP.md) and [`.env.example`](./.env.example) (names only).
+The local sample mode needs no model key or Neon project. The full list of settings and the browser worker are described in [`os/README.md`](./os/README.md) (that file still carries the text of the template Debo started from, so read it with [`os/docs/AUTH.md`](./os/docs/AUTH.md) beside it).
 
-## Scripts
+**Voice worker:** `cd apps/voice-agent`, then `pnpm install`, `pnpm test`, `pnpm dev`. See [`docs/VOICE.md`](./docs/VOICE.md).
 
-| Command | What it does |
-|---|---|
-| `pnpm dev` | Run the app locally |
-| `pnpm build` | Build everything |
-| `pnpm typecheck` | Check types in every package |
-| `pnpm test` | Run the unit tests (Vitest) |
-| `pnpm --filter @debo/db db:generate` | Make a migration after changing the schema |
-| `pnpm --filter @debo/db db:migrate` | Apply migrations |
-| `pnpm --filter @debo/db db:backfill-embeddings` | Make entries saved before meaning search searchable by meaning |
-| `pnpm --filter @debo/recall recall` | Run the recall test set |
-| `pnpm --filter @debo/web test:e2e` | Run the end-to-end test in a real browser |
-| `pnpm --filter @debo/web deploy` | Build and deploy to Cloudflare (normally CI does this) |
+## Deploys
 
-## Testing
+Every deploy is a GitHub Actions workflow in [`.github/workflows`](./.github/workflows). Secrets are repository secrets and Worker secrets, never in the repo.
 
-- **Unit tests:** `pnpm test` runs Vitest in every package.
-- **End-to-end test:** [`apps/web/e2e/journal.spec.ts`](./apps/web/e2e/journal.spec.ts) walks the whole loop with a throwaway account: sign up, write, ask, edit, read the activity record, chat, delete the entry, delete the account. It uses made-up data and deletes its own account.
+| Workflow | Runs on | Deploys |
+|---|---|---|
+| `deploy.yml` | push to `main` | `apps/web` to debo.life (also applies database migrations) |
+| `deploy-site.yml` | push to `main` that touches `apps/site` | the landing page, about.debo.life |
+| `deploy-pitch.yml` | push to `main` that touches `apps/pitch` | pitch.debo.life |
+| `deploy-os.yml` | push to `main` that touches `os/` or `packages/` | the API (api.debo.life), the browser worker and the web app (my.debo.life) on Cloudflare |
+| `release-mobile.yml` | a pushed tag `v*` (builds only on a manual run or on the `mobile-release` branch) | builds the phone apps and publishes a GitHub Release |
 
-```bash
-npx playwright install chromium                                # once, in apps/web
-pnpm --filter @debo/web test:e2e                               # against next dev on port 3000
-BASE_URL=https://debo.life pnpm --filter @debo/web test:e2e    # against the live site
-```
+The voice worker is deployed by hand with `lk agent deploy` from `apps/voice-agent`.
 
-- **Recall test set:** `pnpm --filter @debo/recall recall` checks that search finds the right entries. Run it after any change to search, chunking or embeddings.
+## Phone apps
 
-## Deploying
+The phone app is the same Expo app as my.debo.life, built as a real native app (`expo prebuild`; it needs native code for voice and PDFs, so Expo Go does not work). It talks to https://api.debo.life.
 
-Every push to `main` deploys [debo.life](https://debo.life) through [`.github/workflows/deploy.yml`](./.github/workflows/deploy.yml):
+- **Android:** each release has `debo.apk`. It is an early test build, signed with a debug key, installed by hand. It is not on Google Play and cannot be until the owner makes a proper upload key. Nobody has run it on a real phone yet.
+- **iPhone:** no installable app. A release may carry an unsigned build for the iOS Simulator on a Mac, for developers only. A real iPhone build needs a paid Apple Developer account.
 
-1. Install with pnpm and check types.
-2. Apply database migrations.
-3. Build with OpenNext and deploy to Cloudflare Workers.
-4. Check that debo.life answers.
+How to build, what the workflow does and what is needed for the stores: [`os/apps/mobile/README.md`](./os/apps/mobile/README.md). To publish a release, put the version in `os/apps/mobile/app.json`, merge to `main`, then push a tag such as `v0.1.0`.
 
-Secrets live in Cloudflare (Worker secrets) and GitHub (repository secrets), never in the repo. Details are in [`docs/SETUP.md`](./docs/SETUP.md).
+## Who sees your data
+
+From [the privacy page](https://debo.life/privacy), which is the place to read the exact words:
+
+- **Neon** runs the database, sign-in and file storage (United States, Amazon Web Services us-east-2). The Neon AI Gateway, with models run by Databricks, turns text into numbers for search by meaning.
+- **Anthropic** writes the answers from the pieces of your entries that match your question.
+- **Mem0** stores the memories Debo picks out of your entries.
+- **Cloudflare** runs the websites, sends sign-in emails, stores voice notes and videos in a private bucket, and writes out their words (Workers AI, Whisper).
+- **LiveKit** carries a voice call; it uses Deepgram to turn speech into text and Cartesia to turn Debo's answer into speech. The terms of those three on training and keeping audio have not been checked yet.
+
+Debo does not sell your data, show ads, or train AI on it. It is not end-to-end encrypted. Rules for how data is handled: [`docs/PRIVACY-AND-TRUST.md`](./docs/PRIVACY-AND-TRUST.md).
 
 ## Docs
 
 | Doc | What it covers |
 |---|---|
 | [`AGENTS.md`](./AGENTS.md) | Rules for anyone, human or AI, working here. Start here. |
-| [`DESIGN.md`](./DESIGN.md) | Look, feel, colours, type, patterns |
-| [`docs/PRODUCT.md`](./docs/PRODUCT.md) | What Debo is, who it is for, features |
-| [`docs/WRITING.md`](./docs/WRITING.md) | Plain-English rules for all text |
-| [`docs/ARCHITECTURE.md`](./docs/ARCHITECTURE.md) | How the parts fit together |
-| [`docs/MONOREPO.md`](./docs/MONOREPO.md) | Folder layout and package rules |
-| [`docs/DATA-MODEL.md`](./docs/DATA-MODEL.md) | Database tables |
-| [`docs/MEMORY.md`](./docs/MEMORY.md) | How Debo remembers and recalls |
-| [`docs/VOICE.md`](./docs/VOICE.md) | Talking to Debo |
-| [`docs/CONNECTORS.md`](./docs/CONNECTORS.md) | Connecting other apps |
-| [`docs/BYOK-AND-PLANS.md`](./docs/BYOK-AND-PLANS.md) | Your own key, plans, billing |
-| [`docs/PRIVACY-AND-TRUST.md`](./docs/PRIVACY-AND-TRUST.md) | Promises about data, and how we keep them |
-| [`docs/ROADMAP.md`](./docs/ROADMAP.md) | Build order and what's next |
-| [`docs/DECISIONS.md`](./docs/DECISIONS.md) | Why we chose what we chose |
-| [`docs/SETUP.md`](./docs/SETUP.md) | Accounts, secrets, running locally, deploying |
+| [`DESIGN.md`](./DESIGN.md), [`docs/WRITING.md`](./docs/WRITING.md) | Look and feel; plain-English rules for all text |
+| [`docs/PRODUCT.md`](./docs/PRODUCT.md), [`docs/ROADMAP.md`](./docs/ROADMAP.md), [`docs/DECISIONS.md`](./docs/DECISIONS.md) | What Debo is, what is next, why we chose what we chose |
+| [`docs/ARCHITECTURE.md`](./docs/ARCHITECTURE.md), [`docs/MONOREPO.md`](./docs/MONOREPO.md), [`docs/DATA-MODEL.md`](./docs/DATA-MODEL.md) | How the parts fit; folders; database tables |
+| [`docs/MEMORY.md`](./docs/MEMORY.md), [`docs/VOICE.md`](./docs/VOICE.md), [`docs/CONNECTORS.md`](./docs/CONNECTORS.md), [`docs/BYOK-AND-PLANS.md`](./docs/BYOK-AND-PLANS.md) | Memory, voice, connecting other apps, keys and plans |
+| [`docs/PRIVACY-AND-TRUST.md`](./docs/PRIVACY-AND-TRUST.md), [`docs/SETUP.md`](./docs/SETUP.md) | Promises about data; accounts, secrets and running locally |
+| [`os/docs/AUTH.md`](./os/docs/AUTH.md) | How sign-in works in the new app, on web and phones |
+| [`os/docs/JOURNAL-MEDIA.md`](./os/docs/JOURNAL-MEDIA.md) | Voice notes and videos in the new app |
+| [`os/docs/FEATURES.md`](./os/docs/FEATURES.md), [`os/docs/VERIFICATION.md`](./os/docs/VERIFICATION.md) | What the new app does and what has been checked |
+| [`os/infra/cloudflare/README.md`](./os/infra/cloudflare/README.md) | How the new app is deployed to Cloudflare, and its secrets |
+| [`os/apps/mobile/README.md`](./os/apps/mobile/README.md) | The app, phone builds and releases |
 
-## Contributing
+## Contributing and security
 
-Read [`CONTRIBUTING.md`](./CONTRIBUTING.md) and [`AGENTS.md`](./AGENTS.md) first. Keep changes small, write in plain English, and never claim something works until it does.
+Read [`CONTRIBUTING.md`](./CONTRIBUTING.md) and [`AGENTS.md`](./AGENTS.md) first. Keep changes small, write in plain English, and never claim something works until it does. Do not report security problems in public issues; see [`SECURITY.md`](./SECURITY.md).
 
-## Security
+## Licence and third-party notices
 
-Please do not report security problems in public issues. Read [`SECURITY.md`](./SECURITY.md) for how to report one.
-
-## Licence
-
-Not chosen yet. Until a `LICENSE` file is added, all rights are reserved by the owner.
-
-<p align="center">
-  <img src="./docs/assets/debo.svg" alt="Debo" width="64"><br>
-  Being built in the open by one person.
-</p>
+The root of the repo has no licence file yet, so all rights are reserved by the owner for the code outside `os/`. The code in `os/` started from CopilotKit's OpenFuse template and is under the MIT licence in [`os/LICENSE`](./os/LICENSE); its brand, name and mascot are not used. `apps/voice-agent` started from LiveKit's agent starter (MIT). The full list, with licence texts, is in [`THIRD_PARTY_NOTICES.md`](./THIRD_PARTY_NOTICES.md).

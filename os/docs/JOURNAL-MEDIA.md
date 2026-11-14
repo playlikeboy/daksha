@@ -148,7 +148,7 @@ Not built: recording inside the app, dictation, and an in-app player. To add the
 1. `npx expo install expo-audio` (recording and playback) and `expo-camera` (video). Add their config plugins to `app.json` with microphone and camera permission texts in plain words.
 2. Make a new development build (`expo run:ios`, `expo run:android`, or EAS Build). `expo-audio` does not work in the old `expo-av` way, and neither runs in a plain web view.
 3. Fill in `debo-capture.native.ts` (`recordingSupport`, `startRecording`, `startDictation`) and `debo-player.native.tsx`. The screens already call them.
-None of the phone code has been run on a device.
+None of the phone code has been run on a device. The released Android APK (built by `.github/workflows/release-mobile.yml`, see `apps/mobile/README.md`) contains the file picker and upload, but not recording, so on a phone today a person can add an existing voice note or video and cannot record one in the app.
 
 ## Not checked yet
 
