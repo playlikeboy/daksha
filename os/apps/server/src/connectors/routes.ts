@@ -10,8 +10,21 @@ export function connectorRoutes(service: ConnectorService) {
   const app = new Hono<{ Variables: { owner: string } }>();
   app.get("/", async (c) => c.json(await service.overview(c.get("owner"))));
   app.get("/search", async (c) => {
-    const q = z.string().trim().max(60).parse(c.req.query("q") ?? "");
-    return c.json({ items: await service.search(q) });
+    const query = z
+      .object({
+        q: z.string().trim().max(60).default(""),
+        category: z.string().trim().max(60).optional(),
+        offset: z.coerce.number().int().min(0).max(5000).default(0),
+        limit: z.coerce.number().int().min(1).max(50).default(20),
+      })
+      .parse(c.req.query());
+    const page = await service.browse({
+      query: query.q,
+      category: query.category,
+      offset: query.offset,
+      limit: query.limit,
+    });
+    return c.json(page);
   });
   app.post("/:toolkit/connect", async (c) => {
     const body = z

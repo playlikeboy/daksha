@@ -133,13 +133,13 @@ test("chat reads overlapping primary calendar events for its owner without creat
   assert.deepEqual(await f.db.list("local-user", "actions"), actions);
 });
 
-test("chat distinguishes a disconnected calendar from a connected empty range", async (t) => {
+test("chat offers no calendar tool when Google is off, and distinguishes from a connected empty range", async (t) => {
   await modelFixture(t, (index) =>
     index % 2 === 0 ? { name: "read_calendar", arguments: range } : undefined,
   );
   const f = await fixture(t);
   await f.db.put("local-user", "settings", { id: "google", enabled: false });
-  assert.match((await read(f.conversation)).error, /disconnected/i);
+  assert.match((await read(f.conversation)).error, /Unknown tool/);
   assert.deepEqual(await f.workspace.events("local-user", range), []);
   await f.db.put("local-user", "settings", { id: "google", enabled: true });
   assert.deepEqual(await read(f.conversation.clone()), {
@@ -370,7 +370,7 @@ test("live chat validates before dispatch and never substitutes cached or anothe
   assert.ok(credential);
   await f.db.put("another-owner", "credentials", credential);
   await f.db.remove("local-user", "credentials", "google");
-  assert.match((await read(f.conversation)).error, /disconnected/i);
+  assert.match((await read(f.conversation)).error, /Unknown tool/);
   assert.equal(reads, 2);
 });
 

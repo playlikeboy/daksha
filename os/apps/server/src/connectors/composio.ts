@@ -26,6 +26,12 @@ const str = (value: unknown) => (typeof value === "string" ? value : "");
 const rec = (value: unknown): Raw =>
   value && typeof value === "object" && !Array.isArray(value) ? (value as Raw) : {};
 
+/** Category names from the provider's meta, without repeats ("email", "CRM"...). */
+function categoryNames(value: unknown): string[] {
+  const names = (Array.isArray(value) ? value : []).map((c) => str(rec(c).name).trim());
+  return [...new Set(names.filter(Boolean))].slice(0, 4);
+}
+
 /** Never lets a provider message carry anything but a short plain sentence upward. */
 function plainProviderError(error: unknown): string {
   const text = error instanceof Error ? error.message : "";
@@ -82,6 +88,7 @@ export class ComposioBackend implements ConnectorBackend {
           description: str(meta.description),
           logo: str(meta.logo) || undefined,
           connectable: managed.length > 0,
+          categories: categoryNames(meta.categories),
         });
       }
       cursor = str(body.next_cursor) || undefined;

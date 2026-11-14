@@ -18,6 +18,7 @@ export {
   wrapAppData,
 } from "./service.ts";
 export {
+  connectedAppsNote,
   connectorInstructions,
   connectorTaskInstructions,
   connectorTools,

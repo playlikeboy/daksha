@@ -12,6 +12,8 @@ export interface ToolkitInfo {
    * sign-in first, so they are shown as not available yet.
    */
   connectable: boolean;
+  /** The provider's own category names, for example "Email" or "CRM". May be empty. */
+  categories?: string[];
 }
 
 /** A connected account as the provider reports it. `status` is the provider's own word. */
@@ -92,6 +94,18 @@ export interface CatalogueItem {
   blurb: string;
   logo?: string;
   connectable: boolean;
+  categories?: string[];
+}
+
+/** One page of the catalogue, for the Apps screen's search and "Show more". */
+export interface CataloguePage {
+  items: CatalogueItem[];
+  /** How many apps match in all, not just on this page. */
+  total: number;
+  /** Where the next page starts, or null at the end. */
+  nextOffset: number | null;
+  /** Only on the first page of a browse: the categories to filter by. */
+  categories?: { name: string; count: number }[];
 }
 
 export type Risk = "read" | "write" | "destructive";

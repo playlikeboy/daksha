@@ -237,7 +237,7 @@ test("chat searches and reads actual owner mail without creating a task or sendi
   assert.deepEqual(await fixture.db.list("local-user", "actions"), actionsBefore);
 });
 
-test("chat mail tools report disconnected mail and refuse another owner's thread", async (t) => {
+test("chat mail tools are absent when Google is off and refuse another owner's thread", async (t) => {
   let call = { name: "search_mail", arguments: { query: "aquarium" } as object };
   await modelFixture(t, (index) => (index % 2 === 0 ? call : undefined));
   const fixture = await chatFixture(t);
@@ -251,7 +251,7 @@ test("chat mail tools report disconnected mail and refuse another owner's thread
     assert.ok(result && result.type === EventType.TOOL_CALL_RESULT);
     return JSON.parse(result.content).error;
   }
-  assert.match(await toolError(), /disconnected/);
+  assert.match(await toolError(), /Unknown tool/);
   await fixture.db.put("local-user", "settings", { id: "google", enabled: true });
   call = { name: "read_mail_thread", arguments: { threadId: "trip-thread" } };
   assert.match(await toolError(), /not found/);
