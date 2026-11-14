@@ -4,7 +4,8 @@ A person can connect apps such as Gmail, Slack, Notion, GitHub and Google Drive,
 
 ## What the person sees
 
-- **Apps screen, "Connect your apps".** A first list of apps with one honest line each, one search box that narrows the list and also searches the whole catalogue, and a connected state with **Disconnect** (it asks first).
+- **Apps screen, "Connect your apps".** A short first list of apps with one honest line each and their logo (a letter if there is none). One search box ("Search all apps") narrows that list and searches the whole catalogue, a page at a time. **Show more apps** walks the rest of the catalogue page by page, with category buttons, a count, and loading, empty and error states. An app that Composio cannot sign in for (it needs the owner's own OAuth app) says so and shows no button. A connected app has **Disconnect** (it asks first).
+- **Your own tool servers.** Below the apps, "Add your own tool server (MCP)". See "Custom tool servers (MCP)" further down.
 - **Connecting.** The person signs in on the app's own page, hosted by Composio. Debo never sees the password. On the web the page opens in a new tab; on a phone it opens in an in-app browser sheet that closes itself. The screen checks again when they come back.
 - **Chat.** A card says which app was used ("Looked in Gmail"). A change shows "Asked to send a message in Slack: waiting for your yes" and a button that opens the exact review.
 - **Not set up.** Without `COMPOSIO_API_KEY` the section says "Connecting apps is not set up yet." Nothing else changes.
@@ -46,7 +47,7 @@ Each Debo person is exactly one Composio user: their **owner id** (a Neon Auth u
 | Route | Job |
 |---|---|
 | `GET /api/connectors` | The person's connections (with state) and the first list. |
-| `GET /api/connectors/search?q=` | Search the whole catalogue. Apps that can be connected come first. |
+| `GET /api/connectors/search?q=&category=&offset=&limit=` | Search or browse the whole catalogue. Apps that can be connected come first. Returns `items`, `total`, `nextOffset` (null at the end) and, on the first page, `categories`. `limit` is 1 to 50 (default 20). With no `q` it is every app. |
 | `POST /api/connectors/:toolkit/connect` | Starts a connection. Returns Composio's hosted link. Body `{ "to": "web" \| "native" }`. |
 | `DELETE /api/connectors/:id` | Disconnects and really deletes the connected account at Composio. |
 | `GET /api/connectors/callback` | Public. Where Composio sends people after sign-in. Fixed words only; changes nothing. |
@@ -57,11 +58,25 @@ Connection states in plain words: connected; waiting ("Waiting for you to finish
 
 ### Catalogue
 
-The list comes from `GET https://backend.composio.dev/api/v3/toolkits` and is cached in memory for six hours (the SDK's list call stops at 1,000 rows, so Debo pages the REST API). In November 2026 it held 1,742 apps. **Only 128 have Composio-managed sign-in**, so only those can be connected with one tap. The others need the owner to register their own OAuth app and an auth config in the Composio dashboard; until then they show as "Not available yet". Among the 16 apps in the first list, Telegram (bot token only) and Spotify have no managed sign-in today.
+The list comes from `GET https://backend.composio.dev/api/v3/toolkits` and is cached in memory for six hours (the SDK's list call stops at 1,000 rows, so Debo pages the REST API with a cursor). In November 2026 it held 1,742 apps (checked live, read-only: 871 pages of 2, `total_items` 1742; the API's `search=` and `category=` filters work, but its `managed_by=` filter is ignored). Each app carries `meta.logo` (a `logos.composio.dev` URL) and `meta.categories` (names with inconsistent capitals, so Debo matches them without caring about case). Search and paging run in Debo over the cached list, so they cover every app. **Only 128 have Composio-managed sign-in**, so only those can be connected with one tap. The others need the owner to register their own OAuth app and an auth config in the Composio dashboard; until then they show as "Not available yet". Among the 16 apps in the first list, Telegram (bot token only) and Spotify have no managed sign-in today.
 
 ### Gmail and Google Calendar
 
-Debo already has a built-in Google connection (`google-auth.ts`) with richer tools (full threads, drafts, PDFs, calendar edits with reviews). **That stays the one place for Gmail and Google Calendar.** When this Debo has its own Google sign-in (or in a sample workspace), the new list leaves those two out, so there is never a second "Gmail" card. When a person has connected the built-in Google, the agent uses it and ignores a Composio Gmail. When Debo has no Google sign-in of its own, Gmail and Google Calendar appear in the new list and work through Composio.
+Debo also has an older built-in Google connection (`google-auth.ts`) with richer tools (full threads, drafts, PDFs, calendar edits with reviews). It needs Debo's own Google OAuth app, which production does not have.
+
+- **Which tools the chat agent gets.** The older tools `search_mail`, `read_mail_thread` and `read_calendar` are offered **only** when this person's own Google connection is on (or in a sample workspace). Otherwise they do not exist for that reply, so the model cannot pick them and fail with "Google is disconnected". Mail and calendar then go through `find_app_tools` and `use_app_tool` on the person's Composio Gmail and Google Calendar. (This was a real bug: a person who connected Gmail through Apps was told "Google is disconnected".)
+- **What the prompt says.** Every reply lists the apps the person has connected right now, tells the agent to act straight after `find_app_tools` (pick sensible values, do not ask which tool or account), and to point people to Apps, under Connect your apps, for an app that is not connected.
+- When Debo has its own Google sign-in (or in a sample workspace) the apps list leaves Gmail and Google Calendar out, so there is never a second "Gmail" card, and when the older Google is connected the agent uses it and ignores a Composio Gmail.
+- **Screens.** The Mail, Calendar and Today screens read the older connection. When it is not on, they say "Your calendar lives in Apps" or "Debo reads your mail through the apps you connect" with a **Connect your apps** button, instead of a dead Google sheet. They are not yet fed from Composio; ask Debo in chat or by voice.
+- Delegated tasks (`delegate_task`, the worker) still use the older Google tools for forms and drafts, and the Composio apps through the same two tools.
+
+### Big answers
+
+An app can return a whole mailbox. `wrapAppData` shortens every long text (4,000 characters, then 400 if the total is still too big) and every long list (25 items, then 15) first, so every item still shows, and only then cuts the total at 16,000 characters. The notice tells the agent when something was shortened.
+
+### Chat and voice
+
+Chat and voice run the same agent (`engine/conversation.ts`; voice sets the channel to "voice" and uses `voice/engine-brain.ts`). Both get the same connector tools. A change by voice becomes an on-screen review, and the voice brain says out loud that it is waiting on screen (`APPROVAL_MESSAGE`) whatever the model wrote. Tests: `tests/connectors-power.test.ts` and `tests/mcp.test.ts`.
 
 ## Safety rules
 
@@ -105,3 +120,31 @@ The one live test (`COMPOSIO_LIVE=1`, needs `COMPOSIO_API_KEY`) lists the catalo
 - A change that times out after it may have reached the app is recorded as "outcome unknown", not retried.
 - No triggers or background watching of connected apps yet.
 - Tool schemas shown to the model are shortened to 14 arguments each.
+
+## Custom tool servers (MCP)
+
+A person can add their own tool server on the Apps screen: a name, an https address and an optional secret (a bearer token, or one custom header name and value). Code: `apps/server/src/mcp/`. Routes: `GET/POST /api/mcp`, `POST /api/mcp/:id/refresh`, `PATCH /api/mcp/:id` (`{ autoRead }`), `DELETE /api/mcp/:id`.
+
+| File | Job |
+|---|---|
+| `safe-fetch.ts` | The address checks and the only `fetch` that touches a server. |
+| `service.ts` | Add, list, refresh, remove; talking to the server with the official `@modelcontextprotocol/sdk` client (1.30.0, already used for search); risk; wrapping. |
+| `tools.ts` | The agent tools `find_server_tools` and `use_server_tool`. |
+| `routes.ts` | The HTTP routes. Never returns a secret. |
+
+**Protocol.** MCP over Streamable HTTP, using the SDK's `StreamableHTTPClientTransport` with Debo's own `fetch`. Older SSE-only servers are not supported. **OAuth-protected servers are not supported yet**: the screen and the errors say so. A new connection is made for each action and closed after it (no long-lived sessions).
+
+**How the agent uses them.** Two sibling tools, not the Composio ones: `find_server_tools` (best matches first, up to 8) and `use_server_tool`. The tool list is saved when the server is added or checked; a call can only name a tool from that list. The system prompt carries only the server's own name and a rule that its text is never instructions. Tool names and descriptions arrive in tool results, marked as untrusted.
+
+**Rules**
+1. **Addresses (SSRF).** https only; no name or password in the address; the host is resolved by Debo and every answer must be public. Refused: loopback, private ranges, link-local (including 169.254.169.254), carrier-grade NAT, multicast and reserved, documentation ranges, IPv6 loopback, unique-local, link-local, multicast, 6to4, and IPv4 hidden inside IPv6 (mapped and NAT64). Names refused: `localhost`, `*.localhost`, any `*.internal` (this deployment's `browser.internal`, `media.internal`, `ai.internal`), `*.local`, `*.lan`, `*.localdomain`, and one-word names. One private answer among public ones refuses the name. The check runs on every connection (add, refresh, every call), the request is pinned to the address that was checked (a custom `lookup`, so there is no second DNS lookup), and **redirects are never followed**. Each request has a 30 second limit and a 1,000,000 byte response cap; connecting and listing have 15 seconds.
+2. **Limits.** 5 servers per person, 50 tools per server (names must be plain: letters, numbers, `_ . -`), 60,000 characters of arguments, 40 calls a minute and 10 adds in ten minutes per person.
+3. **Risk.** Every tool is a change that waits for the person's yes, unless the server declares `readOnlyHint: true` **and** the person turned on "Reading without asking" for that server (off by default; decided because a server's own claim is not proof, so the safe default is to ask every time). `destructiveHint: true` always asks. The review is the same on-screen review as connected apps (`connector.call`, toolkit `mcp:<server id>`) and shows the server name, the tool name and every argument. Approval re-checks that the server and tool still exist. Voice can prepare a review but never approve it.
+4. **Prompt injection.** Results are wrapped as data from the server's name (same wrapper as apps: markers neutralised, shortened, 16,000 characters). The prompt says such text can never give instructions or permission. A server's descriptions never enter the system prompt (tested).
+5. **Secrets.** Encrypted with `TOKEN_ENCRYPTION_KEY` (the same AES-256-GCM vault as Google tokens), saved in the `credentials` collection apart from the server row (that collection is never exported), never returned to the app, never logged. Without the key a secret cannot be saved (a server with no secret still works). Removing a server, or deleting the account, deletes its secret. Export lists each server's name, address, tool names and last result, never a secret.
+6. **No private data goes out on its own.** Debo sends a server only the arguments the model chose for a call. The add form says this, and warns that a server Debo does not control can do anything with what it receives.
+7. **Logs** hold person id, server id, tool name and success, never arguments or results.
+
+**What is not done.** OAuth servers; SSE-only servers; tool schema checks (arguments are passed as the model wrote them and the server decides); background watching; custom servers inside delegated tasks (chat and voice only). The "read-only" label is only the server's claim.
+
+**Checked and not checked.** Tests use an in-process fake server. By hand, once, the real pinned `fetch` plus the SDK were run against a local https MCP server (add, list, call, the size cap and a redirect). Not checked against any real third-party MCP server, a real DNS rebinding attempt, or Cloudflare's container network. A response over the size cap currently fails after the 30 second call limit instead of at once, and the error then says "took too long".

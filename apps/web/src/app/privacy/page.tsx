@@ -271,6 +271,38 @@ export default function PrivacyPage() {
         />
       </Section>
 
+      <Section id="tool-servers" title="Your own tool servers (new app, optional)">
+        <p>
+          In the new app you can also add a tool server of your own (an &ldquo;MCP&rdquo; server) by giving Debo its
+          address. This is off until you add one. Debo does not run these servers, does not choose them and does not
+          control them. Only add one you trust.
+        </p>
+        <List
+          items={[
+            <>
+              A tool server you add receives what Debo sends it: the tool name and the values for the call, such as the
+              words of a note. Debo only sends a call you asked for, and a call that changes something waits for your yes
+              on screen. Debo never sends your journal or memories to it by itself. What the server does with what it
+              receives is up to whoever runs it. Debo&rsquo;s people do not control it and cannot undo it.
+            </>,
+            <>
+              What the server sends back is shown to you, and the parts needed are sent to the AI that writes
+              Debo&rsquo;s answer (Anthropic). Debo treats it as plain data, never as instructions.
+            </>,
+            <>
+              If you give a secret (a token or key), Debo saves it encrypted, never shows it again and never writes it to
+              its logs. Debo&rsquo;s logs keep which server and tool were used and whether it worked, never the values or
+              the results. Debo only connects to public https addresses.
+            </>,
+            <>
+              &ldquo;Remove&rdquo; on the Apps screen deletes the server and its secret. &ldquo;Delete my data&rdquo;
+              removes every server you added. &ldquo;Download my data&rdquo; lists each server&rsquo;s name, address and
+              tools, never its secret.
+            </>,
+          ]}
+        />
+      </Section>
+
       <Section id="cookies" title="Cookies and your browser">
         <p>Debo only uses the sign-in cookies it needs to keep you signed in. No ads, no tracking, no analytics.</p>
         <p>
