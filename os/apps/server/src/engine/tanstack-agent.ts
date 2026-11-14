@@ -159,12 +159,47 @@ export function tanstackAgent(options: {
   });
   const run = agent.run.bind(agent);
   agent.run = (input: RunAgentInput) => {
-    const events = splitTextAtToolCalls(run(input)).pipe(map(textOnlyToolResult));
+    const events = splitTextAtToolCalls(run(objectToolArguments(input))).pipe(
+      map(textOnlyToolResult),
+    );
     return options.stepLimitNote
       ? reportStepLimit(events, options.maxSteps, options.stepLimitNote)
       : events;
   };
   return agent;
+}
+
+/**
+ * A tool that takes no input is saved in the chat with empty arguments (""), not "{}".
+ * Sent back to the model on the next turn, that is refused ("tool_use.input: Input should
+ * be an object") and the whole chat stops answering. Give every saved tool call an object.
+ */
+export function objectToolArguments(input: RunAgentInput): RunAgentInput {
+  const isObject = (text: unknown) => {
+    if (typeof text !== "string") return false;
+    try {
+      const value: unknown = JSON.parse(text);
+      return typeof value === "object" && value !== null && !Array.isArray(value);
+    } catch {
+      return false;
+    }
+  };
+  let changed = false;
+  const messages = input.messages.map((message) => {
+    const calls = (message as { toolCalls?: { function?: { arguments?: unknown } }[] }).toolCalls;
+    if (message.role !== "assistant" || !calls?.some((call) => !isObject(call.function?.arguments)))
+      return message;
+    changed = true;
+    return {
+      ...message,
+      toolCalls: calls.map((call) =>
+        isObject(call.function?.arguments)
+          ? call
+          : { ...call, function: { ...call.function, arguments: "{}" } },
+      ),
+    } as typeof message;
+  });
+  return changed ? { ...input, messages } : input;
 }
 
 /**
