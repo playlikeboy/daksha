@@ -3,6 +3,7 @@
     "name": "Debo",
     "slug": "debo",
     "scheme": "debo",
+    "icon": "./assets/debo.png",
     "version": "0.1.0",
     "orientation": "default",
     "userInterfaceStyle": "light",
