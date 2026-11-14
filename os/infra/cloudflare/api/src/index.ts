@@ -4,7 +4,7 @@ import { Container, getContainer } from "@cloudflare/containers";
 // on the Worker entry and refuses to start the container without it.
 export { ContainerProxy } from "@cloudflare/containers";
 
-import { AI_HOST, type AiLike, handleAi, handleMedia, MEDIA_HOST, type R2BucketLike } from "./media.ts";
+import { AI_HOST, type AiLike, handleAi, handleMedia, MEDIA_HOST, type R2BucketLike } from "./media";
 
 interface Env {
   API: DurableObjectNamespace<DeboApi>;
