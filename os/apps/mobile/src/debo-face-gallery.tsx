@@ -1,7 +1,10 @@
-// Developer gallery: every mood side by side, with buttons that drive the shared
-// face. It only opens on a local sample install, at `?face=gallery`.
+// Developer gallery: every character in every mood, side by side, with buttons that drive
+// the shared face. It only opens on a local sample install, at `?face=gallery`.
+// Add `&only=anaya` to show one character, and `&still=1` to hold them all still.
 import { useState } from "react";
 import { ScrollView, Text, TextInput, View } from "react-native";
+import { deboCharacter, useDeboCharacter } from "./debo-character-store";
+import { characterIds, characters } from "./debo-characters";
 import { DeboFace } from "./debo-face";
 import { allMoods, detectTone } from "./debo-mood";
 import { deboMood, useDeboMood } from "./debo-mood-store";
@@ -75,6 +78,11 @@ async function demoVoice(_api: unknown, handlers: VoiceHandlers): Promise<VoiceC
 
 export function DeboFaceGallery() {
   const shared = useDeboMood();
+  const chosen = useDeboCharacter();
+  const query = globalThis.location?.search ?? "";
+  const only = new URLSearchParams(query).get("only");
+  const still = query.includes("still=1");
+  const shown = characterIds.filter((id) => !only || id === only);
   const [text, setText] = useState("");
   const [popup, setPopup] = useState(false);
   const buttons: [string, () => void][] = [
@@ -92,24 +100,38 @@ export function DeboFaceGallery() {
   ];
   return (
     <ScrollView style={{ flex: 1, backgroundColor: colors.canvas }} contentContainerStyle={{ padding: spacing[5], gap: spacing[5] }}>
-      <Text style={s.title}>Debo's face</Text>
-      <View style={{ flexDirection: "row", flexWrap: "wrap", gap: spacing[4] }}>
-        {allMoods.map((mood) => (
-          <View key={mood} testID={`mood-${mood}`} style={{ alignItems: "center", gap: spacing[1] }}>
-            <DeboFace size={150} mood={mood} />
-            <Text style={s.small}>{mood}</Text>
-          </View>
+      <Text style={s.title}>The faces</Text>
+      <View style={{ flexDirection: "row", flexWrap: "wrap", gap: spacing[2] }}>
+        {characterIds.map((id) => (
+          <Button key={id} small primary={chosen === id} onPress={() => deboCharacter.set(id, false)}>
+            {`Shared face: ${characters[id].name}`}
+          </Button>
         ))}
       </View>
-      <View style={{ flexDirection: "row", flexWrap: "wrap", alignItems: "flex-end", gap: spacing[4] }}>
-        {(["pouty", "worried"] as const).flatMap((mood) =>
-          [24, 64, 180, 260].map((size) => (
-            <View key={`${mood}-${size}`} testID={`size-${mood}-${size}`}>
-              <DeboFace size={size} mood={mood} />
-            </View>
-          )),
-        )}
-      </View>
+      {shown.map((id) => (
+        <View key={id} testID={`character-${id}`} style={{ gap: spacing[4] }}>
+          <Text style={s.heading}>
+            {characters[id].name}: {characters[id].blurb}
+          </Text>
+          <View style={{ flexDirection: "row", flexWrap: "wrap", gap: spacing[4] }}>
+            {allMoods.map((mood) => (
+              <View key={mood} testID={`mood-${id}-${mood}`} style={{ alignItems: "center", gap: spacing[1] }}>
+                <DeboFace character={id} size={150} mood={mood} still={still} />
+                <Text style={s.small}>{mood}</Text>
+              </View>
+            ))}
+          </View>
+          <View style={{ flexDirection: "row", flexWrap: "wrap", alignItems: "flex-end", gap: spacing[4] }}>
+            {(["idle", "pouty", "worried"] as const).flatMap((mood) =>
+              [24, 64, 180, 260].map((size) => (
+                <View key={`${mood}-${size}`} testID={`size-${id}-${mood}-${size}`}>
+                  <DeboFace character={id} size={size} mood={mood} still={still} />
+                </View>
+              )),
+            )}
+          </View>
+        </View>
+      ))}
       <View style={{ gap: spacing[3] }}>
         <Text style={s.heading}>Shared face: {shared.mood} (reactions: {shared.reactions})</Text>
         <DeboFace size={180} interactive />

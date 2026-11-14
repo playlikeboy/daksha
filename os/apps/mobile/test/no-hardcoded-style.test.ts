@@ -17,8 +17,11 @@ function sourceFiles(dir: string): string[] {
 // Whole files that may hold raw colours. Key is the file name; value is the reason.
 const exemptFiles: Record<string, string> = {
   "astryx-tokens.ts": "generated from the Astryx theme",
-  "debo-face-colors.ts":
-    "the paint of Debo the tomato, copied from docs/assets/debo.svg. She is a character, not UI, so the app theme must never recolour her",
+  "debo-paint-diya.ts":
+    "the paint of Diya the tomato, copied from docs/assets/debo.svg. She is a character, not UI, so the app theme must never recolour her",
+  "debo-paint-debo.ts": "the paint of Debo, the soft blue creature. A character, not UI",
+  "debo-paint-anaya.ts": "the paint of Anaya, the young woman. A character, not UI",
+  "debo-paint-mishti.ts": "the paint of Mishti, the cat. A character, not UI",
 };
 
 const files = [
