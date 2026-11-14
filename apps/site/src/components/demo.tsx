@@ -18,8 +18,8 @@ export function Demo() {
         </Heading>
         <Text type="large" weight="normal" as="p" color="secondary" textWrap="pretty">
           A short film made from the real app. You write down a day, ask a big question about your own life, and
-          see the journal entries each answer came from. Then you talk to Debo, look at what it knows, and see the
-          apps that are coming. There is no sound, and every step has words on screen.
+          see the journal entries each answer came from. Then you talk to Debo, look at what it knows, and see how
+          your apps connect. There is no sound, and every step has words on screen.
         </Text>
       </VStack>
       <VStack hAlign="center" gap={3}>
@@ -33,7 +33,7 @@ export function Demo() {
               width={1920}
               height={1080}
               poster="/debo-launch-poster.webp"
-              aria-label="A short film about Debo with no sound. It opens with the words You wrote it down somewhere, but where? The red tomato Debo appears. Then real screen recordings of the app: writing a journal entry, asking what to sort out before Mum visits and before a trip, an answer that lists the journal entries it came from, a voice call where Debo answers a tired message kindly, the What Debo knows page with Fix and Forget buttons, and the Apps screen, marked coming soon. It ends on the Debo name and my.debo.life."
+              aria-label="A short film about Debo with no sound. It opens with the words You wrote it down somewhere, but where? The red tomato Debo appears. Then real screen recordings of the app: writing a journal entry, asking what to sort out before Mum visits and before a trip, an answer that lists the journal entries it came from, a voice call where Debo answers a tired message kindly, the What Debo knows page with Fix and Forget buttons, and the Apps screen, where you connect apps like Gmail and Calendar. It ends on the Debo name and my.debo.life."
             >
               <source src="/debo-launch.mp4" type="video/mp4" />
               <source src="/debo-launch.webm" type="video/webm" />
