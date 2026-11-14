@@ -42,6 +42,9 @@ import { deboMood } from "./src/debo-mood-store";
 import { PersonaSetting } from "./src/debo-persona-setting";
 import { ReactionsSetting } from "./src/debo-reactions-setting";
 import { TalkPopup } from "./src/debo-talk";
+import { TalkPill } from "./src/debo-talk-pill";
+import { reviewsWaiting } from "./src/debo-talk-call";
+import { TalkSessionProvider, useTalkState } from "./src/debo-talk-session";
 import { ComputerEntry } from "./src/computer";
 import { ComputerDraftProvider } from "./src/computer-drafts";
 import { JournalScreen } from "./src/debo-journal";
@@ -340,16 +343,19 @@ function WorkspaceApp({ token, sessionKey }: { token: string; sessionKey?: strin
     >
       <AgentWorkspaceProvider>
         <ComputerDraftProvider key={sessionKey ?? token}>
-          <ThreadsProvider>
-            <WorkspaceShell
-              detail={detail}
-              notFound={route === null}
-              toast={toast}
-              clearToast={() => setToast("")}
-              error={error}
-              prompt={prompt}
-            />
-          </ThreadsProvider>
+          {/* The live call sits above every screen, so moving between screens never drops it. */}
+          <TalkSessionProvider>
+            <ThreadsProvider>
+              <WorkspaceShell
+                detail={detail}
+                notFound={route === null}
+                toast={toast}
+                clearToast={() => setToast("")}
+                error={error}
+                prompt={prompt}
+              />
+            </ThreadsProvider>
+          </TalkSessionProvider>
         </ComputerDraftProvider>
       </AgentWorkspaceProvider>
     </WorkspaceContext.Provider>
@@ -372,6 +378,7 @@ function WorkspaceShell({
 }) {
   const { workspace, section: current, navigate, open } = useWorkspace();
   const { data } = useAgentWorkspace();
+  const talkState = useTalkState();
   useTaskMood(data?.tasks);
   // Talk is a popup over the last screen, so the screen underneath is the last one that was not Talk.
   const lastScreen = useRef<Section>("chat");
@@ -394,6 +401,9 @@ function WorkspaceShell({
   const [threadsOpen, setThreadsOpen] = useState(false);
   const { width } = useWindowDimensions();
   const desktop = width >= 900;
+  // A minimised call: a small bar above the tabs, on every screen except the full-screen Talk popup.
+  const talkBarShown = talkState.active && current !== "talk";
+  const waitingReviews = reviewsWaiting(workspace.actions);
   const pending =
     (data?.notifications.filter((n) => !n.read).length || 0) +
     workspace.actions.filter((a) => a.status === "awaiting_review").length;
@@ -652,7 +662,7 @@ function WorkspaceShell({
         {!!toast && (
           <View
             pointerEvents="box-none"
-            style={{ position: "absolute", bottom: 94, left: 20, right: 20, alignItems: "center" }}
+            style={{ position: "absolute", bottom: talkBarShown ? 160 : 94, left: 20, right: 20, alignItems: "center" }}
           >
             <View
               style={[
@@ -682,6 +692,17 @@ function WorkspaceShell({
         )}
         {threadsOpen && <ThreadsSheet onClose={() => setThreadsOpen(false)} />}
         {current === "talk" && <TalkPopup onClose={() => navigate(lastScreen.current)} />}
+        {talkBarShown && (
+          <TalkPill
+            bottom={desktop ? 104 : 88}
+            onExpand={() => navigate("talk")}
+            reviews={waitingReviews.length}
+            onReview={() => {
+              const first = waitingReviews[0];
+              if (first) open({ type: "review", action: first });
+            }}
+          />
+        )}
         {detail && (
           <Details
             key={

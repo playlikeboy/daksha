@@ -6,6 +6,7 @@ import { DeboFace } from "./debo-face";
 import { allMoods, detectTone } from "./debo-mood";
 import { deboMood, useDeboMood } from "./debo-mood-store";
 import { TalkPopup } from "./debo-talk";
+import { TalkSessionProvider } from "./debo-talk-session";
 import type { VoiceConnection, VoiceHandlers } from "./debo-voice-engine";
 import { Button, colors, s, spacing } from "./ui";
 import { WorkspaceContext, type WorkspaceContextValue } from "./workspace";
@@ -147,7 +148,9 @@ export function DeboFaceGallery() {
       </View>
       {popup && (
         <WorkspaceContext.Provider value={standIn}>
-          <TalkPopup engine={demoVoice} onClose={() => setPopup(false)} />
+          <TalkSessionProvider engine={demoVoice}>
+            <TalkPopup onClose={() => setPopup(false)} />
+          </TalkSessionProvider>
         </WorkspaceContext.Provider>
       )}
     </ScrollView>

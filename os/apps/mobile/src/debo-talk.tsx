@@ -5,8 +5,11 @@
 // in one row: microphone, Stop Debo, keyboard and a clear red End. Voice is never
 // the only way: the keyboard button slides up a text box.
 //
-// The connection itself lives in debo-voice-engine.ts. Closing the popup ends the
-// conversation and turns the microphone off, always.
+// The call itself is not in this file. It lives above every screen (see
+// debo-talk-session.tsx and debo-talk-call.ts), so this popup can be collapsed to
+// the small bar (debo-talk-pill.tsx) while the call goes on. The chevron, Escape
+// and a swipe down collapse a live call; only End ends it. With no call, they
+// just close.
 import { ChevronDown, Keyboard, MessageCircle, Mic, MicOff, PhoneOff, Square } from "lucide-react-native";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
@@ -25,104 +28,34 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { duration } from "./astryx-tokens";
 import { DeboFace, useReducedMotion } from "./debo-face";
 import { deboLevels, deboMood } from "./debo-mood-store";
-import {
-  type AgentState,
-  startProblem,
-  startVoice,
-  type VoiceChip,
-  type VoiceConnection,
-  type VoiceLevels,
-} from "./debo-voice-engine";
+import { spokenStatus, stateWords, type TalkLine, useTalkCall, useTalkState } from "./debo-talk-session";
 import { Button, Card, Chip, colors, ErrorNotice, Field, fontSize, radius, s, spacing } from "./ui";
 import { useWorkspace } from "./workspace";
 
-type Status = "idle" | "connecting" | "live" | "ended" | "error";
-interface Line {
-  id: string;
-  who: "you" | "debo";
-  text: string;
-  sources: VoiceChip[];
-}
-
-/** The words under Debo. Short, and always true to what is happening. */
-export function stateWords(input: {
-  status: Status;
-  micOn: boolean;
-  agentState: AgentState;
-  reconnecting: boolean;
-}): string {
-  const { status, micOn, agentState, reconnecting } = input;
-  if (status === "idle") return "Tap to start";
-  if (status === "connecting") return "Connecting…";
-  if (status === "ended") return "Conversation ended";
-  if (status === "error") return "Not connected";
-  if (reconnecting) return "Trying to reconnect…";
-  if (agentState === "speaking") return "Debo is speaking";
-  if (agentState === "thinking") return "Thinking…";
-  if (!micOn) return "Microphone off";
-  if (agentState === "listening") return "Listening";
-  return "Getting ready…";
-}
-
-/** What a screen reader hears. It says the microphone state every time. */
-function spokenStatus(input: {
-  status: Status;
-  micOn: boolean;
-  agentState: AgentState;
-  reconnecting: boolean;
-}): string {
-  const { status, micOn, agentState, reconnecting } = input;
-  const agentWords: Record<string, string> = {
-    listening: "Listening",
-    thinking: "Thinking",
-    speaking: "Speaking",
-    initializing: "Getting ready",
-  };
-  return status === "idle"
-    ? "Microphone off. Debo is not listening."
-    : status === "connecting"
-      ? "Connecting. Microphone off for now."
-      : status === "ended"
-        ? "Conversation ended. Microphone off."
-        : status === "error"
-          ? "Not connected. Microphone off."
-          : reconnecting
-            ? "Trying to reconnect."
-            : micOn
-              ? `Microphone on. ${agentWords[agentState] ?? "Waiting for Debo to join"}.`
-              : "Microphone off. Debo can't hear you, but you can type.";
-}
-
-export function TalkPopup({
-  onClose,
-  engine = startVoice,
-}: {
-  onClose: () => void;
-  /** The voice connection to use. Only the developer gallery passes a different one. */
-  engine?: typeof startVoice;
-}) {
-  const { api, navigate, notify } = useWorkspace();
+export function TalkPopup({ onClose }: { onClose: () => void }) {
+  const { navigate, notify } = useWorkspace();
   const { width, height } = useWindowDimensions();
   const insets = useSafeAreaInsets();
   const reduceMotion = useReducedMotion();
-  const [status, setStatus] = useState<Status>("idle");
-  const [problem, setProblem] = useState("");
-  const [micOn, setMicOn] = useState(false);
-  const [agentState, setAgentState] = useState<AgentState>("");
-  const [reconnecting, setReconnecting] = useState(false);
-  const [lines, setLines] = useState<Line[]>([]);
+  const talk = useTalkCall();
+  const { status, micOn, agentState, reconnecting, lines, problem, youActive, active } = useTalkState();
   const [typed, setTyped] = useState("");
   const [typing, setTyping] = useState(false);
   const [transcript, setTranscript] = useState(false);
   // The transcript panel stays mounted only while it is open or sliding away.
   const [transcriptMounted, setTranscriptMounted] = useState(false);
-  const [youActive, setYouActive] = useState(false);
-  const connection = useRef<VoiceConnection | undefined>(undefined);
   const closing = useRef(false);
-  const youActiveRef = useRef(false);
 
   const live = status === "live";
   const listening = live && micOn;
+
+  // The session needs to know the popup is open (a call that ends behind it is announced).
+  // A finished call from before starts fresh.
+  useEffect(() => {
+    talk.popupOpen(true);
+    talk.reset();
+    return () => talk.popupOpen(false);
+  }, [talk]);
 
   // Motion values: the popup rising, the keyboard panel, the transcript panel, the halo pulse.
   const enter = useRef(new Animated.Value(0)).current;
@@ -180,37 +113,6 @@ export function TalkPopup({
     deboMood.serious(status === "idle");
     return () => deboMood.serious(false);
   }, [status]);
-  useEffect(() => {
-    const state = agentState === "initializing" ? "" : agentState;
-    deboMood.emit({
-      type: "voice",
-      state: live && reconnecting === false && state ? state : "idle",
-    });
-  }, [agentState, live, reconnecting]);
-
-  const endConversation = useCallback(async () => {
-    const open = connection.current;
-    connection.current = undefined;
-    await open?.end().catch(() => {});
-    setMicOn(false);
-    deboLevels.debo.setValue(0);
-    deboLevels.you.setValue(0);
-    deboLevels.real.setValue(0);
-  }, []);
-
-  // Leaving the popup, for any reason, ends the conversation, so the microphone is never left on.
-  useEffect(
-    () => () => {
-      const open = connection.current;
-      connection.current = undefined;
-      void open?.end().catch(() => {});
-      deboLevels.debo.setValue(0);
-      deboLevels.you.setValue(0);
-      deboLevels.real.setValue(0);
-    },
-    [],
-  );
-
   // Put focus back where it was when the popup closes (web).
   useEffect(() => {
     if (Platform.OS !== "web") return;
@@ -218,21 +120,41 @@ export function TalkPopup({
     return () => before?.focus?.();
   }, []);
 
+  // Slide the popup away, then tell the screen underneath.
+  const slideAway = useCallback(
+    (then?: () => void) => {
+      if (closing.current) return;
+      closing.current = true;
+      Animated.timing(enter, {
+        toValue: 0,
+        duration: reduceMotion ? duration.fast : duration.exit + 100,
+        easing: Easing.in(Easing.cubic),
+        useNativeDriver: native,
+      }).start(() => {
+        then?.();
+        onClose();
+      });
+    },
+    [enter, native, onClose, reduceMotion],
+  );
+
+  // The chevron, Escape and a swipe down. During a call this only collapses it: the call keeps
+  // going, and the small bar above the tabs says the microphone is on. With no call it just closes.
   const requestClose = useCallback(() => {
     if (closing.current) return;
-    closing.current = true;
-    const hadSession = connection.current !== undefined;
-    void endConversation();
-    Animated.timing(enter, {
-      toValue: 0,
-      duration: reduceMotion ? duration.fast : duration.exit + 100,
-      easing: Easing.in(Easing.cubic),
-      useNativeDriver: native,
-    }).start(() => {
-      if (hadSession) notify("Conversation ended. Microphone off.");
-      onClose();
+    if (!active) talk.reset();
+    slideAway();
+  }, [active, slideAway, talk]);
+
+  // The only way to hang up from here. The microphone turns off.
+  const endCall = useCallback(async () => {
+    if (closing.current) return;
+    const hadCall = active;
+    await talk.end();
+    slideAway(() => {
+      if (hadCall) notify("Conversation ended. Microphone off.");
     });
-  }, [endConversation, enter, native, notify, onClose, reduceMotion]);
+  }, [active, notify, slideAway, talk]);
 
   // Escape closes the popup (web).
   useEffect(() => {
@@ -264,94 +186,11 @@ export function TalkPopup({
     [drag, requestClose],
   );
 
-  const upsert = useCallback((id: string, who: Line["who"], text: string) => {
-    setLines((all) => {
-      const at = all.findIndex((line) => line.id === id);
-      if (at === -1) return [...all, { id, who, text, sources: [] }];
-      return all.map((line, i) => (i === at ? { ...line, text } : line));
-    });
-  }, []);
-
-  // Sources belong to Debo's answer to the latest question. Show them right under it.
-  const attachSources = useCallback((chips: VoiceChip[]) => {
-    setLines((all) => {
-      const lastYou = all.map((line) => line.who).lastIndexOf("you");
-      if (lastYou === -1 || chips.length === 0) return all;
-      const next = [...all];
-      next.splice(lastYou + 1, 0, { id: `sources-${Date.now()}`, who: "debo", text: "", sources: chips });
-      return next;
-    });
-  }, []);
-
-  const onLevels = useCallback((levels: VoiceLevels) => {
-    deboLevels.debo.setValue(levels.debo);
-    deboLevels.you.setValue(levels.you);
-    deboLevels.real.setValue(levels.real ? 1 : 0);
-    const active = youActiveRef.current ? levels.you > 0.04 : levels.you > 0.1;
-    if (active !== youActiveRef.current) {
-      youActiveRef.current = active;
-      setYouActive(active);
-    }
-  }, []);
-
-  async function start() {
-    if (status === "connecting" || live) return;
-    setProblem("");
-    setStatus("connecting");
-    try {
-      const next = await engine(api, {
-        onLine: (id, who, text) => upsert(id, who, text),
-        onSources: attachSources,
-        onAgentState: setAgentState,
-        onLevels,
-        onConnection: (state) => setReconnecting(state === "reconnecting"),
-        onEnded: () => {
-          connection.current = undefined;
-          setMicOn(false);
-          setReconnecting(false);
-          setStatus((now) => (now === "error" ? now : "ended"));
-        },
-      });
-      if (closing.current) {
-        void next.end().catch(() => {});
-        return;
-      }
-      connection.current = next;
-      setMicOn(!next.microphoneBlocked);
-      if (next.microphoneBlocked) {
-        setProblem(
-          "Debo can't use your microphone. Allow it in your settings, or type to Debo below.",
-        );
-        setTyping(true);
-      }
-      setStatus("live");
-    } catch (error) {
-      setMicOn(false);
-      setStatus("error");
-      setProblem(startProblem(error));
-    }
-  }
-
-  async function toggleMicrophone() {
-    const next = !micOn;
-    try {
-      await connection.current?.setMicrophone(next);
-      setMicOn(next);
-      setProblem("");
-    } catch {
-      setMicOn(false);
-      setProblem("Debo can't use your microphone. Allow it in your settings, or type to Debo below.");
-    }
-  }
-
   async function send() {
     const text = typed.trim();
-    if (!text || !connection.current) return;
+    if (!text) return;
     setTyped("");
-    upsert(`typed-${Date.now()}`, "you", text);
-    await connection.current.sendText(text).catch(() => {
-      setProblem("That message didn't send. Try again.");
-    });
+    await talk.send(text);
   }
 
   const words = stateWords({ status, micOn, agentState, reconnecting });
@@ -404,7 +243,11 @@ export function TalkPopup({
             <View style={[s.between, { minHeight: spacing[11] }]}>
               <Pressable
                 accessibilityRole="button"
-                accessibilityLabel="Close and end the conversation. Microphone turns off."
+                accessibilityLabel={
+                  active
+                    ? "Minimise. The conversation keeps going and the microphone stays as it is."
+                    : "Close"
+                }
                 onPress={requestClose}
                 style={{ width: spacing[11], height: spacing[11], alignItems: "center", justifyContent: "center" }}
               >
@@ -435,7 +278,7 @@ export function TalkPopup({
                 accessibilityRole="button"
                 accessibilityLabel={live ? "Debo" : "Start talking"}
                 disabled={live || status === "connecting"}
-                onPress={() => void start()}
+                onPress={() => void talk.start()}
                 style={{ width: orb * 1.4, height: orb * 1.4, alignItems: "center", justifyContent: "center" }}
               >
                 <Animated.View
@@ -493,11 +336,13 @@ export function TalkPopup({
                     Debo listens only while the conversation is on, and the microphone status above always
                     tells you. What you and Debo say is saved as text, and Debo learns from what you say. You
                     can read it in your journal and delete it there. Debo never keeps your voice
-                    recording. You can end the conversation, or turn the microphone off, at any time. You
-                    can also type to Debo instead.
+                    recording. You can minimise the conversation to a small bar and use the rest of the app
+                    while you talk; the bar always shows whether the microphone is on. On the web the call
+                    stops when you close the tab. You can end the conversation, or turn the microphone off,
+                    at any time. You can also type to Debo instead.
                   </Text>
                   <View style={[s.row, { gap: spacing[3] }]}>
-                    <Button primary icon={Mic} onPress={() => void start()}>
+                    <Button primary icon={Mic} onPress={() => void talk.start()}>
                       Start talking
                     </Button>
                     <Button onPress={requestClose}>Not now</Button>
@@ -507,14 +352,15 @@ export function TalkPopup({
 
               {(status === "ended" || status === "error") && (
                 <View style={[s.row, { gap: spacing[3], flexWrap: "wrap", justifyContent: "center" }]}>
-                  <Button primary icon={Mic} onPress={() => void start()}>
+                  <Button primary icon={Mic} onPress={() => void talk.start()}>
                     {status === "error" ? "Try again" : "Start again"}
                   </Button>
                   {status === "error" && (
                     <Button
                       icon={MessageCircle}
                       onPress={() => {
-                        requestClose();
+                        talk.reset();
+                        slideAway();
                         navigate("chat");
                       }}
                     >
@@ -582,14 +428,14 @@ export function TalkPopup({
                   caption={micOn ? "Mic on" : "Mic off"}
                   checked={micOn}
                   disabled={!live}
-                  onPress={() => void toggleMicrophone()}
+                  onPress={() => void talk.toggleMicrophone()}
                   icon={micOn ? Mic : MicOff}
                 />
                 <RoundButton
                   label="Stop Debo"
                   caption="Stop Debo"
                   disabled={!live || agentState !== "speaking"}
-                  onPress={() => void connection.current?.stopDebo()}
+                  onPress={() => void talk.stopDebo()}
                   icon={Square}
                 />
                 <RoundButton
@@ -604,7 +450,7 @@ export function TalkPopup({
                   label="End conversation"
                   caption="End"
                   danger
-                  onPress={requestClose}
+                  onPress={() => void endCall()}
                   icon={PhoneOff}
                 />
               </View>
@@ -683,7 +529,7 @@ export function TalkPopup({
 }
 
 /** One caption line. It fades in when it appears and dims when a newer line arrives. */
-function Caption({ line, faded }: { line: Line; faded: boolean }) {
+function Caption({ line, faded }: { line: TalkLine; faded: boolean }) {
   const opacity = useRef(new Animated.Value(0)).current;
   useEffect(() => {
     Animated.timing(opacity, {
