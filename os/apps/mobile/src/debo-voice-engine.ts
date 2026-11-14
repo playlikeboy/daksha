@@ -103,6 +103,9 @@ export async function startVoice(api: FuseApi, handlers: VoiceHandlers): Promise
       handlers.onAgentState("");
       handlers.onEnded();
       void audio.release();
+      // Tell the server the call is over, so it reads the call once (search and memories).
+      // If this never arrives (closed tab, no network) the server reads the call later on its own.
+      void api.request("/api/voice/ended", {}).catch(() => {});
     };
 
     connected.on(RoomEvent.TrackSubscribed, (track) => {

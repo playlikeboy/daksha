@@ -185,7 +185,8 @@ function EntryCard({
   const day = entryDay(entry.happenedAt);
   const media = entry.media;
   const status = media?.transcript.status;
-  const recording = entry.kind !== "journal";
+  const recording = entry.kind === "voice" || entry.kind === "video";
+  const call = entry.kind === "call";
 
   async function run(work: () => Promise<void>, done: string) {
     setBusy(true);
@@ -193,7 +194,7 @@ function EntryCard({
     try {
       await work();
       notify(done);
-      if (done === "Entry deleted." || done === "Recording deleted.") deboMood.emit({ type: "deleted" });
+      if (done === "Entry deleted." || done === "Recording deleted." || done === "Call deleted.") deboMood.emit({ type: "deleted" });
       await onChanged();
     } catch (e) {
       setError(errorText(e));
@@ -211,10 +212,15 @@ function EntryCard({
       }}
     >
       <View style={[s.row, { gap: spacing[2], flexWrap: "wrap" }]}>
-        {recording && (entry.kind === "video" ? <Video size={16} color={colors.blueDark} /> : <Mic size={16} color={colors.blueDark} />)}
+        {(recording || call) && (entry.kind === "video" ? <Video size={16} color={colors.blueDark} /> : <Mic size={16} color={colors.blueDark} />)}
         <Text style={[s.small, { fontWeight: "600", color: colors.text }]}>
-          {recording ? `${kindName(entry.kind)}, ${day}` : day}
+          {recording || call ? `${kindName(entry.kind)}, ${day}` : day}
         </Text>
+        {call && entry.minutes ? (
+          <Text style={s.small}>
+            {entry.minutes} {entry.minutes === 1 ? "minute" : "minutes"}
+          </Text>
+        ) : null}
         {media && (
           <Text style={s.small}>
             {media.durationMs ? `${formatDuration(media.durationMs)} · ` : ""}
@@ -294,7 +300,7 @@ function EntryCard({
           <Text
             selectable
             numberOfLines={open ? undefined : 3}
-            accessibilityLabel={`${recording ? `${kindName(entry.kind)} words` : "Entry"} from ${day}. ${open ? entry.text : preview(entry.text)}`}
+            accessibilityLabel={`${recording ? `${kindName(entry.kind)} words` : call ? "Voice call words" : "Entry"} from ${day}. ${open ? entry.text : preview(entry.text)}`}
             style={s.text}
           >
             {open ? entry.text : preview(entry.text, 220)}
@@ -306,10 +312,10 @@ function EntryCard({
         <View style={[s.row, { gap: 10, flexWrap: "wrap" }]}>
           {entry.text.length > 220 && (
             <Button small onPress={() => setOpen(!open)}>
-              {open ? "Show less" : recording ? "Read all the words" : "Read all"}
+              {open ? "Show less" : call ? "Read the whole call" : recording ? "Read all the words" : "Read all"}
             </Button>
           )}
-          {(!recording || status === "ready") && (
+          {!call && (!recording || status === "ready") && (
             <Button
               small
               icon={Pencil}
@@ -323,7 +329,7 @@ function EntryCard({
             </Button>
           )}
           <Button small danger icon={Trash2} onPress={() => setConfirming(true)}>
-            {recording ? "Delete recording" : "Delete entry"}
+            {call ? "Delete call" : recording ? "Delete recording" : "Delete entry"}
           </Button>
           {onClose && (
             <Button small onPress={onClose}>
@@ -335,7 +341,9 @@ function EntryCard({
       {confirming && (
         <View accessibilityRole="alert" style={{ gap: 10 }}>
           <Text style={s.text}>
-            {recording
+            {call
+              ? "Delete this call for good? Debo forgets what it learned from it, and the copy in Chat is deleted too. This can't be undone."
+              : recording
               ? "Delete this recording and its words for good? The file is removed from storage and Debo forgets what it learned from it. This can't be undone."
               : "Delete this entry for good? Debo will also forget what it learned from it. This can't be undone."}
           </Text>
@@ -344,9 +352,9 @@ function EntryCard({
               danger
               busy={busy}
               icon={Trash2}
-              onPress={() => void run(() => debo.deleteEntry(entry.id), recording ? "Recording deleted." : "Entry deleted.")}
+              onPress={() => void run(() => debo.deleteEntry(entry.id), call ? "Call deleted." : recording ? "Recording deleted." : "Entry deleted.")}
             >
-              {recording ? "Yes, delete this recording" : "Yes, delete this entry"}
+              {call ? "Yes, delete this call" : recording ? "Yes, delete this recording" : "Yes, delete this entry"}
             </Button>
             <Button disabled={busy} onPress={() => setConfirming(false)}>
               Keep it

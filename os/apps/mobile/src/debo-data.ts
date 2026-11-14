@@ -25,8 +25,10 @@ export type MediaView = z.infer<typeof mediaView>;
 export const entryView = z.object({
   id: z.string(),
   // Older servers do not send these two: such an entry is a written one.
-  kind: z.enum(["journal", "voice", "video"]).default("journal"),
+  kind: z.enum(["journal", "voice", "video", "call"]).default("journal"),
   title: z.string(),
+  // A voice call: how many minutes it lasted.
+  minutes: z.number().optional(),
   text: z.string(),
   happenedAt: z.string(),
   media: mediaView.nullish().transform((m) => m ?? null),
@@ -303,6 +305,6 @@ export function fileProblem(
 }
 
 /** The date a day button shows for a recording, e.g. "Voice note" or "Video". */
-export function kindName(kind: "journal" | "voice" | "video"): string {
-  return kind === "voice" ? "Voice note" : kind === "video" ? "Video" : "Entry";
+export function kindName(kind: "journal" | "voice" | "video" | "call"): string {
+  return kind === "voice" ? "Voice note" : kind === "video" ? "Video" : kind === "call" ? "Voice call" : "Entry";
 }

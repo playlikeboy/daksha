@@ -491,8 +491,10 @@ export function TalkPopup({
                   <Text style={[s.muted, { textAlign: "center", fontSize: fontSize.base }]}>
                     When you press Start talking, your phone or browser will ask to use the microphone.
                     Debo listens only while the conversation is on, and the microphone status above always
-                    tells you. Debo does not keep your voice recording. You can end the conversation, or
-                    turn the microphone off, at any time. You can also type to Debo instead.
+                    tells you. What you and Debo say is saved as text, and Debo learns from what you say. You
+                    can read it in your journal and delete it there. Debo never keeps your voice
+                    recording. You can end the conversation, or turn the microphone off, at any time. You
+                    can also type to Debo instead.
                   </Text>
                   <View style={[s.row, { gap: spacing[3] }]}>
                     <Button primary icon={Mic} onPress={() => void start()}>
