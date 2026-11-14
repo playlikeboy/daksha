@@ -4,6 +4,7 @@ import { Ask } from "../components/ask";
 import { Closing } from "../components/closing";
 import { Demo } from "../components/demo";
 import { Faq, QUESTIONS } from "../components/faq";
+import { GetApp } from "../components/get-app";
 import { Hero } from "../components/hero";
 import { Knows } from "../components/knows";
 import { SiteFooter } from "../components/site-footer";
@@ -52,6 +53,7 @@ export default function Home() {
             <Ask />
             <Knows />
             <Apps />
+            <GetApp />
             <Trust />
             <Faq />
             <Closing />
