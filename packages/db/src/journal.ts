@@ -298,3 +298,71 @@ export async function getSources(connectionString: string, userId: string, ids: 
       .where(and(eq(sources.userId, userId), inArray(sources.id, ids))),
   );
 }
+
+export type SimilarSource = {
+  id: string;
+  kind: SourceKind;
+  title: string;
+  happenedAt: Date;
+  /** The closest piece of the other entry, for a short preview. Never log it. */
+  text: string;
+  /** Cosine distance from this entry: smaller is closer. */
+  distance: number;
+};
+
+/**
+ * Cut-off for "similar entries". Looser than search (DEFAULT_MAX_DISTANCE),
+ * because this is a gentle "you may also want to read" list, not an answer.
+ */
+export const SIMILAR_MAX_DISTANCE = 0.7;
+
+/**
+ * Other entries of this person that are close in meaning to one entry. Uses
+ * the embeddings search already keeps, so there is no model call: the entry's
+ * pieces are averaged into one vector, and each other entry is scored by its
+ * closest piece. Only this person's pieces on both sides, never the entry
+ * itself. An entry with no embeddings yet has no similar entries.
+ */
+export async function similarSources(
+  connectionString: string,
+  userId: string,
+  sourceId: string,
+  options: { limit?: number; maxDistance?: number } = {},
+): Promise<SimilarSource[]> {
+  const limit = Math.min(Math.max(options.limit ?? 5, 1), 20);
+  const maxDistance = options.maxDistance ?? SIMILAR_MAX_DISTANCE;
+  return withDb(connectionString, async (db) => {
+    const result = await db.execute(sql`
+      with target as (
+        select avg(t.embedding) as v
+        from ${chunks} t
+        where t.user_id = ${userId} and t.source_id = ${sourceId} and t.embedding is not null
+      ),
+      scored as (
+        select distinct on (c.source_id) c.source_id, c.text, (c.embedding <=> target.v) as distance
+        from ${chunks} c, target
+        where target.v is not null
+          and c.user_id = ${userId}
+          and c.source_id <> ${sourceId}
+          and c.embedding is not null
+        order by c.source_id, c.embedding <=> target.v
+      )
+      select s.id, s.kind, s.title, s.happened_at as "happenedAt", scored.text, scored.distance
+      from scored
+      join ${sources} s on s.id = scored.source_id
+      where s.user_id = ${userId}
+        and s.kind in ('journal', 'voice', 'video', 'voice_call')
+        and scored.distance < ${maxDistance}
+      order by scored.distance asc, s.happened_at desc
+      limit ${limit}
+    `);
+    return (result.rows as Record<string, unknown>[]).map((r) => ({
+      id: String(r.id),
+      kind: r.kind as SourceKind,
+      title: String(r.title),
+      happenedAt: r.happenedAt instanceof Date ? r.happenedAt : new Date(String(r.happenedAt)),
+      text: String(r.text ?? ""),
+      distance: Number(r.distance),
+    }));
+  });
+}

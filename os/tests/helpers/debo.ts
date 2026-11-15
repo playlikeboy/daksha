@@ -12,7 +12,22 @@ export type FakeBackend = DeboBackend & {
   asked: { owner: string; question: string }[];
   addMemory(owner: string, sourceId: string, text: string): Memory;
   entriesOf(owner: string): Entry[];
+  /** Give an entry a meaning vector, standing in for its stored embeddings. */
+  setVector(owner: string, entryId: string, vector: number[]): void;
 };
+
+/** Cosine distance, as pgvector's <=> gives it. */
+function cosineDistance(a: number[], b: number[]): number {
+  let dot = 0;
+  let na = 0;
+  let nb = 0;
+  for (let i = 0; i < a.length; i++) {
+    dot += (a[i] ?? 0) * (b[i] ?? 0);
+    na += (a[i] ?? 0) ** 2;
+    nb += (b[i] ?? 0) ** 2;
+  }
+  return 1 - dot / (Math.sqrt(na) * Math.sqrt(nb) || 1);
+}
 
 export function fakeBackend(
   options: { memories?: boolean; askConfigured?: boolean; failActivity?: boolean } = {},
@@ -21,6 +36,8 @@ export function fakeBackend(
   const memories = new Map<string, Memory[]>();
   const activity = new Map<string, ActivityItem[]>();
   const asked: { owner: string; question: string }[] = [];
+  /** "owner:entry" -> vector. */
+  const vectors = new Map<string, number[]>();
   const mine = (owner: string) => entries.get(owner) ?? [];
   const words = (text: string) => text.toLowerCase().match(/[a-z]{4,}/g) ?? [];
   const matching = (owner: string, question: string) => {
@@ -32,6 +49,21 @@ export function fakeBackend(
   const backend: FakeBackend = {
     asked,
     entriesOf: mine,
+    setVector(owner, entryId, vector) {
+      vectors.set(`${owner}:${entryId}`, vector);
+    },
+    // Like the SQL: only this owner's vectors on both sides, never the entry itself, closest first.
+    async similar(owner, id, limit) {
+      const target = vectors.get(`${owner}:${id}`);
+      if (!target) return [];
+      return mine(owner)
+        .filter((e) => e.id !== id && vectors.has(`${owner}:${e.id}`))
+        .map((e) => ({ e, distance: cosineDistance(target, vectors.get(`${owner}:${e.id}`) ?? []) }))
+        .filter((x) => x.distance < 0.7)
+        .sort((a, b) => a.distance - b.distance)
+        .slice(0, limit)
+        .map(({ e, distance }) => ({ id: e.id, kind: "journal" as const, title: e.title, happenedAt: e.happenedAt, text: e.text, distance }));
+    },
     addMemory(owner, sourceId, text) {
       const memory: Memory = {
         id: randomUUID(),
@@ -51,6 +83,9 @@ export function fakeBackend(
           .filter((e) => !needle || e.text.toLowerCase().includes(needle))
           .sort((a, b) => b.happenedAt.getTime() - a.happenedAt.getTime())
           .slice(0, limit);
+      },
+      async get(owner, id) {
+        return mine(owner).find((e) => e.id === id) ?? null;
       },
       async create(owner, text, happenedAt) {
         const entry: Entry = { id: randomUUID(), title: text.split("\n")[0]?.slice(0, 60) ?? "", text, happenedAt: happenedAt ?? new Date() };

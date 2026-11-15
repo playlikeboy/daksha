@@ -7,7 +7,7 @@
 // need a custom native build or run inside a web view, which is fragile; a
 // plain text box is the same everywhere and never loses a word. See
 // os/docs/JOURNAL-MEDIA.md.
-import { Check, Mic, Paperclip, Square, Video } from "lucide-react-native";
+import { AudioLines, Check, Mic, Paperclip, Square, Video } from "lucide-react-native";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Platform, Pressable, Text, TextInput, View } from "react-native";
 import { deboApi, errorText } from "./debo-api";
@@ -15,6 +15,7 @@ import { type Dictation, recordingSupport, startDictation } from "./debo-capture
 import { type DeboStatus, type EntryView, happenedAtFor, todayInput, wordCountLabel } from "./debo-data";
 import { DayField } from "./debo-day-field";
 import { readStoredDraft, writeStoredDraft } from "./debo-draft-store";
+import { Recorder } from "./debo-recorder";
 import { RecordingPanel } from "./debo-recording-panel";
 import { Button, Card, colors, ErrorNotice, fontSize, radius, s, spacing } from "./ui";
 import { useWorkspace } from "./workspace";
@@ -49,7 +50,8 @@ export function Composer({ status, onSaved }: { status: DeboStatus; onSaved: () 
   const [focused, setFocused] = useState(false);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
-  const [panel, setPanel] = useState<"record" | "pick">();
+  const [panel, setPanel] = useState<"pick">();
+  const [recorder, setRecorder] = useState<"voice" | "video">();
   const [listening, setListening] = useState(false);
   const [writing, setWriting] = useState(0);
   const [asking, setAsking] = useState(false);
@@ -275,9 +277,16 @@ export function Composer({ status, onSaved }: { status: DeboStatus; onSaved: () 
             )}
             {status.recordings && (
               <>
-                <Button icon={Video} disabled={listening} onPress={() => setPanel("record")}>
-                  Record
-                </Button>
+                {support.voice && (
+                  <Button icon={AudioLines} disabled={listening} onPress={() => setRecorder("voice")}>
+                    Record voice
+                  </Button>
+                )}
+                {support.video && (
+                  <Button icon={Video} disabled={listening} onPress={() => setRecorder("video")}>
+                    Record video
+                  </Button>
+                )}
                 <Button icon={Paperclip} disabled={listening} onPress={() => setPanel("pick")}>
                   Add a recording
                 </Button>
@@ -286,6 +295,19 @@ export function Composer({ status, onSaved }: { status: DeboStatus; onSaved: () 
           </View>
         )}
       </Card>
+
+      {recorder && (
+        <Recorder
+          key={recorder}
+          kind={recorder}
+          status={status}
+          onClose={() => setRecorder(undefined)}
+          onSaved={() => {
+            setRecorder(undefined);
+            void onSaved();
+          }}
+        />
+      )}
 
       {panel && (
         <RecordingPanel
