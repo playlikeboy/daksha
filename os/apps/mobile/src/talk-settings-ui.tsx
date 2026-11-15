@@ -7,6 +7,7 @@ import { Pressable, Text, View } from "react-native";
 import { useAgentWorkspace } from "./agent-workspace";
 import { errorText } from "./debo-api";
 import { useAssistantName } from "./debo-character-store";
+import { PeopleSetting } from "./debo-people-setting";
 import { PersonaSetting } from "./debo-persona-setting";
 import { Button, Card, colors, ErrorNotice, Field, LinkRow, radius, s, SectionHeading, Sheet, spacing } from "./ui";
 import { useWorkspace } from "./workspace";
@@ -205,6 +206,8 @@ export function TalkSettingsSheet() {
         </Card>
 
         <PersonaSetting />
+
+        <PeopleSetting />
 
         <Card style={{ gap: spacing[3] }}>
           <SectionHeading title={`What ${name} should always know`} />
