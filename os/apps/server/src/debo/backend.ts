@@ -245,10 +245,12 @@ export function realBackend(url: string, env: Env): DeboBackend {
           try {
             // Only the person's turns can become memories; Debo's go along as context.
             const forgotten = await memory.forgetSource(owner, id, { keepEditedByUser: true });
+            const [source] = await getSources(url, owner, [id]);
             const eventId = await memory.rememberFromConversation({
               userId: owner,
               sourceId: id,
               turns: parseCall(prepared.text).map((t) => ({ who: t.who, text: t.text })),
+              happenedAt: source?.happenedAt,
             });
             console.info("call sent to memory", { owner, callId: id, forgotten, eventId });
           } catch (error) {
@@ -280,10 +282,13 @@ export function realBackend(url: string, env: Env): DeboBackend {
         const pieces = await chunksForSource(url, owner, entryId);
         const forgotten = await memory.forgetSource(owner, entryId, { keepEditedByUser: true });
         if (pieces.length === 0) return; // deleted in the meantime
+        // The day the entry is about, so a backdated entry is not remembered as today.
+        const [source] = await getSources(url, owner, [entryId]);
         const eventId = await memory.rememberFromSource({
           userId: owner,
           sourceId: entryId,
           text: pieces.map((p) => p.text).join("\n\n"),
+          happenedAt: source?.happenedAt,
         });
         console.info("entry sent to memory", { owner, entryId, forgotten, eventId });
       } catch (error) {

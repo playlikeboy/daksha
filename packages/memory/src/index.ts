@@ -16,6 +16,7 @@
 // Mem0's own model calls run on Mem0's side, so they are not in our `usage`.
 import { z } from "zod";
 import { CALL_INSTRUCTIONS, type ConversationTurn, conversationMessages, hasPersonTurn } from "./conversation";
+import { datedFor } from "./dated";
 
 type Mem0Module = typeof import("mem0ai");
 type Mem0Client = InstanceType<Mem0Module["MemoryClient"]>;
@@ -162,16 +163,27 @@ export function createMemory(env: Record<string, string | undefined>) {
      * Send an entry to Mem0 to find the lasting facts in it. Mem0 works on it
      * in the background, so the memories show up a little later.
      * Returns Mem0's event id, for logs.
+     *
+     * `happenedAt` is the day the entry is about. It goes to Mem0 as its
+     * timestamp and as a first line, so a backdated entry is not dated today.
      */
-    async rememberFromSource(input: { userId: string; sourceId: string; text: string }): Promise<string | null> {
+    async rememberFromSource(input: {
+      userId: string;
+      sourceId: string;
+      text: string;
+      happenedAt?: Date | string | null;
+      timeZone?: string;
+    }): Promise<string | null> {
       const text = input.text.trim();
       if (!text) return null;
+      const dated = datedFor(input.happenedAt, input.timeZone);
       const m = await mem0();
-      const reply = (await m.add([{ role: "user", content: text }], {
+      const reply = (await m.add([{ role: "user", content: dated ? `${dated.lead}\n\n${text}` : text }], {
         userId: input.userId,
         runId: input.sourceId,
         metadata: { source_id: input.sourceId },
         customInstructions: INSTRUCTIONS,
+        ...(dated ? { timestamp: dated.timestamp } : {}),
       })) as unknown;
       const eventId = z.object({ eventId: z.string() }).safeParse(reply);
       return eventId.success ? eventId.data.eventId : null;
@@ -186,14 +198,17 @@ export function createMemory(env: Record<string, string | undefined>) {
       userId: string;
       sourceId: string;
       turns: ConversationTurn[];
+      happenedAt?: Date | string | null;
     }): Promise<string | null> {
       if (!hasPersonTurn(input.turns)) return null;
+      const dated = datedFor(input.happenedAt);
       const m = await mem0();
       const reply = (await m.add(conversationMessages(input.turns), {
         userId: input.userId,
         runId: input.sourceId,
         metadata: { source_id: input.sourceId },
         customInstructions: CALL_INSTRUCTIONS,
+        ...(dated ? { timestamp: dated.timestamp } : {}),
       })) as unknown;
       const eventId = z.object({ eventId: z.string() }).safeParse(reply);
       return eventId.success ? eventId.data.eventId : null;
@@ -260,4 +275,5 @@ export function createMemory(env: Record<string, string | undefined>) {
 export type MemoryStore = NonNullable<ReturnType<typeof createMemory>>;
 
 export { speakToPerson } from "./wording";
+export { type Dated, datedFor } from "./dated";
 export { type ConversationTurn, hasPersonTurn } from "./conversation";
