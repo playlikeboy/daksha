@@ -18,6 +18,7 @@ import type { DeboService } from "./debo/index.ts";
 import { chipLabel } from "./debo/service.ts";
 import { AppError } from "./errors.ts";
 import { type ComingUp, comingUp, localDay, notePersonInput, PeopleStore, type Person } from "./people.ts";
+import { TimeZoneStore } from "./time-zone.ts";
 
 export const companionInstructions =
   " PEOPLE: when the person tells you about someone in their life (a name with a relation, a birthday, an anniversary, what they like, what is going on for them), save it with note_person at once and say so in a few words ('I'll remember Riya's birthday'). Only save what they said; never guess a date. Use list_people to look someone up. To remove someone, the person does it in the app under 'People in your life'. " +
@@ -69,7 +70,8 @@ export async function buildCheckin(
   options: { timeZone?: string; now?: Date } = {},
 ): Promise<Checkin> {
   const now = options.now ?? new Date();
-  const local = localDay(now, options.timeZone);
+  // The zone asked for, else the app's (this request, or the last one it sent), else UTC.
+  const local = localDay(now, await new TimeZoneStore(deps.db).current(owner, options.timeZone));
   const gaps: string[] = [];
   const [people, tasks, goals] = await Promise.all([
     new PeopleStore(deps.db).list(owner).catch((): Person[] => {
@@ -97,7 +99,7 @@ export async function buildCheckin(
         .map((e) => ({
           id: e.id,
           label: chipLabel(new Date(e.happenedAt), e.kind === "voice" || e.kind === "video" ? e.kind : "journal"),
-          day: e.happenedAt.slice(0, 10),
+          day: localDay(new Date(e.happenedAt), local.timeZone).day,
           excerpt: e.text.length > EXCERPT ? `${e.text.slice(0, EXCERPT - 1)}…` : e.text,
         }));
     } catch (error) {
@@ -139,6 +141,8 @@ export function companionTools(
   signal?: AbortSignal,
 ) {
   const people = new PeopleStore(deps.db);
+  // The zone the app sent wins over one the model passes, which may be a guess.
+  const zone = async (fromModel?: string) => (await new TimeZoneStore(deps.db).current(owner)) ?? fromModel;
   return [
     defineTool({
       name: "note_person",
@@ -170,10 +174,10 @@ export function companionTools(
         signal?.throwIfAborted();
         try {
           const all = await people.list(owner);
-          const zone = typeof args?.timeZone === "string" ? args.timeZone : undefined;
+          const timeZone = await zone(typeof args?.timeZone === "string" ? args.timeZone : undefined);
           return {
             people: all.map(({ createdAt: _c, updatedAt: _u, ...p }) => p),
-            comingUp: comingUp(all, localDay(new Date(), zone).day, 14),
+            comingUp: comingUp(all, localDay(new Date(), timeZone).day, 14),
             ...(all.length ? {} : { message: "No one is saved yet." }),
           };
         } catch (error) {
@@ -185,13 +189,13 @@ export function companionTools(
     defineTool({
       name: "daily_checkin",
       description:
-        "Read-only. A short brief for the person's day from what Debo already holds: birthdays and special days this week, tasks that wait for them, active goals, and entries from the last week worth asking about (with source labels). Pass their IANA time zone (for example Asia/Kolkata) if known; otherwise UTC is used.",
+        "Read-only. A short brief for the person's day from what Debo already holds: birthdays and special days this week, tasks that wait for them, active goals, and entries from the last week worth asking about (with source labels). The time zone the person's app sends is used; timeZone (IANA, for example Asia/Kolkata) is only a fallback when the app has not sent one, and UTC after that.",
       parameters: checkinInput,
       execute: async (args) => {
         signal?.throwIfAborted();
         try {
           const { timeZone } = checkinInput.parse(args ?? {});
-          return await buildCheckin(deps, owner, { timeZone });
+          return await buildCheckin(deps, owner, { timeZone: await zone(timeZone) });
         } catch (error) {
           signal?.throwIfAborted();
           return { error: error instanceof z.ZodError ? plain(error) : "I couldn't put today's check-in together just now. Try again in a moment." };
@@ -201,7 +205,10 @@ export function companionTools(
   ];
 }
 
-/** GET /api/checkin?tz=Asia/Kolkata. Mount after the owner sign-in check. */
+/**
+ * GET /api/checkin?tz=Asia/Kolkata. Mount after the owner sign-in check. Without `tz`,
+ * the X-Time-Zone header or the person's saved zone is used.
+ */
 export function checkinRoutes(deps: { db: Store; debo?: DeboService }) {
   const app = new Hono<{ Variables: { owner: string } }>();
   app.get("/", async (c) => {
