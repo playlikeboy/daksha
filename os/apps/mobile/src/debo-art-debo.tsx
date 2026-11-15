@@ -1,17 +1,18 @@
-// Debo: a small, round, soft blue creature with two little ears and a pale tummy.
-// Not a tomato, not a person: just a friendly something. Very few shapes, so it
-// still reads at 24 px.
+// Debo: a small, round, soft blue blob with two round ears. Not a tomato, not a person:
+// just a friendly something, drawn like a sticker. Flat shapes only, no outlines and no
+// shading lines: one body, two ears, one soft shine. The face does the rest, so it still
+// reads at 24 px.
 import { Animated } from "react-native";
 import { Circle, Ellipse, Path } from "react-native-svg";
 import { FaceFeatures, type FeatureSpec } from "./debo-face-features";
 import { type ArtProps, bodyStyle, Layer, lo } from "./debo-face-rig";
 import { deboPaint as c } from "./debo-paint-debo";
 
+/** Big glossy eyes with one shine each. */
 const eye = (cx: number, cy: number) => (
   <>
-    <Ellipse cx={cx} cy={cy} rx={14} ry={17} fill={c.ink} />
-    <Circle cx={cx + 5} cy={cy - 7} r={5.5} fill={c.highlight} />
-    <Circle cx={cx - 4} cy={cy + 6} r={2.4} fill={c.highlight} />
+    <Ellipse cx={cx} cy={cy} rx={15} ry={18} fill={c.ink} />
+    <Circle cx={cx + 5} cy={cy - 7} r={6} fill={c.highlight} />
   </>
 );
 
@@ -19,88 +20,85 @@ const spec: FeatureSpec = {
   ink: c.ink,
   mouthInside: c.mouthInside,
   tongue: c.tongue,
-  eyeL: 88,
-  eyeR: 152,
-  eyeY: 126,
-  eyeRx: 14,
-  eyeRy: 17,
+  eyeL: 84,
+  eyeR: 156,
+  eyeY: 138,
+  eyeRx: 15,
+  eyeRy: 18,
   eye,
   lid: c.ink,
   lidWidth: 6,
-  browDy: -26,
-  browHalf: 13,
-  browWidth: 5,
+  browDy: -28,
+  browHalf: 12,
+  browWidth: 5.5,
   browColor: c.ink,
   browBase: 0,
   mouthX: 120,
-  mouthY: 156,
-  mouthScale: 0.9,
+  mouthY: 164,
+  mouthScale: 0.85,
   mouthStroke: 5,
   cheeks: [
-    { x: 58, y: 150, rx: 15, ry: 9, color: c.blush, opacity: 0.9 },
-    { x: 182, y: 150, rx: 15, ry: 9, color: c.blush, opacity: 0.9 },
+    { x: 58, y: 164, rx: 15, ry: 10, color: c.blush, opacity: 1 },
+    { x: 182, y: 164, rx: 15, ry: 10, color: c.blush, opacity: 1 },
   ],
   turn: 0.5,
-  dots: { x: 176, y: 36, color: c.ink },
-  sweat: <Path d="M214 76C207 87 205 94 214 101C223 94 221 87 214 76Z" fill={c.sweat} />,
+  dots: { x: 178, y: 40, color: c.ink },
+  sweat: <Path d="M210 82C203 93 201 100 210 107C219 100 217 93 210 82Z" fill={c.sweat} />,
   steam: (
     <>
-      <Circle cx={36} cy={72} r={8} fill={c.steam} />
-      <Circle cx={204} cy={72} r={8} fill={c.steam} />
-      <Circle cx={22} cy={88} r={5} fill={c.steam} />
-      <Circle cx={218} cy={88} r={5} fill={c.steam} />
+      <Circle cx={36} cy={74} r={8} fill={c.steam} />
+      <Circle cx={204} cy={74} r={8} fill={c.steam} />
+      <Circle cx={22} cy={90} r={5} fill={c.steam} />
+      <Circle cx={218} cy={90} r={5} fill={c.steam} />
     </>
   ),
-  steamOrigin: [120, 70],
+  steamOrigin: [120, 72],
   huff: (
     <>
-      <Circle cx={88} cy={164} r={5} fill={c.steam} />
-      <Circle cx={78} cy={169} r={3.5} fill={c.steam} />
+      <Circle cx={92} cy={172} r={5} fill={c.steam} />
+      <Circle cx={82} cy={177} r={3.5} fill={c.steam} />
     </>
   ),
   spark: (
     <>
-      <Path d="M26 56L29 64L37 67L29 70L26 78L23 70L15 67L23 64Z" fill={c.spark} />
-      <Path d="M210 38L212 44L218 46L212 48L210 54L208 48L202 46L208 44Z" fill={c.spark} />
-      <Path d="M220 100L222 105L227 107L222 109L220 114L218 109L213 107L218 105Z" fill={c.spark} />
+      <Path d="M26 60L29 68L37 71L29 74L26 82L23 74L15 71L23 68Z" fill={c.spark} />
+      <Path d="M210 42L212 48L218 50L212 52L210 58L208 52L202 50L208 48Z" fill={c.spark} />
+      <Path d="M220 104L222 109L227 111L222 113L220 118L218 113L213 111L218 109Z" fill={c.spark} />
     </>
   ),
-  sparkOrigin: [120, 80],
+  sparkOrigin: [120, 84],
 };
+
+/** One round ear. The inner dot is the same blue, a touch deeper, so it stays quiet. */
+const ear = (cx: number) => (
+  <>
+    <Circle cx={cx} cy={74} r={22} fill={c.body} />
+    <Circle cx={cx} cy={76} r={11} fill={c.earInner} />
+  </>
+);
 
 export function DeboArt({ size, rig }: ArtProps) {
   const { v, n, S } = rig;
   return (
     <>
       <Layer size={size}>
-        <Ellipse cx={120} cy={226} rx={72} ry={8} fill={c.shadow} opacity={0.14} />
+        <Ellipse cx={120} cy={224} rx={64} ry={7} fill={c.shadow} opacity={0.1} />
       </Layer>
       <Animated.View pointerEvents="none" style={bodyStyle(rig, size)}>
-        {/* A puffed cheek, for the pretend sulk. */}
-        <Layer size={size} style={{ opacity: v.pose.puff, transform: [{ scale: n.puffScale }], transformOrigin: lo(200, 156, S) }}>
-          <Ellipse cx={204} cy={156} rx={30} ry={32} fill={c.body} />
-          <Ellipse cx={210} cy={172} rx={18} ry={16} fill={c.bodyShade} opacity={0.45} />
-        </Layer>
-        {/* Two stubby feet peek out under the body. */}
-        <Layer size={size}>
-          <Ellipse cx={86} cy={214} rx={20} ry={11} fill={c.bodyShade} />
-          <Ellipse cx={154} cy={214} rx={20} ry={11} fill={c.bodyShade} />
+        {/* A puffed cheek, for the pretend sulk. It grows out of the body's side. */}
+        <Layer size={size} style={{ opacity: v.pose.puff, transform: [{ scale: n.puffScale }], transformOrigin: lo(196, 166, S) }}>
+          <Circle cx={198} cy={166} r={26} fill={c.body} />
         </Layer>
         {/* Ears, hinged at the head so they can sway, perk up and droop. */}
-        <Layer size={size} style={{ transform: [{ rotate: n.leafLRot }], transformOrigin: lo(74, 86, S) }}>
-          <Ellipse cx={66} cy={68} rx={19} ry={25} fill={c.body} transform="rotate(-22 66 68)" />
-          <Ellipse cx={67} cy={70} rx={9} ry={14} fill={c.earInner} transform="rotate(-22 67 70)" />
+        <Layer size={size} style={{ transform: [{ rotate: n.leafLRot }], transformOrigin: lo(76, 92, S) }}>
+          {ear(70)}
         </Layer>
-        <Layer size={size} style={{ transform: [{ rotate: n.leafRRot }], transformOrigin: lo(166, 86, S) }}>
-          <Ellipse cx={174} cy={68} rx={19} ry={25} fill={c.body} transform="rotate(22 174 68)" />
-          <Ellipse cx={173} cy={70} rx={9} ry={14} fill={c.earInner} transform="rotate(22 173 70)" />
+        <Layer size={size} style={{ transform: [{ rotate: n.leafRRot }], transformOrigin: lo(164, 92, S) }}>
+          {ear(170)}
         </Layer>
         <Layer size={size}>
-          <Path d="M120 52C176 52 216 92 216 140C216 190 176 218 120 218C64 218 24 190 24 140C24 92 64 52 120 52Z" fill={c.body} />
-          <Path d="M216 140C216 190 176 218 120 218C70 218 34 196 25 156C52 192 104 200 152 188C192 178 212 162 216 140Z" fill={c.bodyShade} />
-          <Ellipse cx={120} cy={198} rx={48} ry={20} fill={c.belly} opacity={0.9} />
-          <Ellipse cx={70} cy={92} rx={20} ry={8} fill={c.highlight} opacity={0.4} transform="rotate(-38 70 92)" />
-          <Path d="M118 54C112 40 124 32 132 40" fill="none" stroke={c.bodyShade} strokeWidth={7} strokeLinecap="round" />
+          <Path d="M120 56C180 56 214 100 214 152C214 198 174 218 120 218C66 218 26 198 26 152C26 100 60 56 120 56Z" fill={c.body} />
+          <Ellipse cx={64} cy={98} rx={15} ry={8} fill={c.highlight} opacity={0.35} transform="rotate(-50 64 98)" />
         </Layer>
         <FaceFeatures rig={rig} size={size} spec={spec} />
       </Animated.View>

@@ -2,18 +2,12 @@
   <title>Anaya</title>
   <ellipse cx="120" cy="230" rx="78" ry="7" fill="#1f130f" opacity="0.12"/>
   <path d="M120 22C66 22 42 68 42 118C42 160 34 190 46 216L194 216C206 190 198 160 198 118C198 68 174 22 120 22Z" fill="#2b1b17"/>
-  <path d="M58 150C56 176 54 196 58 212M182 150C184 176 186 196 182 212" fill="none" stroke="#6b4a3f" stroke-width="4" stroke-linecap="round" opacity="0.5"/>
   <path d="M104 150L104 182Q120 202 136 182L136 150Z" fill="#d4936b"/>
   <path d="M26 238C26 206 60 190 92 184Q120 208 148 184C180 190 214 206 214 238Q120 250 26 238Z" fill="#2f9a8c"/>
-  <path d="M214 238C214 214 196 200 172 192C196 210 202 224 198 242Q208 242 214 238Z" fill="#237e72" opacity="0.6"/>
   <path d="M92 184Q120 208 148 184" fill="none" stroke="#fff0d6" stroke-width="6" stroke-linecap="round"/>
-  <path d="M120 207L120 242" stroke="#fff0d6" stroke-width="3.5" stroke-linecap="round"/>
-  <circle cx="120" cy="218" r="3" fill="#f2b134"/>
-  <circle cx="120" cy="230" r="3" fill="#f2b134"/>
   <path d="M120 42C160 42 176 76 176 108C176 142 152 166 120 166C88 166 64 142 64 108C64 76 80 42 120 42Z" fill="#eab088"/>
   <path d="M72 134C82 156 100 166 120 166C140 166 158 156 168 134C156 152 138 158 120 158C102 158 84 152 72 134Z" fill="#d4936b" opacity="0.35"/>
   <path d="M58 118C50 62 80 26 122 26C166 26 192 62 182 118C178 96 168 76 150 66C136 78 110 82 92 80C78 90 66 102 58 118Z" fill="#2b1b17"/>
-  <path d="M100 40C120 34 148 38 164 54" fill="none" stroke="#6b4a3f" stroke-width="4" stroke-linecap="round" opacity="0.55"/>
   <path d="M66 96C52 126 50 158 58 190C70 174 76 140 74 100Z" fill="#2b1b17"/>
   <path d="M174 96C188 126 190 158 182 190C170 174 164 140 166 100Z" fill="#2b1b17"/>
   <g fill="#ffb703">
