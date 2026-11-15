@@ -80,6 +80,8 @@ export const UploadStart = z.object({
 export const UploadDone = z.object({
   parts: z.array(z.object({ number: z.number().int().min(1), etag: z.string().min(1).max(200) })).max(10_000).optional(),
   happenedAt: z.coerce.date().optional(),
+  /** A name the person gave the recording. Without one, its first words name it. */
+  title: z.string().trim().max(120, "Keep the title under 120 characters.").optional(),
 });
 
 const Uuid = z.string().uuid();
@@ -194,7 +196,7 @@ export class MediaService {
     const finished = await this.media.finish(owner, mediaId, {
       sizeBytes: head.size,
       happenedAt: body.happenedAt ?? record.recordedAt ?? new Date(),
-      title: record.kind === "video" ? "Video" : "Voice note",
+      title: body.title || (record.kind === "video" ? "Video" : "Voice note"),
     });
     if (!finished) throw new AppError(GONE, 404);
     if (finished.created) this.hooks.later(this.process(owner, mediaId));

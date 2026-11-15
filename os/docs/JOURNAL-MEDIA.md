@@ -11,7 +11,40 @@ This is what the Journal screen does beyond typing, how it is stored, what it co
 - **Record.** A voice note, or a video where the browser can record one. On the phone app, both (see "Phone" below). Listen or watch before saving. Progress is shown while it uploads.
 - **Add a recording.** Pick an audio or video file you already have. Same review step.
 
+- **Open an entry.** Every entry has its own page (see "Entry pages" below).
+
 Limits, stated on screen and enforced on the server: **200 MB and 60 minutes per recording; 40 recordings and 4 hours a day** (the day changes at midnight UTC). Allowed types: m4a, mp4, mp3, wav, webm, ogg, aac, flac, 3gp, mov (`apps/server/src/debo/media-limits.ts`).
+
+## Entry pages
+
+Built 15 November 2026 (`debo-entry-page.tsx`, `routes.ts`).
+
+- **Address.** `/journal/<slug>-<id>`, for example `/journal/dinner-with-meera-7c9e6679-7425-40de-944b-e07fc1f90ae7`, the same pattern as chats. The slug comes from the title and is only for people to read; the id at the end is the truth, so an old or wrong slug and a bare `/journal/<id>` open the same entry. A title with no Latin letters (Hindi) gives the bare id. `/journal` stays the list. The page loads the entry itself (`GET /api/debo/entries/:id`), so a reload or a link from outside works, and on the phone `debo://journal/<slug>-<id>` does too. Once the title is known the address and the tab title are corrected in place, without a new back step.
+- **Written entry:** the words in a reading layout (paragraphs as written), "Happened on <day>", Change entry and Delete entry (asks first).
+- **Voice note:** a large play button, the waveform as the scrub bar (press or drag; on the web a real slider sits on it for the keyboard and screen readers), the time, 15 seconds back and forward, speed (0.75× to 2×) and Download. On the web the waveform is the real sound, read in the browser, for files up to 30 MB; otherwise, and on the phone, the bars show where words were said (from the transcript's times) and say so. Then "What was said".
+- **What Whisper stores, and tap-to-seek.** The speech service returns segments with start and end times in seconds; they are kept in `media.segments` (`[{start, end, text}]`) and returned by `GET /entries/:id/transcript`. When there are segments and they still match the words, each one is a row with its time: pressing it plays from there, and the one playing is marked. Once the person fixes the words by hand the times no longer line up, so the fixed words show as plain text.
+- **Video:** a large player (the browser's own controls), speed and Download under it, and the words beside it on wide screens or under it on phones, with the same jumping. On the phone it plays in a web view with a few lines of our own script, so the words can move it.
+- **Voice call:** read from the call's text (one line per turn): your turns on the right, the assistant's on the left with its face once per run of turns, the time of each, how many turns and how long. "Saved from this call" lists the memories made from it.
+- **Under every entry:** "What Debo learned from this" (each memory with Fix this and Forget this), and "Similar entries".
+- **Download (phone):** the file is downloaded to the app's cache, then the phone's share sheet saves or sends it.
+- Loading shows grey blocks in the shape of the page; a failure says what happened and has Try again; a deleted or someone else's entry says "That entry is gone".
+
+### Similar entries
+
+`GET /api/debo/entries/:id/similar` returns up to five other entries, closest first: id, kind, title, day, a short snippet (call time marks removed) and the chip label. It uses the embeddings search already keeps (`chunks.embedding`), so there is **no model call and no outside call**: the entry's pieces are averaged into one vector, each other entry is scored by its closest piece (pgvector cosine distance), and only those closer than 0.7 are kept (looser than search's 0.6; it is a "you may also like to read" list, not an answer). Both sides are filtered by `user_id`, and the entry itself is excluded in the SQL and again in the service. An entry whose pieces have no embeddings yet (no AI gateway, or just saved) has no similar entries. Code: `similarSources` in `packages/db/src/journal.ts`. Tests: `tests/journal-entry-page.test.ts` (owner isolation, never itself, order, limit) against a fake; **the SQL has not been run against a real Neon database.**
+
+## The recorder
+
+Built 15 November 2026 (`debo-recorder.tsx`, opened by "Record voice" and "Record video").
+
+- Full screen. **Get ready:** a voice note shows the live microphone level (web) with "Your microphone is on so you can see it hears you. Nothing is kept until you save."; a video shows the camera. Flip camera (front and back), and on the web a choice of microphone and camera once the browser has allowed them.
+- **Recording:** a big timer with a red dot, the live level as moving bars (a single steady bar with reduced motion), Pause and Carry on (paused time is not counted), Stop, and Throw away (asks first). It stops by itself at 60 minutes.
+- **Review:** play it back, a title (optional; kept when the words arrive, sent as `title` to `.../complete`), "When did this happen?", Save recording with progress, Record again (asks first), Throw it away.
+- The screen stays on while recording and saving (Screen Wake Lock on the web, `expo-keep-awake` on the phone). Closing mid-way asks first; on the web the browser also asks before the tab closes or reloads.
+- Controls are 64 to 88 px round buttons with their names written under them.
+- The upload path is unchanged: the same `uploadRecording` as before.
+- Phone: a voice note can pause (`expo-audio`); a video cannot pause yet. The level shows only while recording. Not run on a device.
+- Not built: a note typed alongside a recording (the transcript is the entry's text, so a note would need its own place to live).
 
 ## Choices, and why
 
@@ -86,7 +119,9 @@ One new table, `media` (migration `0005_journal_media.sql`). The words stay in `
 |---|---|
 | `GET /status` | now also `recordings`, `speaking` and the limits |
 | `POST /media/uploads` | start an upload; returns links |
-| `POST /media/uploads/:id/complete` | finish; saves the entry |
+| `POST /media/uploads/:id/complete` | finish; saves the entry. Optional `title` (up to 120 characters) |
+| `GET /entries/:id` | one entry with its recording, for its page |
+| `GET /entries/:id/similar` | up to five entries close in meaning, from stored embeddings |
 | `GET /entries/:id/playback` | a one-hour link to play the recording |
 | `PUT /api/media-blob/:token`, `GET /api/media-blob/:token` | binding mode only: upload a file or part, play with Range. The signed token is the sign-in |
 | `GET /entries/:id/transcript` | status, words, language, timed segments |

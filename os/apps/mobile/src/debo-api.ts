@@ -9,9 +9,14 @@ import {
   deboStatus,
   type EntryView,
   entriesReply,
+  entryReply,
   entryView,
   type MemoryView,
   memoriesReply,
+  type SimilarView,
+  similarReply,
+  type TranscriptReply,
+  transcriptReply,
 } from "./debo-data";
 
 const uploadStarted = z.object({
@@ -41,6 +46,18 @@ export const deboApi = (api: FuseApi) => ({
     const query = find?.trim() ? `?find=${encodeURIComponent(find.trim())}&limit=500` : "?limit=500";
     return entriesReply.parse(await api.request(`/api/debo/entries${query}`)).entries;
   },
+  /** One entry, for its own page. */
+  async entry(id: string): Promise<EntryView> {
+    return entryReply.parse(await api.request(`/api/debo/entries/${encodeURIComponent(id)}`)).entry;
+  },
+  /** Up to five other entries close in meaning to this one, closest first. */
+  async similar(id: string): Promise<SimilarView[]> {
+    return similarReply.parse(await api.request(`/api/debo/entries/${encodeURIComponent(id)}/similar`)).similar;
+  },
+  /** The words of a recording, with times for each piece when the speech service gave them. */
+  async transcript(id: string): Promise<TranscriptReply> {
+    return transcriptReply.parse(await api.request(`/api/debo/entries/${encodeURIComponent(id)}/transcript`));
+  },
   async addEntry(text: string, happenedAt?: string) {
     await api.request("/api/debo/entries", { text, ...(happenedAt ? { happenedAt } : {}) });
   },
@@ -58,7 +75,10 @@ export const deboApi = (api: FuseApi) => ({
     return uploadStarted.parse(await api.request("/api/debo/media/uploads", body));
   },
   /** Step 3: the file is up. The entry is saved now and its words come a little later. */
-  async completeUpload(mediaId: string, body: { parts?: { number: number; etag: string }[]; happenedAt?: string }) {
+  async completeUpload(
+    mediaId: string,
+    body: { parts?: { number: number; etag: string }[]; happenedAt?: string; title?: string },
+  ) {
     const reply = await api.request(`/api/debo/media/uploads/${encodeURIComponent(mediaId)}/complete`, body);
     return z.object({ entry: entryView }).parse(reply).entry;
   },

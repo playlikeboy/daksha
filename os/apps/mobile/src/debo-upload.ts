@@ -17,7 +17,10 @@ export type UploadApi = {
     fileName?: string;
     lastModified?: number;
   }): Promise<UploadStarted>;
-  completeUpload(mediaId: string, body: { parts?: { number: number; etag: string }[]; happenedAt?: string }): Promise<EntryView>;
+  completeUpload(
+    mediaId: string,
+    body: { parts?: { number: number; etag: string }[]; happenedAt?: string; title?: string },
+  ): Promise<EntryView>;
 };
 
 export type Sender = (
@@ -51,7 +54,13 @@ export async function uploadRecording(
   api: UploadApi,
   send: Sender,
   capture: Capture,
-  options: { happenedAt?: string; onProgress?: (fraction: number) => void; pause?: (ms: number) => Promise<void> } = {},
+  options: {
+    happenedAt?: string;
+    /** A name the person gave it. Without one, its first words name it. */
+    title?: string;
+    onProgress?: (fraction: number) => void;
+    pause?: (ms: number) => Promise<void>;
+  } = {},
 ): Promise<EntryView> {
   const report = options.onProgress ?? (() => {});
   const started = await api.startUpload({
@@ -90,7 +99,12 @@ export async function uploadRecording(
       done += to - from;
     }
   }
-  const entry = await api.completeUpload(started.mediaId, { ...(parts ? { parts } : {}), ...(options.happenedAt ? { happenedAt: options.happenedAt } : {}) });
+  const title = options.title?.trim();
+  const entry = await api.completeUpload(started.mediaId, {
+    ...(parts ? { parts } : {}),
+    ...(options.happenedAt ? { happenedAt: options.happenedAt } : {}),
+    ...(title ? { title } : {}),
+  });
   report(1);
   return entry;
 }

@@ -295,6 +295,10 @@ export async function saveTranscript(
         .for("update");
       if (!row?.sourceId) return false;
       const sourceId = row.sourceId;
+      const [current] = await tx
+        .select({ title: sources.title })
+        .from(sources)
+        .where(and(eq(sources.id, sourceId), eq(sources.userId, userId)));
       const text = transcript.text.trim();
       await tx
         .update(media)
@@ -308,9 +312,11 @@ export async function saveTranscript(
         })
         .where(and(eq(media.id, mediaId), eq(media.userId, userId)));
       const fallback = row.kind === "video" ? "Video" : "Voice note";
+      // A title the person gave when saving stays; otherwise the first words name it.
+      const named = current?.title && current.title !== fallback ? current.title : undefined;
       await tx
         .update(sources)
-        .set({ text, title: text ? titleFrom(text) : fallback, updatedAt: new Date() })
+        .set({ text, title: named ?? (text ? titleFrom(text) : fallback), updatedAt: new Date() })
         .where(and(eq(sources.id, sourceId), eq(sources.userId, userId)));
       await tx.delete(chunks).where(and(eq(chunks.sourceId, sourceId), eq(chunks.userId, userId)));
       const pieces = text ? splitIntoChunks(text) : [];
@@ -387,6 +393,33 @@ export async function listJournalItems(
       : [];
     const bySource = new Map(records.map((r) => [r.sourceId, r]));
     return rows.map((r) => ({ ...r, media: bySource.get(r.id) ?? null }));
+  });
+}
+
+/** One entry with its recording, for the entry's own page. Null when it is not this person's. */
+export async function getJournalItem(connectionString: string, userId: string, sourceId: string): Promise<JournalItem | null> {
+  return withDb(connectionString, async (db) => {
+    const [row] = await db
+      .select({ id: sources.id, kind: sources.kind, title: sources.title, text: sources.text, happenedAt: sources.happenedAt })
+      .from(sources)
+      .where(
+        and(
+          eq(sources.id, sourceId),
+          eq(sources.userId, userId),
+          inArray(sources.kind, ["journal", "voice", "video", "voice_call"]),
+        ),
+      )
+      .limit(1);
+    if (!row) return null;
+    const [record] =
+      row.kind === "voice" || row.kind === "video"
+        ? await db
+            .select(mediaColumns)
+            .from(media)
+            .where(and(eq(media.userId, userId), eq(media.sourceId, row.id)))
+            .limit(1)
+        : [];
+    return { ...row, media: record ?? null };
   });
 }
 

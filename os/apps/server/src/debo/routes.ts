@@ -31,6 +31,11 @@ export function deboRoutes(debo: DeboService) {
     c.json({ entries: await debo.listEntries(c.get("owner"), { find: c.req.query("find"), limit: c.req.query("limit") }) }),
   );
   app.post("/entries", async (c) => c.json({ entry: await debo.createEntry(c.get("owner"), await c.req.json()) }, 201));
+  app.get("/entries/:id", async (c) => c.json({ entry: await debo.getEntry(c.get("owner"), c.req.param("id")) }));
+  /** Other entries close in meaning, from the embeddings search already keeps. Owner only, never itself. */
+  app.get("/entries/:id/similar", async (c) =>
+    c.json({ similar: await debo.similarEntries(c.get("owner"), c.req.param("id")) }),
+  );
   app.put("/entries/:id", async (c) => {
     await debo.updateEntry(c.get("owner"), c.req.param("id"), await c.req.json());
     return c.json({ ok: true });
