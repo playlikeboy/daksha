@@ -56,6 +56,28 @@ export type EntryView = {
   media: MediaView | null;
 };
 export type SourceChipView = { id: string; label: string };
+/** An entry close in meaning to another one: enough to show a short card that opens it. */
+export type SimilarView = {
+  id: string;
+  kind: EntryView["kind"];
+  title: string;
+  happenedAt: string;
+  /** A short piece of its words. */
+  snippet: string;
+  label: string;
+};
+
+/** How many similar entries an entry page shows. */
+export const SIMILAR_LIMIT = 5;
+
+/** A short, flat preview. Call lines lose their "[00:07] You:" marks. */
+export function snippetOf(text: string, max = 180): string {
+  const flat = text
+    .replace(/^\[\d+:\d{2}\] (?:You|Debo): /gm, "")
+    .replace(/\s+/g, " ")
+    .trim();
+  return flat.length > max ? `${flat.slice(0, max - 1).trimEnd()}…` : flat;
+}
 export type MemoryView = {
   id: string;
   text: string;
@@ -282,6 +304,39 @@ export class DeboService {
     const contains = FindText.parse(query.find ?? "") || undefined;
     const limit = z.coerce.number().int().min(1).max(500).catch(100).parse(query.limit ?? 100);
     return (await backend.entries.list(owner, { limit, contains })).map((e) => this.entryView(e));
+  }
+
+  /** One entry, for its own page. Someone else's id gets the same answer as a deleted one. */
+  async getEntry(owner: string, id: string): Promise<EntryView> {
+    const backend = this.ready(owner);
+    if (!Uuid.safeParse(id).success) throw new AppError(ENTRY_GONE, 404);
+    const entry = await backend.entries.get(owner, id);
+    if (!entry) throw new AppError(ENTRY_GONE, 404);
+    return this.entryView(entry);
+  }
+
+  /**
+   * Up to five of this person's other entries closest in meaning to one entry,
+   * closest first. Uses the embeddings already kept for search: no model call.
+   */
+  async similarEntries(owner: string, id: string): Promise<SimilarView[]> {
+    const backend = this.ready(owner);
+    if (!Uuid.safeParse(id).success) throw new AppError(ENTRY_GONE, 404);
+    if (!(await backend.entries.get(owner, id))) throw new AppError(ENTRY_GONE, 404);
+    const found = await backend.similar(owner, id, SIMILAR_LIMIT + 1);
+    // Never the entry itself, and each other entry once, even if a backend slips.
+    const others = [...new Map(found.filter((s) => s.id !== id).map((s) => [s.id, s])).values()];
+    return others
+      .sort((a, b) => a.distance - b.distance)
+      .slice(0, SIMILAR_LIMIT)
+      .map((s) => ({
+        id: s.id,
+        kind: s.kind === "voice_call" ? "call" : s.kind,
+        title: s.title,
+        happenedAt: s.happenedAt.toISOString(),
+        snippet: snippetOf(s.text),
+        label: chipLabel(s.happenedAt, s.kind),
+      }));
   }
 
   async createEntry(owner: string, input: unknown, actor: "you" | "debo" = "you"): Promise<EntryView> {
