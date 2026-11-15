@@ -75,6 +75,69 @@ export const deboStatus = z.object({
 export type DeboStatus = z.infer<typeof deboStatus>;
 
 export const entriesReply = z.object({ entries: z.array(entryView) });
+export const entryReply = z.object({ entry: entryView });
+
+/** An entry close in meaning to another, for "Similar entries". */
+export const similarView = z.object({
+  id: z.string(),
+  kind: z.enum(["journal", "voice", "video", "call"]).catch("journal"),
+  title: z.string(),
+  happenedAt: z.string(),
+  snippet: z.string(),
+  label: z.string(),
+});
+export type SimilarView = z.infer<typeof similarView>;
+export const similarReply = z.object({ similar: z.array(similarView) });
+
+/** One timed piece of a transcript, in seconds from the start (from Whisper). */
+export const transcriptSegment = z.object({ start: z.number(), end: z.number(), text: z.string() });
+export type TranscriptSegment = z.infer<typeof transcriptSegment>;
+export const transcriptReply = z.object({
+  status: z.enum(["waiting", "working", "ready", "failed"]),
+  language: z.string().nullable(),
+  text: z.string(),
+  segments: z.array(transcriptSegment).catch([]),
+  message: z.string().optional(),
+});
+export type TranscriptReply = z.infer<typeof transcriptReply>;
+
+/** The segment playing at `seconds`, or -1. Segments are in time order. */
+export function segmentAt(segments: TranscriptSegment[], seconds: number): number {
+  let found = -1;
+  for (let i = 0; i < segments.length; i++) {
+    const s = segments[i];
+    if (s && s.start <= seconds + 0.05) found = i;
+    else break;
+  }
+  const s = found >= 0 ? segments[found] : undefined;
+  // A long pause after a segment ends: nothing is being said.
+  return s && seconds <= s.end + 1.5 ? found : -1;
+}
+
+/** "1:05" for a point in a recording, in seconds. */
+export const timeMark = (seconds: number) => formatDuration(seconds * 1000);
+
+// ---- A voice call, as its text stores it ----
+// One line per turn: "[00:07] Debo: You went hiking with Arun." (see packages/db/src/voice-call.ts).
+
+export type CallTurn = { who: "person" | "debo"; text: string; seconds: number };
+const CALL_LINE = /^\[(\d+):(\d{2})\] (You|Debo): (.*)$/;
+
+/** The turns of a call, in order. Lines that do not fit are skipped. */
+export function parseCallTurns(text: string): CallTurn[] {
+  const turns: CallTurn[] = [];
+  for (const line of text.split("\n")) {
+    const m = CALL_LINE.exec(line.trim());
+    if (!m) continue;
+    turns.push({ who: m[3] === "You" ? "person" : "debo", text: m[4] ?? "", seconds: Number(m[1]) * 60 + Number(m[2]) });
+  }
+  return turns;
+}
+
+/** How long a call ran, from its first to its last turn, in seconds. */
+export function callLengthSeconds(turns: CallTurn[]): number {
+  return turns.length ? Math.max(0, (turns[turns.length - 1]?.seconds ?? 0) - (turns[0]?.seconds ?? 0)) : 0;
+}
 export const memoriesReply = z.object({ memories: z.array(memoryView) });
 export const activityReply = z.object({ activity: z.array(activityView) });
 
