@@ -2,16 +2,20 @@
 // short clips, picking a file, and sending a file to the upload links.
 // The microphone is only ever opened by a call here that a button press made,
 // and every path closes it again (stop, cancel, or an error).
+import { rmsLevel } from "./audio-level";
 import {
   type Capture,
   type CaptureSupport,
   type Dictation,
+  type InputDevice,
   type LiveRecording,
   micProblemText,
+  type Preview,
+  type RecordOptions,
   type SentRange,
 } from "./debo-capture-types";
 
-export type { Capture, CaptureSupport, Dictation, LiveRecording, SentRange };
+export type { Capture, CaptureSupport, Dictation, InputDevice, LiveRecording, Preview, RecordOptions, SentRange };
 
 const AUDIO_TYPES = ["audio/webm;codecs=opus", "audio/webm", "audio/mp4", "audio/ogg;codecs=opus"];
 const VIDEO_TYPES = ["video/webm;codecs=vp9,opus", "video/webm;codecs=vp8,opus", "video/webm", "video/mp4"];
@@ -24,12 +28,25 @@ function supportedType(candidates: string[]): string | undefined {
 export function recordingSupport(): CaptureSupport {
   const ok =
     typeof navigator !== "undefined" && !!navigator.mediaDevices?.getUserMedia && typeof MediaRecorder !== "undefined";
-  return { voice: ok, video: ok && !!supportedType(VIDEO_TYPES), dictation: ok };
+  const pause = ok && typeof MediaRecorder.prototype.pause === "function";
+  return {
+    voice: ok,
+    video: ok && !!supportedType(VIDEO_TYPES),
+    dictation: ok,
+    pause: { voice: pause, video: pause },
+    chooseInputs: ok && typeof navigator.mediaDevices.enumerateDevices === "function",
+  };
 }
 
-async function openStream(video: boolean): Promise<MediaStream> {
+async function openStream(video: boolean, options: RecordOptions = {}): Promise<MediaStream> {
+  const audio: MediaTrackConstraints | boolean = options.micId ? { deviceId: { exact: options.micId } } : true;
+  const picture: MediaTrackConstraints | boolean = !video
+    ? false
+    : options.cameraId
+      ? { deviceId: { exact: options.cameraId }, width: { ideal: 1280 }, height: { ideal: 720 } }
+      : { facingMode: options.facing ?? "user", width: { ideal: 1280 }, height: { ideal: 720 } };
   try {
-    return await navigator.mediaDevices.getUserMedia({ audio: true, video });
+    return await navigator.mediaDevices.getUserMedia({ audio, video: picture });
   } catch (error) {
     throw new Error(micProblemText(error, video));
   }
@@ -39,17 +56,90 @@ const closeStream = (stream: MediaStream) => {
   for (const track of stream.getTracks()) track.stop();
 };
 
-/** Record until stop() is called. The timer is counted here, because a browser recording has no length written in it. */
-export async function startRecording(kind: "voice" | "video", onTick?: (ms: number) => void): Promise<LiveRecording> {
-  const stream = await openStream(kind === "video");
+/** Reads how loud the microphone is, for the meter. Never records or sends anything. */
+function meter(stream: MediaStream): { level(): number; close(): void } {
+  const Context =
+    globalThis.AudioContext ?? (globalThis as unknown as { webkitAudioContext?: typeof AudioContext }).webkitAudioContext;
+  if (!Context || stream.getAudioTracks().length === 0) return { level: () => 0, close() {} };
+  try {
+    const context = new Context();
+    const analyser = context.createAnalyser();
+    analyser.fftSize = 1024;
+    context.createMediaStreamSource(stream).connect(analyser);
+    const samples = new Uint8Array(analyser.fftSize);
+    return {
+      level() {
+        analyser.getByteTimeDomainData(samples);
+        return rmsLevel(samples, true);
+      },
+      close() {
+        void context.close().catch(() => {});
+      },
+    };
+  } catch {
+    return { level: () => 0, close() {} };
+  }
+}
+
+/** Turn the microphone (and camera) on to show a level and a picture before recording. */
+export async function openPreview(kind: "voice" | "video", options: RecordOptions = {}): Promise<Preview> {
+  const stream = await openStream(kind === "video", options);
+  const levels = meter(stream);
+  return {
+    stream,
+    level: levels.level,
+    close() {
+      levels.close();
+      closeStream(stream);
+    },
+  };
+}
+
+/** The microphones and cameras on this device. Names show only once the person has allowed them. */
+export async function listInputs(): Promise<InputDevice[]> {
+  try {
+    const devices = await navigator.mediaDevices.enumerateDevices();
+    let mics = 0;
+    let cameras = 0;
+    return devices
+      .filter((d) => (d.kind === "audioinput" || d.kind === "videoinput") && d.deviceId && d.deviceId !== "default")
+      .map((d) => {
+        const mic = d.kind === "audioinput";
+        const n = mic ? ++mics : ++cameras;
+        return {
+          id: d.deviceId,
+          kind: mic ? ("mic" as const) : ("camera" as const),
+          label: d.label || (mic ? `Microphone ${n}` : `Camera ${n}`),
+        };
+      });
+  } catch {
+    return [];
+  }
+}
+
+/**
+ * Record until stop() is called. The timer is counted here, because a browser recording has no
+ * length written in it. Paused time is not counted.
+ */
+export async function startRecording(
+  kind: "voice" | "video",
+  onTick?: (ms: number) => void,
+  options: RecordOptions = {},
+): Promise<LiveRecording> {
+  const reused = options.preview?.stream as MediaStream | undefined;
+  const stream = reused && reused.active ? reused : await openStream(kind === "video", options);
+  const levels = meter(stream);
   const mimeType = supportedType(kind === "video" ? VIDEO_TYPES : AUDIO_TYPES);
   const recorder = new MediaRecorder(stream, mimeType ? { mimeType } : undefined);
   const parts: Blob[] = [];
   recorder.ondataavailable = (e) => {
     if (e.data.size > 0) parts.push(e.data);
   };
-  const started = Date.now();
-  const timer = setInterval(() => onTick?.(Date.now() - started), 250);
+  // Time recorded so far, not counting pauses.
+  let banked = 0;
+  let since: number | null = Date.now();
+  const elapsed = () => banked + (since === null ? 0 : Date.now() - since);
+  const timer = setInterval(() => onTick?.(elapsed()), 250);
   let settled = false;
   const done = new Promise<Blob>((resolve) => {
     recorder.onstop = () => resolve(new Blob(parts, { type: recorder.mimeType || mimeType || "audio/webm" }));
@@ -59,12 +149,27 @@ export async function startRecording(kind: "voice" | "video", onTick?: (ms: numb
   const finish = () => {
     settled = true;
     clearInterval(timer);
+    levels.close();
+    options.preview?.close();
     closeStream(stream);
   };
   return {
     stream,
+    level: levels.level,
+    pause() {
+      if (recorder.state !== "recording") return;
+      recorder.pause();
+      if (since !== null) banked += Date.now() - since;
+      since = null;
+      onTick?.(elapsed());
+    },
+    resume() {
+      if (recorder.state !== "paused") return;
+      recorder.resume();
+      since = Date.now();
+    },
     async stop() {
-      const durationMs = Date.now() - started;
+      const durationMs = elapsed();
       if (recorder.state !== "inactive") recorder.stop();
       const blob = await done;
       if (!settled) finish();

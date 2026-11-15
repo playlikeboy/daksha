@@ -26,7 +26,36 @@ export type LiveRecording = {
   cancel(): void;
   /** A video only. Web: the camera picture, to show while recording. Phone: the camera recorder LivePreview shows. */
   stream?: unknown;
+  /** Hold the recording and its timer. Missing where it cannot pause (a video on the phone). */
+  pause?(): void;
+  resume?(): void;
+  /** How loud the microphone is right now, 0 to 1. Missing where it cannot be read. */
+  level?(): number;
 };
+
+/** Which microphone or camera to use, and which way the camera faces. */
+export type RecordOptions = {
+  micId?: string;
+  cameraId?: string;
+  facing?: "user" | "environment";
+  /**
+   * Web: a preview already open from openPreview. Its microphone and camera are used for the
+   * recording, so the person is not asked twice and the picture does not blink.
+   */
+  preview?: Preview;
+};
+
+/** The microphone (and camera) on, but not recording: a level meter and a picture before you start. */
+export type Preview = {
+  /** Web: the camera picture. Phone: the camera LivePreview shows, which the recording then uses. */
+  stream?: unknown;
+  /** Missing where the level cannot be read before recording (the phone). */
+  level?(): number;
+  close(): void;
+};
+
+/** A microphone or camera the person can pick. Labels come from the device. */
+export type InputDevice = { id: string; label: string; kind: "mic" | "camera" };
 
 /** Speaking into the text: clips go out while the mic is on. */
 export type Dictation = {
@@ -34,7 +63,15 @@ export type Dictation = {
   stop(): Promise<void>;
 };
 
-export type CaptureSupport = { voice: boolean; video: boolean; dictation: boolean };
+export type CaptureSupport = {
+  voice: boolean;
+  video: boolean;
+  dictation: boolean;
+  /** A recording of this kind can be paused and carried on. */
+  pause?: { voice: boolean; video: boolean };
+  /** The person can pick which microphone and camera (the web, once allowed). */
+  chooseInputs?: boolean;
+};
 
 /** One piece of an upload went up. `etag` is what R2 sent back for a part. */
 export type SentRange = { etag?: string };
