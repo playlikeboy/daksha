@@ -35,6 +35,17 @@ Every answer links to the entry it came from. If Debo has nothing about a questi
 
 Debo is early. Do not treat any feature as finished until you have checked it in the code or the app. What is built and what is only planned is in [`docs/ROADMAP.md`](./docs/ROADMAP.md) and [`os/docs/FEATURES.md`](./os/docs/FEATURES.md); where the two disagree, the code is the truth.
 
+## Custom people (new, early version)
+
+You can make your own people to talk to, in chat or on a call: a friend, someone in your family, someone you miss, or a character you invent. This part is new and has had little real-world testing.
+
+- **Build them from a description, or from your own files.** Add a WhatsApp chat export, photos, videos, voice notes and call recordings. Debo separates who is speaking in recordings (Cloudflare Workers AI, Deepgram Nova-3) and keeps only that person's words.
+- **Copy their voice, if you choose.** Only with their permission, or if you are close family and they have died. Never a public figure. A copied voice is made with Cartesia and, for now, needs a Cartesia key.
+- **Design their face** with the face builder, so they smile, blink and talk like the built-in characters.
+- **Private and honest.** Debo reads your files once, keeps a short profile and deletes the raw files. The people you make are private to you. It is always honest that it is an AI and never claims to be the real person. A copied voice is used only inside your own Debo, never to call or message anyone.
+
+You can also change settings just by asking: "talk a bit slower", "call yourself Riya" or "turn on my morning check-in". Debo changes it at once and shows what changed. Why and how: decision 33 in [`docs/DECISIONS.md`](./docs/DECISIONS.md).
+
 ## Where it lives
 
 | What | Address |
