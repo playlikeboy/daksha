@@ -741,7 +741,6 @@ export function ChatScreen({
             )}
           </>
         )}
-        {(!richThreads || selection.id === mainId) && <BackgroundUpdates />}
         {(busy || agent.isRunning) && (
           <View
             accessibilityLabel="Agent is working"
@@ -807,6 +806,8 @@ export function ChatScreen({
         behavior={Platform.OS === "ios" ? "padding" : undefined}
         style={keyboardPadding > 0 ? { paddingBottom: keyboardPadding } : undefined}
       >
+        {/* Above the composer, not in the timeline, so a new reply never lands above it. */}
+        {(!richThreads || selection.id === mainId) && <BackgroundUpdates />}
         <ErrorNotice error={saveError} />
         {!!saveError && (
           <Button
