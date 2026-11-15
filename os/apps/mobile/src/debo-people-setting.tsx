@@ -4,6 +4,7 @@
 import { useCallback, useEffect, useState } from "react";
 import { Text, View } from "react-native";
 import { errorText } from "./debo-api";
+import { usePronouns } from "./debo-character-store";
 import { Button, Card, ErrorNotice, Field, s, spacing } from "./ui";
 import { useWorkspace } from "./workspace";
 
@@ -35,6 +36,7 @@ function summary(p: Person): string {
 }
 
 export function PeopleSetting() {
+  const p = usePronouns();
   const { api } = useWorkspace();
   const [people, setPeople] = useState<Person[]>([]);
   const [draft, setDraft] = useState<Draft>(EMPTY);
@@ -90,7 +92,7 @@ export function PeopleSetting() {
       <Text style={s.heading}>People in your life</Text>
       <Text style={s.muted}>
         {people.length
-          ? "Debo remembers these people so she can ask after them and remind you of birthdays. Fix or remove anyone here."
+          ? `Debo remembers these people so ${p.subject} can ask after them and remind you of birthdays. Fix or remove anyone here.`
           : "No one yet. Tell Debo about your family and friends in chat or on a call, or add someone here."}
       </Text>
       <ErrorNotice error={error} />

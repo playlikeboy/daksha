@@ -7,7 +7,7 @@
 import { useSyncExternalStore } from "react";
 import { Platform } from "react-native";
 import * as SecureStore from "expo-secure-store";
-import { type CharacterId, characterOrDefault, characters, defaultCharacter } from "./debo-characters";
+import { type CharacterId, characterOrDefault, characters, defaultCharacter, pronounsFor } from "./debo-characters";
 
 const KEY = "debo.character";
 
@@ -63,6 +63,11 @@ export function useDeboCharacter(): CharacterId {
 export function useAssistantName(): string {
   deboCharacter.start();
   return useSyncExternalStore(deboCharacter.subscribe, deboCharacter.getName, deboCharacter.getName);
+}
+
+/** "she" or "he" (and "her", "him", "his"...), following the chosen character, for labels. */
+export function usePronouns(): ReturnType<typeof pronounsFor> {
+  return pronounsFor(useDeboCharacter());
 }
 
 async function loadCharacter(): Promise<CharacterId | undefined> {

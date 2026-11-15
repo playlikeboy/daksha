@@ -12,6 +12,7 @@ import {
 } from "lucide-react-native";
 import { createContext, type ReactNode, useContext, useEffect, useRef, useState } from "react";
 import { ActivityIndicator, Pressable, Text, View } from "react-native";
+import { usePronouns } from "./debo-character-store";
 import { isInstalledApp, openGetApp } from "./get-app";
 import { useSavedThreads } from "./thread-list";
 import { Button, colors, ErrorNotice, Field, LinkRow, Sheet, s } from "./ui";
@@ -114,6 +115,7 @@ export function useFuseThread() {
   return context;
 }
 export function ThreadsSheet({ onClose }: { onClose: () => void }) {
+  const p = usePronouns();
   const {
     enabled,
     selection,
@@ -335,7 +337,7 @@ export function ThreadsSheet({ onClose }: { onClose: () => void }) {
         <LinkRow
           icon={SlidersHorizontal}
           title="Voice, personality and notes"
-          detail="How she talks and what she knows"
+          detail={`How ${p.subject} talks and what ${p.subject} knows`}
           onPress={() => {
             onClose();
             open({ type: "talk-settings" });

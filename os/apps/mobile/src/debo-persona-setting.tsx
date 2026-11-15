@@ -3,12 +3,14 @@
 import { useCallback, useEffect, useState } from "react";
 import { Text, View } from "react-native";
 import { errorText } from "./debo-api";
+import { usePronouns } from "./debo-character-store";
 import { Button, Card, ErrorNotice, Field, s, spacing } from "./ui";
 import { useWorkspace } from "./workspace";
 
 type Persona = { role: string; notes: string } | null;
 
 export function PersonaSetting() {
+  const p = usePronouns();
   const { api } = useWorkspace();
   const [persona, setPersona] = useState<Persona>(null);
   const [role, setRole] = useState("");
@@ -45,8 +47,8 @@ export function PersonaSetting() {
       <Text style={s.heading}>A role for Debo</Text>
       <Text style={s.muted} accessibilityLiveRegion="polite">
         {persona
-          ? `Debo is playing: ${persona.role}. She stays in this role in chat and on calls until you stop it.`
-          : "Debo is being herself. You can ask her to act as someone, like a friend or a study buddy, in chat or on a call. Or set a role here."}
+          ? `Debo is playing: ${persona.role}. ${p.Subject} stays in this role in chat and on calls until you stop it.`
+          : `Debo is being ${p.reflexive}. You can ask ${p.object} to act as someone, like a friend or a study buddy, in chat or on a call. Or set a role here.`}
       </Text>
       <ErrorNotice error={error} />
       {persona && (

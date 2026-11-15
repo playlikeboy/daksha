@@ -6,7 +6,7 @@ import { useCallback, useEffect, useState } from "react";
 import { Pressable, Text, View } from "react-native";
 import { useAgentWorkspace } from "./agent-workspace";
 import { errorText } from "./debo-api";
-import { useAssistantName } from "./debo-character-store";
+import { useAssistantName, usePronouns } from "./debo-character-store";
 import { PeopleSetting } from "./debo-people-setting";
 import { PersonaSetting } from "./debo-persona-setting";
 import { Button, Card, colors, ErrorNotice, Field, LinkRow, radius, s, SectionHeading, Sheet, spacing } from "./ui";
@@ -85,6 +85,7 @@ export function TalkSettingsSheet() {
   const { api, close, navigate } = useWorkspace();
   const { data, mutate } = useAgentWorkspace();
   const name = useAssistantName();
+  const p = usePronouns();
   const [reply, setReply] = useState<Reply>();
   const [context, setContext] = useState("");
   const [saved, setSaved] = useState("");
@@ -137,7 +138,7 @@ export function TalkSettingsSheet() {
   const contextMax = reply?.limits.contextMax ?? 1500;
 
   return (
-    <Sheet title={`How ${name} talks and what she knows`} subtitle="Changes save as soon as you tap them." onClose={close}>
+    <Sheet title={`How ${name} talks and what ${p.subject} knows`} subtitle="Changes save as soon as you tap them." onClose={close}>
       <View style={{ gap: spacing[4] }}>
         <Card style={{ gap: spacing[3] }}>
           <SectionHeading title="Voice" />
@@ -176,7 +177,7 @@ export function TalkSettingsSheet() {
             })}
           </View>
           <Choices
-            label="How fast she speaks"
+            label={`How fast ${p.subject} speaks`}
             options={SPEEDS.map((o) => ({ id: String(o.value), label: o.label }))}
             value={String(SPEEDS.reduce((a, b) => (Math.abs(b.value - speed) < Math.abs(a.value - speed) ? b : a)).value)}
             onPick={(id) => void save({ speed: Number(id) }, "Speed saved for your next call.")}
@@ -186,13 +187,13 @@ export function TalkSettingsSheet() {
         <Card style={{ gap: spacing[3] }}>
           <SectionHeading title="Personality" />
           <Choices
-            label="Her tone"
+            label={`${p.Possessive} tone`}
             options={TONES}
             value={(data?.identity.tone ?? "warm") as "warm" | "concise" | "thoughtful"}
             onPick={(id) => void pickTone(id)}
           />
-          <Choices label="Her mood" options={MOODS} value={s1?.mood ?? "balanced"} onPick={(id) => void save({ mood: id }, "Saved.")} />
-          <Choices label="How much she says" options={LENGTHS} value={s1?.length ?? "balanced"} onPick={(id) => void save({ length: id }, "Saved.")} />
+          <Choices label={`${p.Possessive} mood`} options={MOODS} value={s1?.mood ?? "balanced"} onPick={(id) => void save({ mood: id }, "Saved.")} />
+          <Choices label={`How much ${p.subject} says`} options={LENGTHS} value={s1?.length ?? "balanced"} onPick={(id) => void save({ length: id }, "Saved.")} />
           <Choices label="Language" options={LANGUAGES} value={s1?.language ?? "match"} onPick={(id) => void save({ language: id }, "Saved.")} />
           <LinkRow
             icon={UserRound}
@@ -230,7 +231,7 @@ export function TalkSettingsSheet() {
           <LinkRow
             icon={Brain}
             title="What Debo knows"
-            detail="The things she has learned, each with its source"
+            detail={`The things ${p.subject} has learned, each with its source`}
             onPress={() => {
               close();
               navigate("knows");

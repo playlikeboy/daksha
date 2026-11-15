@@ -38,7 +38,7 @@ import type {
 import { useAgentWorkspace } from "./agent-workspace";
 import { ConnectAppsSection } from "./connectors-ui";
 import { ToolServersSection } from "./mcp-ui";
-import { deboCharacter } from "./debo-character-store";
+import { deboCharacter, usePronouns } from "./debo-character-store";
 import { type PickPlan, planPick, planRename } from "./debo-character-pick";
 import { CharacterPicker } from "./debo-character-picker";
 import { type CharacterId, characterOrDefault } from "./debo-characters";
@@ -1745,6 +1745,7 @@ export function NotificationsSheet() {
   );
 }
 export function AppsScreen() {
+  const p = usePronouns();
   const { navigate, open } = useWorkspace();
   const { data, mutate } = useAgentWorkspace();
   const [query, setQuery] = useState("");
@@ -1877,7 +1878,7 @@ export function AppsScreen() {
       <LinkRow
         icon={SlidersHorizontal}
         title="Voice, personality and notes"
-        detail="How she talks and what she knows"
+        detail={`How ${p.subject} talks and what ${p.subject} knows`}
         onPress={() => open({ type: "talk-settings" })}
       />
       <Button onPress={() => setSettings(!settings)}>
