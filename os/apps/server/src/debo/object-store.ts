@@ -34,6 +34,8 @@ export interface ObjectStore {
   abortUpload(key: string, uploadId: string): Promise<void>;
   /** Size in bytes, or null when there is no such object. */
   head(key: string): Promise<{ size: number } | null>;
+  /** Store a small file made on the server (a picture Debo made). The server writes it, not the app. */
+  putBytes(key: string, bytes: Uint8Array, mimeType: string): Promise<void>;
   /** A link that plays the object for a short time. */
   signedGet(key: string, mimeType: string, expiresSeconds: number): Promise<string>;
   /** Delete one object. Deleting something that is not there is fine. */
@@ -131,6 +133,16 @@ export function r2Store(config: R2Config, fetchImpl: typeof fetch = fetch): Obje
       if (response.status === 404) return null;
       if (!response.ok) throw new Error("R2 would not answer.");
       return { size: Number(response.headers.get("content-length") ?? 0) };
+    },
+
+    async putBytes(key, bytes, mimeType) {
+      const response = await aws.fetch(objectUrl(key), {
+        method: "PUT",
+        body: new Uint8Array(bytes),
+        headers: { "Content-Type": mimeType, "Content-Length": String(bytes.byteLength) },
+        signal: AbortSignal.timeout(60_000),
+      });
+      if (!response.ok) throw new Error("R2 would not store the file.");
     },
 
     signedGet: (key, _mime, expires) => presign("GET", objectUrl(key), expires),

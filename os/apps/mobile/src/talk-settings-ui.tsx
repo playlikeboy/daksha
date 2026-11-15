@@ -12,6 +12,7 @@ import { RemindersSetting } from "./debo-reminders-setting";
 import { PersonaSetting } from "./debo-persona-setting";
 import { capital, usePronouns, useTalkSettingsName } from "./debo-pronouns";
 import { Button, Card, colors, ErrorNotice, Field, LinkRow, radius, s, SectionHeading, Sheet, Skeleton, spacing } from "./ui";
+import { OwnKeysSetting } from "./own-keys-ui";
 import { useWorkspace } from "./workspace";
 import { Brain, UserRound } from "lucide-react-native";
 
@@ -258,6 +259,8 @@ export function TalkSettingsSheet() {
           {saved}
         </Text>
         <ErrorNotice error={error} />
+
+        <OwnKeysSetting />
       </View>
       )}
     </Sheet>

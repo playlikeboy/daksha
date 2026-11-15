@@ -122,6 +122,16 @@ export function bindingStore(options: BindingStoreOptions): BindingStore {
       return { size: Number(response.headers.get("content-length") ?? 0) };
     },
 
+    async putBytes(key, bytes, mimeType) {
+      const response = await call(path("o", key), {
+        method: "PUT",
+        headers: { "Content-Type": mimeType, "Content-Length": String(bytes.byteLength) },
+        body: new Uint8Array(bytes),
+        signal: AbortSignal.timeout(60_000),
+      });
+      if (!response.ok) throw new Error("The bucket would not store the file.");
+    },
+
     signedGet: async (key, mimeType, seconds) => link({ op: "get", key, mimeType }, seconds),
 
     async delete(key) {

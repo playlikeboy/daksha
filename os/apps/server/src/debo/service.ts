@@ -127,6 +127,8 @@ export class DeboService {
   devStore?: import("hono").Hono;
   /** Binding mode only: uploads to and playback from the private bucket, through this server. Served at /api/media-blob. */
   blobRoutes?: import("hono").Hono;
+  /** The private bucket recordings use. Pictures Debo makes are kept here too, under the owner's folder. */
+  readonly mediaStore?: import("./object-store.ts").ObjectStore;
 
   /**
    * `backend` is null when there is no Debo database. `localOwners` are extra
@@ -139,6 +141,7 @@ export class DeboService {
     mediaDeps?: MediaDeps,
   ) {
     const media = backend?.media;
+    this.mediaStore = mediaDeps?.store;
     this.recordings =
       backend && media && mediaDeps
         ? new MediaService(media, mediaDeps, {
@@ -502,8 +505,17 @@ export class DeboService {
     const backend = this.ready(owner);
     if (!backend.askConfigured) throw new AppError(ASK_OFF, 503);
     const q = Question.parse(question);
-    return backend.ask(owner, q, signal);
+    const ownKey = this.ownAnthropicKey;
+    if (!ownKey) return backend.ask(owner, q, signal);
+    // With their own Anthropic key, the answer is made on it, and Debo's daily limit does not apply.
+    return (async function* () {
+      const anthropicKey = await ownKey(owner).catch(() => undefined);
+      yield* backend.ask(owner, q, signal, anthropicKey ? { anthropicKey } : undefined);
+    })();
   }
+
+  /** Set by the server: the person's own Anthropic key, when they saved one. Never logged. */
+  ownAnthropicKey?: (owner: string) => Promise<string | undefined>;
 
   /** Ask and wait for the whole answer. */
   async askAll(owner: string, question: unknown, signal?: AbortSignal): Promise<AskAnswer> {

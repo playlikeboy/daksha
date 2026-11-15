@@ -13,16 +13,26 @@ import {
   type SchemaInput,
   toolDefinition,
 } from "@tanstack/ai";
-import { type AnthropicChatModel, anthropicText } from "@tanstack/ai-anthropic";
+import { type AnthropicChatModel, anthropicText, createAnthropicChat } from "@tanstack/ai-anthropic";
 import { type GeminiTextModel, geminiText } from "@tanstack/ai-gemini";
-import { type OpenAIChatModel, openaiChatCompletions, openaiText } from "@tanstack/ai-openai";
+import {
+  createOpenaiChatCompletions,
+  type OpenAIChatModel,
+  openaiChatCompletions,
+  openaiText,
+} from "@tanstack/ai-openai";
 import { map, mergeMap, type Observable } from "rxjs";
 import { z } from "zod";
 import { MODEL_MAX_RETRIES } from "../config.ts";
 
+/** OpenRouter speaks the OpenAI Chat Completions format: https://openrouter.ai/docs */
+export const OPENROUTER_BASE_URL = "https://openrouter.ai/api/v1";
+
 // Same "provider/model" strings, env vars and base URL formats as the AI SDK resolver in
 // @copilotkit/runtime. Each provider SDK retries transient failures up to MODEL_MAX_RETRIES times.
-function adapter(spec: string) {
+// `apiKey` is a person's own key (own-keys/service.ts): it goes straight to that provider, never
+// through Debo's base URL or gateway, and is never logged.
+export function adapter(spec: string, apiKey?: string) {
   const [, provider = "", model = ""] = spec.trim().match(/^([^/:]*)[/:](.*)$/) ?? [];
   if (!provider || !model.trim())
     throw new Error(
@@ -42,7 +52,18 @@ function adapter(spec: string) {
         baseURL: process.env.OPENAI_BASE_URL,
         maxRetries: MODEL_MAX_RETRIES,
       });
+    case "openrouter": {
+      const key = apiKey ?? process.env.OPENROUTER_API_KEY;
+      if (!key) throw new Error("An openrouter/ model needs a key: the person's own, or OPENROUTER_API_KEY.");
+      // Chat Completions with tools; OpenRouter does not run the Responses API tool loop.
+      return createOpenaiChatCompletions(id as OpenAIChatModel, key, {
+        // OPENROUTER_BASE_URL is for tests and self-hosted proxies only.
+        baseURL: process.env.OPENROUTER_BASE_URL?.trim() || OPENROUTER_BASE_URL,
+        maxRetries: MODEL_MAX_RETRIES,
+      });
+    }
     case "anthropic":
+      if (apiKey) return createAnthropicChat(id as AnthropicChatModel, apiKey, { maxRetries: MODEL_MAX_RETRIES });
       // The AI SDK base URL ends in /v1; the Anthropic SDK adds /v1 itself.
       return anthropicText(id as AnthropicChatModel, {
         baseURL: process.env.ANTHROPIC_BASE_URL?.replace(/\/v1\/?$/, ""),
@@ -74,7 +95,7 @@ export function unknownProvider(
     ? ` For a model on your OPENAI_BASE_URL gateway, use "openai/${spec.trim()}".`
     : "";
   return new Error(
-    `Unknown provider "${provider}" in "${spec}". Supported: openai, anthropic, google (gemini).${hint}`,
+    `Unknown provider "${provider}" in "${spec}". Supported: openai, anthropic, google (gemini), openrouter.${hint}`,
   );
 }
 
@@ -113,6 +134,8 @@ const stateTools = [
 /** A BuiltInAgent in TanStack factory mode with the options of the classic AI SDK mode. */
 export function tanstackAgent(options: {
   model: string;
+  /** A person's own key for that provider. Without it, Debo's own key from the environment. */
+  apiKey?: string;
   maxSteps: number;
   tools: ToolDefinition[];
   prompt: string;
@@ -138,7 +161,7 @@ export function tanstackAgent(options: {
       )
         system += `\n## Application State\nThis is state from the application that you can edit by calling AGUISendStateSnapshot or AGUISendStateDelta.\n\`\`\`json\n${JSON.stringify(input.state, null, 2)}\n\`\`\`\n`;
       return chat({
-        adapter: adapter(options.model),
+        adapter: adapter(options.model, options.apiKey),
         messages: converted.messages,
         systemPrompts: system ? [system] : [],
         tools: [

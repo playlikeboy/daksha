@@ -37,6 +37,9 @@ export function memoryStore(baseUrl = "http://localhost:8787"): MemoryStore {
     objects,
     issued,
     put: (key, bytes) => void objects.set(key, bytes),
+    async putBytes(key, bytes) {
+      objects.set(key, bytes);
+    },
     async beginUpload({ key, mimeType, size, singleMaxBytes, partBytes, expiresSeconds }): Promise<UploadPlan> {
       if (size <= singleMaxBytes)
         return { mode: "single", url: grant({ op: "put", key, size }, expiresSeconds), headers: { "Content-Type": mimeType } };

@@ -175,12 +175,12 @@ export async function chatCompletionsFixture(
   t: TestContext,
   reply: (index: number) => ModelCall | undefined | Promise<ModelCall | undefined>,
 ) {
-  const requests: { path: string; body: string }[] = [];
+  const requests: { path: string; body: string; authorization?: string }[] = [];
   const server = createServer(async (request, response) => {
     let body = "";
     for await (const chunk of request) body += chunk;
     const index = requests.length;
-    requests.push({ path: request.url ?? "", body });
+    requests.push({ path: request.url ?? "", body, authorization: request.headers.authorization });
     const call = await reply(index);
     response.writeHead(200, { "Content-Type": "text/event-stream" });
     const chunk = (delta: object, finish: string | null) =>
