@@ -40,6 +40,7 @@ import { deboCharacter } from "./src/debo-character-store";
 import { DeboFaceGallery } from "./src/debo-face-gallery";
 import { useTaskMood } from "./src/debo-mood-hooks";
 import { deboMood } from "./src/debo-mood-store";
+import { PeopleSetting } from "./src/debo-people-setting";
 import { PersonaSetting } from "./src/debo-persona-setting";
 import { ReactionsSetting } from "./src/debo-reactions-setting";
 import { ChatTitle } from "./src/chat-title";
@@ -565,6 +566,7 @@ function WorkspaceShell({
                 {section === "apps" && <AccountCard />}
                 {section === "apps" && <ReactionsSetting />}
                 {section === "apps" && <PersonaSetting />}
+                {section === "apps" && <PeopleSetting />}
               </ScrollView>
             )}
             <View
