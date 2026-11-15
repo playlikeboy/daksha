@@ -7,6 +7,7 @@
 // out) ends the call and turns the microphone off.
 import { createContext, type ReactNode, useContext, useEffect, useRef, useSyncExternalStore } from "react";
 import { Platform } from "react-native";
+import { keepCallRunning } from "./debo-call-service";
 import { type TalkEngine, TalkCall, type TalkState } from "./debo-talk-call";
 import { deboLevels, deboMood } from "./debo-mood-store";
 import { startProblem, startVoice } from "./debo-voice-engine";
@@ -89,6 +90,22 @@ export function TalkSessionProvider({
       }
     };
   }, [state.active]);
+
+  // Android: while the call is live, a notification ("Debo is listening", with End) keeps it going
+  // in the background. It goes away when the call ends, however it ends.
+  useEffect(() => {
+    if (!live) return;
+    let stop: (() => Promise<void>) | undefined;
+    let over = false;
+    void keepCallRunning(() => void current.end()).then((next) => {
+      if (over) void next();
+      else stop = next;
+    });
+    return () => {
+      over = true;
+      void stop?.();
+    };
+  }, [live, current]);
 
   // Leaving for good (signing out) ends the call.
   useEffect(() => {

@@ -13,7 +13,15 @@
       "bundleIdentifier": "life.debo.app",
       "infoPlist": { "UIBackgroundModes": ["audio"] }
     },
-    "android": { "package": "life.debo.app" },
+    "android": {
+      "package": "life.debo.app",
+      "permissions": [
+        "android.permission.RECORD_AUDIO",
+        "android.permission.FOREGROUND_SERVICE",
+        "android.permission.FOREGROUND_SERVICE_MICROPHONE",
+        "android.permission.POST_NOTIFICATIONS"
+      ]
+    },
     "web": { "bundler": "metro", "name": "Debo: remembers your life" },
     "plugins": [
       "expo-document-picker",
@@ -39,7 +47,8 @@
           "microphonePermission": "Debo uses the microphone only while you talk to it or record a note. The sound of a call is never kept. A note you record is kept until you delete it.",
           "recordAudioAndroid": true
         }
-      ]
+      ],
+      "./plugins/with-call-service"
     ]
   }
 }
