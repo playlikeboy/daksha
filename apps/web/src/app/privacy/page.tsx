@@ -252,7 +252,9 @@ export default function PrivacyPage() {
               while the bar is there, and the bar always says whether it is on. On the web, the call keeps going if you
               switch tabs or minimise the window, and stops when you close the tab. On iPhone the call is allowed to
               continue when the app is in the background or the screen is locked, and iOS shows its orange microphone
-              dot. Press End, or Mute, at any time.
+              dot. On Android the call keeps going too, and Android shows a &ldquo;Debo is listening&rdquo; notification
+              with an End button for as long as the call lasts. Android may ask whether Debo can show notifications when
+              a call starts; if you say no, the call still works. Press End, or Mute, at any time.
             </>,
           ]}
         />
@@ -291,6 +293,12 @@ export default function PrivacyPage() {
               Debo keeps, with each recording: its type, size, length, when you recorded it, the file name if you added a
               file, the words with their timing, the language, and a fingerprint of the file so the same file is not
               written out twice. It never keeps where you were.
+            </>,
+            <>
+              In the phone app, a voice note or video you record stays in Debo&rsquo;s own storage on your phone, which
+              other apps cannot read, until your phone clears it. One you cancel is deleted from the phone at once. On
+              the phone, speaking into the text uses your keyboard&rsquo;s own microphone, so your keyboard&rsquo;s
+              maker handles that sound, not Debo.
             </>,
             <>
               To delete a recording, delete its entry: the file is removed from storage first, then the entry and what Debo
