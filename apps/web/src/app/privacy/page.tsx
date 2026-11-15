@@ -154,6 +154,35 @@ export default function PrivacyPage() {
           week. It goes to the assistant model like any other answer, and the check-in itself is not saved anywhere.
         </p>
         <p>
+          Reminders in the new app. Once a minute Debo&rsquo;s server checks, in your own time zone, three things and
+          nothing else: birthdays and special days on your people cards (a reminder the day before at 18:00 and on the
+          morning at 08:00; on unless you turn it off), the morning check-in (off unless you turn it on, at the time you
+          pick; it is built from the same things as above, and the update says only names and counts, never your journal
+          text), and reminders you asked for. Each arrives once, as an update in Chat that you can dismiss. Nothing is
+          sent between 22:00 and 07:00. Turn each one on or off in &ldquo;How she talks and what she knows&rdquo;, under
+          &ldquo;Reminders and check-in&rdquo;.
+        </p>
+        <p>
+          Promises from your journal. When you save or change a written entry, its text goes to the assistant model
+          (Anthropic, which already reads your entries to answer your questions) with one more question: did you promise
+          to do something (&ldquo;I told Mum I&rsquo;d call on Sunday&rdquo;)? Anything it finds is only a suggestion on
+          the Ideas screen, with the words it came from and a link to the entry. Nothing happens until you tap
+          &ldquo;Remind me&rdquo;, which makes a reminder, or &ldquo;Dismiss&rdquo;. Deleting the entry deletes its
+          suggestions and the reminders made from them. Reminders and your reminder settings are saved with your
+          account, are in &ldquo;Download my data&rdquo; and are deleted with your data.
+        </p>
+        <p>
+          Notifications outside the app are off until you turn on &ldquo;Send me reminders&rdquo; on a device. In a
+          browser or the installed web app this uses web push: your browser&rsquo;s push service (Google for Chrome,
+          Mozilla for Firefox, Apple for Safari, Microsoft for Edge) gives Debo an address for that browser, which Debo
+          keeps until you turn it off there or delete your data (signing out stops that browser at once, and Debo
+          forgets the address the next time it tries it); your download lists the address but not
+          its keys. A push carries only a short title, such as &ldquo;Good morning&rdquo;, &ldquo;Call Mum&rdquo; or
+          &ldquo;Tomorrow is Riya&rsquo;s birthday&rdquo;, encrypted so the push service cannot read it; never what you
+          wrote. In the phone app the phone itself holds the next reminders (their titles and times) and shows them,
+          with no push service involved; signing out removes them.
+        </p>
+        <p>
           We have not yet checked LiveKit&rsquo;s, Deepgram&rsquo;s or Cartesia&rsquo;s terms on training AI and on how
           long they keep audio. Until we do, assume they may keep it for a time. If that worries you, type instead.
         </p>
@@ -319,6 +348,49 @@ export default function PrivacyPage() {
               copy of a deleted file.
             </>,
             <>A recording can be up to 200 MB and 60 minutes. You can add up to 4 hours and 40 recordings a day.</>,
+          ]}
+        />
+        <h3 className="mt-6 font-semibold">Pictures Debo makes</h3>
+        <p>In the new app you can ask Debo to make a picture, in chat or on a call. If pictures are not switched on, Debo says so and none of the below applies.</p>
+        <List
+          items={[
+            <>
+              The words describing the picture go to Cloudflare Workers AI (a picture model called FLUX.1 schnell), which
+              draws it. Cloudflare says it does not use content processed by Workers AI to train AI models. If you set
+              your own OpenRouter picture model (below), the words go to OpenRouter and the model you picked instead.
+            </>,
+            <>
+              The picture is kept in the same private Cloudflare R2 bucket as recordings, and shown to you with a link
+              that stops working after an hour. Debo keeps the words it was made from, when, and which service made it.
+              This is in &ldquo;Download my data&rdquo;.
+            </>,
+            <>
+              Debo refuses sexual pictures and pictures meant to fool people, and the picture service has its own
+              safety filter. You can make up to 20 pictures a day on Debo&rsquo;s service.
+            </>,
+            <>You can delete a picture, which removes the file too. &ldquo;Delete my data&rdquo; removes them all.</>,
+          ]}
+        />
+        <h3 className="mt-6 font-semibold">Using your own AI keys</h3>
+        <p>In the new app&rsquo;s settings, a folded section called &ldquo;Advanced: use your own keys&rdquo; lets you add your own Anthropic or OpenRouter key. Most people never use it. If you don&rsquo;t, none of this applies.</p>
+        <List
+          items={[
+            <>
+              Debo checks a key with one small request to that company before saving it, then stores it encrypted. It is
+              never shown again, never written to our logs and never in &ldquo;Download my data&rdquo;, which only says
+              that a key is set. The screen shows only its last four characters.
+            </>,
+            <>
+              With your own key, what you say in chats and calls, the parts of your entries Debo uses to answer, and
+              picture descriptions go to that company on your account, under its terms and privacy policy, and it bills
+              you. OpenRouter passes your requests on to the model maker you picked. Debo&rsquo;s daily limits do not
+              apply to what runs on your key.
+            </>,
+            <>
+              On calls, your key is used for what Debo says. Hearing you and speaking out loud still go through
+              Debo&rsquo;s voice service, as described above.
+            </>,
+            <>Removing a key deletes it. &ldquo;Delete my data&rdquo; deletes every key.</>,
           ]}
         />
       </Section>

@@ -56,6 +56,28 @@ export type EntryView = {
   media: MediaView | null;
 };
 export type SourceChipView = { id: string; label: string };
+/** An entry close in meaning to another one: enough to show a short card that opens it. */
+export type SimilarView = {
+  id: string;
+  kind: EntryView["kind"];
+  title: string;
+  happenedAt: string;
+  /** A short piece of its words. */
+  snippet: string;
+  label: string;
+};
+
+/** How many similar entries an entry page shows. */
+export const SIMILAR_LIMIT = 5;
+
+/** A short, flat preview. Call lines lose their "[00:07] You:" marks. */
+export function snippetOf(text: string, max = 180): string {
+  const flat = text
+    .replace(/^\[\d+:\d{2}\] (?:You|Debo): /gm, "")
+    .replace(/\s+/g, " ")
+    .trim();
+  return flat.length > max ? `${flat.slice(0, max - 1).trimEnd()}…` : flat;
+}
 export type MemoryView = {
   id: string;
   text: string;
@@ -101,6 +123,11 @@ export const CALL_IDLE_MS = 10 * 60_000;
 /** The app says a call ended. Wait this long for Debo's last words to be saved first. */
 const CALL_END_GRACE_MS = 2_000;
 
+/** What the server hears about a typed entry: saved (with its words) or deleted. */
+export type EntryChange =
+  | { entryId: string; change: "saved"; text: string; happenedAt?: string }
+  | { entryId: string; change: "deleted" };
+
 export class DeboService {
   private readonly pending = new Set<Promise<unknown>>();
   private readonly recordings: MediaService | null;
@@ -111,12 +138,19 @@ export class DeboService {
   private readonly lastCallSweep = new Map<string, number>();
   /** Set by the server: deleting a call also deletes its copy in Chat. */
   onCallDeleted?: (owner: string, callId: string) => Promise<void>;
+  /**
+   * Set by the server: a typed entry was saved, edited or deleted, so promises found in it
+   * can be suggested (or taken away). Runs after the entry is safe; must not throw.
+   */
+  onEntryChange?: (owner: string, change: EntryChange) => Promise<void>;
   /** How long to wait after "call ended" for the last words to be saved. Tests set 0. */
   callEndGraceMs = CALL_END_GRACE_MS;
   /** Sample mode only: the in-memory bucket, to be served at /api/dev-r2. Never set in a live workspace. */
   devStore?: import("hono").Hono;
   /** Binding mode only: uploads to and playback from the private bucket, through this server. Served at /api/media-blob. */
   blobRoutes?: import("hono").Hono;
+  /** The private bucket recordings use. Pictures Debo makes are kept here too, under the owner's folder. */
+  readonly mediaStore?: import("./object-store.ts").ObjectStore;
 
   /**
    * `backend` is null when there is no Debo database. `localOwners` are extra
@@ -129,6 +163,7 @@ export class DeboService {
     mediaDeps?: MediaDeps,
   ) {
     const media = backend?.media;
+    this.mediaStore = mediaDeps?.store;
     this.recordings =
       backend && media && mediaDeps
         ? new MediaService(media, mediaDeps, {
@@ -284,6 +319,39 @@ export class DeboService {
     return (await backend.entries.list(owner, { limit, contains })).map((e) => this.entryView(e));
   }
 
+  /** One entry, for its own page. Someone else's id gets the same answer as a deleted one. */
+  async getEntry(owner: string, id: string): Promise<EntryView> {
+    const backend = this.ready(owner);
+    if (!Uuid.safeParse(id).success) throw new AppError(ENTRY_GONE, 404);
+    const entry = await backend.entries.get(owner, id);
+    if (!entry) throw new AppError(ENTRY_GONE, 404);
+    return this.entryView(entry);
+  }
+
+  /**
+   * Up to five of this person's other entries closest in meaning to one entry,
+   * closest first. Uses the embeddings already kept for search: no model call.
+   */
+  async similarEntries(owner: string, id: string): Promise<SimilarView[]> {
+    const backend = this.ready(owner);
+    if (!Uuid.safeParse(id).success) throw new AppError(ENTRY_GONE, 404);
+    if (!(await backend.entries.get(owner, id))) throw new AppError(ENTRY_GONE, 404);
+    const found = await backend.similar(owner, id, SIMILAR_LIMIT + 1);
+    // Never the entry itself, and each other entry once, even if a backend slips.
+    const others = [...new Map(found.filter((s) => s.id !== id).map((s) => [s.id, s])).values()];
+    return others
+      .sort((a, b) => a.distance - b.distance)
+      .slice(0, SIMILAR_LIMIT)
+      .map((s) => ({
+        id: s.id,
+        kind: s.kind === "voice_call" ? "call" : s.kind,
+        title: s.title,
+        happenedAt: s.happenedAt.toISOString(),
+        snippet: snippetOf(s.text),
+        label: chipLabel(s.happenedAt, s.kind),
+      }));
+  }
+
   async createEntry(owner: string, input: unknown, actor: "you" | "debo" = "you"): Promise<EntryView> {
     const backend = this.ready(owner);
     this.sweepCalls(owner);
@@ -291,6 +359,7 @@ export class DeboService {
     const entry = await backend.entries.create(owner, text, happenedAt);
     await this.record(backend, owner, actor, "saved", [entry.id]);
     this.later(backend.afterChange(owner, entry.id, "saved"));
+    this.entryChanged(owner, { entryId: entry.id, change: "saved", text, happenedAt: entry.happenedAt.toISOString() });
     return this.entryView(entry);
   }
 
@@ -301,6 +370,7 @@ export class DeboService {
     if (!(await backend.entries.update(owner, id, text))) throw new AppError(ENTRY_GONE, 404);
     await this.record(backend, owner, "you", "edited", [id]);
     this.later(backend.afterChange(owner, id, "saved"));
+    this.entryChanged(owner, { entryId: id, change: "saved", text });
   }
 
   async deleteEntry(owner: string, id: string): Promise<void> {
@@ -311,6 +381,7 @@ export class DeboService {
     if (!(await backend.entries.remove(owner, id))) throw new AppError(ENTRY_GONE, 404);
     await this.record(backend, owner, "you", "deleted", [id]);
     this.later(backend.afterChange(owner, id, "deleted"));
+    this.entryChanged(owner, { entryId: id, change: "deleted" });
     await this.dropCallChat(owner, id);
   }
 
@@ -319,6 +390,28 @@ export class DeboService {
   // memories) runs once per call: when the app says the call ended, or, if it
   // never does (closed tab), when the call has been quiet for CALL_IDLE_MS and
   // the person next uses voice or the journal, or the background sweep runs.
+
+  /** Promises the person made in an entry, or none when no model is set up. Never throws. */
+  async findPromises(owner: string, text: string, today: string) {
+    const backend = this.journalOf(owner);
+    if (!backend?.findPromises) return [];
+    try {
+      return await backend.findPromises(text, today);
+    } catch (error) {
+      console.error("find promises failed", { owner, reason: error instanceof Error ? error.name : "unknown" });
+      return [];
+    }
+  }
+
+  private entryChanged(owner: string, change: EntryChange) {
+    const listener = this.onEntryChange;
+    if (!listener) return;
+    this.later(
+      listener(owner, change).catch((error) =>
+        console.error("entry follow-up failed", { owner, reason: error instanceof Error ? error.name : "unknown" }),
+      ),
+    );
+  }
 
   /** A call's copy in Chat has the same words, so deleting the call deletes it too. */
   private async dropCallChat(owner: string, callId: string) {
@@ -467,8 +560,17 @@ export class DeboService {
     const backend = this.ready(owner);
     if (!backend.askConfigured) throw new AppError(ASK_OFF, 503);
     const q = Question.parse(question);
-    return backend.ask(owner, q, signal);
+    const ownKey = this.ownAnthropicKey;
+    if (!ownKey) return backend.ask(owner, q, signal);
+    // With their own Anthropic key, the answer is made on it, and Debo's daily limit does not apply.
+    return (async function* () {
+      const anthropicKey = await ownKey(owner).catch(() => undefined);
+      yield* backend.ask(owner, q, signal, anthropicKey ? { anthropicKey } : undefined);
+    })();
   }
+
+  /** Set by the server: the person's own Anthropic key, when they saved one. Never logged. */
+  ownAnthropicKey?: (owner: string) => Promise<string | undefined>;
 
   /** Ask and wait for the whole answer. */
   async askAll(owner: string, question: unknown, signal?: AbortSignal): Promise<AskAnswer> {

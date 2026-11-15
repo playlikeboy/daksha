@@ -5,7 +5,9 @@ import { AppError } from "./errors.ts";
 import type { ConnectorService } from "./connectors/index.ts";
 import type { DeboService } from "./debo/index.ts";
 import type { Files } from "./files.ts";
+import type { ImageService } from "./images/service.ts";
 import type { McpService } from "./mcp/service.ts";
+import type { OwnKeysService } from "./own-keys/service.ts";
 
 /** Kinds that hold secrets or session state. They are never part of a person's export. */
 const NEVER_EXPORTED = new Set(["credentials", "sessions"]);
@@ -21,6 +23,8 @@ export function accountRoutes(
   debo?: DeboService,
   connectors?: ConnectorService,
   mcp?: McpService,
+  ownKeys?: OwnKeysService,
+  images?: ImageService,
 ) {
   const app = new Hono<{ Variables: { owner: string } }>();
   app.get("/export", async (c) => {
@@ -42,10 +46,19 @@ export function accountRoutes(
       : null;
     return c.json({
       exportedAt: new Date().toISOString(),
-      records: rows.filter((row) => row.kind !== "mcp_servers"),
+      // Push devices: the push service address and when it was added. The device keys stay out.
+      records: rows
+        .filter((row) => row.kind !== "mcp_servers" && row.kind !== "own_keys")
+        .map((row) =>
+          row.kind === "push-subscriptions" && row.data && typeof row.data === "object"
+            ? { ...row, data: { ...(row.data as Record<string, unknown>), keys: undefined } }
+            : row,
+        ),
       journal,
       connectedApps: apps,
       toolServers,
+      // Which of the person's own AI keys are set. Never a key, and never its last characters.
+      ownKeys: (await ownKeys?.exportMine(c.get("owner"))) ?? null,
     });
   });
   app.delete("/", async (c) => {
@@ -61,8 +74,12 @@ export function accountRoutes(
     // Connected apps next: the sign-ins held at the provider must go too, or the wipe is not a wipe.
     const appsDisconnected = (await connectors?.removeAll(owner)) ?? 0;
     const filesRemoved = await files.removeAll(owner);
+    // Pictures Debo made: the files in the bucket go before their records do.
+    const imagesRemoved = (await images?.removeAll(owner)) ?? 0;
+    // The person's own AI keys. The records below would go anyway; this is the clear path.
+    await ownKeys?.removeAll(owner);
     const recordsRemoved = await db.removeOwner(owner);
-    return c.json({ ok: true, recordsRemoved, filesRemoved, entriesRemoved, appsDisconnected });
+    return c.json({ ok: true, recordsRemoved, filesRemoved, entriesRemoved, appsDisconnected, imagesRemoved });
   });
   return app;
 }

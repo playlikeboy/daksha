@@ -34,6 +34,8 @@ import { backgroundFailure } from "../log.ts";
 import { SearchService } from "../search.ts";
 import type { ConnectorService } from "../connectors/service.ts";
 import type { McpService } from "../mcp/service.ts";
+import type { ImageService } from "../images/service.ts";
+import type { OwnKeysService } from "../own-keys/service.ts";
 import type { DeboService } from "../debo/service.ts";
 import type { WorkspaceService } from "../workspace.ts";
 import { analyzeSpending } from "./finance.ts";
@@ -59,6 +61,14 @@ export class AgentService {
   connectors?: ConnectorService;
   /** The person's own tool servers (MCP). */
   mcp?: McpService;
+  /** Birthday reminders, the morning check-in and reminders, run by the upkeep loop. Set by createApp. */
+  companion?: { tick(now?: Date): Promise<void> };
+  /** Turns an accepted promise suggestion into a reminder. Set by createApp. */
+  promises?: { accept(owner: string, idea: Idea): Promise<Idea | null> };
+  /** The person's own AI keys. With one set, their chats and tasks run on it. */
+  ownKeys?: OwnKeysService;
+  /** Pictures Debo makes (make_image). */
+  images?: ImageService;
   readonly worker: TaskWorker;
   readonly search: SearchService;
   private maintenance?: ReturnType<typeof setInterval>;
@@ -95,6 +105,8 @@ export class AgentService {
     if (this.refreshing) return;
     this.refreshing = true;
     try {
+      // Birthdays, the morning check-in and reminders. Its own failures never stop the rest.
+      await this.companion?.tick().catch((error) => backgroundFailure("companion upkeep", error));
       // Recover publications if the process exited after committing an outcome.
       for (const { owner, value } of await this.db.scan<AgentTask>("tasks"))
         await this.publishOutcome(owner, value);
@@ -577,7 +589,7 @@ export class AgentService {
         .filter((task) => typeof task.input.messageId === "string")
         .map((task) => `${task.kind}:${task.input.messageId}`),
     );
-    const obsolete = (kind: AgentTask["kind"], messageId: unknown) =>
+    const obsolete = (kind: Idea["kind"], messageId: unknown) =>
       typeof messageId === "string" &&
       (sentIds.has(messageId) || completedSources.has(`${kind}:${messageId}`));
     // Retire earlier suggestions as well as preventing new duplicates. A concurrent
@@ -664,6 +676,11 @@ export class AgentService {
         { status: "new" },
         { status: "dismissed" },
       );
+    // A promise from the journal becomes a reminder, never a task.
+    if (idea.kind === "promise") {
+      if (!this.promises) throw new AppError("Reminders are not set up on this server.", 503);
+      return this.promises.accept(owner, idea);
+    }
     if (idea.status === "new") {
       // A task already working on (or done with) the same email is opened instead of copied.
       const { kind, input } = idea;
@@ -732,7 +749,8 @@ export class AgentService {
     );
     return this.db.get<Idea>(owner, "ideas", id);
   }
-  async notify(owner: string, title: string, body: string, taskId?: string, key?: string) {
+  /** Saves one in-app update. With a key, only the first call saves; returns whether this one did. */
+  async notify(owner: string, title: string, body: string, taskId?: string, key?: string): Promise<boolean> {
     const value: AgentNotification = {
       id: key ? hash(key) : randomUUID(),
       taskId,
@@ -741,7 +759,7 @@ export class AgentService {
       createdAt: date(),
       read: false,
     };
-    await this.db.insertIfAbsent(owner, "notifications", value);
+    return Boolean(await this.db.insertIfAbsent(owner, "notifications", value));
   }
   mailEvidence(mail: Mail): Evidence {
     return { id: mail.id, kind: "mail", title: mail.subject, excerpt: mail.body.slice(0, 400) };

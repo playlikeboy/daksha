@@ -57,6 +57,20 @@ Tell the person plainly: "Your key is stored encrypted. Debo uses it only to ans
 
 What the key cannot cover: some features need a specific kind of model (embeddings, speech). Say clearly which features work with which provider's key, and do not silently fall back to our key and charge for it.
 
+### What is built (new app, decision 32)
+
+In the new app (`os/`), Settings has a folded "Advanced: use your own keys" section (`os/apps/server/src/own-keys/`). It takes an Anthropic key and an OpenRouter key. The key is encrypted with the existing `TOKEN_ENCRYPTION_KEY` (the same vault as tool-server secrets), not a separate `BYOK_ENCRYPTION_KEY`. It is checked once with a call that spends no tokens, shown only as "ends in 1234", and only "key set" is in the download.
+
+| Feature | Anthropic key | OpenRouter key |
+|---|---|---|
+| Chat, calls (what she says), delegated tasks | Yes, first choice | Yes, if a chat model with tools is picked and there is no Anthropic key |
+| Journal answers (`ask_my_life`) | Yes. The daily token limit does not apply, and their tokens are not counted | No, Debo's key and limit |
+| Meaning search (embeddings) | No, Debo's gateway (no Anthropic embeddings) | No |
+| Pictures (`make_image`) | No | Yes, if a picture model is picked. Debo's 20 a day limit does not apply |
+| Hearing and speaking on calls | No, Debo's LiveKit project | No |
+
+A failing own key is not retried on Debo's key: the person sees the error. The chat model for the main conversation has no daily limit today in the new app; only journal answers and pictures do.
+
 ## Limits
 
 - Count usage per person per month from the `usage` table.

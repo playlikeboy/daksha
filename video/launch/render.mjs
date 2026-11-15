@@ -1,5 +1,6 @@
 // Renders the launch video: node render.mjs --web <apps/web> --cap <recording dir> --out <dir> [--layout h|v] [--workers 8] [--only 1.5,20]
 // Or the demo walkthrough: node render.mjs --edit demo --web <apps/web> --cap <dir of recording frames> --out <dir>
+// Or the second launch film, drawn with no recording: node render.mjs --edit film2 --web <apps/web> --out <dir> [--layout h|v]
 // Steps through the page frame by frame at 30 fps, saves JPEG frames, then encodes with ffmpeg.
 import { createRequire } from "node:module";
 import http from "node:http";
@@ -13,14 +14,16 @@ const arg = (k, d) => { const i = process.argv.indexOf("--" + k); return i > 0 ?
 const web = arg("web"), cap = arg("cap"), out = arg("out"), layout = arg("layout", "h"), edit = arg("edit", "launch");
 const workers = +arg("workers", 8), FPS = 30, only = arg("only");
 const ffmpeg = process.env.FFMPEG || "ffmpeg";
-if (!web || !cap || !out) throw new Error("Usage: node render.mjs --web <apps/web> --cap <recording dir> --out <dir> [--layout h|v]");
+if (!web || !out || (!cap && edit !== "film2")) throw new Error("Usage: node render.mjs [--edit launch|demo|film2] --web <apps/web> --cap <recording dir> --out <dir> [--layout h|v]");
 const { chromium } = createRequire(path.join(web, "package.json"))("@playwright/test");
 
-const types = { ".html": "text/html", ".js": "text/javascript", ".woff2": "font/woff2", ".jpg": "image/jpeg", ".json": "application/json" };
-const roots = { "/src/": path.join(here, "src"), "/demo/": path.join(here, "demo"), "/assets/": path.join(here, "assets"), "/cap/": cap };
+const types = { ".html": "text/html", ".js": "text/javascript", ".woff2": "font/woff2", ".jpg": "image/jpeg", ".json": "application/json", ".svg": "image/svg+xml" };
+const roots = { "/src/": path.join(here, "src"), "/demo/": path.join(here, "demo"), "/film2/": path.join(here, "film2"), "/assets/": path.join(here, "assets"),
+  "/art/": path.join(here, "..", "..", "docs", "assets"), ...(cap ? { "/cap/": cap } : {}) };
+const pages = { demo: "/demo/index.html", film2: "/film2/index.html" };
 const server = http.createServer((req, res) => {
   let u = decodeURIComponent(req.url.split("?")[0]);
-  if (u === "/") u = edit === "demo" ? "/demo/index.html" : "/src/index.html";
+  if (u === "/") u = pages[edit] || "/src/index.html";
   for (const [pre, dir] of Object.entries(roots)) {
     if (u.startsWith(pre)) {
       const f = path.join(dir, u.slice(pre.length));
@@ -34,7 +37,7 @@ const server = http.createServer((req, res) => {
 await new Promise((r) => server.listen(0, "127.0.0.1", r));
 const base = `http://127.0.0.1:${server.address().port}/?layout=${layout}`;
 
-const name = edit === "demo" ? "demo" : "launch-" + layout;
+const name = edit === "demo" ? "demo" : edit === "film2" ? "film2-" + layout : "launch-" + layout;
 const frameDir = path.join(out, "frames-" + name);
 fs.mkdirSync(frameDir, { recursive: true });
 const browser = await chromium.launch();

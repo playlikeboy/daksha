@@ -12,18 +12,24 @@ const note = (id: string, createdAt: string, extra: { read?: boolean; taskId?: s
   ...("taskId" in extra ? { taskId: extra.taskId } : { taskId: "task-1" }),
 });
 
-test("the chat's update card shows the newest unread task update first", () => {
+test("the chat's update card shows the newest unread update first, with or without a task", () => {
   const updates = chatUpdates([
     note("old", "2026-11-10T08:00:00.000Z"),
     note("new", "2026-11-14T08:00:00.000Z"),
     note("read", "2026-11-15T08:00:00.000Z", { read: true }),
-    note("no-task", "2026-11-15T09:00:00.000Z", { taskId: undefined }),
+    note("reminder", "2026-11-15T09:00:00.000Z", { taskId: undefined }),
   ]);
   assert.deepEqual(
     updates.map((u) => u.id),
-    ["new", "old"],
+    ["reminder", "new", "old"],
   );
   assert.deepEqual(chatUpdates(undefined), []);
+});
+
+test("the update card offers View task only for an update from a task", () => {
+  const card = readFileSync(new URL("../apps/mobile/src/background-updates.tsx", import.meta.url), "utf8");
+  assert.match(card, /update\.taskId && \(\s*<Button/);
+  assert.match(card, /Dismiss this update/);
 });
 
 test("the update card sits above the composer, outside the scrolling timeline", () => {

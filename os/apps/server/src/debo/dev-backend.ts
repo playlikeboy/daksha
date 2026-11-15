@@ -15,6 +15,21 @@ import { chipLabel } from "./service.ts";
 const words = (text: string) => text.toLowerCase().match(/[a-z]{4,}/g) ?? [];
 const titleOf = (text: string, fallback: string) => (text.split("\n")[0]?.slice(0, 60) || fallback).trim();
 
+/** How alike two texts are by the words they share, 0 to 1. */
+function wordCosine(a: string, b: string): number {
+  const count = (text: string) => {
+    const bag = new Map<string, number>();
+    for (const w of words(text)) bag.set(w, (bag.get(w) ?? 0) + 1);
+    return bag;
+  };
+  const x = count(a);
+  const y = count(b);
+  let dot = 0;
+  for (const [w, n] of x) dot += n * (y.get(w) ?? 0);
+  const norm = (bag: Map<string, number>) => Math.sqrt([...bag.values()].reduce((sum, n) => sum + n * n, 0));
+  return dot === 0 ? 0 : dot / (norm(x) * norm(y));
+}
+
 export function devMemoryBackend(): DeboBackend {
   const entries = new Map<string, Item[]>();
   const memories = new Map<string, Memory[]>();
@@ -121,7 +136,9 @@ export function devMemoryBackend(): DeboBackend {
       });
       if (t.durationMs) r.durationMs = t.durationMs;
       entry.text = t.text.trim();
-      entry.title = titleOf(entry.text, r.kind === "video" ? "Video" : "Voice note");
+      // A title the person gave when saving stays, as in the real database.
+      const fallback = r.kind === "video" ? "Video" : "Voice note";
+      if (!entry.title || entry.title === fallback) entry.title = titleOf(entry.text, fallback);
       return true;
     },
     async findByHash(owner, hash, exceptId) {
@@ -216,6 +233,10 @@ export function devMemoryBackend(): DeboBackend {
           .slice(0, limit)
           .map((e) => ({ ...e, media: mineRecords(owner).find((r) => r.sourceId === e.id) ?? null }));
       },
+      async get(owner, id) {
+        const entry = mine(owner).find((e) => e.id === id);
+        return entry ? { ...entry, media: mineRecords(owner).find((r) => r.sourceId === entry.id) ?? null } : null;
+      },
       async create(owner, text, happenedAt) {
         const entry: Item = { id: randomUUID(), title: titleOf(text, ""), text, happenedAt: happenedAt ?? new Date() };
         entries.set(owner, [...mine(owner), entry]);
@@ -251,6 +272,25 @@ export function devMemoryBackend(): DeboBackend {
           title: e.title,
           happenedAt: e.happenedAt,
           text: e.text,
+        }));
+    },
+    // Stands in for meaning search: shared words instead of embeddings, same shape and order.
+    async similar(owner, id, limit) {
+      const self = mine(owner).find((e) => e.id === id);
+      if (!self) return [];
+      return mine(owner)
+        .filter((e) => e.id !== id && e.text.trim())
+        .map((e) => ({ e, distance: 1 - wordCosine(self.text, e.text) }))
+        .filter((x) => x.distance < 0.95)
+        .sort((a, b) => a.distance - b.distance || b.e.happenedAt.getTime() - a.e.happenedAt.getTime())
+        .slice(0, limit)
+        .map(({ e, distance }) => ({
+          id: e.id,
+          kind: e.kind ?? "journal",
+          title: e.title,
+          happenedAt: e.happenedAt,
+          text: e.text.slice(0, 1200),
+          distance,
         }));
     },
     async *ask(owner, question): AsyncGenerator<AskEvent, void> {

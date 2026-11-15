@@ -17,18 +17,39 @@ import * as DocumentPicker from "expo-document-picker";
 import { File } from "expo-file-system";
 import * as LegacyFileSystem from "expo-file-system/legacy";
 import { Platform } from "react-native";
+import { clamp01 } from "./audio-level";
 import {
   type Capture,
   type CaptureSupport,
   type Dictation,
+  type InputDevice,
   type LiveRecording,
+  type Preview,
+  type RecordOptions,
   type SentRange,
 } from "./debo-capture-types";
 
-export type { Capture, CaptureSupport, Dictation, LiveRecording, SentRange };
+export type { Capture, CaptureSupport, Dictation, InputDevice, LiveRecording, Preview, RecordOptions, SentRange };
 
 export function recordingSupport(): CaptureSupport {
-  return { voice: true, video: true, dictation: false };
+  // A voice note can pause (expo-audio). A video cannot pause here yet.
+  return { voice: true, video: true, dictation: false, pause: { voice: true, video: false }, chooseInputs: false };
+}
+
+/** The phone picks its own microphone; the camera is front or back (see `facing`). */
+export async function listInputs(): Promise<InputDevice[]> {
+  return [];
+}
+
+/**
+ * Before recording. A voice note has nothing to show yet (the level comes once it records).
+ * A video shows the camera, which the recording then uses, so the picture does not blink.
+ */
+export async function openPreview(kind: "voice" | "video", options: RecordOptions = {}): Promise<Preview> {
+  if (kind === "voice") return { close() {} };
+  await cameraPermissions();
+  const controller = cameraController(options.facing ?? "user");
+  return { stream: controller, close() {} };
 }
 
 /** The most a video may be, so a long one stops itself instead of growing past what can be saved. */
@@ -42,9 +63,18 @@ const CAMERA_DENIED =
 /** Mono AAC in an m4a file: clear for speech, and about 30 MB for an hour. */
 function voiceOptions() {
   const preset = RecordingPresets.HIGH_QUALITY;
-  const common = { extension: preset.extension, sampleRate: preset.sampleRate, numberOfChannels: 1, bitRate: 64000 };
+  const common = {
+    extension: preset.extension,
+    sampleRate: preset.sampleRate,
+    numberOfChannels: 1,
+    bitRate: 64000,
+    isMeteringEnabled: true,
+  };
   return Platform.OS === "ios" ? { ...common, ...preset.ios } : { ...common, ...preset.android };
 }
+
+/** Metering is in decibels, about -60 (quiet room) to 0 (very loud). */
+const levelFromDb = (db: number | undefined) => (typeof db === "number" ? clamp01((db + 60) / 60) : 0);
 
 const fileSize = (uri: string) => {
   try {
@@ -65,8 +95,12 @@ const deleteFile = (uri: string | null | undefined) => {
 
 const videoType = (uri: string) => (uri.toLowerCase().endsWith(".mov") ? "video/quicktime" : "video/mp4");
 
-export async function startRecording(kind: "voice" | "video", onTick?: (ms: number) => void): Promise<LiveRecording> {
-  return kind === "video" ? startVideo(onTick) : startVoice(onTick);
+export async function startRecording(
+  kind: "voice" | "video",
+  onTick?: (ms: number) => void,
+  options: RecordOptions = {},
+): Promise<LiveRecording> {
+  return kind === "video" ? startVideo(onTick, options) : startVoice(onTick);
 }
 
 async function startVoice(onTick?: (ms: number) => void): Promise<LiveRecording> {
@@ -90,6 +124,13 @@ async function startVoice(onTick?: (ms: number) => void): Promise<LiveRecording>
   }
   timer = setInterval(() => onTick?.(recorder.getStatus().durationMillis), 250);
   return {
+    pause() {
+      recorder.pause();
+    },
+    resume() {
+      recorder.record();
+    },
+    level: () => levelFromDb(recorder.getStatus().metering),
     async stop() {
       const durationMs = recorder.getStatus().durationMillis;
       try {
@@ -127,8 +168,12 @@ async function startVoice(onTick?: (ms: number) => void): Promise<LiveRecording>
 /** What LivePreview needs to show the camera and run the recording. */
 export type CameraRecorder = {
   kind: "camera";
+  /** Which camera LivePreview shows. */
+  facing: "user" | "environment";
   /** LivePreview calls this when the camera picture is showing. */
   ready(camera: CameraHandle): void;
+  /** Run `work` once the camera is showing (now, if it already is). */
+  whenReady(work: (camera: CameraHandle) => void): void;
 };
 
 /** The two CameraView methods used here. */
@@ -137,12 +182,37 @@ export type CameraHandle = {
   stopRecording(): void;
 };
 
-async function startVideo(onTick?: (ms: number) => void): Promise<LiveRecording> {
+function cameraController(facing: "user" | "environment"): CameraRecorder {
+  let handle: CameraHandle | undefined;
+  let waiting: ((camera: CameraHandle) => void) | undefined;
+  return {
+    kind: "camera",
+    facing,
+    ready(next) {
+      if (handle) return;
+      handle = next;
+      waiting?.(next);
+      waiting = undefined;
+    },
+    whenReady(work) {
+      if (handle) work(handle);
+      else waiting = work;
+    },
+  };
+}
+
+async function cameraPermissions() {
   const [camera, mic] = await Promise.all([
     Camera.requestCameraPermissionsAsync(),
     Camera.requestMicrophonePermissionsAsync(),
   ]);
   if (!camera.granted || !mic.granted) throw new Error(CAMERA_DENIED);
+}
+
+async function startVideo(onTick: ((ms: number) => void) | undefined, options: RecordOptions): Promise<LiveRecording> {
+  await cameraPermissions();
+  const previewed = options.preview?.stream as CameraRecorder | undefined;
+  const controller = previewed?.kind === "camera" ? previewed : cameraController(options.facing ?? "user");
 
   let handle: CameraHandle | undefined;
   let started = 0;
@@ -154,18 +224,15 @@ async function startVideo(onTick?: (ms: number) => void): Promise<LiveRecording>
     timer = undefined;
   };
 
-  const controller: CameraRecorder = {
-    kind: "camera",
-    ready(next) {
-      if (handle || cancelled) return;
-      handle = next;
-      started = Date.now();
-      result = next.recordAsync({ maxFileSize: VIDEO_MAX_BYTES });
-      // The recording can end by itself at the size limit: the timer stops with it.
-      void result.catch(() => undefined).finally(clearTimer);
-      timer = setInterval(() => onTick?.(Date.now() - started), 250);
-    },
-  };
+  controller.whenReady((camera) => {
+    if (handle || cancelled) return;
+    handle = camera;
+    started = Date.now();
+    result = camera.recordAsync({ maxFileSize: VIDEO_MAX_BYTES });
+    // The recording can end by itself at the size limit: the timer stops with it.
+    void result.catch(() => undefined).finally(clearTimer);
+    timer = setInterval(() => onTick?.(Date.now() - started), 250);
+  });
 
   return {
     stream: controller,

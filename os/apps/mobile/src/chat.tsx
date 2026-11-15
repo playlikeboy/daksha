@@ -39,6 +39,7 @@ import {
 } from "./conversation-run";
 import { DesktopToolCard } from "./desktop-tool-card";
 import { confirmedJevSelection, displayJevUserMessage, latestJevPanelId } from "./jev-actions";
+import { ImageToolCard } from "./image-tool-card";
 import { JevInteractionContext, JevToolCard } from "./jev-tool-card";
 import { listState } from "./loading-state";
 import { MailToolCard } from "./mail-tool-card";
@@ -138,6 +139,12 @@ export function WorkspaceTools() {
     render: ({ toolCallId, result, status }) => (
       <DesktopToolCard toolCallId={toolCallId} result={result} loading={status !== "complete"} />
     ),
+  });
+  useRenderTool({
+    name: "make_image",
+    description: "Show a picture Debo made",
+    parameters: displayParameters,
+    render: ({ result, status }) => <ImageToolCard result={result} loading={status !== "complete"} />,
   });
   useRenderTool({
     name: "present_choices",

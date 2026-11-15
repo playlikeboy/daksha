@@ -35,7 +35,7 @@ export function BackgroundUpdates() {
         </View>
         <Pressable
           accessibilityRole="button"
-          accessibilityLabel="Dismiss background update"
+          accessibilityLabel="Dismiss this update"
           disabled={busy}
           onPress={() => void dismiss()}
           style={{
@@ -51,13 +51,20 @@ export function BackgroundUpdates() {
       <Text style={s.heading}>{update.title}</Text>
       <Text style={s.text}>{resultSummary(update.body)}</Text>
       <View style={[s.row, { gap: 8, flexWrap: "wrap" }]}>
-        <Button
-          small
-          icon={ArrowRight}
-          onPress={() => update.taskId && open({ type: "task", taskId: update.taskId })}
-        >
-          View task
-        </Button>
+        {update.taskId && (
+          <Button
+            small
+            icon={ArrowRight}
+            onPress={() => update.taskId && open({ type: "task", taskId: update.taskId })}
+          >
+            View task
+          </Button>
+        )}
+        {!update.taskId && (
+          <Button small disabled={busy} onPress={() => void dismiss()}>
+            Dismiss
+          </Button>
+        )}
         {updates.length > 1 && (
           <Button small onPress={() => open({ type: "notifications" })}>
             {updates.length - 1} more updates

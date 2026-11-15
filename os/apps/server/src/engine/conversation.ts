@@ -14,6 +14,9 @@ import { calendarRangeSchema } from "../../../../packages/domain/src/index.ts";
 import { jevActionPrefixOf, parseJevAction } from "../../../../packages/domain/src/jev.ts";
 import { computerInstructions, computerTools } from "../computer-tools.ts";
 import { mcpInstructions, mcpTools } from "../mcp/tools.ts";
+import { imageTools } from "../images/routes.ts";
+import { makeImageInstructions } from "../images/service.ts";
+import type { ChatChoice } from "../own-keys/service.ts";
 import { connectedAppsNote, connectorInstructions, connectorTools } from "../connectors/index.ts";
 import type { Config } from "../config.ts";
 import { deboInstructions, deboTools } from "../debo/index.ts";
@@ -177,10 +180,14 @@ export class ConversationAgent extends AbstractAgent {
           new PeopleStore(this.service.db).list(this.owner).catch((): Person[] => []),
           // Their time zone (from the app, or the last one it sent), so "today" is their today.
           new TimeZoneStore(this.service.db).current(this.owner),
+          // The person's own AI key, if they set one: their chat runs on it. A broken lookup means Debo's own.
+          this.service.ownKeys?.chatChoice(this.owner, this.config.model).catch(() => undefined) ??
+            Promise.resolve(undefined),
+          this.service.images?.canMake(this.owner).catch(() => false) ?? Promise.resolve(false),
         ]),
       ),
     ).pipe(
-      mergeMap(([persona, legacyGoogle, apps, servers, talk, people, timeZone]) =>
+      mergeMap(([persona, legacyGoogle, apps, servers, talk, people, timeZone, ownModel, pictures]) =>
         // The assistant answers to the name the person gave it in "About Debo".
         from(this.assistantName()).pipe(
           mergeMap((name) =>
@@ -191,7 +198,7 @@ export class ConversationAgent extends AbstractAgent {
               jev,
               latestText,
               persona,
-              { legacyGoogle, apps, servers, talk, people, timeZone },
+              { legacyGoogle, apps, servers, talk, people, timeZone, ownModel, pictures },
               name,
             ),
           ),
@@ -222,6 +229,10 @@ export class ConversationAgent extends AbstractAgent {
       talk: TalkSettings | null;
       people: Person[];
       timeZone?: string;
+      /** The person's own key and model, when they set one. */
+      ownModel?: ChatChoice;
+      /** Whether make_image can work for this person. */
+      pictures?: boolean;
     },
     assistantName?: string,
   ): Observable<BaseEvent> {
@@ -248,6 +259,10 @@ export class ConversationAgent extends AbstractAgent {
             signal: browserAbort.signal,
             key,
           })
+        : []),
+      // Pictures: made and kept inside Debo, so no review is needed (decision 28).
+      ...(ctx.pictures && this.service.images
+        ? imageTools(this.service.images, this.owner, this.channel, browserAbort.signal)
         : []),
       // The people in their life and the daily check-in: the person's own data inside Debo.
       ...companionTools(
@@ -419,7 +434,8 @@ export class ConversationAgent extends AbstractAgent {
       }),
     ];
     const agent = tanstackAgent({
-      model: this.config.model ?? "openai/unconfigured",
+      model: ctx.ownModel?.spec ?? this.config.model ?? "openai/unconfigured",
+      apiKey: ctx.ownModel?.apiKey,
       // Desktop work takes one step per click or key, each checked on a screenshot.
       maxSteps: this.config.computerProvider === "e2b-desktop" ? 16 : 6,
       stepLimitNote:
@@ -454,6 +470,7 @@ export class ConversationAgent extends AbstractAgent {
           ? connectorInstructions + connectedAppsNote(ctx.apps)
           : "") +
         (ctx.servers.length ? mcpInstructions(ctx.servers) : "") +
+        (ctx.pictures ? makeImageInstructions : "") +
         computerInstructions(this.config.computerProvider) +
         (this.config.webSearchEnabled ? searchInstructions : ""),
     });

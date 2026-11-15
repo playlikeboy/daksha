@@ -60,6 +60,10 @@ const PASSED = [
   "TOKEN_ENCRYPTION_KEY",
   "SESSION_SIGNING_KEY",
   "WORKER_TOKEN",
+  // Web push for reminders (VAPID). Optional: without both keys push is off and the app hides the switch.
+  "DEBO_OS_VAPID_PUBLIC_KEY",
+  "DEBO_OS_VAPID_PRIVATE_KEY",
+  "DEBO_OS_VAPID_SUBJECT",
   // Optional
   "OPENFUSE_ACCESS_KEY", // only for AUTH_MODE=access-key; not used with Neon Auth
   "OPENAI_API_KEY",

@@ -36,9 +36,9 @@ Value: how much it makes Debo feel like a companion. Effort and risk: S, M, L. "
 | 2 | People in your life: name, relation, birthday, special days (anniversaries), short notes; saved from chat or voice with `note_person`, listed with `list_people`, shown to the model so she uses names | High | M | Low: own data, inside Debo | Privacy page: yes (new stored data) | **Yes** (`people.ts`, `companion.ts`, app card) |
 | 3 | Daily check-in brief (`daily_checkin` tool and `GET /api/checkin`): birthdays and special days this week, tasks waiting for the person, active goals and their next step, entries from the last week worth asking about | High | M | Low: reads only what Debo holds | Privacy page: yes (says what it reads); nothing stored | **Yes** (`companion.ts`) |
 | 4 | Follow-ups from the journal ("how did the interview go?") | High | S on top of 3 | Low | Covered by 3 | **Partly**: the check-in returns recent entries with sources and she may ask about one. No smarter picking yet. |
-| 5 | Birthday and promise reminders that arrive on their own (a notification on the day, or the day before) | High | M | Medium: a nudge can feel pushy; needs a quiet hours rule | Yes: the person turns reminders on; privacy page | No |
-| 6 | Promises found in the journal ("I told Mum I'd call Sunday") turned into a suggested reminder the person accepts | High | M | Medium: the model can misread; must be a suggestion, never automatic | Yes: suggestion card, person accepts; privacy page | No |
-| 7 | Scheduled good-morning / good-evening check-in (the brief arrives at a time the person picks) | Medium | M | Medium: push notifications, time zones | Yes: opt-in, choose time; privacy page | No |
+| 5 | Birthday and promise reminders that arrive on their own (a notification on the day, or the day before) | High | M | Medium: a nudge can feel pushy; needs a quiet hours rule | Yes: the person turns reminders on; privacy page | **Yes** (decision 31): in-app updates the day before at 18:00 and the morning of at 08:00, on unless turned off; push only on devices where the person turns it on; quiet hours 22:00 to 07:00 |
+| 6 | Promises found in the journal ("I told Mum I'd call Sunday") turned into a suggested reminder the person accepts | High | M | Medium: the model can misread; must be a suggestion, never automatic | Yes: suggestion card, person accepts; privacy page | **Yes** (decision 31): typed entries only, Ideas of kind `promise`, "Remind me" or "Dismiss" |
+| 7 | Scheduled good-morning / good-evening check-in (the brief arrives at a time the person picks) | Medium | M | Medium: push notifications, time zones | Yes: opt-in, choose time; privacy page | **Morning only** (decision 31): off by default, default 08:00, sent within three hours of the time. No evening check-in |
 | 8 | Mood over time: a gentle "you've sounded tired this week, how are you doing?" built from the tone of recent entries | Medium | M | High: easy to feel creepy or clinical; must never diagnose | Yes: opt-in, visible, can be turned off; privacy page must say what is inferred and that nothing is stored as a "mood score" unless the person chooses | No |
 | 9 | Household lists (shopping, packing, chores) the family can share | Medium | M | Medium: sharing means a second person sees data | Yes, for sharing; a private list needs only a privacy-page line | No |
 | 10 | Habits and routines (drink water, walk, medicine) with gentle streaks | Medium | M | Medium: streaks can turn into guilt; medicine needs care | Opt-in; privacy page | No |
@@ -67,3 +67,13 @@ Storage: people are rows of kind `people` in the existing records table that hol
 - Nothing here was run against a real model. Check by hand that she saves people from a normal sentence, does not save guesses, follows up once and does not nag, and keeps the brief short.
 - The check-in uses UTC unless she knows the person's time zone, so "today" can be wrong near midnight.
 - People's names and notes go to the assistant model with every reply. That is said on the privacy page. Watch the prompt size for people with many saved people (capped at 40).
+
+## Built on 15 November 2026 (decision 31)
+
+- Birthday and special-day reminders, the opt-in morning check-in, and reminders the person asked for, checked once a minute in the person's saved time zone (`os/apps/server/src/companion-jobs.ts`, `reminders.ts`). Each arrives once as an update in Chat. Nothing between 22:00 and 07:00.
+- Promises in a saved or edited typed entry become suggestions on the Ideas screen with the words and a link to the entry (`promises.ts`, `findPromises` in `@debo/llm`). "Remind me" makes a reminder; nothing happens without the tap. Deleting the entry deletes them.
+- "Send me reminders" per device: web push in a browser (needs the VAPID keys on the server), local notifications held by the phone in the app. Title only.
+- Settings: "Reminders and check-in" in "How she talks and what she knows".
+
+Not checked yet: the promise finder against a real model; web push against a real browser push service; phone notifications on a real phone. Voice notes and calls are not looked at for promises.
+

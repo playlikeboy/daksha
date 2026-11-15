@@ -24,6 +24,7 @@ import {
   type FoundPiece,
   getMedia,
   getMediaForSource,
+  getJournalItem,
   getSources,
   getTranscriptText,
   listActivity,
@@ -41,6 +42,8 @@ import {
   saveTranscript,
   searchPieces,
   setChunkEmbeddings,
+  type SimilarSource,
+  similarSources,
   type SourceKind,
   staleUploads,
   startMedia,
@@ -50,7 +53,7 @@ import {
 import { createLlm } from "@debo/llm";
 import { createMemory, type Memory } from "@debo/memory";
 
-export type { CallSpeaker, ActivityAction, ActivityItem, AskEvent, Entry, FoundPiece, MediaRecord, Memory, NewMedia, SourceKind, Transcript };
+export type { CallSpeaker, ActivityAction, ActivityItem, AskEvent, Entry, FoundPiece, MediaRecord, Memory, NewMedia, SimilarSource, SourceKind, Transcript };
 
 /** An entry in the journal list: written (no kind), or a voice note or video with its recording. */
 export type Item = Entry & { kind?: SourceKind; media?: MediaRecord | null };
@@ -111,6 +114,8 @@ export interface DeboCallsDb {
 export interface DeboBackend {
   entries: {
     list(owner: string, options: { limit: number; contains?: string }): Promise<Item[]>;
+    /** One entry with its recording. Null when it is not this person's. */
+    get(owner: string, id: string): Promise<Item | null>;
     create(owner: string, text: string, happenedAt?: Date): Promise<Entry>;
     /** False when the entry is not this person's. */
     update(owner: string, id: string, text: string): Promise<boolean>;
@@ -119,8 +124,21 @@ export interface DeboBackend {
   };
   /** Pieces of this person's entries that match a search, best first. */
   search(owner: string, query: string, limit: number): Promise<FoundPiece[]>;
-  /** The one brain: the same pipeline the web app uses. */
-  ask(owner: string, question: string, signal?: AbortSignal): AsyncGenerator<AskEvent, void>;
+  /**
+   * Other entries of this person close in meaning to one entry, closest first,
+   * from the embeddings already kept (no model call). Never the entry itself.
+   */
+  similar(owner: string, id: string, limit: number): Promise<SimilarSource[]>;
+  /**
+   * The one brain: the same pipeline the web app uses. With `anthropicKey` (the person's own),
+   * the answer is made on their key and Debo's daily limit does not apply.
+   */
+  ask(
+    owner: string,
+    question: string,
+    signal?: AbortSignal,
+    options?: { anthropicKey?: string },
+  ): AsyncGenerator<AskEvent, void>;
   /** Entries by id, only among this person's own. */
   sources(owner: string, ids: string[]): Promise<{ id: string; kind?: SourceKind; title: string; happenedAt: Date }[]>;
   /** Null when hosted memory (Mem0) is not set up. */
@@ -145,6 +163,11 @@ export interface DeboBackend {
   afterChange(owner: string, entryId: string, change: "saved" | "deleted"): Promise<void>;
   /** Whether the AI side (answers) has a provider key. Entries work without it. */
   askConfigured: boolean;
+  /**
+   * Promises the person made in one entry ("I told Mum I'd call on Sunday"), found by one
+   * small model call. Missing when no model is set up. `today` is YYYY-MM-DD in their zone.
+   */
+  findPromises?(text: string, today: string): Promise<{ text: string; quote: string; due: string | null }[]>;
 }
 
 type Env = Record<string, string | undefined>;
@@ -165,6 +188,29 @@ function gatewayConfigured(env: Env): boolean {
 }
 
 const reason = (error: unknown) => (error instanceof Error ? error.name : "unknown");
+
+/**
+ * The brain on a person's own Anthropic key. Answers go to Anthropic on their key only: there is
+ * no fallback to Debo's gateway, so Debo never pays for them. Meaning search still uses Debo's
+ * gateway (it is tiny, and Anthropic makes no embeddings). Their answer tokens are not counted
+ * against Debo's daily limit, and the limit does not stop them.
+ */
+export function ownKeyBrain(url: string, env: Env, anthropicKey: string) {
+  const theirs = createLlm({ ANTHROPIC_API_KEY: anthropicKey });
+  const store = dbStore(url);
+  return createBrain({
+    store: {
+      ...store,
+      recordUsage: (userId, row) => (row.provider === "neon" ? store.recordUsage(userId, row) : Promise.resolve()),
+    },
+    llm: {
+      embed: (texts) => createLlm(env).embed(texts),
+      streamAnswerFromSources: theirs.streamAnswerFromSources,
+      streamReply: theirs.streamReply,
+    },
+    dailyLimit: () => Number.POSITIVE_INFINITY,
+  });
+}
 
 export function realBackend(url: string, env: Env): DeboBackend {
   const memory = createMemory(env);
@@ -189,6 +235,7 @@ export function realBackend(url: string, env: Env): DeboBackend {
   return {
     entries: {
       list: (owner, { limit, contains }) => listJournalItems(url, owner, limit, contains),
+      get: (owner, id) => getJournalItem(url, owner, id),
       create: (owner, text, happenedAt) => createEntry(url, owner, { text, happenedAt }),
       update: (owner, id, text) => updateEntry(url, owner, id, { text }),
       remove: (owner, id) => deleteEntry(url, owner, id),
@@ -207,7 +254,11 @@ export function realBackend(url: string, env: Env): DeboBackend {
       }
       return searchPieces(url, owner, query, { embedding, limit });
     },
-    ask: (owner, question, signal) => brain().askStream(owner, question, { signal }),
+    similar: (owner, id, limit) => similarSources(url, owner, id, { limit }),
+    ask: (owner, question, signal, options) =>
+      (options?.anthropicKey ? ownKeyBrain(url, env, options.anthropicKey) : brain()).askStream(owner, question, {
+        signal,
+      }),
     sources: (owner, ids) => getSources(url, owner, ids),
     memories: memory
       ? {
@@ -296,5 +347,12 @@ export function realBackend(url: string, env: Env): DeboBackend {
       }
     },
     askConfigured: llmConfigured(env),
+    ...(llmConfigured(env)
+      ? {
+          async findPromises(text: string, today: string) {
+            return (await llm().findPromises(text, today)).promises;
+          },
+        }
+      : {}),
   };
 }

@@ -27,6 +27,11 @@ import {
 import type { Config } from "./config.ts";
 import { McpService } from "./mcp/service.ts";
 import { mcpOAuthCallbackRoute, mcpRoutes } from "./mcp/routes.ts";
+import { imageMakerFromEnv } from "./images/makers.ts";
+import { imageRoutes } from "./images/routes.ts";
+import { ImageService } from "./images/service.ts";
+import { ownKeyRoutes } from "./own-keys/routes.ts";
+import { OwnKeysService } from "./own-keys/service.ts";
 import type { Store } from "./db.ts";
 import { createDebo, type DeboService, deboRoutes } from "./debo/index.ts";
 import { agentRoutes } from "./engine/routes.ts";
@@ -35,6 +40,10 @@ import { AppError } from "./errors.ts";
 import { Files } from "./files.ts";
 import { GoogleAuth } from "./google-auth.ts";
 import { checkinRoutes } from "./companion.ts";
+import { CompanionJobs } from "./companion-jobs.ts";
+import { PromiseFinder } from "./promises.ts";
+import { PushService, pushKeysFromEnv, pushRoutes } from "./push.ts";
+import { companionRoutes } from "./reminders.ts";
 import { PeopleStore, peopleRoutes } from "./people.ts";
 import { PersonaStore, personaRoutes } from "./persona.ts";
 import { OnboardingStore, onboardingRoutes } from "./onboarding.ts";
@@ -68,6 +77,12 @@ export async function createApp(
     connectors?: ConnectorService;
     /** The person's own tool servers. Tests pass one with a fake network. */
     mcp?: McpService;
+    /** Web push. Tests pass one with a fake sender; otherwise the VAPID keys come from the environment. */
+    push?: PushService;
+    /** The person's own AI keys. Tests pass one with a fake network. */
+    ownKeys?: OwnKeysService;
+    /** Pictures. Tests pass one with a fake picture service. */
+    images?: ImageService;
   } = {},
 ) {
   await resolveComputerDeployment(config);
@@ -105,6 +120,26 @@ export async function createApp(
   agent.debo = debo;
   agent.connectors = connectors;
   agent.mcp = mcp;
+  // Reminders, birthdays and the morning check-in: in-app updates, and a push where it is on.
+  const push = options.push ?? new PushService(db, pushKeysFromEnv());
+  agent.companion = new CompanionJobs({
+    db,
+    debo,
+    push,
+    notify: (owner, title, body, key) => agent.notify(owner, title, body, undefined, key),
+  });
+  // Promises in a saved entry become suggestions; deleting the entry takes them away.
+  const promises = new PromiseFinder(db, debo);
+  agent.promises = promises;
+  debo.onEntryChange = (owner, change) => promises.onEntryChange(owner, change);
+  // A person's own AI keys, and the pictures Debo makes (kept in the recordings bucket).
+  const ownKeys = options.ownKeys ?? new OwnKeysService(db, { encryptionKey: config.encryptionKey });
+  agent.ownKeys = ownKeys;
+  debo.ownAnthropicKey = (owner) => ownKeys.secret(owner, "anthropic");
+  const images =
+    options.images ??
+    new ImageService(db, { store: () => debo.mediaStore, maker: imageMakerFromEnv(process.env), ownKeys });
+  agent.images = images;
   const threads = new ThreadStore(db);
   const timeZones = new TimeZoneStore(db);
   const runner = new DatabaseAgentRunner(threads);
@@ -288,13 +323,17 @@ export async function createApp(
   app.route("/api/onboarding", onboardingRoutes(new OnboardingStore(db)));
   app.route("/api/people", peopleRoutes(new PeopleStore(db)));
   app.route("/api/checkin", checkinRoutes({ db, debo }));
+  app.route("/api/companion", companionRoutes(db));
+  app.route("/api/push", pushRoutes(push));
   const talkSettings = new TalkSettingsStore(db);
   const characterOf = async (owner: string) =>
     (await db.get<{ character?: string }>(owner, "agent-settings", "identity").catch(() => null))?.character;
   app.route("/api/talk-settings", talkSettingsRoutes(talkSettings, characterOf));
-  app.route("/api/account", accountRoutes(db, files, debo, connectors, mcp));
+  app.route("/api/account", accountRoutes(db, files, debo, connectors, mcp, ownKeys, images));
   app.route("/api/connectors", connectorRoutes(connectors));
   app.route("/api/mcp", mcpRoutes(mcp));
+  app.route("/api/own-keys", ownKeyRoutes(ownKeys));
+  app.route("/api/images", imageRoutes(images));
   app.route("/api/agent", agentRoutes(agent));
   app.route("/api/debo", deboRoutes(debo));
   app.route("/api/computer", computerRoutes(computer, files));

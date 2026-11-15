@@ -2,7 +2,7 @@
 // need no access keys and no API tokens:
 //
 //   media.internal  the private R2 bucket, through a Worker binding
-//   ai.internal     Workers AI (Whisper), through a Worker binding
+//   ai.internal     Workers AI (Whisper for recordings, FLUX for pictures), through a Worker binding
 //
 // Only the container's outbound traffic is routed here (see index.ts). Even so,
 // every key is checked: it must look exactly like the keys the API makes
@@ -52,6 +52,8 @@ export interface AiLike {
 export const MEDIA_HOST = "media.internal";
 export const AI_HOST = "ai.internal";
 export const WHISPER_MODEL = "@cf/openai/whisper-large-v3-turbo";
+/** Text to picture: fast, square. https://developers.cloudflare.com/workers-ai/models/flux-1-schnell/ */
+export const IMAGE_MODEL = "@cf/black-forest-labs/flux-1-schnell";
 
 /** `<owner id>/<random id>.<ext>`: the only shape the API ever writes. */
 const KEY = /^[A-Za-z0-9_-]{1,64}\/[A-Za-z0-9_-]{1,64}\.[a-z0-9]{1,8}$/;
@@ -250,9 +252,35 @@ export async function handleMedia(request: Request, bucket: R2BucketLike): Promi
   }
 }
 
+/**
+ * POST /image with { prompt, steps? }. Answers { success, result: { image } } with the picture as
+ * base64 (JPEG), the same shape as the REST API. Only the prompt and the step count go through.
+ */
+async function handleImage(request: Request, ai: AiLike): Promise<Response> {
+  const input = (await request.json().catch(() => null)) as Record<string, unknown> | null;
+  const prompt = typeof input?.prompt === "string" ? input.prompt.trim() : "";
+  if (!prompt || prompt.length > 2048) return refuse(400, "prompt is required, up to 2048 characters");
+  const allowed: Record<string, unknown> = { prompt };
+  if (typeof input?.steps === "number" && Number.isInteger(input.steps) && input.steps >= 1 && input.steps <= 8)
+    allowed.steps = input.steps;
+  try {
+    const result = (await ai.run(IMAGE_MODEL, allowed)) as { image?: unknown } | null;
+    if (!result || typeof result.image !== "string" || !result.image) return json({ success: false }, 502);
+    return json({ success: true, result: { image: result.image } });
+  } catch (error) {
+    // The name only: the prompt is the person's words.
+    console.error("ai.internal image failed", error instanceof Error ? error.name : "unknown");
+    const message = error instanceof Error ? error.message : "";
+    // Workers AI turns down unsafe prompts with an error. Say "refused", never the text.
+    if (/nsfw|safety|flagged|not allowed|inappropriate/i.test(message)) return json({ success: false, refused: true }, 422);
+    return json({ success: false }, /rate|capacity|overload|timeout|temporar/i.test(message) ? 503 : 502);
+  }
+}
+
 /** POST /run with the JSON the REST API takes (base64 audio, task, vad_filter, ...). Answers { success, result }. */
 export async function handleAi(request: Request, ai: AiLike): Promise<Response> {
   const url = new URL(request.url);
+  if (request.method === "POST" && url.pathname === "/image") return handleImage(request, ai);
   if (request.method !== "POST" || url.pathname !== "/run") return refuse(404, "not found");
   const input = (await request.json().catch(() => null)) as Record<string, unknown> | null;
   if (!input || typeof input.audio !== "string" || input.audio.length === 0) return refuse(400, "audio is required");
