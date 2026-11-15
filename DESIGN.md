@@ -38,7 +38,7 @@ In the app, About Debo has "Choose who you talk to". The person picks one of fou
 - Picking a character offers its name as the assistant's name. If the name is still "Debo" or another character's name, it changes with the pick. If the person typed a name of their own, it is kept and the app asks "Call me Mishti?" with "Use Mishti" and "Keep Nova". The assistant answers to the saved name in chat and voice.
 - Each character's colours live in its own `debo-paint-*.ts` file, and each character's `expresses` table in `debo-characters.ts` says how it shows each mood. A test fails if any character misses a mood.
 - The brand mascot is still the tomato. The landing page, pitch site, favicon and app icon still use `docs/assets/debo.svg`. The "no human face" rule above is about that brand mascot. Anaya is a character the person picks for themselves in the app, and is never used as the brand.
-- Static pictures of the four, for docs and sharing: `docs/assets/avatar-debo.svg`, `avatar-diya.svg`, `avatar-anaya.svg`, `avatar-mishti.svg`.
+- Static pictures of the four, for docs and sharing: `docs/assets/avatar-debo.svg`, `avatar-diya.svg`, `avatar-anaya.svg`, `avatar-mishti.svg`. The landing page shows copies of them (`apps/site/public/characters/`) in its "Choose who you talk to" card, as the choice inside the app, not as the brand.
 
 ## Colour
 

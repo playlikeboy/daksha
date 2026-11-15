@@ -3,10 +3,10 @@ import { HStack, VStack } from "@astryxdesign/core/Layout";
 import { Grid } from "@astryxdesign/core/Grid";
 import { Card } from "@astryxdesign/core/Card";
 import { Button } from "@astryxdesign/core/Button";
-import { Badge } from "@astryxdesign/core/Badge";
 import { Heading, Text } from "@astryxdesign/core/Text";
 import { PRIVACY_URL } from "../links";
 import { Band } from "./band";
+import { SectionHead } from "./section-head";
 
 // Every line here matches apps/web/src/app/privacy/page.tsx. Change them together.
 const FACTS = [
@@ -30,19 +30,16 @@ const FACTS = [
 
 export function Trust() {
   return (
-    <Band id="trust">
-      <VStack gap={3} maxWidth={640} hAlign="start">
-        <Badge variant="neutral" label="Your data" />
-        <Heading level={2} type="display-2" weight="bold" id="trust-title" textWrap="balance">
-          It is your life. You stay in charge of it.
-        </Heading>
-        <Text type="large" weight="normal" as="p" color="secondary" textWrap="pretty">
-          Debo keeps personal things, so here is what happens to them, in plain words.
-        </Text>
-      </VStack>
+    <Band id="trust" variant="muted">
+      <SectionHead
+        id="trust"
+        eyebrow="Your data"
+        title="It is your life. You stay in charge of it."
+        lead="Debo keeps personal things, so here is what happens to them, in plain words."
+      />
       <Grid columns={{ minWidth: 240, repeat: "fit" }} gap={4}>
         {FACTS.map((fact) => (
-          <Card key={fact.title} variant="muted" padding={5}>
+          <Card key={fact.title} padding={5}>
             <VStack gap={2}>
               <Heading level={3}>{fact.title}</Heading>
               <Text as="p" type="large" weight="normal" color="secondary" textWrap="pretty">
@@ -52,7 +49,7 @@ export function Trust() {
           </Card>
         ))}
       </Grid>
-      <Card variant="gray" padding={6}>
+      <Card padding={6} elevation="low">
         <VStack gap={3} maxWidth={720}>
           <Heading level={3}>Honest limits</Heading>
           <Text as="p" type="large" weight="normal" textWrap="pretty">
