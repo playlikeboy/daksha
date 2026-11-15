@@ -8,7 +8,10 @@
 //   3. The address is checked (see safe-fetch.ts) on every connection.
 //   4. The secret is stored encrypted, never sent back to the app, never logged.
 //   5. What the server returns is wrapped as data, shortened, and can never give instructions.
-import { randomUUID } from "node:crypto";
+//   6. A server that wants a sign-in (OAuth) gets one through oauth.ts. Its tokens are kept like
+//      a secret, and every request of the sign-in goes through the same checked fetch.
+import { randomBytes, randomUUID } from "node:crypto";
+import { auth, discoverOAuthServerInfo } from "@modelcontextprotocol/sdk/client/auth.js";
 import { Client } from "@modelcontextprotocol/sdk/client/index.js";
 import { StreamableHTTPClientTransport } from "@modelcontextprotocol/sdk/client/streamableHttp.js";
 import { decryptSecret, encryptSecret } from "../../../../packages/integrations/src/vault.ts";
@@ -16,6 +19,8 @@ import { wrapAppData } from "../connectors/service.ts";
 import type { Store } from "../db.ts";
 import { AppError } from "../errors.ts";
 import { createRateLimitStore } from "../rate-limit.ts";
+import { composioHeaderFor, isComposioUrl } from "./composio.ts";
+import { OAuthVault, SignInNeeded, signState, StoredOAuthProvider, verifyState } from "./oauth.ts";
 import { checkPublicUrl, createSafeFetch, type Resolver } from "./safe-fetch.ts";
 
 export const MAX_SERVERS = 5;
@@ -62,7 +67,16 @@ export interface McpServer {
   lastAt?: string;
   lastMessage?: string;
   createdAt: string;
+  /** "oauth": the person signs in to the server instead of giving a secret. */
+  auth?: "oauth";
+  /** For a sign-in server: whether Debo holds a working sign-in. */
+  signedIn?: boolean;
+  /** Added with the "Composio" choice on the Apps screen. */
+  preset?: "composio";
 }
+
+/** Where a sign-in page sends the person back to: a browser tab, or the phone app. */
+export type ReturnTo = "web" | "native";
 
 export interface McpOptions {
   /** TOKEN_ENCRYPTION_KEY. Without it a secret cannot be saved; a server without one still works. */
@@ -72,6 +86,20 @@ export interface McpOptions {
   resolve?: Resolver;
   now?: () => number;
   log?: (entry: Record<string, unknown>) => void;
+  /** For servers that need a sign-in. Without it, Debo can't offer sign-in. */
+  signIn?: SignInSetup;
+}
+
+export interface SignInSetup {
+  /** Signs the OAuth `state`. Made from SESSION_SIGNING_KEY (Auth.purposeKey). */
+  stateKey: string;
+  /** `${PUBLIC_API_URL}/api/mcp/oauth/callback` */
+  redirectUrl: string;
+}
+
+interface Connection {
+  headers: Record<string, string>;
+  authProvider?: StoredOAuthProvider;
 }
 
 const nameOk = /^[\p{L}\p{N} ._()-]{1,40}$/u;
@@ -87,6 +115,9 @@ export class McpService {
   private readonly adds = createRateLimitStore({ windowMs: 10 * 60_000, maxRequests: 10 });
   private readonly fetcher: typeof fetch;
   private readonly now: () => number;
+  private signIn?: SignInSetup;
+  /** One token refresh at a time per server, in this process. */
+  private readonly refreshing = new Map<string, Promise<void>>();
 
   constructor(
     private readonly db: Store,
@@ -94,6 +125,12 @@ export class McpService {
   ) {
     this.fetcher = options.fetcher ?? createSafeFetch({ resolve: options.resolve });
     this.now = options.now ?? Date.now;
+    this.signIn = options.signIn;
+  }
+
+  /** Called by the app with its keys, unless the service was made with its own. */
+  configureSignIn(setup: SignInSetup) {
+    this.signIn ??= setup;
   }
 
   private log(phase: string, fields: Record<string, unknown>) {
@@ -121,8 +158,17 @@ export class McpService {
 
   async add(
     owner: string,
-    input: { name: string; url: string; secret?: string; headerName?: string },
-  ): Promise<McpServer> {
+    input: {
+      name: string;
+      url: string;
+      secret?: string;
+      headerName?: string;
+      /** "sign-in": the person signs in to the server (OAuth) instead of giving a secret. */
+      auth?: "sign-in" | "secret";
+      preset?: "composio";
+      to?: ReturnTo;
+    },
+  ): Promise<McpServer & { signInUrl?: string }> {
     this.limit(this.adds, owner, "add");
     const name = input.name.trim().replace(/\s+/g, " ");
     if (!nameOk.test(name))
@@ -135,8 +181,16 @@ export class McpService {
       throw new AppError(`You can add up to ${MAX_SERVERS} tool servers. Remove one first.`, 409);
     if (existing.some((s) => s.name.toLowerCase() === name.toLowerCase()))
       throw new AppError("You already have a tool server with that name. Pick another name.", 409);
+    const signIn = input.auth === "sign-in";
     const secret = input.secret?.trim() || undefined;
-    const headerName = input.headerName?.trim() || undefined;
+    if (input.preset === "composio" && !isComposioUrl(input.url))
+      throw new AppError("That is not a Composio address. It should end in composio.dev.", 400);
+    // A Composio key goes in Composio's own header unless the person typed another one.
+    const headerName =
+      input.headerName?.trim() ||
+      (input.preset === "composio" && secret ? composioHeaderFor(input.url) : undefined);
+    if (signIn && (secret || headerName))
+      throw new AppError("Choose either Sign in or a secret, not both.", 400);
     if (headerName && (!/^[A-Za-z0-9-]{1,64}$/.test(headerName) || FORBIDDEN_HEADERS.has(headerName.toLowerCase())))
       throw new AppError("That header name can't be used. Leave it empty to send the secret as a bearer token.", 400);
     if (secret && (secret.length > 2000 || /[\r\n\0]/.test(secret)))
@@ -147,6 +201,7 @@ export class McpService {
     // The address is checked now so the person hears why before anything is saved.
     const { url } = await checkPublicUrl(input.url, this.options.resolve);
     url.hash = "";
+    if (signIn) return this.addForSignIn(owner, name, url.toString(), input.preset, input.to ?? "web");
     const id = randomUUID();
     const draft: McpServer = {
       id,
@@ -157,9 +212,10 @@ export class McpService {
       autoRead: false,
       tools: [],
       createdAt: new Date(this.now()).toISOString(),
+      ...(input.preset ? { preset: input.preset } : {}),
     };
     const headers = this.headers(secret, headerName);
-    const tools = await this.fetchTools(owner, draft, headers);
+    const tools = await this.fetchTools(owner, draft, { headers });
     const row: McpServer = { ...draft, tools, toolsAt: draft.createdAt, lastOk: true, lastAt: draft.createdAt, lastMessage: "Connected and listed its tools." };
     if (secret && this.options.encryptionKey)
       await this.db.put(owner, SECRETS, {
@@ -171,9 +227,187 @@ export class McpService {
     return row;
   }
 
+  /** Saves a server that waits for the person to sign in, and starts that sign-in. */
+  private async addForSignIn(
+    owner: string,
+    name: string,
+    url: string,
+    preset: "composio" | undefined,
+    to: ReturnTo,
+  ) {
+    this.signInReady();
+    const row: McpServer = {
+      id: randomUUID(),
+      name,
+      url,
+      hasSecret: false,
+      autoRead: false,
+      tools: [],
+      createdAt: new Date(this.now()).toISOString(),
+      auth: "oauth",
+      signedIn: false,
+      lastMessage: "Waiting for you to sign in.",
+      ...(preset ? { preset } : {}),
+    };
+    await this.db.put(owner, KIND, row);
+    try {
+      const { url: signInUrl } = await this.startSignIn(owner, row.id, to, { counted: true });
+      this.log("mcp.added", { owner, server: row.id, auth: "oauth" });
+      return { ...row, signInUrl };
+    } catch (error) {
+      // A server that can't start a sign-in is not kept: nothing half-made stays in the list.
+      await this.vault(owner, row.id).remove().catch(() => undefined);
+      await this.db.remove(owner, KIND, row.id).catch(() => undefined);
+      throw error;
+    }
+  }
+
+  private signInReady(): SignInSetup {
+    if (!this.signIn || !this.options.encryptionKey)
+      throw new AppError(
+        "This Debo can't keep sign-ins safely yet, so it can't sign in to a tool server. Use a secret instead.",
+        503,
+      );
+    return this.signIn;
+  }
+  private vault(owner: string, id: string) {
+    return new OAuthVault(this.db, this.options.encryptionKey ?? "", owner, id);
+  }
+
+  /**
+   * Starts a sign-in for a server that asks for one, and returns the page to send the person to.
+   * The page must be on a public https address. Nothing secret is returned.
+   */
+  async startSignIn(
+    owner: string,
+    id: string,
+    to: ReturnTo,
+    how: { counted?: boolean } = {},
+  ): Promise<{ url: string }> {
+    const row = await this.mine(owner, id);
+    if (row.auth !== "oauth")
+      throw new AppError(
+        "This server uses a secret, not a sign-in. Remove it and add it again to sign in.",
+        409,
+      );
+    if (!how.counted) this.limit(this.adds, owner, "add");
+    const setup = this.signInReady();
+    let info: Awaited<ReturnType<typeof discoverOAuthServerInfo>>;
+    try {
+      info = await discoverOAuthServerInfo(row.url, { fetchFn: this.fetcher });
+    } catch (error) {
+      if (error instanceof AppError) throw error;
+      throw new AppError(NO_SIGN_IN, 400);
+    }
+    const meta = info.authorizationServerMetadata;
+    // MCP sign-in needs PKCE with S256. A service that does not say it supports it is refused.
+    if (!meta || !meta.code_challenge_methods_supported?.includes("S256"))
+      throw new AppError(NO_SIGN_IN, 400);
+    if (!meta.registration_endpoint)
+      throw new AppError(
+        "This server's sign-in needs Debo to be registered with it by hand, which Debo can't do yet. Use a secret instead.",
+        400,
+      );
+    // Ask for the scopes the server lists. If it lists none, ask only for what keeps a sign-in going.
+    const scope = info.resourceMetadata?.scopes_supported?.length
+      ? undefined
+      : meta.scopes_supported?.filter((s) => s === "openid" || s === "offline_access").join(" ") ||
+        undefined;
+    const nonce = randomBytes(18).toString("base64url");
+    const state = signState({ owner, server: row.id, nonce, to }, setup.stateKey, this.now());
+    const provider = await StoredOAuthProvider.open(this.vault(owner, row.id), {
+      redirectUrl: setup.redirectUrl,
+      now: this.now,
+      scope,
+      state,
+    });
+    try {
+      await provider.saveDiscoveryState({
+        authorizationServerUrl: info.authorizationServerUrl,
+        authorizationServerMetadata: meta,
+        resourceMetadata: info.resourceMetadata,
+      });
+      await provider.begin(nonce);
+      const result = await auth(provider, { serverUrl: row.url, fetchFn: this.fetcher });
+      if (result !== "REDIRECT" || !provider.authorizationUrl) throw new Error("no sign-in page");
+    } catch (error) {
+      this.log("mcp.sign_in.failed", { owner, server: row.id, phase: "start" });
+      if (error instanceof AppError) throw error;
+      throw new AppError("I couldn't start the sign-in with that server. Try again in a moment.", 502);
+    }
+    const page = provider.authorizationUrl;
+    // The person's browser opens this page, so it must be a public https address too.
+    await checkPublicUrl(`${page.origin}${page.pathname}`, this.options.resolve);
+    this.log("mcp.sign_in.started", { owner, server: row.id });
+    return { url: page.toString() };
+  }
+
+  /**
+   * The sign-in page sent the person back with a code. Checks the state, uses it once, swaps
+   * the code for tokens and lists the server's tools. Never throws: the result is ok or not.
+   */
+  async finishSignIn(state: string, code: string): Promise<{ ok: boolean; to: ReturnTo }> {
+    const setup = this.signIn;
+    const claim = setup ? verifyState(state, setup.stateKey, this.now()) : null;
+    if (!claim || !setup || !this.options.encryptionKey) return { ok: false, to: claim?.to ?? "web" };
+    const { owner, server: id, to } = claim;
+    if (!code || code.length > 2000) return { ok: false, to };
+    const row = await this.db.get<McpServer>(owner, KIND, id).catch(() => undefined);
+    if (!row || row.auth !== "oauth") return { ok: false, to };
+    const provider = await StoredOAuthProvider.open(this.vault(owner, id), {
+      redirectUrl: setup.redirectUrl,
+      now: this.now,
+    });
+    if (!(await provider.take(claim.nonce))) {
+      this.log("mcp.sign_in.failed", { owner, server: id, phase: "state" });
+      return { ok: false, to };
+    }
+    try {
+      const result = await auth(provider, {
+        serverUrl: row.url,
+        authorizationCode: code,
+        fetchFn: this.fetcher,
+      });
+      if (result !== "AUTHORIZED") throw new Error("not signed in");
+      const tools = await this.fetchTools(owner, row, { headers: {}, authProvider: provider });
+      const at = new Date(this.now()).toISOString();
+      await this.db.put(owner, KIND, {
+        ...row,
+        signedIn: true,
+        tools,
+        toolsAt: at,
+        lastOk: true,
+        lastAt: at,
+        lastMessage: "Signed in and listed its tools.",
+      });
+      this.log("mcp.sign_in.finished", { owner, server: id, tools: tools.length });
+      return { ok: true, to };
+    } catch {
+      this.log("mcp.sign_in.failed", { owner, server: id, phase: "exchange" });
+      await this.record(owner, row, false, "The sign-in did not finish. Choose Sign in to try again.", {
+        signedIn: false,
+      });
+      return { ok: false, to };
+    }
+  }
+
+  /** Forgets the sign-in: the tokens are deleted. The server stays in the list. */
+  async signOut(owner: string, id: string): Promise<McpServer> {
+    const row = await this.mine(owner, id);
+    if (row.auth !== "oauth") throw new AppError("This server has no sign-in to sign out of.", 409);
+    await this.vault(owner, id).remove();
+    this.log("mcp.signed_out", { owner, server: id });
+    return this.db.put(owner, KIND, {
+      ...row,
+      signedIn: false,
+      lastMessage: "Signed out. Choose Sign in to use it again.",
+    });
+  }
+
   async remove(owner: string, id: string): Promise<void> {
     const row = await this.mine(owner, id);
     await this.db.remove(owner, SECRETS, `mcp-${row.id}`);
+    await this.vault(owner, row.id).remove();
     await this.db.remove(owner, KIND, row.id);
     this.log("mcp.removed", { owner, server: id });
   }
@@ -188,7 +422,7 @@ export class McpService {
     const row = await this.mine(owner, id);
     this.limit(this.calls, owner, "call");
     try {
-      const tools = await this.fetchTools(owner, row, await this.secretHeaders(owner, row));
+      const tools = await this.fetchTools(owner, row, await this.connection(owner, row));
       const at = new Date(this.now()).toISOString();
       return await this.db.put(owner, KIND, {
         ...row,
@@ -199,7 +433,7 @@ export class McpService {
         lastMessage: "Listed its tools.",
       });
     } catch (error) {
-      await this.record(owner, row, false, plain(error, row.hasSecret));
+      await this.record(owner, row, false, plain(error, row), signedOut(error));
       throw error;
     }
   }
@@ -224,21 +458,58 @@ export class McpService {
     return this.headers(value, row.headerName);
   }
 
+  /** How to reach a server: its secret header, or its sign-in (refreshed first if it runs out soon). */
+  private async connection(owner: string, row: McpServer): Promise<Connection> {
+    if (row.auth !== "oauth") return { headers: await this.secretHeaders(owner, row) };
+    const setup = this.signIn;
+    if (!setup || !this.options.encryptionKey || !row.signedIn) throw new SignInNeeded();
+    const open = () =>
+      StoredOAuthProvider.open(this.vault(owner, row.id), {
+        redirectUrl: setup.redirectUrl,
+        now: this.now,
+      });
+    let provider = await open();
+    if (!provider.data.tokens) throw new SignInNeeded();
+    if (provider.needsRefresh()) {
+      const key = `${owner}:${row.id}`;
+      let running = this.refreshing.get(key);
+      if (!running) {
+        running = (async () => {
+          const fresh = await open();
+          // Another call may have refreshed it while this one waited.
+          if (!fresh.needsRefresh()) return;
+          await auth(fresh, { serverUrl: row.url, fetchFn: this.fetcher });
+          this.log("mcp.sign_in.refreshed", { owner, server: row.id });
+        })().finally(() => this.refreshing.delete(key));
+        this.refreshing.set(key, running);
+      }
+      try {
+        await running;
+      } catch (error) {
+        this.log("mcp.sign_in.failed", { owner, server: row.id, phase: "refresh" });
+        throw error instanceof AppError && !(error instanceof SignInNeeded) ? error : new SignInNeeded();
+      }
+      provider = await open();
+    }
+    return { headers: {}, authProvider: provider };
+  }
+
   private async withClient<T>(
-    row: Pick<McpServer, "url" | "hasSecret">,
-    headers: Record<string, string>,
+    row: Pick<McpServer, "url" | "hasSecret" | "auth">,
+    connection: Connection,
     work: (client: Client) => Promise<T>,
   ): Promise<T> {
     const client = new Client({ name: "debo", version: "1.0.0" });
     const transport = new StreamableHTTPClientTransport(new URL(row.url), {
       fetch: this.fetcher,
-      requestInit: { headers },
+      requestInit: { headers: connection.headers },
+      ...(connection.authProvider ? { authProvider: connection.authProvider } : {}),
     });
     try {
       await client.connect(transport, { timeout: 15_000 });
       return await work(client);
     } catch (error) {
-      throw wrapError(error, row.hasSecret);
+      throw wrapError(error, row);
     } finally {
       await client.close().catch(() => undefined);
     }
@@ -246,10 +517,10 @@ export class McpService {
 
   private async fetchTools(
     owner: string,
-    row: Pick<McpServer, "url" | "hasSecret" | "id">,
-    headers: Record<string, string>,
+    row: Pick<McpServer, "url" | "hasSecret" | "id" | "auth">,
+    connection: Connection,
   ): Promise<McpTool[]> {
-    return this.withClient(row, headers, async (client) => {
+    return this.withClient(row, connection, async (client) => {
       const tools: McpTool[] = [];
       let cursor: string | undefined;
       for (let page = 0; page < 5 && tools.length < MAX_TOOLS; page++) {
@@ -274,10 +545,22 @@ export class McpService {
     });
   }
 
-  private async record(owner: string, row: McpServer, ok: boolean, message: string) {
+  private async record(
+    owner: string,
+    row: McpServer,
+    ok: boolean,
+    message: string,
+    extra: Partial<McpServer> = {},
+  ) {
     const fresh = (await this.db.get<McpServer>(owner, KIND, row.id)) ?? row;
     await this.db
-      .put(owner, KIND, { ...fresh, lastOk: ok, lastAt: new Date(this.now()).toISOString(), lastMessage: message })
+      .put(owner, KIND, {
+        ...fresh,
+        ...extra,
+        lastOk: ok,
+        lastAt: new Date(this.now()).toISOString(),
+        lastMessage: message,
+      })
       .catch(() => undefined);
   }
 
@@ -380,8 +663,8 @@ export class McpService {
   ): Promise<{ ok: true; data: unknown } | { ok: false; error: string; unknown?: boolean }> {
     this.limit(this.calls, owner, "call");
     try {
-      const headers = await this.secretHeaders(owner, server);
-      const data = await this.withClient(server, headers, async (client) => {
+      const connection = await this.connection(owner, server);
+      const data = await this.withClient(server, connection, async (client) => {
         const result = await client.callTool({ name: tool, arguments: args }, undefined, {
           timeout: 30_000,
         });
@@ -399,8 +682,8 @@ export class McpService {
         return { ok: true, data: { serverReportedError: true, text: data.text } };
       return { ok: true, data: data.structured ?? { text: data.text } };
     } catch (error) {
-      const message = plain(error, server.hasSecret);
-      await this.record(owner, server, false, message);
+      const message = plain(error, server);
+      await this.record(owner, server, false, message, signedOut(error));
       this.log("mcp.call", { owner, server: server.id, tool, ok: false });
       return { ok: false, error: message, unknown: /too long|timed out/i.test(message) };
     }
@@ -427,21 +710,35 @@ function compactArguments(schema: Record<string, unknown> | undefined) {
 }
 
 /** Keeps our own plain errors, and marks everything else with what the SDK says went wrong. */
-function wrapError(error: unknown, hasSecret: boolean): unknown {
+const NO_SIGN_IN = "This server does not offer a sign-in Debo can use. Add it with a secret instead.";
+
+/** A sign-in server whose sign-in failed is marked signed out, so the screen offers Sign in again. */
+function signedOut(error: unknown): Partial<McpServer> {
+  return error instanceof SignInNeeded ? { signedIn: false } : {};
+}
+
+type ErrorRow = Pick<McpServer, "hasSecret" | "auth">;
+
+function wrapError(error: unknown, row: ErrorRow): unknown {
   if (error instanceof AppError) return error;
   const cause = (error as { cause?: unknown } | null)?.cause;
   if (cause instanceof AppError) return cause;
-  return new AppError(plain(error, hasSecret), 502);
+  // The SDK says this when the server still refuses after a refresh: only a new sign-in helps.
+  if (row.auth === "oauth" && (error as { name?: string } | null)?.name === "UnauthorizedError")
+    return new SignInNeeded();
+  return new AppError(plain(error, row), 502);
 }
 
-function plain(error: unknown, hasSecret: boolean): string {
+function plain(error: unknown, row: ErrorRow): string {
   if (error instanceof AppError) return error.message;
   const code = (error as { code?: unknown } | null)?.code;
   const text = error instanceof Error ? error.message : "";
   if (code === 401 || code === 403 || /401|403|unauthori[sz]ed|forbidden/i.test(text))
-    return hasSecret
-      ? "The server did not accept the secret. Check it, then remove the server and add it again."
-      : "The server asked for a sign-in or a secret. Add it again with a secret. Servers that need an OAuth sign-in can't be used yet.";
+    return row.auth === "oauth"
+      ? new SignInNeeded().message
+      : row.hasSecret
+        ? "The server did not accept the secret. Check it, then remove the server and add it again."
+        : "The server asked for a sign-in or a secret. Add it again with a secret, or choose Sign in instead.";
   if (code === 404 || code === 405 || /404|405|not found/i.test(text))
     return "That address did not answer like a tool server. Debo supports MCP over Streamable HTTP; older SSE-only servers are not supported yet.";
   if (/too much data/i.test(text)) return "That server sent back too much data.";
