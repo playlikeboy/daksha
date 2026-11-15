@@ -12,7 +12,7 @@ export type TaskStatus =
   | "cancelled";
 export interface Evidence {
   id: string;
-  kind: "mail" | "file" | "web" | "user";
+  kind: "mail" | "file" | "web" | "user" | "journal";
   title: string;
   excerpt: string;
   url?: string;
@@ -86,10 +86,13 @@ export interface Idea {
   reason: string;
   evidence: Evidence[];
   prompt: string;
-  kind: AgentTask["kind"];
+  /** "promise": something the person promised in a journal entry; accepting it makes a reminder, not a task. */
+  kind: AgentTask["kind"] | "promise";
   input: Record<string, unknown>;
   status: "new" | "dismissed" | "accepted";
   taskId?: string;
+  /** For a promise: the reminder made when the person accepted it. */
+  reminderId?: string;
   createdAt: string;
 }
 export interface AgentMemory {

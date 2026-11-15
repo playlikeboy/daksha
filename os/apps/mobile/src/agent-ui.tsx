@@ -41,6 +41,7 @@ import { ToolServersSection } from "./mcp-ui";
 import { deboCharacter, usePronouns } from "./debo-character-store";
 import { type PickPlan, planPick, planRename } from "./debo-character-pick";
 import { CharacterPicker } from "./debo-character-picker";
+import { PromiseCard } from "./debo-promise-card";
 import { type CharacterId, characterOrDefault } from "./debo-characters";
 import { listState } from "./loading-state";
 import { ActivityScreen, ConnectionsScreen } from "./screens";
@@ -1092,9 +1093,9 @@ export function IdeasScreen() {
         </Button>
       </View>
       <ErrorNotice error={error} />
-      {ideas.map((idea) => (
-        <IdeaCard key={idea.id} idea={idea} />
-      ))}
+      {ideas.map((idea) =>
+        idea.kind === "promise" ? <PromiseCard key={idea.id} idea={idea} /> : <IdeaCard key={idea.id} idea={idea} />,
+      )}
       {!ideas.length && (
         <Empty
           icon={Lightbulb}
@@ -1107,7 +1108,7 @@ export function IdeasScreen() {
         .map((idea) => (
           <Card key={idea.id} style={{ gap: 7 }}>
             <Text style={s.heading}>{idea.title}</Text>
-            <Chip tint={colors.green}>Started</Chip>
+            <Chip tint={colors.green}>{idea.kind === "promise" ? "Reminder set" : "Started"}</Chip>
             {!!idea.taskId && <TaskLink taskId={idea.taskId} />}
           </Card>
         ))}

@@ -147,6 +147,35 @@ export default function PrivacyPage() {
           week. It goes to the assistant model like any other answer, and the check-in itself is not saved anywhere.
         </p>
         <p>
+          Reminders in the new app. Once a minute Debo&rsquo;s server checks, in your own time zone, three things and
+          nothing else: birthdays and special days on your people cards (a reminder the day before at 18:00 and on the
+          morning at 08:00; on unless you turn it off), the morning check-in (off unless you turn it on, at the time you
+          pick; it is built from the same things as above, and the update says only names and counts, never your journal
+          text), and reminders you asked for. Each arrives once, as an update in Chat that you can dismiss. Nothing is
+          sent between 22:00 and 07:00. Turn each one on or off in &ldquo;How she talks and what she knows&rdquo;, under
+          &ldquo;Reminders and check-in&rdquo;.
+        </p>
+        <p>
+          Promises from your journal. When you save or change a written entry, its text goes to the assistant model
+          (Anthropic, which already reads your entries to answer your questions) with one more question: did you promise
+          to do something (&ldquo;I told Mum I&rsquo;d call on Sunday&rdquo;)? Anything it finds is only a suggestion on
+          the Ideas screen, with the words it came from and a link to the entry. Nothing happens until you tap
+          &ldquo;Remind me&rdquo;, which makes a reminder, or &ldquo;Dismiss&rdquo;. Deleting the entry deletes its
+          suggestions and the reminders made from them. Reminders and your reminder settings are saved with your
+          account, are in &ldquo;Download my data&rdquo; and are deleted with your data.
+        </p>
+        <p>
+          Notifications outside the app are off until you turn on &ldquo;Send me reminders&rdquo; on a device. In a
+          browser or the installed web app this uses web push: your browser&rsquo;s push service (Google for Chrome,
+          Mozilla for Firefox, Apple for Safari, Microsoft for Edge) gives Debo an address for that browser, which Debo
+          keeps until you turn it off there or delete your data (signing out stops that browser at once, and Debo
+          forgets the address the next time it tries it); your download lists the address but not
+          its keys. A push carries only a short title, such as &ldquo;Good morning&rdquo;, &ldquo;Call Mum&rdquo; or
+          &ldquo;Tomorrow is Riya&rsquo;s birthday&rdquo;, encrypted so the push service cannot read it; never what you
+          wrote. In the phone app the phone itself holds the next reminders (their titles and times) and shows them,
+          with no push service involved; signing out removes them.
+        </p>
+        <p>
           We have not yet checked LiveKit&rsquo;s, Deepgram&rsquo;s or Cartesia&rsquo;s terms on training AI and on how
           long they keep audio. Until we do, assume they may keep it for a time. If that worries you, type instead.
         </p>
