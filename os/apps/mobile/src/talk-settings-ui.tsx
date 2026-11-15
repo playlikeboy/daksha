@@ -13,6 +13,7 @@ import { PersonaSetting } from "./debo-persona-setting";
 import { capital, usePronouns, useTalkSettingsName } from "./debo-pronouns";
 import { Button, Card, colors, ErrorNotice, Field, LinkRow, radius, s, SectionHeading, Sheet, Skeleton, spacing } from "./ui";
 import { OwnKeysSetting } from "./own-keys-ui";
+import { useSettingsChanged } from "./settings-events";
 import { useWorkspace } from "./workspace";
 import { Brain, UserRound } from "lucide-react-native";
 
@@ -109,6 +110,8 @@ export function TalkSettingsSheet() {
   useEffect(() => {
     void load();
   }, [load]);
+  // A change made by asking in chat or on a call shows here too.
+  useSettingsChanged(["talk-settings"], load);
 
   async function save(patch: Settings, note: string) {
     setBusy(true);

@@ -49,6 +49,7 @@ import { deboMood } from "./debo-mood-store";
 import { ConnectorToolCard } from "./connectors-ui";
 import { DeboToolCard } from "./debo-source-chips";
 import { SearchToolCard } from "./search-tool-card";
+import { ScreenToolCard, SettingsToolCard } from "./settings-tool-card";
 import { FileThreadCard, TaskThreadCard } from "./thread-artifacts";
 import { TypingDots } from "./typing-dots";
 import { type Selection, useFuseThread } from "./threads";
@@ -144,6 +145,20 @@ export function WorkspaceTools() {
     description: "Show a picture Debo made",
     parameters: displayParameters,
     render: ({ result, status }) => <ImageToolCard result={result} loading={status !== "complete"} />,
+  });
+  // Settings changed by asking, and a button that opens a screen (settings-tool-card.tsx).
+  for (const name of ["update_talk_settings", "update_identity", "update_reminders"] as const)
+    useRenderTool({
+      name,
+      description: "Show a setting Debo changed",
+      parameters: displayParameters,
+      render: ({ result, status }) => <SettingsToolCard result={result} loading={status !== "complete"} />,
+    });
+  useRenderTool({
+    name: "open_screen",
+    description: "Show a button that opens a screen in the app",
+    parameters: displayParameters,
+    render: ({ result, status }) => <ScreenToolCard result={result} loading={status !== "complete"} />,
   });
   useRenderTool({
     name: "present_choices",
