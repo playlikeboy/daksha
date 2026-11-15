@@ -26,7 +26,7 @@ import {
 } from "./connectors/index.ts";
 import type { Config } from "./config.ts";
 import { McpService } from "./mcp/service.ts";
-import { mcpRoutes } from "./mcp/routes.ts";
+import { mcpOAuthCallbackRoute, mcpRoutes } from "./mcp/routes.ts";
 import type { Store } from "./db.ts";
 import { createDebo, type DeboService, deboRoutes } from "./debo/index.ts";
 import { agentRoutes } from "./engine/routes.ts";
@@ -78,6 +78,11 @@ export async function createApp(
     : createConnectors(config, { googleConnected: (owner) => workspace.connected(owner) });
   const connectors = made.service;
   const mcp = options.mcp ?? new McpService(db, { encryptionKey: config.encryptionKey });
+  // Signing in to a tool server (OAuth): the state is signed with a key made for that one job.
+  mcp.configureSignIn({
+    stateKey: auth.purposeKey("mcp-oauth-state"),
+    redirectUrl: new URL("/api/mcp/oauth/callback", config.publicUrl).toString(),
+  });
   const actions = new ActionService(db, {
     execute: (owner, input, connectionId, targetVersion) =>
       input.kind === "journal.add"
@@ -207,6 +212,14 @@ export async function createApp(
       appUrl: [...origins].find((origin) => origin.startsWith("https://")) ?? [...origins][0],
       sampleComplete: made.backend?.complete?.bind(made.backend),
     }),
+  );
+  // Where a tool server's sign-in page sends people back. Public; it trusts only the signed state.
+  app.route(
+    "/api/mcp/oauth/callback",
+    mcpOAuthCallbackRoute(
+      mcp,
+      [...origins].find((origin) => origin.startsWith("https://")) ?? [...origins][0],
+    ),
   );
   // The voice agent has no owner session; it proves itself with VOICE_AGENT_SECRET.
   // Voice runs through the same agent, tools and saved conversations as chat, so

@@ -367,9 +367,23 @@ export default function PrivacyPage() {
               the results. Debo only connects to public https addresses.
             </>,
             <>
-              &ldquo;Remove&rdquo; on the Apps screen deletes the server and its secret. &ldquo;Delete my data&rdquo;
-              removes every server you added. &ldquo;Download my data&rdquo; lists each server&rsquo;s name, address and
-              tools, never its secret.
+              If you choose to sign in to a server instead of giving a secret, you sign in on that server&rsquo;s own
+              page, not in Debo. To set this up, Debo sends the server&rsquo;s sign-in service its name
+              (&ldquo;Debo&rdquo;) and the address to send you back to. Debo then keeps the sign-in it gets back (its
+              tokens) encrypted, never shows them and never writes them to its logs.
+            </>,
+            <>
+              Your own Composio account works the same way. If you add it with &ldquo;Sign in with Composio&rdquo; or
+              your own Composio API key, Debo saves the key or the sign-in encrypted, and the calls go to your Composio
+              account with what each call needs: the tool name and its values. What Composio and the apps you connected
+              there do with it is set by your Composio account, not by Debo.
+            </>,
+            <>
+              &ldquo;Remove&rdquo; on the Apps screen deletes the server and its secret or sign-in. &ldquo;Sign
+              out&rdquo; deletes the sign-in and keeps the server. Both only make Debo forget it: to cut off access on
+              the other side too, do that in the server&rsquo;s own settings (Composio offers no way for Debo to do it).
+              &ldquo;Delete my data&rdquo; removes every server you added. &ldquo;Download my data&rdquo; lists each
+              server&rsquo;s name, address and tools, never its secret or sign-in.
             </>,
           ]}
         />

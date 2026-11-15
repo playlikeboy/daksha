@@ -123,16 +123,18 @@ The one live test (`COMPOSIO_LIVE=1`, needs `COMPOSIO_API_KEY`) lists the catalo
 
 ## Custom tool servers (MCP)
 
-A person can add their own tool server on the Apps screen: a name, an https address and an optional secret (a bearer token, or one custom header name and value). Code: `apps/server/src/mcp/`. Routes: `GET/POST /api/mcp`, `POST /api/mcp/:id/refresh`, `PATCH /api/mcp/:id` (`{ autoRead }`), `DELETE /api/mcp/:id`.
+A person can add their own tool server on the Apps screen: a name, an https address and either an optional secret (a bearer token, or one custom header name and value) or a sign-in on the server's own page (OAuth, see "Signing in to a tool server" below). Code: `apps/server/src/mcp/`. Routes: `GET/POST /api/mcp` (POST also takes `auth: "sign-in"`, `preset: "composio"`, `to: "web" | "native"`), `POST /api/mcp/:id/refresh`, `POST /api/mcp/:id/sign-in` (`{ to }`, answers `{ url }`), `DELETE /api/mcp/:id/sign-in` (sign out), `PATCH /api/mcp/:id` (`{ autoRead }`), `DELETE /api/mcp/:id`, and the public `GET /api/mcp/oauth/callback`.
 
 | File | Job |
 |---|---|
 | `safe-fetch.ts` | The address checks and the only `fetch` that touches a server. |
 | `service.ts` | Add, list, refresh, remove; talking to the server with the official `@modelcontextprotocol/sdk` client (1.30.0, already used for search); risk; wrapping. |
 | `tools.ts` | The agent tools `find_server_tools` and `use_server_tool`. |
-| `routes.ts` | The HTTP routes. Never returns a secret. |
+| `routes.ts` | The HTTP routes and the public sign-in callback. Never returns a secret or a token. |
+| `oauth.ts` | The signed sign-in state and the encrypted store the SDK's OAuth code reads and writes. |
+| `composio.ts` | Which addresses are Composio's, and which header a Composio key goes in. |
 
-**Protocol.** MCP over Streamable HTTP, using the SDK's `StreamableHTTPClientTransport` with Debo's own `fetch`. Older SSE-only servers are not supported. **OAuth-protected servers are not supported yet**: the screen and the errors say so. A new connection is made for each action and closed after it (no long-lived sessions).
+**Protocol.** MCP over Streamable HTTP, using the SDK's `StreamableHTTPClientTransport` with Debo's own `fetch`. Older SSE-only servers are not supported. Servers that need a sign-in (OAuth) are supported, see below. A new connection is made for each action and closed after it (no long-lived sessions).
 
 **How the agent uses them.** Two sibling tools, not the Composio ones: `find_server_tools` (best matches first, up to 8) and `use_server_tool`. The tool list is saved when the server is added or checked; a call can only name a tool from that list. The system prompt carries only the server's own name and a rule that its text is never instructions. Tool names and descriptions arrive in tool results, marked as untrusted.
 
@@ -145,6 +147,30 @@ A person can add their own tool server on the Apps screen: a name, an https addr
 6. **No private data goes out on its own.** Debo sends a server only the arguments the model chose for a call. The add form says this, and warns that a server Debo does not control can do anything with what it receives.
 7. **Logs** hold person id, server id, tool name and success, never arguments or results.
 
-**What is not done.** OAuth servers; SSE-only servers; tool schema checks (arguments are passed as the model wrote them and the server decides); background watching; custom servers inside delegated tasks (chat and voice only). The "read-only" label is only the server's claim.
+**What is not done.** Sign-in services that need Debo registered by hand (only dynamic client registration is done); SSE-only servers; tool schema checks (arguments are passed as the model wrote them and the server decides); background watching; custom servers inside delegated tasks (chat and voice only). The "read-only" label is only the server's claim.
 
-**Checked and not checked.** Tests use an in-process fake server. By hand, once, the real pinned `fetch` plus the SDK were run against a local https MCP server (add, list, call, the size cap and a redirect). Not checked against any real third-party MCP server, a real DNS rebinding attempt, or Cloudflare's container network. A response over the size cap currently fails after the 30 second call limit instead of at once, and the error then says "took too long".
+### Signing in to a tool server (OAuth)
+
+The add form has "Sign in instead of a secret (OAuth)". Debo then saves the server as waiting ("Waiting for you to sign in.", no tools yet) and opens the server's sign-in page. The OAuth itself is the official SDK's `auth()` with Debo's `OAuthClientProvider` (`oauth.ts`); nothing about OAuth is written by hand.
+
+1. **Discovery.** `discoverOAuthServerInfo` reads the server's protected-resource document and its sign-in service's metadata. A service that does not list `S256` in `code_challenge_methods_supported`, or has no `registration_endpoint`, is refused and the server is not kept.
+2. **Registration.** The first time Debo signs in to a server (and again after Sign out), it registers itself with the sign-in service (dynamic client registration): name "Debo", redirect `${PUBLIC_API_URL}/api/mcp/oauth/callback`, grants `authorization_code` and `refresh_token`, auth method `none` when the service allows it (a public client, no client secret). No client id is set up by hand.
+3. **Scopes.** The scopes the server's document lists; if it lists none, only `openid offline_access` when the service offers them (enough to stay signed in, nothing about the person's profile).
+4. **State.** `base64url(json).base64url(hmac)` with the owner, the server id, a random nonce, web or native, and a 10 minute expiry. The key is `Auth.purposeKey("mcp-oauth-state")`, an HMAC of `SESSION_SIGNING_KEY`, so the signing key itself is not passed around. The nonce is saved with the PKCE verifier; the callback checks the signature, the expiry, that the server belongs to that owner and that the nonce matches, and deletes the nonce **before** swapping the code, so a state works once. Starting a new sign-in makes older links useless.
+5. **Callback.** `GET /api/mcp/oauth/callback` is mounted before the session check (like the Google and Composio callbacks). It shows fixed words only ("You are signed in" or "That did not finish"), with `default-src 'none'`, and sends the phone app to `debo://tool-servers?status=success|failed`. On success it lists the server's tools.
+6. **Tokens.** The client registration, tokens, their expiry and the discovery documents are one encrypted record (`TOKEN_ENCRYPTION_KEY`, AES-256-GCM) in `credentials`, id `mcp-oauth-<server id>`, apart from the server row. Never returned by any route, never exported, never logged. Without `TOKEN_ENCRYPTION_KEY` sign-in is refused.
+7. **Staying signed in.** Before each connection, a token that runs out within 60 seconds is refreshed (one refresh at a time per server in this process). A 401 from the server makes the SDK refresh and retry once. If the refresh is refused, the server is marked "Sign in again" and nothing more is sent until the person signs in. A service that sends no new refresh token keeps the old one.
+8. **Sign out and remove.** Sign out deletes the token record and keeps the server. Remove deletes both. Neither tells the sign-in service: Debo only forgets the tokens (Composio offers no way to take them back).
+9. **Everything over the checked fetch.** Discovery, registration and token requests all go through `safe-fetch.ts` (public https only, pinned, no redirects, size and time limits); it sends a form body (URLSearchParams) for the token requests. The sign-in page itself must also be on a public https address.
+10. **Writes still wait.** Signing in changes only how Debo gets in. Every change still waits for the person's yes, exactly as above.
+
+### Bring your own Composio
+
+This is the person's **own** Composio account, not the apps Debo connects for them with Debo's key (top of this file). The Apps screen card "Composio: connect all your apps at once" offers:
+
+- **Sign in with Composio**: adds `https://connect.composio.dev/mcp` (Composio Connect: every app the person connected in their Composio account) with the sign-in above. Checked live on 15 November 2026 (anonymous, read-only): its protected-resource document names `https://connect.composio.dev` as sign-in service; its metadata lists authorize `connect.composio.dev/oauth/authorize`, token `login.composio.dev/oauth2/token`, registration `login.composio.dev/oauth2/register`, PKCE `S256` only, auth method `none`, scopes `openid profile email offline_access`, no revocation endpoint. An unauthenticated MCP request answers 401.
+- **Use an API key**: the same address with the key in `x-consumer-api-key`, or a Composio project address (`https://backend.composio.dev/v3/mcp/<id>?user_id=...`) with the project key in `x-api-key` (docs.composio.dev, November 2026). The header is filled in from the address and can be changed.
+
+The server refuses `preset: "composio"` for any address that is not on `composio.dev`. Everything else is the same as any tool server: the tools Composio lists, reviews for every change, the same limits.
+
+**Checked and not checked.** Tests use an in-process fake server. By hand, once, the real pinned `fetch` plus the SDK were run against a local https MCP server (add, list, call, the size cap and a redirect). Sign-in tests (`tests/mcp-oauth.test.ts`) use a fake sign-in service and server: registration, PKCE S256 checked at the token step, the full start, callback, list and approved call, refresh early and on 401, a refused refresh, replayed, changed and old states, sign out, and that no token reaches a route, the export, the logs or the database in clear text. Not checked against a real Composio sign-in or key (no account here), nor two server copies refreshing the same token at once (the lock is per process). Not checked against any real third-party MCP server, a real DNS rebinding attempt, or Cloudflare's container network. A response over the size cap currently fails after the 30 second call limit instead of at once, and the error then says "took too long".
