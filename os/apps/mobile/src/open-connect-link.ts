@@ -29,7 +29,12 @@ export function dropSignInWindow(reserved: Window | null) {
  * Opens the sign-in page. Resolves when the person is back: at once on the web (the new tab
  * stays open, and the screen checks again when they return), after the sheet closes on native.
  */
-export async function openSignInPage(url: string, reserved: Window | null) {
+export async function openSignInPage(
+  url: string,
+  reserved: Window | null,
+  /** The deep link the page sends people back to. The sheet closes when it is reached. */
+  returnUrl = "debo://connectors",
+) {
   if (Platform.OS === "web") {
     if (reserved && !reserved.closed) reserved.location.href = url;
     // A blocked tab: fall back to this tab. The page sends people back to Debo.
@@ -37,5 +42,5 @@ export async function openSignInPage(url: string, reserved: Window | null) {
     return;
   }
   const WebBrowser = await import("expo-web-browser");
-  await WebBrowser.openAuthSessionAsync(url, "debo://connectors");
+  await WebBrowser.openAuthSessionAsync(url, returnUrl);
 }

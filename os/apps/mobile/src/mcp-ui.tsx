@@ -1,23 +1,40 @@
 // "Add your own tool server (MCP)" on the Apps screen. A person can point Debo at a tool
 // server they run or trust. It is NOT one of Debo's apps: a stranger may run it, and what Debo
 // sends it leaves Debo. The words on this screen say so. Colours and sizes come from ui.tsx.
-import { Plus, Server, ShieldAlert } from "lucide-react-native";
+// A server can take a secret, or a sign-in (OAuth) on the server's own page. The Composio card
+// is a shortcut for a person's OWN Composio account (not the apps Debo connects for them).
+import { KeyRound, LogIn, Plus, Server, ShieldAlert } from "lucide-react-native";
 import { useCallback, useEffect, useRef, useState } from "react";
-import { ActivityIndicator, Text, View } from "react-native";
+import { ActivityIndicator, AppState, Platform, Text, View } from "react-native";
 import {
   addToolServer,
+  COMPOSIO_CONNECT_URL,
+  composioHeaderFor,
+  freeName,
   hostOf,
   loadToolServers,
   refreshToolServer,
   removeToolServer,
   setToolServerReads,
+  signOutToolServer,
+  startToolServerSignIn,
   type ToolServer,
 } from "./mcp-data";
+import { dropSignInWindow, openSignInPage, reserveSignInWindow } from "./open-connect-link";
 import { Button, Card, Chip, colors, ErrorNotice, Field, relativeDate, s, spacing } from "./ui";
 import { useWorkspace } from "./workspace";
 
 const errorText = (e: unknown) => (e instanceof Error ? e.message : String(e));
 const accessText = { reads: "reads", changes: "changes something", destructive: "can delete" } as const;
+/** Where the sign-in page sends people back to. The in-app sheet closes when it gets there. */
+const RETURN_URL = "debo://tool-servers";
+const returnTo = () => (Platform.OS === "web" ? ("web" as const) : ("native" as const));
+const emptyForm = { name: "", url: "", secret: "", headerName: "", signIn: false };
+const composioStart = {
+  url: COMPOSIO_CONNECT_URL,
+  secret: "",
+  headerName: composioHeaderFor(COMPOSIO_CONNECT_URL),
+};
 
 export function ToolServersSection() {
   const { api, notify } = useWorkspace();
@@ -27,7 +44,8 @@ export function ToolServersSection() {
   const [busy, setBusy] = useState<string>();
   const [open, setOpen] = useState<string>();
   const [confirming, setConfirming] = useState<string>();
-  const [form, setForm] = useState({ name: "", url: "", secret: "", headerName: "" });
+  const [form, setForm] = useState(emptyForm);
+  const [composioKey, setComposioKey] = useState<typeof composioStart>();
   const alive = useRef(true);
   useEffect(() => {
     alive.current = true;
@@ -50,6 +68,13 @@ export function ToolServersSection() {
   useEffect(() => {
     void refresh();
   }, [refresh]);
+  // Back from a sign-in page: check again when Debo is in front.
+  useEffect(() => {
+    const sub = AppState.addEventListener("change", (state) => {
+      if (state === "active") void refresh();
+    });
+    return () => sub.remove();
+  }, [refresh]);
 
   async function run(id: string, work: () => Promise<unknown>, done?: string) {
     setBusy(id);
@@ -65,7 +90,40 @@ export function ToolServersSection() {
     }
   }
 
+  /** Opens the server's sign-in page. The tab is reserved first, before any waiting. */
+  async function signIn(id: string, start: () => Promise<{ url?: string; name: string }>) {
+    setError("");
+    const reserved = reserveSignInWindow();
+    setBusy(id);
+    try {
+      const { url, name } = await start();
+      if (!url) throw new Error("I couldn't start the sign-in. Try again in a moment.");
+      await refresh();
+      await openSignInPage(url, reserved, RETURN_URL);
+      notify(`Sign in to ${name} on the page that opened, then come back here.`);
+      return true;
+    } catch (e) {
+      dropSignInWindow(reserved);
+      setError(errorText(e));
+      return false;
+    } finally {
+      if (alive.current) setBusy(undefined);
+      await refresh();
+    }
+  }
+
   async function add() {
+    if (form.signIn) {
+      const ok = await signIn("add", async () => {
+        const made = await addToolServer(api, { name: form.name, url: form.url, auth: "sign-in", to: returnTo() });
+        return { url: made.signInUrl, name: made.name };
+      });
+      if (ok && alive.current) {
+        setForm(emptyForm);
+        setAdding(false);
+      }
+      return;
+    }
     setBusy("add");
     setError("");
     try {
@@ -75,9 +133,31 @@ export function ToolServersSection() {
         ...(form.secret ? { secret: form.secret } : {}),
         ...(form.secret && form.headerName ? { headerName: form.headerName } : {}),
       });
-      setForm({ name: "", url: "", secret: "", headerName: "" });
+      setForm(emptyForm);
       setAdding(false);
       notify(`${made.name} is added. Debo found ${made.tools.length} ${made.tools.length === 1 ? "tool" : "tools"}.`);
+      await refresh();
+    } catch (e) {
+      setError(errorText(e));
+    } finally {
+      if (alive.current) setBusy(undefined);
+    }
+  }
+
+  async function addComposioKey() {
+    if (!composioKey) return;
+    setBusy("composio");
+    setError("");
+    try {
+      const made = await addToolServer(api, {
+        name: freeName("Composio", servers),
+        url: composioKey.url,
+        secret: composioKey.secret,
+        headerName: composioKey.headerName,
+        preset: "composio",
+      });
+      setComposioKey(undefined);
+      notify(`Composio is added. Debo found ${made.tools.length} ${made.tools.length === 1 ? "tool" : "tools"}.`);
       await refresh();
     } catch (e) {
       setError(errorText(e));
@@ -109,13 +189,18 @@ export function ToolServersSection() {
             <View style={{ flex: 1, gap: spacing[1] }}>
               <View style={[s.row, { gap: spacing[2], flexWrap: "wrap" }]}>
                 <Text style={[s.text, { fontWeight: "600" }]}>{server.name}</Text>
-                <Chip tint={server.lastOk === false ? colors.lavender : colors.green}>
-                  {server.lastOk === false ? "Not working" : "Working"}
-                </Chip>
+                {server.auth === "sign-in" && !server.signedIn ? (
+                  <Chip tint={colors.lavender}>Needs you to sign in</Chip>
+                ) : (
+                  <Chip tint={server.lastOk === false ? colors.lavender : colors.green}>
+                    {server.lastOk === false ? "Not working" : "Working"}
+                  </Chip>
+                )}
               </View>
               <Text style={s.small}>
                 {hostOf(server.url)} · {server.tools.length} {server.tools.length === 1 ? "tool" : "tools"}
                 {server.hasSecret ? " · secret saved" : ""}
+                {server.auth === "sign-in" ? (server.signedIn ? " · signed in" : " · not signed in") : ""}
               </Text>
               <Text style={s.small}>
                 {server.lastAt
@@ -145,6 +230,38 @@ export function ToolServersSection() {
             >
               {server.autoRead ? "Reading without asking: on" : "Reading without asking: off"}
             </Button>
+            {server.auth === "sign-in" && (
+              <Button
+                small
+                primary={!server.signedIn}
+                icon={LogIn}
+                busy={busy === `sign-in:${server.id}`}
+                disabled={busy === server.id}
+                onPress={() =>
+                  void signIn(`sign-in:${server.id}`, async () => ({
+                    ...(await startToolServerSignIn(api, server.id, returnTo())),
+                    name: server.name,
+                  }))
+                }
+              >
+                {server.signedIn ? "Sign in again" : "Sign in"}
+              </Button>
+            )}
+            {server.auth === "sign-in" && server.signedIn && (
+              <Button
+                small
+                disabled={busy === server.id}
+                onPress={() =>
+                  void run(
+                    server.id,
+                    () => signOutToolServer(api, server.id),
+                    `Signed out of ${server.name}. Debo deleted its sign-in.`,
+                  )
+                }
+              >
+                Sign out
+              </Button>
+            )}
           </View>
           {open === server.id && (
             <View style={{ gap: spacing[2] }}>
@@ -169,8 +286,8 @@ export function ToolServersSection() {
           {confirming === server.id ? (
             <View accessibilityRole="alert" style={{ gap: spacing[2] }}>
               <Text style={s.text}>
-                Remove {server.name}? Debo stops using it and deletes the secret it saved. You can add
-                it again any time.
+                Remove {server.name}? Debo stops using it and deletes the secret or sign-in it saved.
+                You can add it again any time.
               </Text>
               <View style={[s.row, { gap: spacing[2], flexWrap: "wrap" }]}>
                 <Button
@@ -198,6 +315,26 @@ export function ToolServersSection() {
       ))}
       {servers && !servers.length && !adding && (
         <Text style={s.muted}>You have not added a tool server yet.</Text>
+      )}
+      {!adding && (
+        <ComposioCard
+          busy={busy}
+          keyForm={composioKey}
+          setKeyForm={setComposioKey}
+          onSignIn={() =>
+            void signIn("composio", async () => {
+              const made = await addToolServer(api, {
+                name: freeName("Composio", servers),
+                url: COMPOSIO_CONNECT_URL,
+                auth: "sign-in",
+                preset: "composio",
+                to: returnTo(),
+              });
+              return { url: made.signInUrl, name: made.name };
+            })
+          }
+          onAddKey={() => void addComposioKey()}
+        />
       )}
       {adding ? (
         <Card style={{ gap: spacing[3], padding: spacing[4] }}>
@@ -228,27 +365,43 @@ export function ToolServersSection() {
             autoCorrect={false}
             keyboardType="url"
           />
-          <Field
-            label="Secret (optional)"
-            value={form.secret}
-            onChangeText={(secret) => setForm({ ...form, secret })}
-            placeholder="A token or key the server gave you"
-            secureTextEntry
-            autoCapitalize="none"
-            autoCorrect={false}
-          />
-          <Field
-            label="Header name for the secret (optional)"
-            value={form.headerName}
-            onChangeText={(headerName) => setForm({ ...form, headerName })}
-            placeholder="Leave empty to send it as a bearer token"
-            autoCapitalize="none"
-            autoCorrect={false}
-          />
-          <Text style={s.small}>
-            Debo saves the secret encrypted and never shows it again. Servers that need you to sign in
-            with OAuth can’t be added yet.
-          </Text>
+          <View style={s.row}>
+            <Button
+              small
+              primary={form.signIn}
+              icon={LogIn}
+              onPress={() => setForm({ ...form, signIn: !form.signIn, secret: "", headerName: "" })}
+            >
+              {form.signIn ? "Sign in instead of a secret (OAuth): on" : "Sign in instead of a secret (OAuth): off"}
+            </Button>
+          </View>
+          {form.signIn ? (
+            <Text style={s.small}>
+              Debo opens the server’s own sign-in page. After you sign in, Debo keeps the sign-in
+              encrypted and never shows it. Sign out or Remove deletes it.
+            </Text>
+          ) : (
+            <>
+              <Field
+                label="Secret (optional)"
+                value={form.secret}
+                onChangeText={(secret) => setForm({ ...form, secret })}
+                placeholder="A token or key the server gave you"
+                secureTextEntry
+                autoCapitalize="none"
+                autoCorrect={false}
+              />
+              <Field
+                label="Header name for the secret (optional)"
+                value={form.headerName}
+                onChangeText={(headerName) => setForm({ ...form, headerName })}
+                placeholder="Leave empty to send it as a bearer token"
+                autoCapitalize="none"
+                autoCorrect={false}
+              />
+              <Text style={s.small}>Debo saves the secret encrypted and never shows it again.</Text>
+            </>
+          )}
           <View style={[s.row, { gap: spacing[2], flexWrap: "wrap" }]}>
             <Button
               primary
@@ -256,7 +409,7 @@ export function ToolServersSection() {
               disabled={!form.name.trim() || !form.url.trim()}
               onPress={() => void add()}
             >
-              Add this tool server
+              {form.signIn ? "Add and sign in" : "Add this tool server"}
             </Button>
             <Button
               disabled={busy === "add"}
@@ -275,5 +428,82 @@ export function ToolServersSection() {
         </Button>
       )}
     </View>
+  );
+}
+
+/**
+ * A shortcut for a person who has their own Composio account: one tool server for every app they
+ * connected there. Sign in on Composio's page, or paste a key.
+ */
+function ComposioCard(props: {
+  busy?: string;
+  keyForm?: typeof composioStart;
+  setKeyForm: (form: typeof composioStart | undefined) => void;
+  onSignIn: () => void;
+  onAddKey: () => void;
+}) {
+  const { busy, keyForm, setKeyForm } = props;
+  return (
+    <Card style={{ gap: spacing[3], padding: spacing[4] }}>
+      <Text style={[s.text, { fontWeight: "600" }]}>Composio: connect all your apps at once</Text>
+      <Text style={s.small}>
+        If you have your own Composio account, add it once and Debo can use the apps you connected
+        there. This uses your Composio account, not Debo’s. Every change still waits for your yes.
+      </Text>
+      {keyForm ? (
+        <View style={{ gap: spacing[3] }}>
+          <Field
+            label="Composio address"
+            value={keyForm.url}
+            onChangeText={(url) => setKeyForm({ ...keyForm, url, headerName: composioHeaderFor(url) })}
+            autoCapitalize="none"
+            autoCorrect={false}
+            keyboardType="url"
+          />
+          <Field
+            label="Your Composio API key"
+            value={keyForm.secret}
+            onChangeText={(secret) => setKeyForm({ ...keyForm, secret })}
+            placeholder="Paste the key from your Composio account"
+            secureTextEntry
+            autoCapitalize="none"
+            autoCorrect={false}
+          />
+          <Field
+            label="Header name for the key"
+            value={keyForm.headerName}
+            onChangeText={(headerName) => setKeyForm({ ...keyForm, headerName })}
+            autoCapitalize="none"
+            autoCorrect={false}
+          />
+          <Text style={s.small}>
+            For connect.composio.dev, use your own API key. For a project address from your Composio
+            dashboard, use that project’s API key. Debo saves the key encrypted and never shows it again.
+          </Text>
+          <View style={[s.row, { gap: spacing[2], flexWrap: "wrap" }]}>
+            <Button
+              primary
+              busy={busy === "composio"}
+              disabled={!keyForm.secret.trim() || !keyForm.url.trim()}
+              onPress={props.onAddKey}
+            >
+              Add Composio
+            </Button>
+            <Button disabled={busy === "composio"} onPress={() => setKeyForm(undefined)}>
+              Cancel
+            </Button>
+          </View>
+        </View>
+      ) : (
+        <View style={[s.row, { gap: spacing[2], flexWrap: "wrap" }]}>
+          <Button primary icon={LogIn} busy={busy === "composio"} onPress={props.onSignIn}>
+            Sign in with Composio
+          </Button>
+          <Button icon={KeyRound} disabled={busy === "composio"} onPress={() => setKeyForm(composioStart)}>
+            Use an API key
+          </Button>
+        </View>
+      )}
+    </Card>
   );
 }
