@@ -30,13 +30,45 @@ import {
 } from "./ui";
 import { useWorkspace } from "./workspace";
 
-export function ComputerEntry() {
+export function ComputerEntry({ compact }: { compact?: boolean } = {}) {
   const { workspace, open } = useWorkspace();
   const available = workspace.connections.some(
     (c) => c.id === "browser" && c.status === "connected",
   );
   const active = workspace.browsers.filter((b) => b.status === "active").length;
   const status = computerStatus(available, active);
+  // In the slim top bar: just the screen icon and a dot, with the status in its label.
+  if (compact)
+    return (
+      <Pressable
+        accessibilityRole="button"
+        accessibilityLabel={`Debo's computer — ${status}`}
+        onPress={() => open({ type: "computer" })}
+        style={({ pressed }) => ({
+          width: spacing[11],
+          height: spacing[11],
+          alignItems: "center",
+          justifyContent: "center",
+          borderRadius: radius.full,
+          backgroundColor: pressed ? colors.line : "transparent",
+        })}
+      >
+        <Monitor size={20} strokeWidth={1.8} color={colors.text} />
+        <View
+          style={{
+            position: "absolute",
+            bottom: spacing[2] + spacing[0.5],
+            right: spacing[2] + spacing[0.5],
+            width: spacing[2],
+            height: spacing[2],
+            borderRadius: radius.full,
+            borderWidth: 1,
+            borderColor: colors.card,
+            backgroundColor: available ? colors.success : colors.disabled,
+          }}
+        />
+      </Pressable>
+    );
   return (
     <Pressable
       accessibilityRole="button"

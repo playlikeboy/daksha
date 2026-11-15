@@ -51,7 +51,8 @@ import { SearchToolCard } from "./search-tool-card";
 import { FileThreadCard, TaskThreadCard } from "./thread-artifacts";
 import { TypingDots } from "./typing-dots";
 import { type Selection, useFuseThread } from "./threads";
-import { Button, Card, CheckRow, colors, ErrorNotice, fontSize, radius, s, shadow, spacing } from "./ui";
+import { useChrome } from "./chrome";
+import { Button, Card, CheckRow, colors, ErrorNotice, fontSize, radius, s, shadow, Skeleton, spacing } from "./ui";
 import { useWorkspace } from "./workspace";
 
 const displayParameters = z.record(z.string(), z.unknown());
@@ -531,13 +532,14 @@ export function ChatScreen({
     .at(-1)?.id;
   const replying = busy || agent.isRunning;
   const assistantName = useAssistantName();
+  const chrome = useChrome();
   useChatMood({ active, running: replying, messages, error });
   return (
     <View style={{ flex: 1 }}>
       <ScrollView
         ref={list}
         showsVerticalScrollIndicator={false}
-        contentContainerStyle={{ gap: spacing[3], paddingTop: spacing[4], paddingBottom: spacing[5], flexGrow: 1 }}
+        contentContainerStyle={{ gap: spacing[3], paddingTop: chrome.top + spacing[4], paddingBottom: spacing[5], flexGrow: 1 }}
         onScroll={({ nativeEvent: { contentOffset, contentSize, layoutMeasurement } }) => {
           const nearEnd = contentSize.height - contentOffset.y - layoutMeasurement.height < 100;
           followLatest.current = nearEnd;
@@ -559,11 +561,7 @@ export function ChatScreen({
           </>
         )}
         {listState(loaded, visible.length) === "loading" && !historyError && (
-          <ActivityIndicator
-            accessibilityLabel="Loading conversation"
-            color={colors.blueDark}
-            style={{ flexGrow: 1 }}
-          />
+          <Skeleton label="Loading conversation" variant="chat" rows={4} />
         )}
         {listState(loaded, visible.length) === "empty" ? (
           <View
@@ -591,6 +589,9 @@ export function ChatScreen({
               I keep your journal and remember what is in it. Ask me about your days, and I will
               show you which entry each answer came from.
             </Text>
+            <Text style={[s.small, { maxWidth: 320, textAlign: "center" }]}>
+              Type below, or tap my face at the top to talk out loud.
+            </Text>
             <View style={{ width: "100%", maxWidth: 360, marginTop: spacing[3], gap: spacing[2] }}>
               {[
                 { text: "Write in my journal", action: () => navigate("journal") },
@@ -598,7 +599,7 @@ export function ChatScreen({
                   text: "What did I do last week?",
                   action: () => enqueue("What did I do last week?"),
                 },
-                { text: "See what Debo knows", action: () => navigate("knows") },
+                { text: `See what ${assistantName} knows`, action: () => navigate("knows") },
               ].map((item) => (
                 <Button key={item.text} onPress={item.action}>
                   {item.text}
@@ -789,6 +790,10 @@ export function ChatScreen({
         </Button>
       )}
       <KeyboardAvoidingView
+        onLayout={(event) => {
+          // Only the chat on screen moves the floating call bubble.
+          if (active) chrome.setComposerHeight?.(event.nativeEvent.layout.height);
+        }}
         behavior={Platform.OS === "ios" ? "padding" : undefined}
         style={keyboardPadding > 0 ? { paddingBottom: keyboardPadding } : undefined}
       >
