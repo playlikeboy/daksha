@@ -1,3 +1,6 @@
+> [!NOTE]
+> **Debo is being renamed to Daksha.** This repository and the website will soon move from Debo to Daksha, and the address will become https://daksha.life. Nothing has been renamed in the code yet; until then, everything below still says Debo and the current addresses keep working.
+
 <p align="center">
   <img src="./docs/assets/debo-banner.svg" alt="Debo, a small red tomato, next to the words: Debo, a friendly assistant that remembers your life." width="100%">
 </p>
