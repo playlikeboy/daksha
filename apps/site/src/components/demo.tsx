@@ -5,8 +5,8 @@ import { Badge } from "@astryxdesign/core/Badge";
 import { Heading, Text } from "@astryxdesign/core/Text";
 import { Band } from "./band";
 
-// A short film cut from real screen recordings of the live app, made with the demo account
-// (source in video/launch). Below it, a walkthrough of one real recording with step captions.
+// A short animated film: the app's cards are redrawn (not screen recordings), with words that build
+// on screen (source in video/launch/film2). Below it, a walkthrough of one real recording with step captions.
 // Both have music and sound effects made in video/launch/audio, and no speech.
 // Astryx has no video component, so these are plain video elements inside a Card.
 export function Demo() {
@@ -18,9 +18,9 @@ export function Demo() {
           See what Debo does
         </Heading>
         <Text type="large" weight="normal" as="p" color="secondary" textWrap="pretty">
-          A short film made from the real app. You write down a day, ask a big question about your own life, and
-          see the journal entries each answer came from. Then you talk to Debo, look at what it knows, and see how
-          your apps connect. It has music and sound effects but no speech, and every step has words on screen.
+          A short animated film about what Debo does. You write down a day, ask about your own life and see the
+          entries each answer came from. Then you fix what Debo knows, talk to it, keep track of the people in your
+          life, and say yes before anything changes in your apps. It has music and sound effects but no speech.
         </Text>
       </VStack>
       <VStack hAlign="center" gap={3}>
@@ -33,7 +33,7 @@ export function Demo() {
               width={1920}
               height={1080}
               poster="/debo-launch-poster.webp"
-              aria-label="A short film about Debo, with music and sound effects and no speech. It opens with the words You wrote it down somewhere, but where? The red tomato Debo appears. Then real screen recordings of the app: writing a journal entry, asking what to sort out before Mum visits and before a trip, an answer that lists the journal entries it came from, a voice call where Debo answers a tired message kindly, the What Debo knows page with Fix and Forget buttons, and the Apps screen, where you connect apps like Gmail and Calendar. It ends on the Debo name and my.debo.life."
+              aria-label="A short animated film about Debo, with music and sound effects and no speech. Words build on a white screen: Meet Debo, a journal you can talk to. Between the cards, a line repeats: Debo remembers your days, Debo answers from your journal, Debo shows you what it knows, Debo talks with you, Debo remembers your people, Debo asks before it acts. The cards show a journal entry about lunch with Neha and a Goa trip being typed and saved, next to a voice note and a video. A question, what do I need to sort out before the Goa trip, gets an answer with three things to do and the three entries it came from. On What Debo knows, a memory is fixed and another is forgotten. Five characters appear and Debo, a blue blob, is picked for a voice call, where the person says Neha's birthday is on 21 November. People in your life shows Neha, Mum and Aarav, and Debo says Neha's birthday is on Saturday. Connected apps like Gmail and Calendar circle Debo. A card waiting for your yes asks to add the Goa trip to the calendar; Approve is pressed, the days flip over and the word Done appears with confetti. It ends on Debo keeps you in control, the Debo tomato and my.debo.life."
             >
               <source src="/debo-launch.mp4" type="video/mp4" />
               <source src="/debo-launch.webm" type="video/webm" />
@@ -42,7 +42,7 @@ export function Demo() {
           </AspectRatio>
         </Card>
         <Text type="supporting" as="p" color="secondary" justify="center" textWrap="balance">
-          Cut from recordings of the live app with a demo account. All the names and entries are made-up sample text.
+          Drawn, not recorded: the cards are rebuilt from the app's own screens and words. All the names and entries are made-up sample text.
         </Text>
       </VStack>
       <VStack gap={3} hAlign="center">

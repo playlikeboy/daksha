@@ -1,6 +1,41 @@
 # Debo launch video
 
-A 69 second launch film (1920x1080, plus a 1080x1920 cut) and a 66 second demo walkthrough (1920x1080). Both have music and sound effects, and no speech.
+The site shows the second launch film (`film2/`, 72 seconds, 1920x1080 plus a 1080x1920 cut): an animation with no screen recordings. There is also the first launch film (`src/`, 69 seconds, cut from screen recordings) and a 66 second demo walkthrough (`demo/`, 1920x1080). All have music and sound effects, and no speech.
+
+## The second launch film (film2)
+
+Bright white screen, a soft blue glow at the bottom, words that build one at a time with small icons between them, and cards rebuilt from the app (not screenshots) that float, tilt and stack. A line comes back between the cards: "Debo remembers your days", "Debo answers from your journal", "Debo shows you what it knows", "Debo talks with you", "Debo remembers your people", "Debo asks before it acts", and it ends on "Debo keeps you in control".
+
+- `film2/timeline.js` holds every time: the word blocks, the card scenes and the sound cues.
+- `film2/engine.js` draws a frame for any time t. The card text uses the app's real words ("Looking through your journal…", "Waiting for your yes", "Approve", "Not now", "Fix this memory", "Forget this memory", "Journal, 12 November").
+- The characters are `docs/assets/avatar-*.svg` and the end card logo is `docs/assets/debo.svg`. App icons are simple drawings of our own, not brand logos.
+- Everything on screen is something the app does today (see `os/docs/FEATURES.md`). The names and entries are the made-up sample text used in the demo. If a card's feature changes, change the card.
+
+Remake it (no recording needed; keep temporary files off a full disk with `TMPDIR`):
+
+```
+node video/launch/render.mjs --edit film2 --web apps/web --out video/launch/build/out --workers 8
+node video/launch/render.mjs --edit film2 --web apps/web --out video/launch/build/out --workers 8 --layout v
+python3 video/launch/audio/make-audio.py --out video/launch/build/audio --only film2
+```
+
+This writes `build/out/film2-h.mp4`, `build/out/film2-v.mp4` and `build/audio/film2.wav`. `--only 12,30.5` renders just those seconds as JPEGs, for checking. Then make the published files (TV range, sound added, fast start):
+
+```
+cd video/launch/build
+ffmpeg -i out/film2-h.mp4 -i audio/film2.wav -map 0:v -map 1:a -vf "scale=in_range=pc:out_range=tv,format=yuv420p" -c:v libx264 -preset slow -crf 20 -maxrate 6M -bufsize 12M -color_range tv -c:a aac -b:a 160k -movflags +faststart -shortest ../../../apps/site/public/debo-launch.mp4
+ffmpeg -i out/film2-v.mp4 -i audio/film2.wav -map 0:v -map 1:a -vf "scale=in_range=pc:out_range=tv,format=yuv420p" -c:v libx264 -preset slow -crf 20 -maxrate 6M -bufsize 12M -color_range tv -c:a aac -b:a 160k -movflags +faststart -shortest ../../../apps/site/public/debo-launch-vertical.mp4
+ffmpeg -i ../../../apps/site/public/debo-launch.mp4 -c:v libvpx-vp9 -crf 35 -b:v 0 -row-mt 1 -pix_fmt yuv420p -c:a libopus -b:a 128k ../../../apps/site/public/debo-launch.webm
+ffmpeg -ss 22.5 -i ../../../apps/site/public/debo-launch.mp4 -frames:v 1 -vf scale=1280:-1 -c:v libwebp -quality 85 ../../../apps/site/public/debo-launch-poster.webp
+```
+
+Check it by eye: a contact sheet with one frame a second (`ffmpeg -i film2-h.mp4 -vf "fps=1,scale=384:-1,tile=8x9" -frames:v 1 sheet.jpg`), and a few short stretches frame by frame for smooth motion.
+
+The music for film2 is brighter and faster than the first film: D major, about 120 beats a minute, plucks, marimba, bass, kick, claps and hats. The beat drops on the first "Debo remembers", rests during the voice call, and stops for the last line. Sounds follow the cues in the timeline: pops on words, ticks while typing, whooshes on card moves, taps on buttons, flaps on the calendar flip, a tick and chime on the check, and sparkles on the confetti.
+
+## The first launch film
+
+The steps below make the first film. They write the same file names in `apps/site/public` as film2, so publish only one of the two.
 
 Each edit is a web page driven by a clock: `src/engine.js` draws every frame of the film as a function of time, and `src/timeline.js` holds the whole edit (cuts, speed ramps, camera moves, text, callouts). The walkthrough works the same way from `demo/engine.js` and `demo/timeline.js`. `render.mjs` steps through a page at 30 fps with Playwright and encodes with ffmpeg. `audio/make-audio.py` makes the sound for both from the same timelines.
 

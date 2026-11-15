@@ -26,7 +26,7 @@ export function DemoVideo() {
         poster={DEMO_VIDEO_POSTER || undefined}
         width={1280}
         height={720}
-        aria-label="Debo demo video"
+        aria-label="The Debo launch film, an animation of what the app does: write a day, ask about it with sources, fix what Debo knows, talk by voice, people in your life, and a yes before anything changes in your apps. Music and sound effects, no speech."
       >
         <source src={DEMO_VIDEO_MP4} type="video/mp4" />
         Your browser cannot play this video. Open the app on the Try it page instead.
