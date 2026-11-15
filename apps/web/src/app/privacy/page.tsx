@@ -37,7 +37,7 @@ export default function PrivacyPage() {
       </a>
 
       <h1 className="h-section mt-8">How Debo handles your data</h1>
-      <p className="mt-4 text-[1.125rem] text-ink-soft">Last updated 14 November 2026.</p>
+      <p className="mt-4 text-[1.125rem] text-ink-soft">Last updated 15 November 2026.</p>
 
       <div className="mt-8 max-w-[40rem] rounded-[24px] border-2 border-ink bg-paper p-6">
         <p>
@@ -51,6 +51,7 @@ export default function PrivacyPage() {
           items={[
             <>Your name, email and password. Your password passes through Debo on its way to our sign-in service, which stores only a hashed version. Debo never stores or logs it.</>,
             <>Your journal entries.</>,
+            <>In the new app, the people in your life that you tell Debo about: name, who they are to you, birthdays and other special days, and a few notes. Described below.</>,
             <>
               Voice calls with Debo in the new app, written out as text: what you said and what Debo said, in order, with
               how far into the call each line was said. The sound of your voice is not kept.
@@ -122,6 +123,23 @@ export default function PrivacyPage() {
           are saved with your account. The notes are sent to the assistant model with your questions, as your own words,
           so she can be personal; the voice choice is sent to LiveKit with the call. Both are in &ldquo;Download my
           data&rdquo; and are deleted with your account.
+        </p>
+        <p>
+          In the new app Debo also keeps &ldquo;People in your life&rdquo;: a short card for each person you tell her
+          about, with their name, who they are to you, their birthday and other special days, and a few notes in your
+          words (for example &ldquo;loves jasmine tea&rdquo;). She saves a card when you mention someone in chat or on a
+          call, and tells you. You can see every card, fix it, add someone or remove them on the Apps screen, under
+          &ldquo;People in your life&rdquo;. The cards are saved in Debo&rsquo;s database at Neon, with your other
+          settings. Up to 40 of them (name, who they are, the start of the notes) and the birthdays coming up in the next
+          week are sent to the assistant model (Anthropic) with your questions, so she can ask after people by name. They
+          are in &ldquo;Download my data&rdquo; and are removed by &ldquo;Delete my data&rdquo; and when you delete your
+          account. They are separate from memories: removing a card does not forget a memory, and forgetting a memory does
+          not remove a card.
+        </p>
+        <p>
+          When you say good morning, or ask how your day looks, Debo may put together a short check-in. It reads only what
+          Debo already holds: the people cards, tasks waiting for you, your goals, and your journal entries from the last
+          week. It goes to the assistant model like any other answer, and the check-in itself is not saved anywhere.
         </p>
         <p>
           We have not yet checked LiveKit&rsquo;s, Deepgram&rsquo;s or Cartesia&rsquo;s terms on training AI and on how
