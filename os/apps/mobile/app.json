@@ -13,7 +13,15 @@
       "bundleIdentifier": "life.debo.app",
       "infoPlist": { "UIBackgroundModes": ["audio"] }
     },
-    "android": { "package": "life.debo.app" },
+    "android": {
+      "package": "life.debo.app",
+      "permissions": [
+        "android.permission.RECORD_AUDIO",
+        "android.permission.FOREGROUND_SERVICE",
+        "android.permission.FOREGROUND_SERVICE_MICROPHONE",
+        "android.permission.POST_NOTIFICATIONS"
+      ]
+    },
     "web": { "bundler": "metro", "name": "Debo: remembers your life" },
     "plugins": [
       "expo-document-picker",
@@ -23,9 +31,24 @@
       [
         "@config-plugins/react-native-webrtc",
         {
-          "microphonePermission": "Debo uses the microphone only while you are talking to it. It never keeps the recording."
+          "microphonePermission": "Debo uses the microphone only while you talk to it or record a note. The sound of a call is never kept. A note you record is kept until you delete it."
         }
-      ]
+      ],
+      [
+        "expo-audio",
+        {
+          "microphonePermission": "Debo uses the microphone only while you talk to it or record a note. The sound of a call is never kept. A note you record is kept until you delete it."
+        }
+      ],
+      [
+        "expo-camera",
+        {
+          "cameraPermission": "Debo uses the camera only while you record a video note. The video is kept until you delete it.",
+          "microphonePermission": "Debo uses the microphone only while you talk to it or record a note. The sound of a call is never kept. A note you record is kept until you delete it.",
+          "recordAudioAndroid": true
+        }
+      ],
+      "./plugins/with-call-service"
     ]
   }
 }

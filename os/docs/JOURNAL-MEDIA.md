@@ -8,7 +8,7 @@ This is what the Journal screen does beyond typing, how it is stored, what it co
 
 - **Write.** One calm box that grows as you write. The draft is kept on the device (browser storage on the web, a small file on the phone) and comes back after a restart. A quiet "Saved on this device" line, a word count, a day you can change ("When did this happen?"), and Ctrl or Command with Enter to save on the web.
 - **Speak.** Dictate into the text. A "Listening" box with a Stop button shows the whole time the microphone is on.
-- **Record.** A voice note, or a video where the browser can record one. Listen or watch before saving. Progress is shown while it uploads.
+- **Record.** A voice note, or a video where the browser can record one. On the phone app, both (see "Phone" below). Listen or watch before saving. Progress is shown while it uploads.
 - **Add a recording.** Pick an audio or video file you already have. Same review step.
 
 Limits, stated on screen and enforced on the server: **200 MB and 60 minutes per recording; 40 recordings and 4 hours a day** (the day changes at midnight UTC). Allowed types: m4a, mp4, mp3, wav, webm, ogg, aac, flac, 3gp, mov (`apps/server/src/debo/media-limits.ts`).
@@ -26,7 +26,7 @@ Chosen: record clips of about 8 seconds with the browser's `MediaRecorder`, send
 Why not the browser's built-in speech recognition: it differs by browser (Chrome sends audio to Google, Safari to Apple, Firefox has none), and it handles Hindi and mixed speech unevenly. One path through Debo's endpoint behaves the same on every browser, uses the same company as recordings (Cloudflare), and the privacy page can say so in one place.
 Cost of this choice: words appear a few seconds after you speak, not as you speak, and there is a gap of a few milliseconds between clips.
 Limits: 30 clips a minute and 600 a day per person (about 100 minutes), in server memory, so a restart resets them. Dictation does not count against the daily AI token limit, because it uses a different service with its own cost. Clips are not stored.
-On the phone: not built. Use the microphone on the keyboard to dictate. In-app dictation needs a native audio module (below).
+On the phone: not built. Use the microphone on the keyboard to dictate. In-app dictation would record short clips with `expo-audio` (now in the app for recordings) and send them the same way; it is not written yet.
 
 ### Upload route: through the API, into R2 by binding (default)
 
@@ -139,12 +139,16 @@ Nothing to create by hand, apart from the bucket, which already exists (`debo-jo
 
 ## Phone (iOS and Android)
 
-Built: pick a voice or video file (`expo-document-picker`), upload it (single link with `expo-file-system`'s upload task; parts by reading bytes with `File.open()`), the draft kept in a file, the day as a typed date. "Play" opens the signed link in the phone's player.
-Not built: recording inside the app, dictation, and an in-app player. To add them:
-1. `npx expo install expo-audio` (recording and playback) and `expo-camera` (video). Add their config plugins to `app.json` with microphone and camera permission texts in plain words.
-2. Make a new development build (`expo run:ios`, `expo run:android`, or EAS Build). `expo-audio` does not work in the old `expo-av` way, and neither runs in a plain web view.
-3. Fill in `debo-capture.native.ts` (`recordingSupport`, `startRecording`, `startDictation`) and `debo-player.native.tsx`. The screens already call them.
-None of the phone code has been run on a device. The released Android APK (built by `.github/workflows/release-mobile.yml`, see `apps/mobile/README.md`) contains the file picker and upload, but not recording, so on a phone today a person can add an existing voice note or video and cannot record one in the app.
+Built (15 November 2026), in `debo-capture.native.ts` and `debo-player.native.tsx`, with the same names the web version exports, so the Journal screens are unchanged:
+- **Record a voice note** with `expo-audio` 1.1.x: mono AAC in an `.m4a` file (`audio/mp4`) at 64 kbps, about 30 MB for an hour. The microphone permission is asked when "Record your voice" is pressed.
+- **Record a video** with `expo-camera` 17.0.x: the front camera, 720p, shown while it records (`LivePreview`). Recording starts when the camera says it is ready, and stops itself at 200 MB. Android gives `video/mp4`, iPhone `video/quicktime` (`.mov`); both are allowed types. Camera and microphone permissions are asked when "Record a video" is pressed.
+- **Pick a file** (`expo-document-picker`), as before.
+- **Upload** through the same path as the web: `POST /api/debo/media/uploads`, then one PUT (single link, `expo-file-system`'s upload task) or 8 MiB parts (bytes read with `File.open()`), then `complete`. Nothing is sent before "Save recording".
+- **Listen or watch first, and play saved ones:** a voice note plays in the app (`expo-audio`: Play, Pause, Back 15 seconds, and the time). A video plays in a small web view with the phone's own video controls and no scripts. A saved recording asks for its one-hour link when Play is pressed, as on the web.
+- **On the phone itself:** a recording made in the app is written to Debo's cache folder (only this app can read it). One that is cancelled is deleted at once. One that is kept stays there until the phone clears the cache: it is not deleted straight after saving, because the upload may still be running if the screen was closed.
+- The permission texts in `app.json` (the WebRTC, `expo-audio` and `expo-camera` plugins) say the microphone is used only for a call or a note, the sound of a call is never kept, and a note is kept until it is deleted.
+Not built: dictation (the keyboard's microphone is used instead), and a way to pause a recording.
+Not run on a device or simulator. Checked: `tsc`, `expo export` for Android and web, and `expo prebuild` for Android (the camera and microphone permissions). The Android APK from `.github/workflows/release-mobile.yml` (see `apps/mobile/README.md`) includes recording from the first build after this change. Not checked: that recording, the camera preview, playback of a local video in the web view on Android, and seeking work on real phones; iPhone at all (no signed build exists).
 
 ## Not checked yet
 
