@@ -38,7 +38,8 @@ export const characters: Record<CharacterId, CharacterInfo> = {
     name: "Debo",
     blurb: "A soft blue creature",
     looks: "a small round blue creature with two little ears",
-    poseTweaks: {},
+    // Pale pink on blue turns lilac, so the cheeks stay pink even when a mood fades them.
+    poseTweaks: { worried: { blush: 0.85 }, sleepy: { blush: 0.85 } },
     expresses: {
       idle: "Breathes slowly and blinks. Ears sway a little.",
       listening: "Grows a bit taller. Ears perk up. Eyes go wide.",
