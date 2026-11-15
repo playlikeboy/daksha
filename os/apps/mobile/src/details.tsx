@@ -55,6 +55,7 @@ import {
   s,
   SectionHeading,
   Sheet,
+  spacing,
   timeLabel,
 } from "./ui";
 import { TalkSettingsSheet } from "./talk-settings-ui";
@@ -149,15 +150,15 @@ function MailDetail({ mail: m }: { mail: Mail }) {
       onClose={close}
     >
       {loading && (
-        <View style={[s.row, { gap: 10, paddingBottom: 20 }]}>
+        <View style={[s.row, { gap: spacing[3], paddingBottom: spacing[5] }]}>
           <ActivityIndicator color={colors.blueDark} />
           <Text style={s.muted}>Loading the conversation…</Text>
         </View>
       )}
       {thread.map((message) => (
-        <Card key={message.id} style={{ marginBottom: 16 }}>
+        <Card key={message.id} style={{ marginBottom: spacing[4] }}>
           <View style={s.between}>
-            <View style={{ gap: 4, flex: 1 }}>
+            <View style={{ gap: spacing[1], flex: 1 }}>
               <Text style={s.heading}>{message.sender}</Text>
               <Text style={s.small}>{message.from}</Text>
               <Text style={s.small}>To: {message.to.join(", ")}</Text>
@@ -290,7 +291,7 @@ function EmailEditor({ draft }: { draft?: Partial<EmailDraft> & { id?: string } 
         autoCapitalize="none"
         keyboardType="email-address"
       />
-      <View style={{ flexDirection: "row", gap: 16 }}>
+      <View style={{ flexDirection: "row", gap: spacing[4] }}>
         <View style={{ flex: 1 }}>
           <Field
             label="Cc"
@@ -325,8 +326,8 @@ function EmailEditor({ draft }: { draft?: Partial<EmailDraft> & { id?: string } 
         style={{ minHeight: 210 }}
       />
       {w.files.length > 0 && (
-        <Card style={{ padding: 16, marginBottom: 18 }}>
-          <Text style={[s.heading, { fontSize: fontSize.base, marginBottom: 5 }]}>Attachments</Text>
+        <Card style={{ padding: spacing[4], marginBottom: spacing[5] }}>
+          <Text style={[s.heading, { fontSize: fontSize.base, marginBottom: spacing[1] }]}>Attachments</Text>
           {w.files.map((f) => (
             <CheckRow
               key={f.id}
@@ -344,7 +345,7 @@ function EmailEditor({ draft }: { draft?: Partial<EmailDraft> & { id?: string } 
         </Card>
       )}
       <ErrorNotice error={error} />
-      <View style={[s.row, { gap: 10, flexWrap: "wrap" }]}>
+      <View style={[s.row, { gap: spacing[3], flexWrap: "wrap" }]}>
         <Button
           primary
           icon={ShieldCheck}
@@ -363,7 +364,7 @@ function EmailEditor({ draft }: { draft?: Partial<EmailDraft> & { id?: string } 
           Save draft
         </Button>
       </View>
-      <Text style={[s.small, { marginTop: 13 }]}>
+      <Text style={[s.small, { marginTop: spacing[3] }]}>
         You’ll review the exact recipients, message, and attachments before anything is sent.
       </Text>
     </Sheet>
@@ -490,7 +491,7 @@ function EventEditor({
       />
       <DateTimeEditor label="Ends" value={end} onChange={setEnd} timeZone={zone} allDay={allDay} />
       {allDay && (
-        <Text style={[s.small, { marginBottom: 15 }]}>
+        <Text style={[s.small, { marginBottom: spacing[4] }]}>
           The end date is the day after the last day of your event.
         </Text>
       )}
@@ -520,7 +521,7 @@ function EventEditor({
         placeholder="Anything else to keep in mind?"
       />
       {!!conflicts.length && (
-        <Card style={{ backgroundColor: colors.orange, padding: 16, marginBottom: 16 }}>
+        <Card style={{ backgroundColor: colors.orange, padding: spacing[4], marginBottom: spacing[4] }}>
           <Text style={s.heading}>This time overlaps</Text>
           {conflicts.map((c) => (
             <Text key={c.id} style={s.muted}>
@@ -530,7 +531,7 @@ function EventEditor({
         </Card>
       )}
       <ErrorNotice error={error} />
-      <View style={[s.row, { gap: 10, flexWrap: "wrap" }]}>
+      <View style={[s.row, { gap: spacing[3], flexWrap: "wrap" }]}>
         <Button primary icon={ShieldCheck} busy={busy} onPress={() => void propose()}>
           Review {e ? "changes" : "event"}
         </Button>
@@ -616,11 +617,11 @@ function ReviewDetail({ initial }: { initial: ActionProposal }) {
       }
       onClose={close}
     >
-      <View style={[s.row, { gap: 13, marginBottom: 21 }]}>
+      <View style={[s.row, { gap: spacing[3], marginBottom: spacing[5] }]}>
         <View style={[s.iconBox, { backgroundColor: colors.lavender }]}>
           <ShieldCheck size={22} color={colors.text} />
         </View>
-        <View style={{ flex: 1, gap: 4 }}>
+        <View style={{ flex: 1, gap: spacing[1] }}>
           <Text style={s.heading}>{action.title}</Text>
           <Text style={s.small}>
             {connector ? `In ${appName}` : action.kind.replace(".", " · ")}
@@ -630,7 +631,7 @@ function ReviewDetail({ initial }: { initial: ActionProposal }) {
           {action.status.replace(/_/g, " ")}
         </Chip>
       </View>
-      <Card style={{ gap: 13 }}>
+      <Card style={{ gap: spacing[3] }}>
         <ReviewLine label="Account" value={action.account || w.profile.email} />
         {connector ? (
           <>
@@ -723,7 +724,7 @@ function ReviewDetail({ initial }: { initial: ActionProposal }) {
       </Card>
       <ErrorNotice error={error || action.error} />
       {!!action.result && (
-        <Card style={{ marginTop: 16, backgroundColor: colors.green, padding: 18 }}>
+        <Card style={{ marginTop: spacing[4], backgroundColor: colors.green, padding: spacing[5] }}>
           <Text selectable style={s.text}>
             {journal ? "Saved to your journal." : resultSummary(action.result)}
           </Text>
@@ -731,7 +732,7 @@ function ReviewDetail({ initial }: { initial: ActionProposal }) {
       )}
       {pending ? (
         <>
-          <Text style={[s.small, { marginVertical: 17 }]}>
+          <Text style={[s.small, { marginVertical: spacing[4] }]}>
             Review expires{" "}
             {new Date(action.expiresAt).toLocaleString(undefined, {
               year: "numeric",
@@ -743,7 +744,7 @@ function ReviewDetail({ initial }: { initial: ActionProposal }) {
             })}
             . Your approval applies only to the details shown above.
           </Text>
-          <View style={[s.row, { gap: 10, flexWrap: "wrap" }]}>
+          <View style={[s.row, { gap: spacing[3], flexWrap: "wrap" }]}>
             <Button primary icon={Check} busy={busy} onPress={() => void decide("approve")}>
               {journal
                 ? "Save to my journal"
@@ -766,7 +767,7 @@ function ReviewDetail({ initial }: { initial: ActionProposal }) {
           </View>
         </>
       ) : (
-        <Button style={{ alignSelf: "flex-start", marginTop: 19 }} onPress={close}>
+        <Button style={{ alignSelf: "flex-start", marginTop: spacing[5] }} onPress={close}>
           Done
         </Button>
       )}
@@ -778,7 +779,7 @@ function arrayText(value: unknown) {
 }
 function ReviewLine({ label, value }: { label: string; value: string }) {
   return (
-    <View style={{ gap: 4 }}>
+    <View style={{ gap: spacing[1] }}>
       <Text style={s.label}>{label}</Text>
       <Text selectable style={s.text}>
         {value}
@@ -840,7 +841,7 @@ function FileDetail({ file: f }: { file: Artifact }) {
       wide
     >
       <PdfReader url={url} token={api.token} pageCount={f.pageCount} />
-      <View style={[s.row, { gap: 10, marginVertical: 18, flexWrap: "wrap" }]}>
+      <View style={[s.row, { gap: spacing[3], marginVertical: spacing[5], flexWrap: "wrap" }]}>
         <Button icon={Download} onPress={() => void share()}>
           {Platform.OS === "web" ? "Open / download" : "Save or share"}
         </Button>
@@ -854,7 +855,7 @@ function FileDetail({ file: f }: { file: Artifact }) {
       {f.fields && f.fields.length > 0 && (
         <Card>
           <SectionHeading title="Fill this form" />
-          <Text style={[s.muted, { marginBottom: 18 }]}>
+          <Text style={[s.muted, { marginBottom: spacing[5] }]}>
             Add your details below. Saving creates a new copy and keeps the original intact.
           </Text>
           {f.fields.map((field) =>
@@ -884,7 +885,7 @@ function FileDetail({ file: f }: { file: Artifact }) {
         </Card>
       )}
       <ErrorNotice error={error} />
-      <Text style={[s.small, { marginTop: 15 }]}>
+      <Text style={[s.small, { marginTop: spacing[4] }]}>
         Added {dateLabel(f.createdAt)}
         {f.parentId ? " · filled copy" : ""}
       </Text>
@@ -975,7 +976,7 @@ function BrowserDetail({ initial }: { initial: BrowserSession }) {
       onClose={close}
       wide
     >
-      <View style={[s.row, { gap: 10, marginBottom: 16 }]}>
+      <View style={[s.row, { gap: spacing[3], marginBottom: spacing[4] }]}>
         <View style={{ flex: 1 }}>
           <Field
             label="Website address"
@@ -992,7 +993,7 @@ function BrowserDetail({ initial }: { initial: BrowserSession }) {
       </View>
       <ErrorNotice error={error} />
       {loading ? (
-        <View style={[s.row, { gap: 10, paddingVertical: 24 }]}>
+        <View style={[s.row, { gap: spacing[3], paddingVertical: spacing[6] }]}>
           {error ? (
             <Button onPress={() => setRetry(retry + 1)}>Retry connection</Button>
           ) : (
@@ -1023,7 +1024,7 @@ function BrowserDetail({ initial }: { initial: BrowserSession }) {
           }
         />
       )}
-      <View style={[s.row, { gap: 10, marginTop: 18, flexWrap: "wrap" }]}>
+      <View style={[s.row, { gap: spacing[3], marginTop: spacing[5], flexWrap: "wrap" }]}>
         {!loading && browser.status === "active" && browser.consoleUrl && (
           <Button
             icon={ExternalLink}

@@ -57,6 +57,7 @@ import {
   SectionHeading,
   Segmented,
   Sheet,
+  spacing,
   timeLabel,
 } from "./ui";
 import { useWorkspace } from "./workspace";
@@ -103,7 +104,7 @@ export function AgendaRow({
   return (
     <Pressable
       onPress={() => open({ type: "event", event: e, neighbors })}
-      style={[s.row, { gap: 16, paddingVertical: 14 }]}
+      style={[s.row, { gap: spacing[4], paddingVertical: spacing[4] }]}
     >
       <View style={{ width: 65 }}>
         <Text style={[s.text, { fontSize: fontSize.sm }]}>
@@ -121,7 +122,7 @@ export function AgendaRow({
           backgroundColor: [colors.blue, colors.green, colors.lavender][index % 3],
         }}
       />
-      <View style={{ flex: 1, gap: 3 }}>
+      <View style={{ flex: 1, gap: spacing[1] }}>
         <Text style={[s.text, { fontSize: fontSize.base, fontWeight: "500" }]}>{e.title}</Text>
         <Text numberOfLines={1} style={[s.small, { fontSize: fontSize.sm }]}>
           {e.location || (e.attendees.length ? `${e.attendees.length} attendees` : "Time for you")}
@@ -184,20 +185,20 @@ export function MailScreen() {
     `${d.to.join(" ")} ${d.subject} ${d.body}`.toLowerCase().includes(query.toLowerCase()),
   );
   return (
-    <View style={{ gap: 20 }}>
-      <View style={[s.between, { gap: 12, flexWrap: "wrap" }]}>
+    <View style={{ gap: spacing[5] }}>
+      <View style={[s.between, { gap: spacing[3], flexWrap: "wrap" }]}>
         <View
           style={[
             s.row,
             {
-              gap: 9,
+              gap: spacing[2],
               flex: 1,
               minWidth: 200,
               backgroundColor: colors.card,
               borderWidth: 1,
               borderColor: colors.line,
               borderRadius: radius.container,
-              paddingHorizontal: 14,
+              paddingHorizontal: spacing[4],
             },
           ]}
         >
@@ -208,7 +209,7 @@ export function MailScreen() {
             placeholderTextColor={colors.muted}
             value={query}
             onChangeText={setQuery}
-            style={{ flex: 1, paddingVertical: 13, fontSize: fontSize.base, color: colors.text }}
+            style={{ flex: 1, paddingVertical: spacing[3], fontSize: fontSize.base, color: colors.text }}
           />
         </View>
         <Button onPress={() => open({ type: "email" })} primary icon={Plus}>
@@ -217,7 +218,7 @@ export function MailScreen() {
       </View>
       <ErrorNotice error={error} />
       <Card>
-        <View style={[s.row, { gap: 10, marginBottom: 15, flexWrap: "wrap" }]}>
+        <View style={[s.row, { gap: spacing[3], marginBottom: spacing[4], flexWrap: "wrap" }]}>
           <Button small primary={tab === "all"} onPress={() => setTab("all")}>
             All messages
           </Button>
@@ -253,11 +254,11 @@ export function MailScreen() {
               onPress={() => open({ type: "mail", mail: m })}
               style={[
                 s.row,
-                { gap: 15, paddingVertical: 20, borderTopWidth: 1, borderTopColor: colors.line },
+                { gap: spacing[4], paddingVertical: spacing[5], borderTopWidth: 1, borderTopColor: colors.line },
               ]}
             >
               <Avatar name={m.sender} index={i} />
-              <View style={{ flex: 1, gap: 5 }}>
+              <View style={{ flex: 1, gap: spacing[1] }}>
                 <View style={s.between}>
                   <Text style={[s.text, { fontWeight: m.unread ? "600" : "400" }]}>{m.sender}</Text>
                   <Text style={s.small}>{dateLabel(m.date)}</Text>
@@ -269,7 +270,7 @@ export function MailScreen() {
                   {m.body.replace(/\n/g, " ")}
                 </Text>
                 {!!m.attachments.length && (
-                  <View style={[s.row, { gap: 4, marginTop: 2 }]}>
+                  <View style={[s.row, { gap: spacing[1], marginTop: spacing[0.5] }]}>
                     <FileText size={12} color={colors.muted} />
                     <Text style={s.small}>
                       {m.attachments.length} attachment{m.attachments.length > 1 ? "s" : ""}
@@ -417,9 +418,9 @@ export function CalendarScreen() {
       </Card>
     );
   return (
-    <View style={{ gap: 20 }}>
-      <View style={[s.between, { gap: 12, flexWrap: "wrap" }]}>
-        <View style={[s.row, { gap: 8 }]}>
+    <View style={{ gap: spacing[5] }}>
+      <View style={[s.between, { gap: spacing[3], flexWrap: "wrap" }]}>
+        <View style={[s.row, { gap: spacing[2] }]}>
           <Text style={s.title}>
             {anchor.toLocaleDateString("en-US", { month: "long", year: "numeric" })}
           </Text>
@@ -439,9 +440,9 @@ export function CalendarScreen() {
         </Button>
       </View>
       {calendars.length > 0 && (
-        <View style={{ gap: 9 }}>
+        <View style={{ gap: spacing[2] }}>
           <Text style={s.label}>Your calendars</Text>
-          <View style={[s.row, { gap: 8, flexWrap: "wrap" }]}>
+          <View style={[s.row, { gap: spacing[2], flexWrap: "wrap" }]}>
             {calendars.map((c) => (
               <Button
                 key={c.id}
@@ -456,8 +457,8 @@ export function CalendarScreen() {
           </View>
         </View>
       )}
-      <Card style={{ padding: 12 }}>
-        <View style={{ flexDirection: "row", gap: 5 }}>
+      <Card style={{ padding: spacing[3] }}>
+        <View style={{ flexDirection: "row", gap: spacing[1] }}>
           {dates.map((day) => {
             const key = localDateTime(
               day.toISOString(),
@@ -473,8 +474,8 @@ export function CalendarScreen() {
                 style={{
                   flex: 1,
                   alignItems: "center",
-                  paddingVertical: 17,
-                  gap: 9,
+                  paddingVertical: spacing[4],
+                  gap: spacing[2],
                   borderRadius: radius.container,
                   backgroundColor: key === date ? colors.sky : "transparent",
                 }}
@@ -506,7 +507,7 @@ export function CalendarScreen() {
         </View>
       </Card>
       <Card>
-        <View style={[s.between, { gap: 10, flexWrap: "wrap" }]}>
+        <View style={[s.between, { gap: spacing[3], flexWrap: "wrap" }]}>
           <Text style={s.heading}>
             {all
               ? "The next 30 days"
@@ -516,7 +517,7 @@ export function CalendarScreen() {
             {all ? "Selected day" : "Next 30 days"}
           </Button>
         </View>
-        <Text style={[s.small, { marginTop: 7, marginBottom: 13 }]}>
+        <Text style={[s.small, { marginTop: spacing[2], marginBottom: spacing[3] }]}>
           {selected?.name || "Your calendar"} · {zone}. Events show their own time zone.
         </Text>
         <ErrorNotice error={error} />
@@ -526,16 +527,16 @@ export function CalendarScreen() {
           </Button>
         )}
         {loading ? (
-          <View style={[s.row, { gap: 10, paddingVertical: 35, justifyContent: "center" }]}>
+          <View style={[s.row, { gap: spacing[3], paddingVertical: spacing[9], justifyContent: "center" }]}>
             <ActivityIndicator size="small" color={colors.blueDark} />
             <Text style={s.muted}>Checking your calendar…</Text>
           </View>
         ) : events.length ? (
           events.map((e, i) => (
             <View key={e.id}>
-              {all && <Text style={[s.label, { marginTop: 16 }]}>{dateLabel(e.start)}</Text>}
+              {all && <Text style={[s.label, { marginTop: spacing[4] }]}>{dateLabel(e.start)}</Text>}
               <AgendaRow event={e} index={i} neighbors={events} />
-              <Text style={[s.small, { marginLeft: 84, marginBottom: 8 }]}>{e.timeZone}</Text>
+              <Text style={[s.small, { marginLeft: 84, marginBottom: spacing[2] }]}>{e.timeZone}</Text>
             </View>
           ))
         ) : (
@@ -583,16 +584,16 @@ export function BrowserScreen() {
     }
   }
   return (
-    <View style={{ gap: 22 }}>
+    <View style={{ gap: spacing[6] }}>
       <Card style={{ backgroundColor: colors.sky }}>
-        <View style={[s.row, { gap: 12, marginBottom: 15 }]}>
+        <View style={[s.row, { gap: spacing[3], marginBottom: spacing[4] }]}>
           <Globe2 size={22} color={colors.blueDark} />
           <View>
             <Text style={s.heading}>A place for your open tabs</Text>
             <Text style={s.muted}>Browse in a private, persistent workspace session.</Text>
           </View>
         </View>
-        <View style={[s.row, { gap: 10 }]}>
+        <View style={[s.row, { gap: spacing[3] }]}>
           <TextInput
             accessibilityLabel="Website address"
             value={url}
@@ -625,15 +626,15 @@ export function BrowserScreen() {
               style={{
                 borderTopWidth: 1,
                 borderTopColor: colors.line,
-                paddingVertical: 20,
-                gap: 12,
+                paddingVertical: spacing[5],
+                gap: spacing[3],
               }}
             >
-              <View style={[s.row, { gap: 14 }]}>
+              <View style={[s.row, { gap: spacing[4] }]}>
                 <View style={s.iconBox}>
                   <Globe2 size={20} color={colors.blueDark} />
                 </View>
-                <View style={{ flex: 1, gap: 4 }}>
+                <View style={{ flex: 1, gap: spacing[1] }}>
                   <Text style={s.heading}>{b.title || "Browser session"}</Text>
                   <Text style={s.muted} numberOfLines={1}>
                     {b.url}
@@ -710,9 +711,9 @@ export function FilesScreen() {
     }
   }
   return (
-    <View style={{ gap: 20 }}>
+    <View style={{ gap: spacing[5] }}>
       <View style={s.between}>
-        <Text style={[s.muted, { flex: 1, marginRight: 15 }]}>
+        <Text style={[s.muted, { flex: 1, marginRight: spacing[4] }]}>
           Documents, with a little room to work.
         </Text>
         <Button primary icon={Upload} busy={busy} onPress={() => void upload()}>
@@ -720,7 +721,7 @@ export function FilesScreen() {
         </Button>
       </View>
       <ErrorNotice error={error} />
-      <View style={{ flexDirection: "row", flexWrap: "wrap", gap: 18 }}>
+      <View style={{ flexDirection: "row", flexWrap: "wrap", gap: spacing[5] }}>
         {w.files.map((f) => (
           <Pressable
             key={f.id}
@@ -742,13 +743,13 @@ export function FilesScreen() {
                     height: 121,
                     borderRadius: radius.inner,
                     backgroundColor: colors.card,
-                    padding: 14,
+                    padding: spacing[4],
                     transform: [{ rotate: "-4deg" }],
                     borderWidth: 1,
                     borderColor: colors.line,
                   }}
                 >
-                  <View style={[s.row, { gap: 5, marginBottom: 15 }]}>
+                  <View style={[s.row, { gap: spacing[1], marginBottom: spacing[4] }]}>
                     <FileText size={13} color={colors.blueDark} />
                     <Text style={{ fontSize: fontSize.sm, color: colors.blueDark }}>DOCUMENT</Text>
                   </View>
@@ -759,7 +760,7 @@ export function FilesScreen() {
                         height: 3,
                         backgroundColor: i === 0 ? colors.blueLine : colors.line,
                         width: `${width}%`,
-                        marginBottom: 7,
+                        marginBottom: spacing[2],
                         borderRadius: radius.inner,
                       }}
                     />
@@ -769,7 +770,7 @@ export function FilesScreen() {
                   <Chip>PDF</Chip>
                 </View>
               </View>
-              <View style={{ padding: 21, gap: 6 }}>
+              <View style={{ padding: spacing[5], gap: spacing[1.5] }}>
                 <Text numberOfLines={1} style={[s.heading, { fontSize: fontSize.base }]}>
                   {f.name}
                 </Text>
@@ -777,7 +778,7 @@ export function FilesScreen() {
                   {f.pageCount} {f.pageCount === 1 ? "page" : "pages"} ·{" "}
                   {Math.max(1, Math.round(f.size / 1024))} KB
                 </Text>
-                <View style={[s.between, { marginTop: 9 }]}>
+                <View style={[s.between, { marginTop: spacing[2] }]}>
                   <Chip>{f.source}</Chip>
                   <Text style={s.small}>{dateLabel(f.createdAt)}</Text>
                 </View>
@@ -823,7 +824,7 @@ export function ActivityScreen() {
               onPress={() => open({ type: "review", action: a })}
               style={[
                 s.row,
-                { gap: 15, paddingVertical: 17, borderTopWidth: 1, borderTopColor: colors.line },
+                { gap: spacing[4], paddingVertical: spacing[4], borderTopWidth: 1, borderTopColor: colors.line },
               ]}
             >
               <View
@@ -841,21 +842,24 @@ export function ActivityScreen() {
                   <CheckCheck size={18} color={colors.text} />
                 )}
               </View>
-              <View style={{ flex: 1, gap: 4 }}>
+              {/* The status sits under the title, so a long title never squeezes to one word a line. */}
+              <View style={{ flex: 1, gap: spacing[1] }}>
                 <Text style={s.text}>{a.title}</Text>
-                <Text style={s.small}>{relativeDate(a.createdAt)}</Text>
+                <View style={[s.row, { gap: spacing[2], flexWrap: "wrap" }]}>
+                  <Chip
+                    tint={
+                      a.status === "failed"
+                        ? colors.dangerBg
+                        : a.status === "awaiting_review"
+                          ? colors.lavender
+                          : colors.canvas
+                    }
+                  >
+                    {a.status.replace(/_/g, " ")}
+                  </Chip>
+                  <Text style={s.small}>{relativeDate(a.createdAt)}</Text>
+                </View>
               </View>
-              <Chip
-                tint={
-                  a.status === "failed"
-                    ? colors.dangerBg
-                    : a.status === "awaiting_review"
-                      ? colors.lavender
-                      : colors.canvas
-                }
-              >
-                {a.status.replace(/_/g, " ")}
-              </Chip>
               <ChevronRight size={16} color={colors.muted} />
             </Pressable>
           ))}
@@ -872,8 +876,8 @@ export function ActivityScreen() {
                   s.row,
                   {
                     alignItems: "flex-start",
-                    gap: 17,
-                    paddingVertical: 18,
+                    gap: spacing[4],
+                    paddingVertical: spacing[5],
                     borderTopWidth: i ? 1 : 0,
                     borderTopColor: colors.line,
                   },
@@ -884,7 +888,7 @@ export function ActivityScreen() {
                 >
                   <Clock3 size={16} color={colors.muted} />
                 </View>
-                <View style={{ flex: 1, gap: 4 }}>
+                <View style={{ flex: 1, gap: spacing[1] }}>
                   <Text style={s.text}>{a.title}</Text>
                   <Text style={s.muted}>{resultSummary(a.detail)}</Text>
                   <Text style={s.small}>
@@ -980,13 +984,13 @@ export function ConnectionsScreen({ query = "" }: { query?: string }) {
     .filter((row) => row.group !== "google" || row.connected)
     .filter((row) => `${row.name} ${row.group}`.toLowerCase().includes(query.toLowerCase()));
   return (
-    <View style={{ gap: 22 }}>
+    <View style={{ gap: spacing[6] }}>
       {[true, false].map((isConnected) => {
         const group = rows.filter((row) => row.connected === isConnected);
         if (!group.length) return null;
         return (
-          <View key={String(isConnected)} style={{ gap: 8 }}>
-            <Text style={[s.small, { marginLeft: 12 }]}>
+          <View key={String(isConnected)} style={{ gap: spacing[2] }}>
+            <Text style={[s.small, { marginLeft: spacing[3] }]}>
               {isConnected
                 ? w.mode === "sample"
                   ? "Your connections"
@@ -995,7 +999,7 @@ export function ConnectionsScreen({ query = "" }: { query?: string }) {
             </Text>
             <View
               style={{
-                paddingHorizontal: 16,
+                paddingHorizontal: spacing[4],
                 borderRadius: radius.page,
                 backgroundColor: colors.subtle,
               }}
@@ -1011,7 +1015,7 @@ export function ConnectionsScreen({ query = "" }: { query?: string }) {
                   style={[
                     s.row,
                     {
-                      gap: 14,
+                      gap: spacing[4],
                       minHeight: 61,
                       borderBottomWidth: index < group.length - 1 ? 1 : 0,
                       borderBottomColor: colors.line,
@@ -1060,12 +1064,12 @@ export function ConnectionsScreen({ query = "" }: { query?: string }) {
           onClose={() => setSelected(undefined)}
         >
           {selected === "google" && (
-            <View style={{ gap: 18 }}>
+            <View style={{ gap: spacing[5] }}>
               <Text style={s.muted}>
                 Bring Gmail and Google Calendar into your conversations. Debo can only read at first.
                 You choose when it may send or edit.
               </Text>
-              <View style={[s.row, { gap: 7, flexWrap: "wrap" }]}>
+              <View style={[s.row, { gap: spacing[2], flexWrap: "wrap" }]}>
                 {google?.capabilities.map((cap) => (
                   <Chip key={cap}>{capabilityLabel(cap)}</Chip>
                 ))}
@@ -1119,7 +1123,7 @@ function SettingsLine({ label, value }: { label: string; value: string }) {
     <View
       style={[
         s.between,
-        { gap: 15, paddingVertical: 14, borderBottomWidth: 1, borderBottomColor: colors.line },
+        { gap: spacing[4], paddingVertical: spacing[4], borderBottomWidth: 1, borderBottomColor: colors.line },
       ]}
     >
       <Text style={s.muted}>{label}</Text>

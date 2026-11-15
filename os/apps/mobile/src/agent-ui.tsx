@@ -89,7 +89,7 @@ export function AgentStatus() {
   const { data, error, refresh } = useAgentWorkspace();
   if (data?.worker.running && !error) return null;
   return (
-    <View style={{ gap: 8 }}>
+    <View style={{ gap: spacing[2] }}>
       <ErrorNotice error={error ? `Agent updates unavailable. ${error}` : ""} />
       {!!error && (
         <Button small onPress={() => void refresh().catch(() => {})}>
@@ -128,12 +128,12 @@ export function TaskCard({
       <Card
         style={{
           padding: compact ? 15 : 20,
-          gap: 11,
+          gap: spacing[3],
           borderRadius: radius.page,
           backgroundColor: colors.subtle,
         }}
       >
-        <View style={[s.row, { gap: 10 }]}>
+        <View style={[s.row, { gap: spacing[3] }]}>
           <View
             style={[
               s.iconBox,
@@ -142,7 +142,7 @@ export function TaskCard({
           >
             <ListChecks size={18} color={colors.blueDark} />
           </View>
-          <View style={{ flex: 1, gap: 4 }}>
+          <View style={{ flex: 1, gap: spacing[1] }}>
             <Text style={s.heading}>{task.title}</Text>
             <Text style={s.small}>
               {statusLabel(task.status)}
@@ -396,7 +396,7 @@ export function TaskDetail({ taskId }: { taskId: string }) {
       {!task ? (
         <ActivityIndicator color={colors.blueDark} />
       ) : (
-        <View style={{ gap: 20 }}>
+        <View style={{ gap: spacing[5] }}>
           <Text selectable style={s.text}>
             {task.prompt}
           </Text>
@@ -407,7 +407,7 @@ export function TaskDetail({ taskId }: { taskId: string }) {
                 : "The linked milestone is no longer available. This task and its results are still accessible."}
             </Text>
           )}
-          <View style={[s.row, { gap: 8, flexWrap: "wrap" }]}>
+          <View style={[s.row, { gap: spacing[2], flexWrap: "wrap" }]}>
             {["queued", "running", "scheduled", "waiting_input", "waiting_approval"].includes(
               task.status,
             ) && (
@@ -453,7 +453,7 @@ export function TaskDetail({ taskId }: { taskId: string }) {
             )}
           </View>
           {task.status === "waiting_approval" && (
-            <Card style={{ backgroundColor: colors.lavender, gap: 12 }}>
+            <Card style={{ backgroundColor: colors.lavender, gap: spacing[3] }}>
               <Text style={s.heading}>Ready for your review</Text>
               <Text style={s.muted}>Review the exact action and account before it proceeds.</Text>
               <Button primary busy={busy} onPress={() => void review()}>
@@ -462,7 +462,7 @@ export function TaskDetail({ taskId }: { taskId: string }) {
             </Card>
           )}
           {task.status === "waiting_input" && (
-            <Card style={{ backgroundColor: colors.sky, gap: 10 }}>
+            <Card style={{ backgroundColor: colors.sky, gap: spacing[3] }}>
               <Text style={s.heading}>{task.question || "A detail from you will help"}</Text>
               {fieldNames.map((name) =>
                 missing.some(
@@ -522,10 +522,10 @@ export function TaskDetail({ taskId }: { taskId: string }) {
             </Card>
           )}
           {!!task.plan.length && (
-            <Card style={{ gap: 15 }}>
+            <Card style={{ gap: spacing[4] }}>
               <Text style={s.heading}>Plan</Text>
               {task.plan.map((step, index) => (
-                <View key={step.id} style={[s.row, { gap: 10, alignItems: "flex-start" }]}>
+                <View key={step.id} style={[s.row, { gap: spacing[3], alignItems: "flex-start" }]}>
                   <Text
                     style={[
                       s.text,
@@ -534,7 +534,7 @@ export function TaskDetail({ taskId }: { taskId: string }) {
                   >
                     {step.status === "succeeded" ? "✓" : `${index + 1}.`}
                   </Text>
-                  <View style={{ flex: 1, gap: 3 }}>
+                  <View style={{ flex: 1, gap: spacing[1] }}>
                     <Text style={s.text}>{step.title}</Text>
                     <Text style={s.small}>
                       {statusLabel(step.status)}
@@ -554,7 +554,7 @@ export function TaskDetail({ taskId }: { taskId: string }) {
           )}
           <ErrorNotice error={task.error ?? undefined} />
           {detail?.browsers?.map((browser) => (
-            <Card key={browser.id} style={{ gap: 10 }}>
+            <Card key={browser.id} style={{ gap: spacing[3] }}>
               <Text style={s.heading}>{browser.title || "Agent browser"}</Text>
               <Text style={s.small}>{browser.url}</Text>
               {browser.status === "active" && browser.previewUrl && (
@@ -605,7 +605,7 @@ export function TaskDetail({ taskId }: { taskId: string }) {
             <ArtifactCard key={artifact.id} artifact={artifact} />
           ))}
           {!!task.evidence.length && (
-            <View style={{ gap: 14 }}>
+            <View style={{ gap: spacing[4] }}>
               <Text style={s.heading}>Sources</Text>
               <EvidenceList items={task.evidence} />
             </View>
@@ -614,7 +614,7 @@ export function TaskDetail({ taskId }: { taskId: string }) {
           {detail?.events.map((event) => (
             <View
               key={event.id}
-              style={{ gap: 4, paddingLeft: 14, borderLeftWidth: 2, borderLeftColor: colors.line }}
+              style={{ gap: spacing[1], paddingLeft: spacing[4], borderLeftWidth: 2, borderLeftColor: colors.line }}
             >
               <Text style={s.small}>
                 {stamp(event.date)} · {statusLabel(event.kind)}
@@ -652,7 +652,7 @@ export function ArtifactCard({ artifact }: { artifact: AgentArtifact }) {
   if (artifact.kind === "finance") return <FinanceArtifact artifact={artifact} />;
   const rows = Object.entries(artifact.data);
   return (
-    <Card style={{ gap: 13, backgroundColor: colors.card }}>
+    <Card style={{ gap: spacing[3], backgroundColor: colors.card }}>
       <View style={s.between}>
         <Text style={s.heading}>{artifact.title}</Text>
         <Chip>{statusLabel(artifact.kind)}</Chip>
@@ -661,7 +661,7 @@ export function ArtifactCard({ artifact }: { artifact: AgentArtifact }) {
         {artifact.summary}
       </Text>
       {(expanded ? rows : rows.slice(0, 4)).map(([key, value]) => (
-        <View key={key} style={{ gap: 6 }}>
+        <View key={key} style={{ gap: spacing[1.5] }}>
           <Text style={s.label}>{key.replace(/_/g, " ")}</Text>
           {Array.isArray(value) ? (
             value.slice(0, expanded ? 100 : 5).map((item) => {
@@ -670,7 +670,7 @@ export function ArtifactCard({ artifact }: { artifact: AgentArtifact }) {
                 <View
                   key={`${key}-${display(row?.id ?? item)}`}
                   style={{
-                    paddingVertical: 8,
+                    paddingVertical: spacing[2],
                     borderBottomWidth: 1,
                     borderBottomColor: colors.line,
                   }}
@@ -749,7 +749,7 @@ function FinanceArtifact({ artifact }: { artifact: AgentArtifact }) {
   const period = record(artifact.data.period);
   return (
     <Card
-      style={{ gap: 12, padding: 10, backgroundColor: colors.subtle, maxWidth: 440, width: "100%" }}
+      style={{ gap: spacing[3], padding: spacing[3], backgroundColor: colors.subtle, maxWidth: 440, width: "100%" }}
     >
       <Pressable
         accessibilityRole="button"
@@ -763,7 +763,7 @@ function FinanceArtifact({ artifact }: { artifact: AgentArtifact }) {
             borderRadius: radius.container,
             overflow: "hidden",
             backgroundColor: colors.ink,
-            padding: 20,
+            padding: spacing[5],
           }}
         >
           <View style={{ position: "absolute", top: 0, left: 0, right: 0, height: 142 }}>
@@ -782,7 +782,7 @@ function FinanceArtifact({ artifact }: { artifact: AgentArtifact }) {
               color: colors.onAccent,
               fontSize: fontSize.sm,
               lineHeight: 18,
-              marginBottom: 20,
+              marginBottom: spacing[5],
             }}
           >
             Read from your imported transactions.{"\n"}
@@ -790,7 +790,7 @@ function FinanceArtifact({ artifact }: { artifact: AgentArtifact }) {
             {"\n"}
             {transactions.length} transactions, categorized and summarized.
           </Text>
-          <View style={[s.row, { gap: 7 }]}>
+          <View style={[s.row, { gap: spacing[2] }]}>
             {(
               [
                 ["Income", "income"],
@@ -802,7 +802,7 @@ function FinanceArtifact({ artifact }: { artifact: AgentArtifact }) {
                 key={key}
                 style={{
                   flex: 1,
-                  padding: 11,
+                  padding: spacing[3],
                   borderRadius: radius.container,
                   backgroundColor: colors.accent,
                 }}
@@ -817,21 +817,21 @@ function FinanceArtifact({ artifact }: { artifact: AgentArtifact }) {
                     fontSize: fontSize.lg,
                     fontWeight: "600",
                     color: colors.onAccent,
-                    marginTop: 5,
+                    marginTop: spacing[1],
                   }}
                 >
                   {amount(artifact.data[key])}
                 </Text>
-                <Text style={{ color: colors.onAccent, fontSize: fontSize.sm, marginTop: 4 }}>
+                <Text style={{ color: colors.onAccent, fontSize: fontSize.sm, marginTop: spacing[1] }}>
                   source currency
                 </Text>
               </View>
             ))}
           </View>
         </View>
-        <View style={[s.row, { gap: 11, paddingHorizontal: 8, paddingTop: 13, paddingBottom: 4 }]}>
+        <View style={[s.row, { gap: spacing[3], paddingHorizontal: spacing[2], paddingTop: spacing[3], paddingBottom: spacing[1] }]}>
           <Text style={{ fontSize: fontSize["2xl"] }}>💸</Text>
-          <View style={{ flex: 1, gap: 2 }}>
+          <View style={{ flex: 1, gap: spacing[0.5] }}>
             <Text style={[s.text, { fontWeight: "600" }]}>Finance tracker</Text>
             <Text style={s.small}>Spending, savings, and a plan for what’s next.</Text>
           </View>
@@ -839,13 +839,13 @@ function FinanceArtifact({ artifact }: { artifact: AgentArtifact }) {
         </View>
       </Pressable>
       {details && (
-        <View style={{ gap: 16, padding: 10 }}>
+        <View style={{ gap: spacing[4], padding: spacing[3] }}>
           <Text style={s.label}>Where your money went</Text>
           {categories.map((category) => {
             const row = record(category);
             if (!row) return null;
             return (
-              <View key={String(row.name)} style={{ gap: 8 }}>
+              <View key={String(row.name)} style={{ gap: spacing[2] }}>
                 <View style={s.between}>
                   <Text style={s.text}>{String(row.name)}</Text>
                   <Text style={s.text}>{amount(row.amount)}</Text>
@@ -871,7 +871,7 @@ function FinanceArtifact({ artifact }: { artifact: AgentArtifact }) {
           {goalSaved ? (
             <Text style={s.text}>Your savings goal is saved in Goals.</Text>
           ) : (
-            <View style={{ gap: 10 }}>
+            <View style={{ gap: spacing[3] }}>
               <Field
                 label="Turn this into a savings goal"
                 value={goalTitle}
@@ -971,13 +971,13 @@ export function DelegateSheet({ goalId, milestoneId }: { goalId?: string; milest
       onClose={close}
     >
       {milestoneId && (
-        <Text style={[s.muted, { marginBottom: 16 }]}>
+        <Text style={[s.muted, { marginBottom: spacing[4] }]}>
           {milestone
             ? `${goal?.title} · ${milestone.title}. Mark this milestone complete when you are satisfied with the result.`
             : "This milestone is no longer available."}
         </Text>
       )}
-      <View style={[s.row, { flexWrap: "wrap", gap: 8, marginBottom: 20 }]}>
+      <View style={[s.row, { flexWrap: "wrap", gap: spacing[2], marginBottom: spacing[5] }]}>
         {(["plan", "document", "finance", "agent"] as const).map((item) => (
           <Button small primary={kind === item} key={item} onPress={() => setKind(item)}>
             {item === "agent" ? "General task" : statusLabel(item)}
@@ -998,7 +998,7 @@ export function DelegateSheet({ goalId, milestoneId }: { goalId?: string; milest
         }
       />
       {kind === "document" && (
-        <View style={{ gap: 8, marginBottom: 18 }}>
+        <View style={{ gap: spacing[2], marginBottom: spacing[5] }}>
           <Text style={s.heading}>Choose the email with the PDF</Text>
           {workspace.mail
             .filter((mail) => mail.attachments.length)
@@ -1038,14 +1038,14 @@ export function DelegateSheet({ goalId, milestoneId }: { goalId?: string; milest
               Try example transactions
             </Button>
           )}
-          <Text style={[s.small, { marginVertical: 12 }]}>
+          <Text style={[s.small, { marginVertical: spacing[3] }]}>
             Positive amounts are expenses; negative amounts are income. Imported data only. No bank
             connection is implied.
           </Text>
         </>
       )}
       {kind === "agent" && !workspace.runtime.configured && (
-        <Text style={[s.muted, { marginBottom: 16 }]}>
+        <Text style={[s.muted, { marginBottom: spacing[4] }]}>
           General tasks and plans require a configured model. Document jobs, page watches and
           spending summaries have guided workflows.
         </Text>
@@ -1084,7 +1084,7 @@ export function IdeasScreen() {
   }
   const ideas = data?.ideas.filter((idea) => idea.status === "new") || [];
   return (
-    <View style={{ gap: 20 }}>
+    <View style={{ gap: spacing[5] }}>
       <AgentStatus />
       <View style={s.between}>
         <Text style={s.small}>Inspired by your connected apps</Text>
@@ -1106,7 +1106,7 @@ export function IdeasScreen() {
       {(data?.ideas || [])
         .filter((idea) => idea.status === "accepted")
         .map((idea) => (
-          <Card key={idea.id} style={{ gap: 7 }}>
+          <Card key={idea.id} style={{ gap: spacing[2] }}>
             <Text style={s.heading}>{idea.title}</Text>
             <Chip tint={colors.green}>Started</Chip>
             {!!idea.taskId && <TaskLink taskId={idea.taskId} />}
@@ -1151,15 +1151,15 @@ function IdeaCard({ idea }: { idea: Idea }) {
     }
   }
   return (
-    <View style={{ paddingVertical: 18, borderBottomWidth: 1, borderBottomColor: colors.line }}>
+    <View style={{ paddingVertical: spacing[5], borderBottomWidth: 1, borderBottomColor: colors.line }}>
       <Pressable
         accessibilityRole="button"
         accessibilityLabel={`View idea: ${idea.title}`}
         accessibilityState={{ expanded }}
         onPress={() => setExpanded(!expanded)}
-        style={{ flexDirection: "row", gap: 14 }}
+        style={{ flexDirection: "row", gap: spacing[4] }}
       >
-        <Text style={{ fontSize: fontSize["2xl"], width: 34, paddingTop: 3 }}>
+        <Text style={{ fontSize: fontSize["2xl"], width: 34, paddingTop: spacing[1] }}>
           {/document|permission|form/i.test(idea.title)
             ? "📋"
             : /money|spend|saving/i.test(idea.title)
@@ -1170,19 +1170,19 @@ function IdeaCard({ idea }: { idea: Idea }) {
                   ? "🍽️"
                   : "💡"}
         </Text>
-        <View style={{ flex: 1, gap: 5 }}>
+        <View style={{ flex: 1, gap: spacing[1] }}>
           <Text style={[s.heading, { fontSize: fontSize.lg, lineHeight: 23 }]}>{idea.title}</Text>
           <Text style={s.muted}>{idea.reason}</Text>
         </View>
       </Pressable>
       {expanded && (
-        <View style={{ gap: 15, marginTop: 18, paddingLeft: 48 }}>
+        <View style={{ gap: spacing[4], marginTop: spacing[5], paddingLeft: spacing[12] }}>
           <EvidenceList items={idea.evidence} />
           {editing && (
             <Field label="What should Debo do?" value={prompt} onChangeText={setPrompt} multiline />
           )}
           <ErrorNotice error={error} />
-          <View style={[s.row, { gap: 8, flexWrap: "wrap" }]}>
+          <View style={[s.row, { gap: spacing[2], flexWrap: "wrap" }]}>
             <Button
               primary
               busy={busy}
@@ -1213,11 +1213,11 @@ export function GoalsScreen() {
   const monitor = data?.monitors.find((item) => item.id === selectedMonitor);
   const monitors = data?.monitors || [];
   return (
-    <View style={{ gap: 22 }}>
+    <View style={{ gap: spacing[6] }}>
       <AgentStatus />
-      <View style={{ gap: 8 }}>
-        <View style={[s.between, { marginBottom: 5 }]}>
-          <View style={[s.row, { gap: 10 }]}>
+      <View style={{ gap: spacing[2] }}>
+        <View style={[s.between, { marginBottom: spacing[1] }]}>
+          <View style={[s.row, { gap: spacing[3] }]}>
             <View
               style={{
                 width: 16,
@@ -1240,10 +1240,10 @@ export function GoalsScreen() {
             accessibilityRole="button"
             accessibilityLabel={`Open tracking: ${item.title}`}
             onPress={() => setSelectedMonitor(item.id)}
-            style={[s.row, { gap: 12, paddingVertical: 13 }]}
+            style={[s.row, { gap: spacing[3], paddingVertical: spacing[3] }]}
           >
             <Square size={21} color={colors.muted} />
-            <View style={{ flex: 1, gap: 4 }}>
+            <View style={{ flex: 1, gap: spacing[1] }}>
               <Text style={s.text}>{item.title}</Text>
               <Text numberOfLines={1} style={s.muted}>
                 {item.status === "active"
@@ -1255,7 +1255,7 @@ export function GoalsScreen() {
           </Pressable>
         ))}
         {!monitors.length && (
-          <Text style={[s.muted, { paddingVertical: 10 }]}>
+          <Text style={[s.muted, { paddingVertical: spacing[3] }]}>
             Ticket prices, a reservation, a page you’re watching.
           </Text>
         )}
@@ -1266,8 +1266,8 @@ export function GoalsScreen() {
         )}
       </View>
       <View style={{ height: 1, backgroundColor: colors.line }} />
-      <View style={{ gap: 8 }}>
-        <View style={[s.row, { gap: 10, marginBottom: 5 }]}>
+      <View style={{ gap: spacing[2] }}>
+        <View style={[s.row, { gap: spacing[3], marginBottom: spacing[1] }]}>
           <View
             style={{
               width: 16,
@@ -1286,14 +1286,14 @@ export function GoalsScreen() {
             accessibilityRole="button"
             accessibilityLabel={`Open goal: ${item.title}`}
             onPress={() => setSelectedGoal(item.id)}
-            style={[s.row, { gap: 12, paddingVertical: 13 }]}
+            style={[s.row, { gap: spacing[3], paddingVertical: spacing[3] }]}
           >
             <Square
               size={21}
               color={colors.muted}
               fill={item.status === "completed" ? colors.green : "transparent"}
             />
-            <View style={{ flex: 1, gap: 4 }}>
+            <View style={{ flex: 1, gap: spacing[1] }}>
               <Text style={s.text}>{item.title}</Text>
               <Text numberOfLines={2} style={s.muted}>
                 {item.description || statusLabel(item.status)}
@@ -1303,7 +1303,7 @@ export function GoalsScreen() {
           </Pressable>
         ))}
         {!data?.goals.length && (
-          <Text style={[s.muted, { paddingVertical: 10 }]}>
+          <Text style={[s.muted, { paddingVertical: spacing[3] }]}>
             Big plans start with one small step.
           </Text>
         )}
@@ -1321,7 +1321,7 @@ export function GoalsScreen() {
           accessibilityRole="button"
           accessibilityLabel={`Create ${item.name.toLowerCase()} goal`}
           onPress={() => setAdding(item.name)}
-          style={[s.row, { gap: 12, minHeight: 38 }]}
+          style={[s.row, { gap: spacing[3], minHeight: 38 }]}
         >
           <item.icon size={23} color={colors.muted} />
           <Text style={[s.text, { flex: 1, color: colors.muted }]}>{item.name}</Text>
@@ -1444,7 +1444,7 @@ function GoalCard({ goal, onOpenTask }: { goal: Goal; onOpenTask?: () => void })
     }
   }
   return (
-    <Card style={{ gap: 12 }}>
+    <Card style={{ gap: spacing[3] }}>
       <View style={s.between}>
         <Text style={[s.heading, { flex: 1 }]}>{goal.title}</Text>
         <Chip tint={goal.status === "completed" ? colors.green : colors.sky}>
@@ -1456,7 +1456,7 @@ function GoalCard({ goal, onOpenTask }: { goal: Goal; onOpenTask?: () => void })
         {done} of {goal.milestones.length} milestones
       </Text>
       {goal.milestones.map((milestone) => (
-        <View key={milestone.id} style={{ gap: 8 }}>
+        <View key={milestone.id} style={{ gap: spacing[2] }}>
           <CheckRow
             checked={milestone.done}
             label={milestone.title}
@@ -1484,7 +1484,7 @@ function GoalCard({ goal, onOpenTask }: { goal: Goal; onOpenTask?: () => void })
         </View>
       ))}
       <ErrorNotice error={error} />
-      <View style={[s.row, { gap: 8, flexWrap: "wrap" }]}>
+      <View style={[s.row, { gap: spacing[2], flexWrap: "wrap" }]}>
         <Button
           small
           busy={busy}
@@ -1571,8 +1571,8 @@ function MonitorForm({ onDone }: { onDone: () => void }) {
           placeholder="https://example.com/product"
         />
       )}
-      <Text style={[s.small, { marginBottom: 10 }]}>Notify me when</Text>
-      <View style={[s.row, { gap: 7, flexWrap: "wrap", marginBottom: 16 }]}>
+      <Text style={[s.small, { marginBottom: spacing[3] }]}>Notify me when</Text>
+      <View style={[s.row, { gap: spacing[2], flexWrap: "wrap", marginBottom: spacing[4] }]}>
         {(["change", "contains", "price_below"] as const).map((item) => (
           <Button small primary={condition === item} key={item} onPress={() => setCondition(item)}>
             {item === "change"
@@ -1596,7 +1596,7 @@ function MonitorForm({ onDone }: { onDone: () => void }) {
         onChangeText={setInterval}
         keyboardType="number-pad"
       />
-      <Text style={[s.small, { marginBottom: 14 }]}>
+      <Text style={[s.small, { marginBottom: spacing[4] }]}>
         {sample
           ? "Changes to this built-in page stay in your workspace."
           : "Debo checks this public page on the server and saves meaningful changes in Notifications."}
@@ -1645,7 +1645,7 @@ function MonitorCard({ monitor, onOpenTask }: { monitor: Monitor; onOpenTask?: (
     }
   }
   return (
-    <Card style={{ gap: 13 }}>
+    <Card style={{ gap: spacing[3] }}>
       <View style={s.between}>
         <Text style={[s.heading, { flex: 1 }]}>{monitor.title}</Text>
         <Chip tint={colors.sky}>{statusLabel(monitor.status)}</Chip>
@@ -1674,7 +1674,7 @@ function MonitorCard({ monitor, onOpenTask }: { monitor: Monitor; onOpenTask?: (
       )}
       <ErrorNotice error={error || monitor.error} />
       {monitor.status !== "stopped" && (
-        <View style={[s.row, { gap: 8, flexWrap: "wrap" }]}>
+        <View style={[s.row, { gap: spacing[2], flexWrap: "wrap" }]}>
           <Button
             small
             busy={busy}
@@ -1717,12 +1717,12 @@ export function NotificationsSheet() {
       subtitle="Results and decisions that need your attention."
       onClose={close}
     >
-      <View style={{ gap: 14 }}>
+      <View style={{ gap: spacing[4] }}>
         <ErrorNotice error={error} />
         {data?.notifications.map((item) => (
           <Card
             key={item.id}
-            style={{ gap: 8, backgroundColor: item.read ? colors.card : colors.sky }}
+            style={{ gap: spacing[2], backgroundColor: item.read ? colors.card : colors.sky }}
           >
             <View style={s.between}>
               <Text style={s.heading}>{item.title}</Text>
@@ -1848,7 +1848,7 @@ export function AppsScreen() {
     },
   ];
   return (
-    <View style={{ gap: 22 }}>
+    <View style={{ gap: spacing[6] }}>
       <AgentStatus />
       <Field
         label="Search all apps"
@@ -1860,7 +1860,7 @@ export function AppsScreen() {
       <ConnectAppsSection query={query} />
       <ToolServersSection />
       <Text style={s.heading}>More from Debo</Text>
-      <Card style={{ paddingVertical: 3, backgroundColor: colors.subtle }}>
+      <Card style={{ paddingVertical: spacing[1], backgroundColor: colors.subtle }}>
         {shortcuts
           .filter((item) =>
             `${item.title} ${item.detail}`.toLowerCase().includes(query.toLowerCase()),
@@ -1888,15 +1888,15 @@ export function AppsScreen() {
       </Button>
       {settings && (
         <>
-          <Card style={{ gap: 10 }}>
+          <Card style={{ gap: spacing[3] }}>
             <SectionHeading title="About Debo" />
             <CharacterPicker value={character} onChange={(id) => void choose(id)} busy={busy} />
             {nameOffer && data && (
-              <View style={{ gap: 8 }} accessibilityLiveRegion="polite">
+              <View style={{ gap: spacing[2] }} accessibilityLiveRegion="polite">
                 <Text style={s.muted}>
                   Call me {nameOffer.name}? You named me {nameOffer.keep}, so I kept it.
                 </Text>
-                <View style={[s.row, { gap: 8 }]}>
+                <View style={[s.row, { gap: spacing[2] }]}>
                   <Button
                     small
                     onPress={() => {
@@ -1951,7 +1951,7 @@ export function AppsScreen() {
               })}
             </View>
             <Field label="Name" value={name} onChangeText={setName} />
-            <View style={[s.row, { gap: 8 }]}>
+            <View style={[s.row, { gap: spacing[2] }]}>
               {(["warm", "concise", "thoughtful"] as const).map((item) => (
                 <Button key={item} small primary={tone === item} onPress={() => setTone(item)}>
                   {statusLabel(item)}
@@ -1977,7 +1977,7 @@ export function AppsScreen() {
               Save preferences
             </Button>
           </Card>
-          <Card style={{ gap: 12 }}>
+          <Card style={{ gap: spacing[3] }}>
             <SectionHeading title="Notes" />
             <Text style={s.muted}>Little things Debo keeps for chat. You can fix or forget any of them.</Text>
             {data?.memories.map((item) => (
@@ -2025,7 +2025,7 @@ function MemoryRow({ memory }: { memory: AgentMemory }) {
   }
   return (
     <View
-      style={{ gap: 8, paddingBottom: 16, borderBottomWidth: 1, borderBottomColor: colors.line }}
+      style={{ gap: spacing[2], paddingBottom: spacing[4], borderBottomWidth: 1, borderBottomColor: colors.line }}
     >
       {editing ? (
         <Field label="Memory" value={text} onChangeText={setText} />
@@ -2035,7 +2035,7 @@ function MemoryRow({ memory }: { memory: AgentMemory }) {
       <Text style={s.small}>
         {memory.source} · {stamp(memory.createdAt)}
       </Text>
-      <View style={[s.row, { gap: 8 }]}>
+      <View style={[s.row, { gap: spacing[2] }]}>
         {editing ? (
           <Button small busy={busy} disabled={!text.trim()} onPress={() => void act(false)}>
             Save correction
