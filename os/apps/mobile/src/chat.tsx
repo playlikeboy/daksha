@@ -30,6 +30,7 @@ import { BrowserThreadCard } from "./computer";
 import { ConversationQueue, type QueuedMessage } from "./conversation-queue";
 import {
   ConversationTurnError,
+  duringReplay,
   replayedRunError,
   runConversationTurn,
   showsRunError,
@@ -322,7 +323,7 @@ export function ChatScreen({
             try {
               await runConversationTurn(
                 agentId,
-                () => copilotkit.connectAgent({ agent }),
+                () => duringReplay(() => copilotkit.connectAgent({ agent })),
                 (onError) => copilotkit.subscribe({ onError }),
                 [replayedRunError],
               );

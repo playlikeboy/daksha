@@ -37,6 +37,33 @@ export function showsRunError(
   return true;
 }
 
+/** Chats replaying saved history right now, across the app. A count, so loads can overlap. */
+let replaysInProgress = 0;
+
+/** Count a history replay while `work` runs, so the app-wide error handler can tell. */
+export async function duringReplay<T>(work: () => Promise<T>): Promise<T> {
+  replaysInProgress += 1;
+  try {
+    return await work();
+  } finally {
+    replaysInProgress -= 1;
+  }
+}
+
+/**
+ * Whether the app-wide CopilotKit handler logs this error. An old run's
+ * error, replayed while a chat opens, is not a new failure, so it stays quiet.
+ */
+export function logsCopilotError(event: Pick<RunError, "code">, replaying = replaysInProgress > 0) {
+  return !(replaying && event.code === replayedRunError);
+}
+
+/** The `onError` for CopilotKitProvider: what CopilotKit logs by default, minus replayed run errors. */
+export function onCopilotError(event: { error: unknown; code?: string }) {
+  if (!logsCopilotError(event)) return;
+  console.error("CopilotKit error", event.code ?? "unknown", event.error);
+}
+
 /** CopilotKit emits run failures through onError even when runAgent resolves. */
 export async function runConversationTurn(
   agentId: string,

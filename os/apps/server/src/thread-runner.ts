@@ -36,6 +36,41 @@ function firstWords(messages: readonly Message[] | undefined): string | undefine
 }
 
 /**
+ * Saved events as they are sent back when a chat is opened again. A run that
+ * ended in an error is closed as finished instead: the error was shown when it
+ * happened, and replaying it would show it again on every load.
+ */
+export function replayEvents(events: readonly BaseEvent[]): BaseEvent[] {
+  const out: BaseEvent[] = [];
+  let started: { threadId?: unknown; runId?: unknown } = {};
+  let finished = false;
+  for (const event of events) {
+    if (event.type === EventType.RUN_STARTED) {
+      started = event as typeof started;
+      finished = false;
+    }
+    if (event.type === EventType.RUN_ERROR) {
+      // One end per run: an error after the run already finished is dropped.
+      if (finished) continue;
+      finished = true;
+      out.push({
+        type: EventType.RUN_FINISHED,
+        threadId: typeof started.threadId === "string" ? started.threadId : "",
+        runId: typeof started.runId === "string" ? started.runId : "",
+        ...(event.timestamp !== undefined ? { timestamp: event.timestamp } : {}),
+      } as BaseEvent);
+      continue;
+    }
+    if (event.type === EventType.RUN_FINISHED) {
+      if (finished) continue;
+      finished = true;
+    }
+    out.push(event);
+  }
+  return out;
+}
+
+/**
  * Runs the agent and saves every finished run to Debo's own database, so a conversation
  * can be replayed after a restart. Live state (a reply still streaming) stays in memory.
  * Keys include the owner, so one person can never replay or stop another person's thread.
@@ -135,7 +170,7 @@ export class DatabaseAgentRunner extends AgentRunner {
       (async () => {
         const history = await this.threads.history(owner, request.threadId);
         const seen = new Set<string>();
-        for (const event of history.events) {
+        for (const event of replayEvents(history.events)) {
           subscriber.next(event);
           const id = (event as { messageId?: unknown }).messageId;
           if (typeof id === "string") seen.add(id);
