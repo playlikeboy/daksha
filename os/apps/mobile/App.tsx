@@ -36,6 +36,8 @@ import {
 import { AgentWorkspaceProvider, useAgentWorkspace } from "./src/agent-workspace";
 import { API_URL, createSession, FuseApi } from "./src/api";
 import { ChatScreen, WorkspaceTools } from "./src/chat";
+import { onCopilotError } from "./src/conversation-run";
+import { timeZoneHeaders } from "./src/time-zone";
 import { deboCharacter } from "./src/debo-character-store";
 import { DeboFaceGallery } from "./src/debo-face-gallery";
 import { useTaskMood } from "./src/debo-mood-hooks";
@@ -138,7 +140,8 @@ export default function App() {
           {(token, sessionKey) => (
             <CopilotKitProvider
               runtimeUrl={`${API_URL}/api/copilotkit`}
-              headers={{ Authorization: `Bearer ${token}` }}
+              headers={{ Authorization: `Bearer ${token}`, ...timeZoneHeaders() }}
+              onError={onCopilotError}
             >
               <WorkspaceApp token={token} sessionKey={sessionKey} />
             </CopilotKitProvider>
@@ -182,7 +185,8 @@ function AccessKeyApp() {
       {token ? (
         <CopilotKitProvider
           runtimeUrl={`${API_URL}/api/copilotkit`}
-          headers={{ Authorization: `Bearer ${token}` }}
+          headers={{ Authorization: `Bearer ${token}`, ...timeZoneHeaders() }}
+          onError={onCopilotError}
         >
           <WorkspaceApp token={token} />
         </CopilotKitProvider>

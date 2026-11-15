@@ -321,7 +321,8 @@ export function devMemoryBackend(): DeboBackend {
         text: entry.text.split("\n")[0]?.slice(0, 200) ?? "",
         sourceId: entryId,
         editedByUser: false,
-        createdAt: new Date().toISOString(),
+        // Dated by the day the entry is about, as Mem0 is (see rememberFromSource).
+        createdAt: new Date(entry.happenedAt).toISOString(),
         updatedAt: null,
       });
       memories.set(owner, kept);

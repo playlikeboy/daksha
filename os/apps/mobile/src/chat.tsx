@@ -10,6 +10,7 @@ import {
 import { ArrowDown, ArrowUp, FileText, Mic, RotateCcw, Square, X } from "lucide-react-native";
 import { useCallback, useEffect, useRef, useState, useSyncExternalStore } from "react";
 import {
+  ActivityIndicator,
   Keyboard,
   KeyboardAvoidingView,
   Platform,
@@ -30,6 +31,7 @@ import { BrowserThreadCard } from "./computer";
 import { ConversationQueue, type QueuedMessage } from "./conversation-queue";
 import {
   ConversationTurnError,
+  duringReplay,
   replayedRunError,
   runConversationTurn,
   showsRunError,
@@ -38,6 +40,7 @@ import {
 import { DesktopToolCard } from "./desktop-tool-card";
 import { confirmedJevSelection, displayJevUserMessage, latestJevPanelId } from "./jev-actions";
 import { JevInteractionContext, JevToolCard } from "./jev-tool-card";
+import { listState } from "./loading-state";
 import { MailToolCard } from "./mail-tool-card";
 import { useChatMood } from "./debo-mood-hooks";
 import { deboMood } from "./debo-mood-store";
@@ -322,7 +325,7 @@ export function ChatScreen({
             try {
               await runConversationTurn(
                 agentId,
-                () => copilotkit.connectAgent({ agent }),
+                () => duringReplay(() => copilotkit.connectAgent({ agent })),
                 (onError) => copilotkit.subscribe({ onError }),
                 [replayedRunError],
               );
@@ -552,7 +555,14 @@ export function ChatScreen({
             </Button>
           </>
         )}
-        {!visible.length ? (
+        {listState(loaded, visible.length) === "loading" && !historyError && (
+          <ActivityIndicator
+            accessibilityLabel="Loading conversation"
+            color={colors.blueDark}
+            style={{ flexGrow: 1 }}
+          />
+        )}
+        {listState(loaded, visible.length) === "empty" ? (
           <View
             style={{
               flexGrow: 1,
@@ -740,7 +750,6 @@ export function ChatScreen({
             )}
           </>
         )}
-        {(!richThreads || selection.id === mainId) && <BackgroundUpdates />}
         {(busy || agent.isRunning) && (
           <View
             accessibilityLabel="Agent is working"
@@ -806,6 +815,8 @@ export function ChatScreen({
         behavior={Platform.OS === "ios" ? "padding" : undefined}
         style={keyboardPadding > 0 ? { paddingBottom: keyboardPadding } : undefined}
       >
+        {/* Above the composer, not in the timeline, so a new reply never lands above it. */}
+        {(!richThreads || selection.id === mainId) && <BackgroundUpdates />}
         <ErrorNotice error={saveError} />
         {!!saveError && (
           <Button

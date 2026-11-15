@@ -2,6 +2,7 @@ import { ArrowRight, Bell, X } from "lucide-react-native";
 import { useState } from "react";
 import { Pressable, Text, View } from "react-native";
 import { useAgentWorkspace } from "./agent-workspace";
+import { chatUpdates } from "./chat-updates";
 import { Button, Card, colors, ErrorNotice, resultSummary, s, spacing } from "./ui";
 import { useWorkspace } from "./workspace";
 
@@ -10,7 +11,7 @@ export function BackgroundUpdates() {
   const { open } = useWorkspace();
   const [error, setError] = useState("");
   const [busy, setBusy] = useState(false);
-  const updates = data?.notifications.filter((item) => !item.read && item.taskId) || [];
+  const updates = chatUpdates(data?.notifications);
   const update = updates[0];
   if (!update || data?.identity.showChatUpdates === false) return null;
   async function dismiss() {
@@ -26,7 +27,7 @@ export function BackgroundUpdates() {
     }
   }
   return (
-    <Card style={{ backgroundColor: colors.sky, padding: 16, gap: 10 }}>
+    <Card style={{ backgroundColor: colors.sky, padding: 16, gap: 10, marginBottom: spacing[3] }}>
       <View style={[s.between, { gap: 12 }]}>
         <View style={[s.row, { gap: 7 }]}>
           <Bell size={14} color={colors.blueDark} />

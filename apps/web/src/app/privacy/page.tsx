@@ -53,6 +53,11 @@ export default function PrivacyPage() {
             <>Your journal entries.</>,
             <>In the new app, the people in your life that you tell Debo about: name, who they are to you, birthdays and other special days, and a few notes. Described below.</>,
             <>
+              In the new app, the time zone your device is set to (for example Asia/Kolkata), so &ldquo;today&rdquo; means
+              your today. Only the latest one is kept, with the time it changed. It is part of your download and is
+              deleted with your data.
+            </>,
+            <>
               Voice calls with Debo in the new app, written out as text: what you said and what Debo said, in order, with
               how far into the call each line was said. The sound of your voice is not kept.
             </>,

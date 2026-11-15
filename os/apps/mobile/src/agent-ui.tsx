@@ -42,6 +42,7 @@ import { deboCharacter, usePronouns } from "./debo-character-store";
 import { type PickPlan, planPick, planRename } from "./debo-character-pick";
 import { CharacterPicker } from "./debo-character-picker";
 import { type CharacterId, characterOrDefault } from "./debo-characters";
+import { listState } from "./loading-state";
 import { ActivityScreen, ConnectionsScreen } from "./screens";
 import {
   Button,
@@ -211,7 +212,7 @@ export function AgentActivityScreen() {
       {tasks.map((task) => (
         <TaskCard key={task.id} task={task} />
       ))}
-      {!tasks.length && (
+      {listState(!!data, tasks.length) === "empty" && (
         <Empty
           icon={ListChecks}
           title="No work here yet"

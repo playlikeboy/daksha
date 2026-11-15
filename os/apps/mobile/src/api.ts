@@ -1,5 +1,6 @@
 import { Platform } from "react-native";
 import { readApiPayload } from "./api-response";
+import { timeZoneHeaders } from "./time-zone";
 
 export const API_URL = (
   process.env.EXPO_PUBLIC_API_URL ||
@@ -13,6 +14,7 @@ export class FuseApi {
       method: method ?? (body === undefined ? "GET" : "POST"),
       headers: {
         Authorization: `Bearer ${this.token}`,
+        ...timeZoneHeaders(),
         ...(body === undefined || body instanceof FormData
           ? {}
           : { "Content-Type": "application/json" }),

@@ -42,6 +42,8 @@ import { neonAuthProxy } from "./neon-auth-proxy.ts";
 import { rateLimit } from "./rate-limit.ts";
 import { DatabaseAgentRunner, threadOwner } from "./thread-runner.ts";
 import { assertThreadId, ThreadStore } from "./threads.ts";
+import { backgroundFailure } from "./log.ts";
+import { readTimeZone, requestTimeZone, TIME_ZONE_HEADER, TimeZoneStore } from "./time-zone.ts";
 import type { VoiceBrain } from "./voice/brain.ts";
 import { EngineVoiceBrain } from "./voice/engine-brain.ts";
 import { voiceAgentRoutes, voiceTokenRoutes } from "./voice/routes.ts";
@@ -103,6 +105,7 @@ export async function createApp(
   agent.connectors = connectors;
   agent.mcp = mcp;
   const threads = new ThreadStore(db);
+  const timeZones = new TimeZoneStore(db);
   const runner = new DatabaseAgentRunner(threads);
   const runtime = makeRuntime(config, agent, auth, runner);
   const app = new Hono<{ Variables: { owner: string } }>();
@@ -119,7 +122,7 @@ export async function createApp(
     "*",
     cors({
       origin: (origin) => (origins.has(origin) ? origin : undefined),
-      allowHeaders: ["Content-Type", "Authorization"],
+      allowHeaders: ["Content-Type", "Authorization", TIME_ZONE_HEADER],
       exposeHeaders: ["ETag", "set-auth-jwt", "set-auth-token"],
       allowMethods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
       credentials: true,
@@ -250,7 +253,11 @@ export async function createApp(
         ? auth.verify(new URL(c.req.url))
         : await auth.owner(c.req.header("authorization"));
     c.set("owner", owner);
-    await next();
+    // The person's time zone from the app: used for this request, and kept for background work.
+    const zone = readTimeZone(c.req.header(TIME_ZONE_HEADER));
+    if (zone)
+      await timeZones.remember(owner, zone).catch((error) => backgroundFailure("save time zone", error));
+    await requestTimeZone.run(zone, () => next());
   });
   app.delete("/api/session", async (c) => {
     await auth.revoke(c.req.header("authorization"));
