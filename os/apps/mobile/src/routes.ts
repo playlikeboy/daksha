@@ -54,6 +54,26 @@ export function rememberChatName(id: string, name: string | null | undefined): v
 export function chatNameOf(id: string): string | undefined {
   return names.get(id);
 }
+// Journal entries work the same way: /journal/<slug>-<id>, the slug from the entry's title.
+const entryNames = new Map<string, string>();
+/** Remember an entry's title so its address and the page title can use it. */
+export function rememberEntryName(id: string, title: string | null | undefined): void {
+  if (title?.trim()) entryNames.set(id, title.trim());
+}
+export function entryNameOf(id: string): string | undefined {
+  return entryNames.get(id);
+}
+/** The entry id inside /journal/<slug>-<id>, or the whole text for a plain id. */
+export function entryIdFrom(part: string): string {
+  return UUID_TAIL.exec(part)?.[1] ?? part;
+}
+/** "<slug>-<id>" for an entry, or the bare id when there is no title or the id is not a UUID. */
+function readable(id: string, name: string | undefined, idPattern: boolean): string {
+  const slug = slugify(name ?? "");
+  const joined = slug && idPattern ? `${slug}-${id}` : id;
+  return ID.test(joined) ? joined : id;
+}
+
 /** The id inside /chat/<slug>-<id>, or the whole text for an old plain id. */
 export function threadIdFrom(part: string): string {
   return UUID_TAIL.exec(part)?.[1] ?? CALL_TAIL.exec(part)?.[1] ?? part;
@@ -84,12 +104,8 @@ export function pathFor(section: Section, params: RouteParams = {}): string {
   const name = PATHS[canonicalSection(section)] ?? "chat";
   const id = name === "chat" ? params.threadId : name === "journal" ? params.entryId : undefined;
   if (!id || !ID.test(id)) return `/${name}`;
-  if (name === "chat") {
-    const slug = slugify(names.get(id) ?? "");
-    const readable = slug && (UUID_TAIL.test(id) || CALL_TAIL.test(id)) ? `${slug}-${id}` : id;
-    return ID.test(readable) ? `/chat/${readable}` : `/chat/${id}`;
-  }
-  return `/${name}/${id}`;
+  if (name === "chat") return `/chat/${readable(id, names.get(id), UUID_TAIL.test(id) || CALL_TAIL.test(id))}`;
+  return `/journal/${readable(id, entryNames.get(id), UUID_TAIL.test(id))}`;
 }
 
 function cleanPath(path: string): string[] {
@@ -116,7 +132,7 @@ export function parsePath(path: string): Route | null {
   if (id === undefined) return { section };
   if (!ID.test(id)) return null;
   if (section === "chat") return { section, threadId: threadIdFrom(id) };
-  if (section === "journal") return { section, entryId: id };
+  if (section === "journal") return { section, entryId: entryIdFrom(id) };
   return null;
 }
 
@@ -134,5 +150,7 @@ export function titleFor(route: Route | null): string {
   if (!route) return "That page isn't here · Debo";
   const chat = route.section === "chat" && route.threadId ? chatNameOf(route.threadId) : undefined;
   if (chat) return `${chat} · Debo`;
+  const entry = route.section === "journal" && route.entryId ? entryNameOf(route.entryId) : undefined;
+  if (entry) return `${entry} · Debo`;
   return `${NAMES[canonicalSection(route.section)] ?? "Debo"} · Debo`;
 }
