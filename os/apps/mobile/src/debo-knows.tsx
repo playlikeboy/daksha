@@ -9,13 +9,20 @@ import { deboMood } from "./debo-mood-store";
 import { Button, Card, Empty, ErrorNotice, Field, s, screenGap, Skeleton, spacing } from "./ui";
 import { useWorkspace } from "./workspace";
 
+/** The last list per signed-in session, so coming back shows it at once while it refreshes. */
+const lastSeen = new WeakMap<object, { status: DeboStatus; memories: MemoryView[] }>();
+/** Long lists show this many at first, then more on request, so a big memory stays quick. */
+const PAGE = 40;
+
 /** What Debo knows: each memory, the entry it came from, and a way to fix or forget it. */
 export function KnowsScreen() {
   const { api } = useWorkspace();
   const debo = useMemo(() => deboApi(api), [api]);
-  const [status, setStatus] = useState<DeboStatus>();
-  const [memories, setMemories] = useState<MemoryView[]>([]);
-  const [loading, setLoading] = useState(true);
+  const cached = lastSeen.get(api);
+  const [status, setStatus] = useState<DeboStatus | undefined>(cached?.status);
+  const [memories, setMemories] = useState<MemoryView[]>(cached?.memories ?? []);
+  const [loading, setLoading] = useState(!cached);
+  const [shown, setShown] = useState(PAGE);
   const [error, setError] = useState("");
 
   const load = useCallback(async () => {
@@ -24,18 +31,20 @@ export function KnowsScreen() {
       const next = await debo.status();
       setStatus(next);
       // Memory off is not an error: the screen explains it.
-      if (next.configured && next.memories) setMemories(await debo.memories());
+      const list = next.configured && next.memories ? await debo.memories() : [];
+      setMemories(list);
+      lastSeen.set(api, { status: next, memories: list });
     } catch (e) {
       setError(errorText(e));
     } finally {
       setLoading(false);
     }
-  }, [debo]);
+  }, [debo, api]);
   useEffect(() => {
     void load();
   }, [load]);
 
-  if (loading) return <Skeleton label="Loading what Debo knows" />;
+  if (loading) return <Skeleton label="Loading what Debo knows" rows={3} />;
   if (status && !status.configured) return <NotSetUp status={status} what="What Debo knows" />;
 
   return (
@@ -68,9 +77,14 @@ export function KnowsScreen() {
         </Empty>
       ) : (
         <View accessibilityRole="list" style={{ gap: spacing[3] }}>
-          {memories.map((memory) => (
+          {memories.slice(0, shown).map((memory) => (
             <MemoryCard key={memory.id} memory={memory} onChanged={load} />
           ))}
+          {memories.length > shown && (
+            <Button onPress={() => setShown(shown + PAGE)}>
+              {`Show more memories (${memories.length - shown} left)`}
+            </Button>
+          )}
         </View>
       )}
     </View>
