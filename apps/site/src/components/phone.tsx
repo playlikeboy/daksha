@@ -9,12 +9,14 @@ type PhoneProps = {
   alt: string;
   /** Load straight away only for the picture at the top of the page. */
   isPriority?: boolean;
+  /** Widest the phone may grow, in pixels. Smaller phones keep the page short on a small screen. */
+  maxWidth?: number;
 };
 
 // A real screenshot of the app, set in a raised Astryx card that acts as the phone.
-export function Phone({ src, width, height, alt, isPriority = false }: PhoneProps) {
+export function Phone({ src, width, height, alt, isPriority = false, maxWidth = 360 }: PhoneProps) {
   return (
-    <Card padding={1.5} elevation="high" width="100%" maxWidth={360}>
+    <Card padding={1.5} elevation="high" width="100%" maxWidth={maxWidth}>
       <AspectRatio ratio={width / height} fit="cover">
         <img
           src={src}

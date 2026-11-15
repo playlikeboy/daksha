@@ -48,11 +48,11 @@ export default function Home() {
         content={
           <LayoutContent role="main" label="Debo" isScrollable={false} padding={0}>
             <Hero />
-            <Demo />
             <WriteOrSay />
             <Ask />
             <Knows />
             <Apps />
+            <Demo />
             <GetApp />
             <Trust />
             <Faq />

@@ -7,20 +7,20 @@ import { Card } from "@astryxdesign/core/Card";
 import { Heading, Text } from "@astryxdesign/core/Text";
 import { ANDROID_APK_URL, RELEASES_URL, START_URL } from "../links";
 import { Band } from "./band";
+import { SectionHead } from "./section-head";
 
 export function GetApp() {
   return (
     <Band id="get-app">
-      <VStack gap={3} hAlign="center">
-        <Heading level={2} type="display-2" weight="bold" id="get-app-title" justify="center" textWrap="balance">
-          Get the app
-        </Heading>
-        <Text type="large" weight="normal" as="p" color="secondary" justify="center" textWrap="balance">
-          Debo works in any web browser. There is also an early app for Android phones.
-        </Text>
-      </VStack>
+      <SectionHead
+        id="get-app"
+        eyebrow="On your phone"
+        title="Get the app"
+        lead="Debo works in any web browser, on a computer or a phone. There is also an early app for Android phones."
+        align="center"
+      />
       <Grid columns={{ minWidth: 320, repeat: "fit" }} gap={5}>
-        <Card padding={6}>
+        <Card padding={6} elevation="low">
           <VStack gap={3} hAlign="start">
             <Badge variant="warning" label="Early test build" />
             <Heading level={3}>
@@ -37,7 +37,7 @@ export function GetApp() {
             </HStack>
           </VStack>
         </Card>
-        <Card padding={6}>
+        <Card padding={6} elevation="low">
           <VStack gap={3} hAlign="start">
             <Badge variant="neutral" label="Not available yet" />
             <Heading level={3}>

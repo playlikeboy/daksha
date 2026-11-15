@@ -1,7 +1,8 @@
 import { VStack } from "@astryxdesign/core/Layout";
 import { Collapsible, CollapsibleGroup } from "@astryxdesign/core/Collapsible";
-import { Heading, Text } from "@astryxdesign/core/Text";
+import { Text } from "@astryxdesign/core/Text";
 import { Band } from "./band";
+import { SectionHead } from "./section-head";
 
 export const QUESTIONS = [
   {
@@ -36,11 +37,9 @@ export const QUESTIONS = [
 
 export function Faq() {
   return (
-    <Band id="faq" variant="muted">
+    <Band id="faq">
       <VStack gap={6} width="100%" maxWidth={760}>
-        <Heading level={2} type="display-2" weight="bold" id="faq-title" textWrap="balance">
-          Questions people ask
-        </Heading>
+        <SectionHead id="faq" eyebrow="Questions" title="Questions people ask" />
         <CollapsibleGroup type="single" hasDividers>
           {QUESTIONS.map((item, index) => (
             <Collapsible

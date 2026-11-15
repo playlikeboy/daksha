@@ -2,10 +2,10 @@ import { HStack, VStack } from "@astryxdesign/core/Layout";
 import { Grid } from "@astryxdesign/core/Grid";
 import { Card } from "@astryxdesign/core/Card";
 import { Divider } from "@astryxdesign/core/Divider";
-import { Badge } from "@astryxdesign/core/Badge";
 import { Token } from "@astryxdesign/core/Token";
 import { Heading, Text } from "@astryxdesign/core/Text";
 import { Band } from "./band";
+import { SectionHead } from "./section-head";
 
 // Both exchanges are real replies from the demo account, set again here in
 // larger type so they are easy to read. Nothing in them is made up.
@@ -21,19 +21,15 @@ function Question({ children }: { children: string }) {
 
 export function Ask() {
   return (
-    <Band id="ask" variant="muted">
+    <Band id="ask">
       <Grid columns={{ minWidth: 320, repeat: "fit" }} gap={8} align="center">
         <VStack gap={5}>
-          <VStack gap={3} hAlign="start">
-            <Badge variant="neutral" label="Step 2" />
-            <Heading level={2} type="display-2" weight="bold" id="ask-title" textWrap="balance">
-              Ask in plain words. See where the answer came from.
-            </Heading>
-            <Text type="large" weight="normal" as="p" color="secondary" textWrap="pretty">
-              Debo answers only from what you wrote. Under every answer is a chip for each entry it used, with the
-              date. Press a chip to open the original.
-            </Text>
-          </VStack>
+          <SectionHead
+            id="ask"
+            eyebrow="Step 2"
+            title="Ask in plain words. See where the answer came from."
+            lead="Debo answers only from what you wrote. Under every answer is a chip for each entry it used, with the date. Press a chip to open the original."
+          />
           <VStack gap={2}>
             <Heading level={3}>No source, no guess</Heading>
             <Text as="p" type="large" weight="normal" color="secondary" textWrap="pretty">
@@ -41,7 +37,7 @@ export function Ask() {
             </Text>
           </VStack>
         </VStack>
-        <Card padding={6}>
+        <Card padding={6} elevation="high">
           <VStack gap={5}>
             <Question>What did I plant on the balcony?</Question>
             <VStack gap={3}>
