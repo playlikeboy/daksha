@@ -15,7 +15,7 @@ import {
 } from "./debo-data";
 import { deboMood } from "./debo-mood-store";
 import { RecordingPlayer } from "./debo-player";
-import { Button, Card, colors, Empty, ErrorNotice, Field, s, spacing } from "./ui";
+import { Button, Card, colors, Empty, ErrorNotice, Field, s, screenGap, Skeleton, spacing } from "./ui";
 import { useWorkspace } from "./workspace";
 
 /** Shown when there is no Debo database, a plain "not set up" instead of a failure. */
@@ -73,26 +73,37 @@ export function JournalScreen() {
     return () => clearInterval(timer);
   }, [writingOut, load, finding]);
 
-  if (loading)
-    return <ActivityIndicator accessibilityLabel="Loading your journal" color={colors.blueDark} />;
-  if (status && !status.configured) return <NotSetUp status={status} what="Your journal" />;
+  const retry = () => {
+    setLoading(true);
+    void load(finding);
+  };
+  if (loading) return <Skeleton label="Loading your journal" />;
+  // The first load failed, so there is nothing to show yet except the error and a way back.
+  if (!status)
+    return (
+      <ErrorNotice
+        error="Your journal did not load. Check your connection, then try again. Your entries are safe."
+        onRetry={retry}
+      />
+    );
+  if (!status.configured) return <NotSetUp status={status} what="Your journal" />;
 
   const focused = focus ? entries.find((e) => e.id === focus) : undefined;
   const rest = entries.filter((e) => e.id !== focused?.id);
 
   return (
-    <View style={{ gap: 22 }}>
+    <View style={{ gap: screenGap }}>
       <Text style={s.muted}>
         Write, speak or record. Only you can read your entries. Debo uses them to answer your questions, and shows which
         entry each answer came from.
       </Text>
-      <ErrorNotice error={error} />
-      <Composer status={status as DeboStatus} onSaved={() => {
+      <ErrorNotice error={error} onRetry={retry} />
+      <Composer status={status} onSaved={() => {
           deboMood.emit({ type: "journal_saved" });
           return load(finding);
         }} />
 
-      <View style={{ gap: 10 }} accessibilityRole="search">
+      <View style={{ gap: spacing[2] }} accessibilityRole="search">
         <Field
           label="Find an entry"
           value={find}
@@ -102,7 +113,7 @@ export function JournalScreen() {
           onSubmitEditing={() => setFinding(find.trim())}
           placeholder="A word or a name"
         />
-        <View style={[s.row, { gap: 10, flexWrap: "wrap" }]}>
+        <View style={[s.row, { gap: spacing[2], flexWrap: "wrap" }]}>
           <Button icon={Search} onPress={() => setFinding(find.trim())}>
             Find
           </Button>
@@ -142,7 +153,7 @@ export function JournalScreen() {
           detail="Start small: write one line about today, like who you saw or what you ate, or record a short voice note. Then you can ask Debo about it."
         />
       ) : (
-        <View accessibilityRole="list" style={{ gap: 14 }}>
+        <View accessibilityRole="list" style={{ gap: spacing[3] }}>
           {focused && (
             <EntryCard
               entry={focused}
@@ -206,8 +217,8 @@ function EntryCard({
   return (
     <Card
       style={{
-        gap: 10,
-        padding: 16,
+        gap: spacing[2],
+        padding: spacing[4],
         ...(highlighted ? { borderWidth: 2, borderColor: colors.blueDark } : {}),
       }}
     >
@@ -270,7 +281,7 @@ function EntryCard({
             multiline
             maxLength={20000}
           />
-          <View style={[s.row, { gap: 10, flexWrap: "wrap" }]}>
+          <View style={[s.row, { gap: spacing[2], flexWrap: "wrap" }]}>
             <Button
               primary
               busy={busy}
@@ -309,7 +320,7 @@ function EntryCard({
       )}
       <ErrorNotice error={error} />
       {!editing && !confirming && (
-        <View style={[s.row, { gap: 10, flexWrap: "wrap" }]}>
+        <View style={[s.row, { gap: spacing[2], flexWrap: "wrap" }]}>
           {entry.text.length > 220 && (
             <Button small onPress={() => setOpen(!open)}>
               {open ? "Show less" : call ? "Read the whole call" : recording ? "Read all the words" : "Read all"}
@@ -339,7 +350,7 @@ function EntryCard({
         </View>
       )}
       {confirming && (
-        <View accessibilityRole="alert" style={{ gap: 10 }}>
+        <View accessibilityRole="alert" style={{ gap: spacing[2] }}>
           <Text style={s.text}>
             {call
               ? "Delete this call for good? Debo forgets what it learned from it, and the copy in Chat is deleted too. This can't be undone."
@@ -347,7 +358,7 @@ function EntryCard({
               ? "Delete this recording and its words for good? The file is removed from storage and Debo forgets what it learned from it. This can't be undone."
               : "Delete this entry for good? Debo will also forget what it learned from it. This can't be undone."}
           </Text>
-          <View style={[s.row, { gap: 10, flexWrap: "wrap" }]}>
+          <View style={[s.row, { gap: spacing[2], flexWrap: "wrap" }]}>
             <Button
               danger
               busy={busy}

@@ -1,12 +1,12 @@
 import { Brain, Pencil, Trash2 } from "lucide-react-native";
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { ActivityIndicator, Text, View } from "react-native";
+import { Text, View } from "react-native";
 import { deboApi, errorText } from "./debo-api";
 import { type DeboStatus, type MemoryView } from "./debo-data";
 import { NotSetUp } from "./debo-journal";
 import { SourceChips } from "./debo-source-chips";
 import { deboMood } from "./debo-mood-store";
-import { Button, Card, colors, Empty, ErrorNotice, Field, s } from "./ui";
+import { Button, Card, Empty, ErrorNotice, Field, s, screenGap, Skeleton, spacing } from "./ui";
 import { useWorkspace } from "./workspace";
 
 /** What Debo knows: each memory, the entry it came from, and a way to fix or forget it. */
@@ -35,18 +35,23 @@ export function KnowsScreen() {
     void load();
   }, [load]);
 
-  if (loading)
-    return <ActivityIndicator accessibilityLabel="Loading what Debo knows" color={colors.blueDark} />;
+  if (loading) return <Skeleton label="Loading what Debo knows" />;
   if (status && !status.configured) return <NotSetUp status={status} what="What Debo knows" />;
 
   return (
-    <View style={{ gap: 18 }}>
+    <View style={{ gap: screenGap }}>
       <Text style={s.muted}>
         After you save an entry, Debo picks out the lasting facts in it, like people, places and
         plans. Each memory shows the entry it came from. Fix anything that is wrong, or forget
         anything you don&apos;t want Debo to keep.
       </Text>
-      <ErrorNotice error={error} />
+      <ErrorNotice
+        error={error}
+        onRetry={() => {
+          setLoading(true);
+          void load();
+        }}
+      />
       {status && !status.memories ? (
         <Empty
           icon={Brain}
@@ -62,7 +67,7 @@ export function KnowsScreen() {
           <Button onPress={() => void load()}>Check again</Button>
         </Empty>
       ) : (
-        <View accessibilityRole="list" style={{ gap: 14 }}>
+        <View accessibilityRole="list" style={{ gap: spacing[3] }}>
           {memories.map((memory) => (
             <MemoryCard key={memory.id} memory={memory} onChanged={load} />
           ))}
@@ -97,11 +102,11 @@ function MemoryCard({ memory, onChanged }: { memory: MemoryView; onChanged: () =
   }
 
   return (
-    <Card style={{ gap: 12, padding: 16 }}>
+    <Card style={{ gap: spacing[3], padding: spacing[4] }}>
       {editing ? (
         <>
           <Field label="Fix this memory" value={text} onChangeText={setText} multiline maxLength={1000} />
-          <View style={[s.row, { gap: 10, flexWrap: "wrap" }]}>
+          <View style={[s.row, { gap: spacing[2], flexWrap: "wrap" }]}>
             <Button
               primary
               busy={busy}
@@ -135,7 +140,7 @@ function MemoryCard({ memory, onChanged }: { memory: MemoryView; onChanged: () =
       <SourceChips sources={[memory.source]} />
       <ErrorNotice error={error} />
       {!editing && !confirming && (
-        <View style={[s.row, { gap: 10, flexWrap: "wrap" }]}>
+        <View style={[s.row, { gap: spacing[2], flexWrap: "wrap" }]}>
           <Button
             small
             icon={Pencil}
@@ -152,11 +157,11 @@ function MemoryCard({ memory, onChanged }: { memory: MemoryView; onChanged: () =
         </View>
       )}
       {confirming && (
-        <View accessibilityRole="alert" style={{ gap: 10 }}>
+        <View accessibilityRole="alert" style={{ gap: spacing[2] }}>
           <Text style={s.text}>
             Forget this memory for good? Your entry stays. Debo will not remember this fact from it.
           </Text>
-          <View style={[s.row, { gap: 10, flexWrap: "wrap" }]}>
+          <View style={[s.row, { gap: spacing[2], flexWrap: "wrap" }]}>
             <Button
               danger
               busy={busy}

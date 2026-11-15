@@ -60,28 +60,34 @@ import { BrowserScreen, CalendarScreen, FilesScreen, MailScreen } from "./src/sc
 import { AccountCard, NeonGate, useAuthInfo } from "./src/neon-gate";
 import { ThreadsProvider, ThreadsSheet, useFuseThread } from "./src/threads";
 import {
+  avatarSize,
   Button,
   Card,
   colors,
   ErrorNotice,
   Field,
+  fontFamily,
   fontSize,
   IconButton,
   Mascot,
   radius,
   s,
+  screenGap,
+  screenPadding,
   shadow,
+  spacing,
 } from "./src/ui";
 import { entryFocus } from "./src/debo-data";
 import { canonicalSection, parsePath, pathFor, pathFromUrl, type Route, type RouteParams, titleFor } from "./src/routes";
 import { type Detail, useWorkspace, WorkspaceContext } from "./src/workspace";
 
-const nav: { id: Section; label: string; icon: LucideIcon }[] = [
-  { id: "chat", label: "Chat", icon: MessageCircle },
-  { id: "journal", label: "Journal", icon: BookOpen },
-  { id: "knows", label: "What Debo knows", icon: Brain },
-  { id: "activity", label: "Tasks", icon: PanelsTopLeft },
-  { id: "apps", label: "Apps", icon: Shapes },
+/** `short` is the word under the icon; `label` is the full name read out by screen readers. */
+const nav: { id: Section; label: string; short: string; icon: LucideIcon }[] = [
+  { id: "chat", label: "Chat", short: "Chat", icon: MessageCircle },
+  { id: "journal", label: "Journal", short: "Journal", icon: BookOpen },
+  { id: "knows", label: "What Debo knows", short: "Memories", icon: Brain },
+  { id: "activity", label: "Tasks", short: "Tasks", icon: PanelsTopLeft },
+  { id: "apps", label: "Apps", short: "Apps", icon: Shapes },
 ];
 const titles: Partial<Record<Section, { title: string; subtitle: string }>> = {
   talk: { title: "Talk to Debo", subtitle: "Say it out loud. Debo answers and shows where it came from." },
@@ -107,7 +113,7 @@ const titles: Partial<Record<Section, { title: string; subtitle: string }>> = {
 function NotFound() {
   const { navigate } = useWorkspace();
   return (
-    <View style={{ gap: 16, alignItems: "flex-start" }}>
+    <View style={{ gap: spacing[4], alignItems: "flex-start" }}>
       <Text accessibilityRole="header" style={[s.title, { fontSize: fontSize["2xl"] }]}>
         That page isn't here
       </Text>
@@ -197,11 +203,11 @@ function AccessKeyApp() {
             backgroundColor: colors.canvas,
             justifyContent: "center",
             alignItems: "center",
-            padding: 24,
+            padding: spacing[6],
           }}
         >
-          <View style={{ width: "100%", maxWidth: 420, gap: 22, alignItems: "center" }}>
-            <Mascot size={72} />
+          <View style={{ width: "100%", maxWidth: 420, gap: spacing[5], alignItems: "center" }}>
+            <Mascot size={avatarSize.lg} />
             <Text
               style={{
                 fontSize: fontSize["3xl"],
@@ -228,7 +234,7 @@ function AccessKeyApp() {
                 <Button primary onPress={() => void connect(accessKey || undefined)}>
                   Open workspace
                 </Button>
-                <Text style={[s.small, { marginTop: 15 }]}>
+                <Text style={[s.small, { marginTop: spacing[4] }]}>
                   Local workspaces open without a key. Make sure your Debo server is running at{" "}
                   {API_URL}.
                 </Text>
@@ -325,11 +331,11 @@ function WorkspaceApp({ token, sessionKey }: { token: string; sessionKey?: strin
           backgroundColor: colors.canvas,
           alignItems: "center",
           justifyContent: "center",
-          padding: 24,
-          gap: 18,
+          padding: spacing[6],
+          gap: spacing[4],
         }}
       >
-        <Mascot size={56} />
+        <Mascot size={avatarSize.lg} />
         {error ? (
           <>
             <ErrorNotice error={error} />
@@ -468,18 +474,18 @@ function WorkspaceShell({
           <View
             style={{
               height: desktop ? 160 : 136,
-              paddingTop: desktop ? 14 : 2,
-              marginHorizontal: 20,
+              paddingTop: desktop ? spacing[3] : spacing[0.5],
+              marginHorizontal: screenPadding.phone,
             }}
           >
-            <View style={{ position: "absolute", left: 0, top: 16 }}>
+            <View style={{ position: "absolute", left: 0, top: spacing[4] }}>
               <IconButton
                 icon={Menu}
                 label="Open conversations and menu"
                 onPress={() => setThreadsOpen(true)}
               />
             </View>
-            <View pointerEvents="box-none" style={{ alignItems: "center", gap: 1 }}>
+            <View pointerEvents="box-none" style={{ alignItems: "center", gap: spacing[0.5] }}>
               <Pressable
                 accessibilityRole="button"
                 accessibilityLabel={
@@ -498,7 +504,10 @@ function WorkspaceShell({
                   opacity: pressed ? 0.65 : 1,
                 })}
               >
-                <Mascot size={desktop ? 58 : 49} variant={data?.identity.avatar} />
+                {/* While the call bar shows its own face, the header keeps only the name. */}
+                {!talkBarShown && (
+                  <Mascot size={desktop ? avatarSize.lg : avatarSize.md} variant={data?.identity.avatar} />
+                )}
                 <Text
                   style={{
                     fontSize: fontSize.lg,
@@ -511,14 +520,14 @@ function WorkspaceShell({
                 </Text>
                 <Text
                   numberOfLines={1}
-                  style={{ fontSize: fontSize.sm, color: colors.muted, marginBottom: 6 }}
+                  style={{ fontSize: fontSize.base, color: colors.muted, marginBottom: spacing[1.5] }}
                 >
                   {status}
                 </Text>
               </Pressable>
               {section === "chat" && <ComputerEntry />}
             </View>
-            <View style={{ position: "absolute", right: 0, top: 16 }}>
+            <View style={{ position: "absolute", right: 0, top: spacing[4] }}>
               <IconButton
                 icon={Bell}
                 label={`Notifications, ${pending} unread or pending`}
@@ -528,12 +537,12 @@ function WorkspaceShell({
                 <View
                   pointerEvents="none"
                   style={{
-                    width: 6,
-                    height: 6,
-                    borderRadius: radius.inner,
+                    width: spacing[2],
+                    height: spacing[2],
+                    borderRadius: radius.full,
                     position: "absolute",
-                    top: 7,
-                    right: 9,
+                    top: spacing[2],
+                    right: spacing[2],
                     backgroundColor: colors.blueDark,
                   }}
                 />
@@ -545,13 +554,16 @@ function WorkspaceShell({
               <ScrollView
                 key={section}
                 showsVerticalScrollIndicator={false}
-                contentContainerStyle={{ paddingHorizontal: desktop ? 42 : 22, paddingBottom: 28 }}
+                contentContainerStyle={{
+                  paddingHorizontal: desktop ? screenPadding.desktop : screenPadding.phone,
+                  paddingBottom: spacing[8],
+                }}
                 keyboardShouldPersistTaps="handled"
               >
                 {utility && (
                   <Button
                     small
-                    style={{ alignSelf: "flex-start", marginBottom: 18 }}
+                    style={{ alignSelf: "flex-start", marginBottom: spacing[4] }}
                     onPress={() => navigate("apps")}
                   >
                     Back to Apps
@@ -560,7 +572,7 @@ function WorkspaceShell({
                 {title && (
                   <Text
                     accessibilityRole="header"
-                    style={[s.title, { fontSize: fontSize["2xl"], marginBottom: 22 }]}
+                    style={[s.title, { fontSize: fontSize["2xl"], marginBottom: screenGap }]}
                   >
                     {title.title}
                   </Text>
@@ -577,7 +589,7 @@ function WorkspaceShell({
               style={{
                 display: section === "chat" ? "flex" : "none",
                 flex: 1,
-                paddingHorizontal: desktop ? 42 : 17,
+                paddingHorizontal: desktop ? screenPadding.desktop : screenPadding.phone,
               }}
             >
               <AgentStatus />
@@ -612,9 +624,9 @@ function WorkspaceShell({
           </View>
           <View
             style={{
-              paddingHorizontal: 22,
-              paddingTop: 10,
-              paddingBottom: desktop ? 22 : 7,
+              paddingHorizontal: screenPadding.phone,
+              paddingTop: spacing[2],
+              paddingBottom: desktop ? spacing[5] : spacing[2],
               alignItems: "center",
             }}
           >
@@ -622,8 +634,8 @@ function WorkspaceShell({
               style={{
                 flexDirection: "row",
                 width: "100%",
-                maxWidth: 370,
-                padding: 5,
+                maxWidth: 420,
+                padding: spacing[1],
                 backgroundColor: colors.card,
                 borderRadius: radius.full,
                 boxShadow: shadow.low,
@@ -636,13 +648,33 @@ function WorkspaceShell({
                 const active = section === item.id || (item.id === "apps" && utility);
                 const tabStyle = {
                   flex: 1,
-                  height: 47,
+                  minWidth: 0,
+                  height: spacing[12] + spacing[1],
+                  gap: spacing[0.5],
+                  flexDirection: "column",
                   alignItems: "center",
                   justifyContent: "center",
                   backgroundColor: active ? colors.subtle : "transparent",
                   borderRadius: radius.chat,
                 } as const;
-                const icon = <item.icon size={23} strokeWidth={1.8} color={colors.text} />;
+                // A visible word under each icon, so no one has to guess what a shape means.
+                const icon = (
+                  <>
+                    <item.icon size={22} strokeWidth={active ? 2.2 : 1.8} color={colors.text} />
+                    <Text
+                      numberOfLines={1}
+                      style={{
+                        fontFamily,
+                        fontSize: fontSize.sm,
+                        lineHeight: spacing[4],
+                        fontWeight: active ? "600" : "500",
+                        color: active ? colors.text : colors.muted,
+                      }}
+                    >
+                      {item.short}
+                    </Text>
+                  </>
+                );
                 // On the web a tab is a real link, so middle-click and "open in new tab" work.
                 if (onWeb)
                   return createElement(
@@ -687,8 +719,8 @@ function WorkspaceShell({
               style={[
                 s.row,
                 {
-                  gap: 10,
-                  padding: 14,
+                  gap: spacing[2],
+                  padding: spacing[4],
                   backgroundColor: colors.ink,
                   borderRadius: radius.page,
                   maxWidth: 560,

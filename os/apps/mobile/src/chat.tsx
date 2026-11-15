@@ -42,14 +42,16 @@ import { confirmedJevSelection, displayJevUserMessage, latestJevPanelId } from "
 import { JevInteractionContext, JevToolCard } from "./jev-tool-card";
 import { listState } from "./loading-state";
 import { MailToolCard } from "./mail-tool-card";
+import { useAssistantName } from "./debo-character-store";
 import { useChatMood } from "./debo-mood-hooks";
 import { deboMood } from "./debo-mood-store";
 import { ConnectorToolCard } from "./connectors-ui";
 import { DeboToolCard } from "./debo-source-chips";
 import { SearchToolCard } from "./search-tool-card";
 import { FileThreadCard, TaskThreadCard } from "./thread-artifacts";
+import { TypingDots } from "./typing-dots";
 import { type Selection, useFuseThread } from "./threads";
-import { Button, Card, CheckRow, colors, ErrorNotice, fontSize, radius, s, shadow } from "./ui";
+import { Button, Card, CheckRow, colors, ErrorNotice, fontSize, radius, s, shadow, spacing } from "./ui";
 import { useWorkspace } from "./workspace";
 
 const displayParameters = z.record(z.string(), z.unknown());
@@ -528,13 +530,14 @@ export function ChatScreen({
     .filter((call) => call.function.name === "use_desktop")
     .at(-1)?.id;
   const replying = busy || agent.isRunning;
+  const assistantName = useAssistantName();
   useChatMood({ active, running: replying, messages, error });
   return (
     <View style={{ flex: 1 }}>
       <ScrollView
         ref={list}
         showsVerticalScrollIndicator={false}
-        contentContainerStyle={{ gap: 13, paddingTop: 15, paddingBottom: 20, flexGrow: 1 }}
+        contentContainerStyle={{ gap: spacing[3], paddingTop: spacing[4], paddingBottom: spacing[5], flexGrow: 1 }}
         onScroll={({ nativeEvent: { contentOffset, contentSize, layoutMeasurement } }) => {
           const nearEnd = contentSize.height - contentOffset.y - layoutMeasurement.height < 100;
           followLatest.current = nearEnd;
@@ -569,8 +572,8 @@ export function ChatScreen({
               flexShrink: 0,
               justifyContent: "center",
               alignItems: "center",
-              paddingVertical: 34,
-              gap: 15,
+              paddingVertical: spacing[8],
+              gap: spacing[4],
             }}
           >
             <Text
@@ -582,13 +585,13 @@ export function ChatScreen({
                 maxWidth: 350,
               }}
             >
-              Hi, I&apos;m Debo.
+              Hi, I&apos;m {assistantName}.
             </Text>
-            <Text style={[s.muted, { maxWidth: 320, textAlign: "center", lineHeight: 23 }]}>
+            <Text style={[s.muted, { maxWidth: 320, textAlign: "center" }]}>
               I keep your journal and remember what is in it. Ask me about your days, and I will
               show you which entry each answer came from.
             </Text>
-            <View style={{ width: "100%", maxWidth: 360, marginTop: 14, gap: 8 }}>
+            <View style={{ width: "100%", maxWidth: 360, marginTop: spacing[3], gap: spacing[2] }}>
               {[
                 { text: "Write in my journal", action: () => navigate("journal") },
                 {
@@ -623,17 +626,17 @@ export function ChatScreen({
                   alignSelf: user ? "flex-end" : "flex-start",
                   maxWidth: user ? "85%" : "95%",
                   width: toolCalls.length ? "95%" : undefined,
-                  gap: 8,
+                  gap: spacing[2],
                 }}
               >
                 {!!text && (
                   <View
                     style={{
-                      paddingHorizontal: 16,
-                      paddingVertical: 13,
+                      paddingHorizontal: spacing[4],
+                      paddingVertical: spacing[3],
                       borderRadius: radius.page,
-                      borderBottomRightRadius: user ? 7 : 22,
-                      borderBottomLeftRadius: user ? 22 : 7,
+                      borderBottomRightRadius: user ? radius.inner : radius.page,
+                      borderBottomLeftRadius: user ? radius.page : radius.inner,
                       backgroundColor: user ? colors.blue : colors.subtle,
                     }}
                   >
@@ -751,33 +754,7 @@ export function ChatScreen({
           </>
         )}
         {(busy || agent.isRunning) && (
-          <View
-            accessibilityLabel="Agent is working"
-            style={[
-              s.row,
-              {
-                alignSelf: "flex-start",
-                gap: 7,
-                paddingHorizontal: 19,
-                paddingVertical: 18,
-                backgroundColor: colors.subtle,
-                borderRadius: radius.chat,
-              },
-            ]}
-          >
-            {[0.4, 0.75, 0.5].map((opacity) => (
-              <View
-                key={opacity}
-                style={{
-                  width: 8,
-                  height: 8,
-                  borderRadius: radius.inner,
-                  backgroundColor: colors.muted,
-                  opacity,
-                }}
-              />
-            ))}
-          </View>
+          <TypingDots />
         )}
         <ErrorNotice error={error} />
         {!!error && (

@@ -1,4 +1,4 @@
-// "How <name> talks and what she knows": voice, personality and context in one sheet.
+// "How <name> talks and what <they> know": voice, personality and context in one sheet.
 // Reached from the menu, from the Apps screen and from the small settings button in the
 // Talk popup. Every choice saves the moment it is tapped, except the notes, which have a
 // Save button. The server checks everything again (apps/server/src/talk-settings.ts).
@@ -6,10 +6,11 @@ import { useCallback, useEffect, useState } from "react";
 import { Pressable, Text, View } from "react-native";
 import { useAgentWorkspace } from "./agent-workspace";
 import { errorText } from "./debo-api";
-import { useAssistantName, usePronouns } from "./debo-character-store";
+import { useAssistantName } from "./debo-character-store";
 import { PeopleSetting } from "./debo-people-setting";
 import { PersonaSetting } from "./debo-persona-setting";
-import { Button, Card, colors, ErrorNotice, Field, LinkRow, radius, s, SectionHeading, Sheet, spacing } from "./ui";
+import { capital, usePronouns, useTalkSettingsName } from "./debo-pronouns";
+import { Button, Card, colors, ErrorNotice, Field, LinkRow, radius, s, SectionHeading, Sheet, Skeleton, spacing } from "./ui";
 import { useWorkspace } from "./workspace";
 import { Brain, UserRound } from "lucide-react-native";
 
@@ -86,6 +87,7 @@ export function TalkSettingsSheet() {
   const { data, mutate } = useAgentWorkspace();
   const name = useAssistantName();
   const p = usePronouns();
+  const settingsName = useTalkSettingsName();
   const [reply, setReply] = useState<Reply>();
   const [context, setContext] = useState("");
   const [saved, setSaved] = useState("");
@@ -93,6 +95,7 @@ export function TalkSettingsSheet() {
   const [busy, setBusy] = useState(false);
 
   const load = useCallback(async () => {
+    setError("");
     try {
       const next = await api.request<Reply>("/api/talk-settings");
       setReply(next);
@@ -138,7 +141,16 @@ export function TalkSettingsSheet() {
   const contextMax = reply?.limits.contextMax ?? 1500;
 
   return (
-    <Sheet title={`How ${name} talks and what ${p.subject} knows`} subtitle="Changes save as soon as you tap them." onClose={close}>
+    <Sheet
+      title={settingsName}
+      subtitle="Changes save as soon as you tap them."
+      onClose={close}
+    >
+      {!reply && !error ? (
+        <Skeleton label="Loading your settings" rows={3} />
+      ) : !reply ? (
+        <ErrorNotice error={error} onRetry={() => void load()} />
+      ) : (
       <View style={{ gap: spacing[4] }}>
         <Card style={{ gap: spacing[3] }}>
           <SectionHeading title="Voice" />
@@ -177,7 +189,7 @@ export function TalkSettingsSheet() {
             })}
           </View>
           <Choices
-            label={`How fast ${p.subject} speaks`}
+            label={`How fast ${p.they} ${p.verb("speak")}`}
             options={SPEEDS.map((o) => ({ id: String(o.value), label: o.label }))}
             value={String(SPEEDS.reduce((a, b) => (Math.abs(b.value - speed) < Math.abs(a.value - speed) ? b : a)).value)}
             onPick={(id) => void save({ speed: Number(id) }, "Speed saved for your next call.")}
@@ -187,13 +199,13 @@ export function TalkSettingsSheet() {
         <Card style={{ gap: spacing[3] }}>
           <SectionHeading title="Personality" />
           <Choices
-            label={`${p.Possessive} tone`}
+            label={`${capital(p.their)} tone`}
             options={TONES}
             value={(data?.identity.tone ?? "warm") as "warm" | "concise" | "thoughtful"}
             onPick={(id) => void pickTone(id)}
           />
-          <Choices label={`${p.Possessive} mood`} options={MOODS} value={s1?.mood ?? "balanced"} onPick={(id) => void save({ mood: id }, "Saved.")} />
-          <Choices label={`How much ${p.subject} says`} options={LENGTHS} value={s1?.length ?? "balanced"} onPick={(id) => void save({ length: id }, "Saved.")} />
+          <Choices label={`${capital(p.their)} mood`} options={MOODS} value={s1?.mood ?? "balanced"} onPick={(id) => void save({ mood: id }, "Saved.")} />
+          <Choices label={`How much ${p.they} ${p.verb("say")}`} options={LENGTHS} value={s1?.length ?? "balanced"} onPick={(id) => void save({ length: id }, "Saved.")} />
           <Choices label="Language" options={LANGUAGES} value={s1?.language ?? "match"} onPick={(id) => void save({ language: id }, "Saved.")} />
           <LinkRow
             icon={UserRound}
@@ -230,8 +242,8 @@ export function TalkSettingsSheet() {
           </Button>
           <LinkRow
             icon={Brain}
-            title="What Debo knows"
-            detail={`The things ${p.subject} has learned, each with its source`}
+            title={`What ${name} knows`}
+            detail={`The things ${p.they} ${p.verb("have")} learned, each with its source`}
             onPress={() => {
               close();
               navigate("knows");
@@ -244,6 +256,7 @@ export function TalkSettingsSheet() {
         </Text>
         <ErrorNotice error={error} />
       </View>
+      )}
     </Sheet>
   );
 }

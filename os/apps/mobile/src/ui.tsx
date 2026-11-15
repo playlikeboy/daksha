@@ -1,4 +1,4 @@
-import { ArrowUpRight, Check, ChevronRight, type LucideIcon, X } from "lucide-react-native";
+import { ArrowUpRight, Check, ChevronRight, type LucideIcon, RotateCw, X } from "lucide-react-native";
 import { Component, type ReactNode } from "react";
 import {
   ActivityIndicator,
@@ -39,13 +39,26 @@ export { fontSize, radius, shadow, sizeElement, spacing, textStyle };
 const face = Platform.OS === "web" ? { fontFamily: fontStack.body } : {};
 export const fontFamily = face.fontFamily;
 
+/**
+ * Body text: 16px on a 24px line. DESIGN.md sets 16px as the floor for anything a person
+ * reads, so this is larger than Astryx's 14px body. Small print and labels use 14px.
+ */
+export const bodyText = { fontSize: spacing[4], fontWeight: "400", lineHeight: spacing[6] } as const;
+
+/** The only sizes the character is drawn at, so it is the same size wherever it shows. */
+export const avatarSize = { sm: 36, md: 48, lg: 64, xl: 96 } as const;
+
+/** One gap between blocks on a screen, and one side padding for phone and desktop. */
+export const screenGap = spacing[5];
+export const screenPadding = { phone: spacing[5], desktop: spacing[10] } as const;
+
 export const s = StyleSheet.create({
   row: { flexDirection: "row", alignItems: "center" },
   between: { flexDirection: "row", alignItems: "center", justifyContent: "space-between" },
-  text: { ...face, color: colors.text, ...textStyle.body },
-  muted: { ...face, color: colors.muted, ...textStyle.body },
-  small: { ...face, color: colors.muted, ...textStyle.supporting },
-  label: { ...face, color: colors.muted, ...textStyle.heading5 },
+  text: { ...face, color: colors.text, ...bodyText },
+  muted: { ...face, color: colors.muted, ...bodyText },
+  small: { ...face, color: colors.muted, ...textStyle.body },
+  label: { ...face, color: colors.muted, ...textStyle.heading4, fontWeight: "600" },
   title: { ...face, color: colors.text, ...textStyle.heading2 },
   heading: { ...face, color: colors.text, ...textStyle.heading3 },
   card: {
@@ -213,6 +226,59 @@ export function Chip({ children, tint }: { children: ReactNode; tint?: string })
     </View>
   );
 }
+/**
+ * A row of choices where exactly one is on, like a filter. Quieter than a row of buttons:
+ * the picked one is a white pill inside a grey track.
+ */
+export function Segmented<T extends string>({
+  label,
+  options,
+  value,
+  onChange,
+}: {
+  label: string;
+  options: { id: T; label: string }[];
+  value: T;
+  onChange: (id: T) => void;
+}) {
+  return (
+    <View
+      accessibilityRole="radiogroup"
+      accessibilityLabel={label}
+      style={{
+        flexDirection: "row",
+        alignSelf: "flex-start",
+        maxWidth: "100%",
+        padding: spacing[1],
+        gap: spacing[1],
+        borderRadius: radius.full,
+        backgroundColor: colors.line,
+      }}
+    >
+      {options.map((option) => {
+        const on = option.id === value;
+        return (
+          <Pressable
+            key={option.id}
+            accessibilityRole="radio"
+            accessibilityState={{ checked: on }}
+            onPress={() => onChange(option.id)}
+            style={{
+              minHeight: spacing[11],
+              paddingHorizontal: spacing[4],
+              justifyContent: "center",
+              borderRadius: radius.full,
+              backgroundColor: on ? colors.card : "transparent",
+              boxShadow: on ? shadow.low : undefined,
+            }}
+          >
+            <Text style={[s.buttonText, { color: on ? colors.text : colors.muted }]}>{option.label}</Text>
+          </Pressable>
+        );
+      })}
+    </View>
+  );
+}
 export function Field({ label, ...props }: TextInputProps & { label: string }) {
   return (
     <View style={s.field}>
@@ -261,12 +327,38 @@ export function Empty({
     </View>
   );
 }
-export function ErrorNotice({ error }: { error?: string }) {
+export function ErrorNotice({ error, onRetry }: { error?: string; onRetry?: () => void }) {
   return error ? (
     <View accessibilityRole="alert" style={s.error}>
       <Text style={[s.text, { color: colors.danger }]}>{error}</Text>
+      {onRetry && (
+        <Button small icon={RotateCw} style={{ alignSelf: "flex-start", marginTop: spacing[2] }} onPress={onRetry}>
+          Try again
+        </Button>
+      )}
     </View>
   ) : null;
+}
+/**
+ * Grey blocks in the shape of the cards that are loading, so the screen does not jump
+ * when they arrive. They hold still (no shimmer), so reduced motion needs nothing extra.
+ */
+export function Skeleton({ label, rows = 2 }: { label: string; rows?: number }) {
+  const bar = (width: `${number}%`, height: number, color: string) => (
+    <View style={{ width, height, borderRadius: radius.inner, backgroundColor: color }} />
+  );
+  return (
+    <View accessible accessibilityRole="progressbar" accessibilityLabel={label} style={{ gap: screenGap }}>
+      {bar("80%", spacing[4], colors.line)}
+      {Array.from({ length: rows }, (_, i) => (
+        <View key={i} style={[s.card, { gap: spacing[3] }]}>
+          {bar("40%", spacing[4], colors.line)}
+          {bar("95%", spacing[3], colors.subtle)}
+          {bar("70%", spacing[3], colors.subtle)}
+        </View>
+      ))}
+    </View>
+  );
 }
 export function Sheet({
   title,
@@ -452,13 +544,20 @@ class MascotFallback extends Component<{ size: number; children: ReactNode }, { 
   }
 }
 
+/** Soft Neutral-theme tints behind the character. The character art itself is never recoloured. */
+export const mascotTint = {
+  sky: colors.blue,
+  sand: colors.orange,
+  lilac: colors.lavender,
+} as const;
+
 /**
  * The character the person talks to (Debo by default), drawn in code so its face can move
  * (see debo-face.tsx). It follows the shared mood, so the header, chat and voice popup
  * always agree.
  */
 export function Mascot({
-  size = 42,
+  size = avatarSize.md,
   variant = "sky",
   character,
   mood,
@@ -474,12 +573,7 @@ export function Mascot({
   interactive?: boolean;
 }) {
   const assistantName = useAssistantName();
-  // Soft Neutral-theme tints behind the character. The character art itself is never recoloured.
-  const palette = {
-    sky: colors.blue,
-    sand: colors.orange,
-    lilac: colors.lavender,
-  }[variant];
+  const palette = mascotTint[variant];
   return (
     <View accessibilityLabel={character ? characters[character].name : assistantName} style={{ width: size, height: size }}>
       <View
