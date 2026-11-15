@@ -97,6 +97,10 @@ export class Auth {
     if (authorization?.startsWith("Bearer "))
       await this.db.remove("system", "sessions", digest(authorization.slice(7)).toString("hex"));
   }
+  /** A key for one job, made from the signing key, so the signing key itself is never handed out. */
+  purposeKey(purpose: string) {
+    return createHmac("sha256", this.signingKey).update(`purpose\n${purpose}`).digest("base64url");
+  }
   sign(owner: string, path: string) {
     const expires = String(Date.now() + 15 * 60 * 1000);
     const signature = createHmac("sha256", this.signingKey)

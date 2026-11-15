@@ -177,6 +177,22 @@ export interface SafeFetchOptions {
   timeoutMs?: number;
 }
 
+/**
+ * The body as text, and its length (and form type) set in `headers`. MCP messages are text; OAuth
+ * token requests send a form (URLSearchParams). Anything else is refused.
+ */
+export function requestBody(body: RequestInit["body"], headers: Record<string, string>) {
+  let text = typeof body === "string" ? body : undefined;
+  if (body instanceof URLSearchParams) {
+    text = body.toString();
+    headers["content-type"] ??= "application/x-www-form-urlencoded;charset=UTF-8";
+  }
+  if (body !== undefined && body !== null && text === undefined)
+    throw new AppError("Debo sent a request in a form it does not support.", 500);
+  if (text !== undefined) headers["content-length"] = String(Buffer.byteLength(text));
+  return text;
+}
+
 /** A `fetch` that can only reach public https addresses, never follows redirects and is size and time limited. */
 export function createSafeFetch(options: SafeFetchOptions = {}): typeof fetch {
   const maxBytes = options.maxBytes ?? 1_000_000;
@@ -189,10 +205,7 @@ export function createSafeFetch(options: SafeFetchOptions = {}): typeof fetch {
       if (!["host", "content-length", "connection", "transfer-encoding"].includes(key))
         headers[key] = value;
     });
-    const body = typeof init.body === "string" ? init.body : undefined;
-    if (init.body !== undefined && init.body !== null && body === undefined)
-      throw new AppError("Debo sent a request in a form it does not support.", 500);
-    if (body !== undefined) headers["content-length"] = String(Buffer.byteLength(body));
+    const body = requestBody(init.body, headers);
     return await new Promise<Response>((resolve, reject) => {
       let settled = false;
       const fail = (error: unknown) => {
