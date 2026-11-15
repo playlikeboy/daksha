@@ -9,13 +9,15 @@ import {
   RefreshCw,
   Settings2,
   SlidersHorizontal,
+  Sparkles,
 } from "lucide-react-native";
 import { createContext, type ReactNode, useContext, useEffect, useRef, useState } from "react";
-import { ActivityIndicator, Pressable, Text, View } from "react-native";
+import { Pressable, Text, View } from "react-native";
 import { useTalkSettingsName } from "./debo-pronouns";
 import { isInstalledApp, openGetApp } from "./get-app";
+import { onboarding } from "./onboarding-store";
 import { useSavedThreads } from "./thread-list";
-import { Button, colors, ErrorNotice, Field, LinkRow, Sheet, s } from "./ui";
+import { Button, colors, ErrorNotice, Field, LinkRow, Sheet, Skeleton, s } from "./ui";
 import { useWorkspace } from "./workspace";
 
 function newThreadId() {
@@ -159,7 +161,7 @@ export function ThreadsSheet({ onClose }: { onClose: () => void }) {
             {mainError ? (
               <Button onPress={retry}>Retry main chat</Button>
             ) : (
-              <ActivityIndicator color={colors.blueDark} />
+              <Skeleton label="Loading your conversations" variant="rows" rows={3} />
             )}
           </>
         ) : enabled ? (
@@ -189,7 +191,7 @@ export function ThreadsSheet({ onClose }: { onClose: () => void }) {
                 {archived ? "Show active" : "Archived"}
               </Button>
             </View>
-            {threads.isLoading && <ActivityIndicator color={colors.blueDark} />}
+            {threads.isLoading && <Skeleton label="Loading side chats" variant="rows" rows={3} />}
             <ErrorNotice error={error || threads.error?.message} />
             {threads.error && (
               <Button small onPress={threads.refetchThreads}>
@@ -344,6 +346,15 @@ export function ThreadsSheet({ onClose }: { onClose: () => void }) {
           }}
         />
         <LinkRow icon={Settings2} title="Apps & settings" onPress={() => go("apps")} />
+        <LinkRow
+          icon={Sparkles}
+          title="Show the welcome again"
+          detail="The short tour from your first day"
+          onPress={() => {
+            onClose();
+            onboarding.open();
+          }}
+        />
         {!isInstalledApp() && (
           <LinkRow
             icon={Download}
