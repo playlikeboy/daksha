@@ -13,6 +13,6 @@ test("a list says it is empty only after it has loaded", () => {
 test("Chat and Tasks wait for their data before showing the empty state", () => {
   const source = (file: string) => readFileSync(new URL(`../apps/mobile/src/${file}`, import.meta.url), "utf8");
   assert.match(source("chat.tsx"), /listState\(loaded, visible\.length\) === "empty"/);
-  assert.match(source("chat.tsx"), /accessibilityLabel="Loading conversation"/);
+  assert.match(source("chat.tsx"), /<Skeleton label="Loading conversation"/, "the chat shows a labelled skeleton while it loads");
   assert.match(source("agent-ui.tsx"), /listState\(!!data, tasks\.length\) === "empty"/);
 });
