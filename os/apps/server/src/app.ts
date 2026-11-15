@@ -34,6 +34,8 @@ import { AgentService } from "./engine/service.ts";
 import { AppError } from "./errors.ts";
 import { Files } from "./files.ts";
 import { GoogleAuth } from "./google-auth.ts";
+import { checkinRoutes } from "./companion.ts";
+import { PeopleStore, peopleRoutes } from "./people.ts";
 import { PersonaStore, personaRoutes } from "./persona.ts";
 import { TalkSettingsStore, talkSettingsRoutes, voiceFor } from "./talk-settings.ts";
 import { neonAuthProxy } from "./neon-auth-proxy.ts";
@@ -262,6 +264,8 @@ export async function createApp(
       async (owner) => voiceFor(await talkSettings.get(owner).catch(() => null), await characterOf(owner)),
     ));
   app.route("/api/persona", personaRoutes(new PersonaStore(db)));
+  app.route("/api/people", peopleRoutes(new PeopleStore(db)));
+  app.route("/api/checkin", checkinRoutes({ db, debo }));
   const talkSettings = new TalkSettingsStore(db);
   const characterOf = async (owner: string) =>
     (await db.get<{ character?: string }>(owner, "agent-settings", "identity").catch(() => null))?.character;
