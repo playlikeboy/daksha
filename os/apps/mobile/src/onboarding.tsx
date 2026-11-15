@@ -99,6 +99,8 @@ export function Onboarding() {
     onboarding.close();
   }
   async function skip() {
+    // A face tried on the second step but not saved goes back to the saved one.
+    deboCharacter.set(data?.identity.character);
     await remember("skipped");
     notify("You can see the welcome again from the menu.");
   }
@@ -207,8 +209,8 @@ export function Onboarding() {
 
           <Animated.View style={{ flexGrow: 1, gap: spacing[5], opacity: fade }}>
             {step === "hello" && (
-              <>
-                <View style={{ alignItems: "center", paddingTop: spacing[6] }}>
+              <View style={{ flexGrow: 1, justifyContent: "center", gap: spacing[5], paddingBottom: spacing[12] }}>
+                <View style={{ alignItems: "center" }}>
                   <Mascot size={avatarSize.xl} variant={data?.identity.avatar} />
                 </View>
                 <Heading refFor={heading} title={`Hi, I'm ${data?.identity.name || "Debo"}.`} />
@@ -216,7 +218,7 @@ export function Onboarding() {
                   I keep your days safe and help you remember them. Tell me about your day, then ask me
                   anything about it later. This takes about a minute.
                 </Text>
-              </>
+              </View>
             )}
 
             {step === "who" && (
@@ -385,7 +387,12 @@ export function Onboarding() {
                     ? ["What did I write today?", "What can you do for me?"]
                     : ["What can you do for me?", "How do I write my first entry?"]
                   ).map((question) => (
-                    <Button key={question} disabled={busy} onPress={() => void finish(() => ask(question))}>
+                    <Button
+                      key={question}
+                      disabled={busy}
+                      style={{ backgroundColor: colors.card, justifyContent: "flex-start" }}
+                      onPress={() => void finish(() => ask(question))}
+                    >
                       {question}
                     </Button>
                   ))}
