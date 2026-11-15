@@ -20,7 +20,6 @@ import {
 } from "lucide-react-native";
 import { useEffect, useState } from "react";
 import {
-  ActivityIndicator,
   Image,
   Linking,
   Platform,
@@ -57,6 +56,7 @@ import {
   SectionHeading,
   Segmented,
   Sheet,
+  Skeleton,
   spacing,
   timeLabel,
 } from "./ui";
@@ -527,10 +527,7 @@ export function CalendarScreen() {
           </Button>
         )}
         {loading ? (
-          <View style={[s.row, { gap: spacing[3], paddingVertical: spacing[9], justifyContent: "center" }]}>
-            <ActivityIndicator size="small" color={colors.blueDark} />
-            <Text style={s.muted}>Checking your calendar…</Text>
-          </View>
+          <Skeleton label="Checking your calendar" variant="rows" rows={4} />
         ) : events.length ? (
           events.map((e, i) => (
             <View key={e.id}>

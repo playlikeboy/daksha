@@ -46,6 +46,7 @@ import { PushService, pushKeysFromEnv, pushRoutes } from "./push.ts";
 import { companionRoutes } from "./reminders.ts";
 import { PeopleStore, peopleRoutes } from "./people.ts";
 import { PersonaStore, personaRoutes } from "./persona.ts";
+import { OnboardingStore, onboardingRoutes } from "./onboarding.ts";
 import { TalkSettingsStore, talkSettingsRoutes, voiceFor } from "./talk-settings.ts";
 import { neonAuthProxy } from "./neon-auth-proxy.ts";
 import { rateLimit } from "./rate-limit.ts";
@@ -319,6 +320,7 @@ export async function createApp(
       async (owner) => voiceFor(await talkSettings.get(owner).catch(() => null), await characterOf(owner)),
     ));
   app.route("/api/persona", personaRoutes(new PersonaStore(db)));
+  app.route("/api/onboarding", onboardingRoutes(new OnboardingStore(db)));
   app.route("/api/people", peopleRoutes(new PeopleStore(db)));
   app.route("/api/checkin", checkinRoutes({ db, debo }));
   app.route("/api/companion", companionRoutes(db));

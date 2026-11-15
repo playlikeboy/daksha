@@ -22,7 +22,7 @@ import {
   SlidersHorizontal,
 } from "lucide-react-native";
 import { useEffect, useRef, useState } from "react";
-import { ActivityIndicator, Image, Linking, Pressable, Text, View } from "react-native";
+import { Image, Linking, Pressable, Text, View } from "react-native";
 import Svg, { Defs, LinearGradient, Rect, Stop } from "react-native-svg";
 import type { Artifact, BrowserSession } from "../../../packages/domain/src";
 import type {
@@ -63,6 +63,7 @@ import {
   SectionHeading,
   Segmented,
   Sheet,
+  Skeleton,
   spacing,
 } from "./ui";
 import { useTalkSettingsName } from "./debo-pronouns";
@@ -98,7 +99,6 @@ export function AgentStatus() {
           Reconnect agent
         </Button>
       )}
-      {!data && !error && <ActivityIndicator color={colors.blueDark} />}
       {data && !data.worker.running && (
         <Text style={s.small}>Worker is offline. Saved work will continue when it reconnects.</Text>
       )}
@@ -212,6 +212,9 @@ export function AgentActivityScreen() {
         value={filter}
         onChange={setFilter}
       />
+      {listState(!!data, tasks.length) === "loading" && (
+        <Skeleton label="Loading your tasks" rows={3} heading={false} />
+      )}
       {tasks.map((task) => (
         <TaskCard key={task.id} task={task} />
       ))}
@@ -396,7 +399,7 @@ export function TaskDetail({ taskId }: { taskId: string }) {
     >
       <ErrorNotice error={error} />
       {!task ? (
-        <ActivityIndicator color={colors.blueDark} />
+        <Skeleton label="Loading saved progress" rows={2} />
       ) : (
         <View style={{ gap: spacing[5] }}>
           <Text selectable style={s.text}>
@@ -1098,7 +1101,8 @@ export function IdeasScreen() {
       {ideas.map((idea) =>
         idea.kind === "promise" ? <PromiseCard key={idea.id} idea={idea} /> : <IdeaCard key={idea.id} idea={idea} />,
       )}
-      {!ideas.length && (
+      {!data && <Skeleton label="Loading ideas" rows={2} heading={false} />}
+      {data && !ideas.length && (
         <Empty
           icon={Lightbulb}
           title="No ideas yet"
@@ -1705,11 +1709,20 @@ export function NotificationsSheet() {
   const { data, mutate } = useAgentWorkspace();
   const { close, open } = useWorkspace();
   const [error, setError] = useState("");
+  // Marked read on screen at once; the server catches up. If it fails, the mark comes back off.
+  const [readNow, setReadNow] = useState<ReadonlySet<string>>(new Set());
   async function read(id: string, taskId?: string) {
+    setError("");
+    setReadNow((ids) => new Set(ids).add(id));
+    if (taskId) open({ type: "task", taskId });
     try {
       await mutate(`/notifications/${id}/read`, {});
-      if (taskId) open({ type: "task", taskId });
     } catch (e) {
+      setReadNow((ids) => {
+        const next = new Set(ids);
+        next.delete(id);
+        return next;
+      });
       setError(errorText(e));
     }
   }
@@ -1721,7 +1734,8 @@ export function NotificationsSheet() {
     >
       <View style={{ gap: spacing[4] }}>
         <ErrorNotice error={error} />
-        {data?.notifications.map((item) => (
+        {!data && <Skeleton label="Loading notifications" rows={3} heading={false} />}
+        {data?.notifications.map((stored) => ({ ...stored, read: stored.read || readNow.has(stored.id) })).map((item) => (
           <Card
             key={item.id}
             style={{ gap: spacing[2], backgroundColor: item.read ? colors.card : colors.sky }}
@@ -1737,7 +1751,7 @@ export function NotificationsSheet() {
             </Button>
           </Card>
         ))}
-        {!data?.notifications.length && (
+        {data && !data.notifications.length && (
           <Empty
             icon={Bell}
             title="You're all caught up"

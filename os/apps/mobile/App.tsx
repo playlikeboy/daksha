@@ -1,12 +1,10 @@
 import { CopilotKitProvider } from "@copilotkit/react-native/headless";
 import { StatusBar } from "expo-status-bar";
 import {
-  Bell,
   BookOpen,
   Brain,
   Check,
   type LucideIcon,
-  Menu,
   MessageCircle,
   PanelsTopLeft,
   Shapes,
@@ -24,7 +22,7 @@ import {
   useWindowDimensions,
   View,
 } from "react-native";
-import { SafeAreaProvider, SafeAreaView } from "react-native-safe-area-context";
+import { SafeAreaProvider, SafeAreaView, useSafeAreaInsets } from "react-native-safe-area-context";
 import type { Section, Workspace } from "../../packages/domain/src";
 import {
   AgentActivityScreen,
@@ -50,8 +48,11 @@ import { TalkPopup } from "./src/debo-talk";
 import { requestTalkAutoStart } from "./src/debo-talk-consent";
 import { TalkPill } from "./src/debo-talk-pill";
 import { reviewsWaiting } from "./src/debo-talk-call";
-import { TalkSessionProvider, useTalkState } from "./src/debo-talk-session";
-import { ComputerEntry } from "./src/computer";
+import { stateWords, TalkSessionProvider, useTalkState } from "./src/debo-talk-session";
+import { ChromeContext, topBarHeight } from "./src/chrome";
+import { TopBar } from "./src/top-bar";
+import { Onboarding } from "./src/onboarding";
+import { onboarding, type OnboardingReply, useOnboardingOpen } from "./src/onboarding-store";
 import { ComputerDraftProvider } from "./src/computer-drafts";
 import { JournalScreen } from "./src/debo-journal";
 import { KnowsScreen } from "./src/debo-knows";
@@ -68,13 +69,13 @@ import {
   Field,
   fontFamily,
   fontSize,
-  IconButton,
   Mascot,
   radius,
   s,
   screenGap,
   screenPadding,
   shadow,
+  Skeleton,
   spacing,
 } from "./src/ui";
 import { entryFocus } from "./src/debo-data";
@@ -344,10 +345,10 @@ function WorkspaceApp({ token, sessionKey }: { token: string; sessionKey?: strin
             </Button>
           </>
         ) : (
-          <>
-            <ActivityIndicator color={colors.blueDark} />
-            <Text style={s.muted}>Opening your workspace…</Text>
-          </>
+          // The face is already moving, so it is the loading sign; no spinner needed.
+          <Text accessibilityRole="progressbar" accessibilityLiveRegion="polite" style={s.muted}>
+            Opening your workspace…
+          </Text>
         )}
       </SafeAreaView>
     );
@@ -390,8 +391,9 @@ function WorkspaceShell({
   error: string;
   prompt?: { id: number; text: string };
 }) {
-  const { workspace, section: current, navigate, open } = useWorkspace();
-  const { data } = useAgentWorkspace();
+  const { workspace, api, section: current, navigate, open } = useWorkspace();
+  const agentData = useAgentWorkspace();
+  const { data } = agentData;
   const talkState = useTalkState();
   useTaskMood(data?.tasks);
   // Talk is a popup over the last screen, so the screen underneath is the last one that was not Talk.
@@ -413,6 +415,21 @@ function WorkspaceShell({
     enabled: richThreads,
   } = useFuseThread();
   const [threadsOpen, setThreadsOpen] = useState(false);
+  const welcomeOpen = useOnboardingOpen();
+  // The welcome shows once per person. Whether it was seen is saved in their account, so a
+  // second phone or browser does not show it again. An older server without the route: no welcome.
+  useEffect(() => {
+    let live = true;
+    void api
+      .request<OnboardingReply>("/api/onboarding")
+      .then((reply) => {
+        if (live && reply.onboarding === null) onboarding.open();
+      })
+      .catch(() => {});
+    return () => {
+      live = false;
+    };
+  }, [api]);
   const { width } = useWindowDimensions();
   const desktop = width >= 900;
   // A minimised call: a small bar above the tabs, on every screen except the full-screen Talk popup.
@@ -433,15 +450,38 @@ function WorkspaceShell({
     deboCharacter.set(savedCharacter);
     deboCharacter.setName(agentName);
   }, [data, savedCharacter, agentName]);
-  const status = activeTask
-    ? activeTask.status === "waiting_approval"
-      ? `Ready to review · ${activeTask.title}`
-      : activeTask.status === "waiting_input"
-        ? `Needs your input · ${activeTask.title}`
-        : activeTask.plan.find((step) => step.status === "running")?.title || activeTask.title
-    : data?.tasks.some((task) => task.status === "queued")
-      ? "Picking up your next task…"
-      : "Here when you need me";
+  // The line under the name shows only when something is happening: the call, or a task.
+  const callWords = talkState.active
+    ? stateWords({ ...talkState, name: agentName })
+    : undefined;
+  const status = callWords
+    ? callWords
+    : activeTask
+      ? activeTask.status === "waiting_approval"
+        ? `Ready to review · ${activeTask.title}`
+        : activeTask.status === "waiting_input"
+          ? `Needs your input · ${activeTask.title}`
+          : activeTask.plan.find((step) => step.status === "running")?.title || activeTask.title
+      : data?.tasks.some((task) => task.status === "queued")
+        ? "Picking up your next task…"
+        : undefined;
+  const insets = useSafeAreaInsets();
+  const barHeight = desktop ? topBarHeight.desktop : topBarHeight.phone;
+  // Something shows above the chat (agent offline, a side chat's title, loading or an error),
+  // so the chat column starts below the bar instead of scrolling under it.
+  const chatNotice =
+    (!!agentData.data && !agentData.data.worker.running) ||
+    !!agentData.error ||
+    (richThreads && (threadsLoading || !!threadsError || selection.id !== mainId));
+  const [composerHeight, setComposerHeight] = useState(0);
+  const [tabHeight, setTabHeight] = useState(desktop ? 84 : 72);
+  const chrome = useMemo(
+    () => ({ top: chatNotice ? 0 : barHeight, setComposerHeight }),
+    [chatNotice, barHeight],
+  );
+  // The floating call bubble sits above the tabs, and above the chat's composer on Chat.
+  const bubbleBottom =
+    insets.bottom + tabHeight + (section === "chat" ? composerHeight : 0) + spacing[3];
   const title = section === "none" ? undefined : titles[section] || titles.apps;
   const Screen =
     section === "none"
@@ -471,92 +511,18 @@ function WorkspaceShell({
       <WorkspaceTools />
       <SafeAreaView style={{ flex: 1, backgroundColor: colors.canvas }} edges={["top", "bottom"]}>
         <View style={{ flex: 1, width: "100%", maxWidth: 760, alignSelf: "center" }}>
-          <View
-            style={{
-              height: desktop ? 160 : 136,
-              paddingTop: desktop ? spacing[3] : spacing[0.5],
-              marginHorizontal: screenPadding.phone,
-            }}
-          >
-            <View style={{ position: "absolute", left: 0, top: spacing[4] }}>
-              <IconButton
-                icon={Menu}
-                label="Open conversations and menu"
-                onPress={() => setThreadsOpen(true)}
-              />
-            </View>
-            <View pointerEvents="box-none" style={{ alignItems: "center", gap: spacing[0.5] }}>
-              <Pressable
-                accessibilityRole="button"
-                accessibilityLabel={
-                  talkState.active ? `Open the conversation with ${agentName}` : `Talk to ${agentName}`
-                }
-                onPress={() => {
-                  deboMood.tap();
-                  // A call that is already going (minimised) is just opened again. Otherwise the
-                  // popup opens and starts the call, if this device has already seen the consent text.
-                  if (!talkState.active) requestTalkAutoStart();
-                  navigate("talk");
-                }}
-                style={({ pressed }) => ({
-                  alignItems: "center",
-                  maxWidth: "70%",
-                  opacity: pressed ? 0.65 : 1,
-                })}
-              >
-                {/* While the call bar shows its own face, the header keeps only the name. */}
-                {!talkBarShown && (
-                  <Mascot size={desktop ? avatarSize.lg : avatarSize.md} variant={data?.identity.avatar} />
-                )}
-                <Text
-                  style={{
-                    fontSize: fontSize.lg,
-                    fontWeight: "600",
-                    color: colors.text,
-                    letterSpacing: -0.4,
-                  }}
-                >
-                  {agentName}
-                </Text>
-                <Text
-                  numberOfLines={1}
-                  style={{ fontSize: fontSize.base, color: colors.muted, marginBottom: spacing[1.5] }}
-                >
-                  {status}
-                </Text>
-              </Pressable>
-              {section === "chat" && <ComputerEntry />}
-            </View>
-            <View style={{ position: "absolute", right: 0, top: spacing[4] }}>
-              <IconButton
-                icon={Bell}
-                label={`Notifications, ${pending} unread or pending`}
-                onPress={() => open({ type: "notifications" })}
-              />
-              {pending > 0 && (
-                <View
-                  pointerEvents="none"
-                  style={{
-                    width: spacing[2],
-                    height: spacing[2],
-                    borderRadius: radius.full,
-                    position: "absolute",
-                    top: spacing[2],
-                    right: spacing[2],
-                    backgroundColor: colors.blueDark,
-                  }}
-                />
-              )}
-            </View>
-          </View>
           <View style={{ flex: 1, minHeight: 0 }}>
+            <ChromeContext.Provider value={chrome}>
             {section !== "chat" && (
               <ScrollView
                 key={section}
                 showsVerticalScrollIndicator={false}
                 contentContainerStyle={{
                   paddingHorizontal: desktop ? screenPadding.desktop : screenPadding.phone,
-                  paddingBottom: spacing[8],
+                  // The first line starts below the see-through bar; the rest scrolls under it.
+                  paddingTop: barHeight + spacing[3],
+                  // Room at the end so the floating call bubble never hides the last row.
+                  paddingBottom: talkBarShown ? spacing[12] + spacing[12] : spacing[8],
                 }}
                 keyboardShouldPersistTaps="handled"
               >
@@ -590,6 +556,9 @@ function WorkspaceShell({
                 display: section === "chat" ? "flex" : "none",
                 flex: 1,
                 paddingHorizontal: desktop ? screenPadding.desktop : screenPadding.phone,
+                // When a notice sits above the chat, it starts below the bar. Otherwise the
+                // chat itself scrolls under the bar (it reads `top` from ChromeContext).
+                paddingTop: chatNotice ? barHeight : 0,
               }}
             >
               <AgentStatus />
@@ -599,7 +568,9 @@ function WorkspaceShell({
                   {threadsError ? (
                     <Button onPress={retryThreads}>Retry main chat</Button>
                   ) : threadsLoading ? (
-                    <ActivityIndicator color={colors.blueDark} />
+                    <View style={{ paddingTop: spacing[4] }}>
+                      <Skeleton label="Loading your conversation" variant="chat" rows={4} />
+                    </View>
                   ) : null}
                   {!threadsLoading && selection.id !== mainId && (
                     <ChatTitle id={selection.id} />
@@ -621,8 +592,29 @@ function WorkspaceShell({
                 <ChatScreen prompt={prompt} active={section === "chat"} />
               )}
             </View>
+            </ChromeContext.Provider>
+            <TopBar
+              height={barHeight}
+              name={agentName}
+              status={status}
+              showFace={!talkBarShown}
+              avatar={data?.identity.avatar}
+              callOn={talkState.active}
+              chat={section === "chat"}
+              pending={pending}
+              onMenu={() => setThreadsOpen(true)}
+              onTalk={() => {
+                deboMood.tap();
+                // A call that is already going (minimised) is just opened again. Otherwise the
+                // popup opens and starts the call, if this device has already seen the consent text.
+                if (!talkState.active) requestTalkAutoStart();
+                navigate("talk");
+              }}
+              onBell={() => open({ type: "notifications" })}
+            />
           </View>
           <View
+            onLayout={(event) => setTabHeight(event.nativeEvent.layout.height)}
             style={{
               paddingHorizontal: screenPadding.phone,
               paddingTop: spacing[2],
@@ -713,7 +705,14 @@ function WorkspaceShell({
         {!!toast && (
           <View
             pointerEvents="box-none"
-            style={{ position: "absolute", bottom: talkBarShown ? 160 : 94, left: 20, right: 20, alignItems: "center" }}
+            style={{
+              position: "absolute",
+              bottom: insets.bottom + tabHeight + spacing[3],
+              left: spacing[5],
+              // Leave the floating call bubble's corner free.
+              right: talkBarShown ? spacing[12] + spacing[12] : spacing[5],
+              alignItems: "center",
+            }}
           >
             <View
               style={[
@@ -742,10 +741,12 @@ function WorkspaceShell({
           </View>
         )}
         {threadsOpen && <ThreadsSheet onClose={() => setThreadsOpen(false)} />}
+        {welcomeOpen && <Onboarding />}
         {current === "talk" && <TalkPopup onClose={() => navigate(lastScreen.current)} />}
         {talkBarShown && (
           <TalkPill
-            bottom={desktop ? 104 : 88}
+            bottom={bubbleBottom}
+            right={Math.max(spacing[4], (width - 760) / 2 + spacing[4])}
             onExpand={() => navigate("talk")}
             reviews={waitingReviews.length}
             onReview={() => {

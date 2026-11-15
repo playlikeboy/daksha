@@ -130,6 +130,13 @@ export default function PrivacyPage() {
           data&rdquo; and are deleted with your account.
         </p>
         <p>
+          The app also remembers whether you finished or skipped the short welcome after you first signed in, and
+          when, so your other phones and browsers do not show it again. Nothing you type during the welcome is kept
+          there: a name or first entry is saved where it always is. The voice samples in voice settings are built into
+          the app, so playing one sends nothing anywhere. The welcome record is in &ldquo;Download my data&rdquo; and is
+          deleted with your account.
+        </p>
+        <p>
           In the new app Debo also keeps &ldquo;People in your life&rdquo;: a short card for each person you tell her
           about, with their name, who they are to you, their birthday and other special days, and a few notes in your
           words (for example &ldquo;loves jasmine tea&rdquo;). She saves a card when you mention someone in chat or on a

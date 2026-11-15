@@ -18,15 +18,17 @@ import {
   startConnect,
 } from "./connectors-data";
 import { dropSignInWindow, openSignInPage, reserveSignInWindow } from "./open-connect-link";
-import { Button, Card, Chip, colors, ErrorNotice, fontSize, s, spacing } from "./ui";
+import { Button, Card, Chip, colors, ErrorNotice, fontSize, s, Skeleton, spacing } from "./ui";
 import { useWorkspace } from "./workspace";
 
 const errorText = (e: unknown) => (e instanceof Error ? e.message : String(e));
 const POLL_MS = 3000;
+/** The last list of apps per signed-in session, so coming back to Apps shows it at once. */
+const lastOverview = new WeakMap<object, ConnectorsOverview>();
 
 export function ConnectAppsSection({ query }: { query: string }) {
   const { api, notify } = useWorkspace();
-  const [overview, setOverview] = useState<ConnectorsOverview>();
+  const [overview, setOverview] = useState<ConnectorsOverview | undefined>(() => lastOverview.get(api));
   const [error, setError] = useState("");
   // The rest of the catalogue, a page at a time. `browsing` turns on when the person presses
   // "Show more apps" or types in the search box.
@@ -49,6 +51,7 @@ export function ConnectAppsSection({ query }: { query: string }) {
   const refresh = useCallback(async () => {
     try {
       const next = await loadConnectors(api);
+      lastOverview.set(api, next);
       if (alive.current) {
         setOverview(next);
         setError("");
@@ -173,9 +176,9 @@ export function ConnectAppsSection({ query }: { query: string }) {
 
   if (!overview && !error)
     return (
-      <View style={[s.row, { gap: spacing[3] }]} accessibilityLabel="Loading your apps">
-        <ActivityIndicator size="small" color={colors.blueDark} />
-        <Text style={s.muted}>Loading apps…</Text>
+      <View style={{ gap: spacing[3] }}>
+        <Text style={s.heading}>Connect your apps</Text>
+        <Skeleton label="Loading your apps" variant="apps" rows={4} />
       </View>
     );
   if (overview && !overview.configured)
@@ -196,6 +199,8 @@ export function ConnectAppsSection({ query }: { query: string }) {
   );
   // Apps from the catalogue that the first list does not already show.
   const shown = new Set(curated.map((item) => item.slug));
+  // While new search words load, the last results stay (faded), so the list does not jump.
+  const stale = list && list.key !== key && loadingList ? list : undefined;
   const current = list && list.key === key ? list : undefined;
   const more = (current?.items ?? []).filter((item) => !shown.has(item.slug));
   // Connected apps that are in neither list still deserve a row, so they can be disconnected.
@@ -277,7 +282,16 @@ export function ConnectAppsSection({ query }: { query: string }) {
               ))}
             </View>
           )}
-          {more.map((item) => row(item))}
+          {loadingList && !current && !stale && (
+            <Skeleton label={searching ? "Searching every app" : "Loading apps"} variant="apps" rows={3} />
+          )}
+          {stale ? (
+            <View style={{ gap: spacing[2], opacity: 0.5 }} accessibilityElementsHidden importantForAccessibility="no-hide-descendants">
+              {stale.items.filter((item) => !shown.has(item.slug)).map((item) => row(item))}
+            </View>
+          ) : (
+            more.map((item) => row(item))
+          )}
           {current && !more.length && !loadingList && !listError && (
             <Text style={s.muted}>
               {searching

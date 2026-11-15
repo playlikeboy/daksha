@@ -38,7 +38,7 @@ In the app, About Debo has "Choose who you talk to". The person picks one of fiv
 - Everyone who never chose gets Debo the creature. That includes accounts made before this existed: they had no way to pick, so they have no saved character, and they now see Debo. A name they typed stays as it is.
 - Picking a character offers its name as the assistant's name. If the name is still "Debo" or another character's name, it changes with the pick. If the person typed a name of their own, it is kept and the app asks "Call me Mishti?" with "Use Mishti" and "Keep Nova". The assistant answers to the saved name in chat and voice.
 - Labels use the saved name and the character's own pronoun (`debo-pronouns.ts`): Debo the creature is "they", Diya, Anaya and Mishti are "she". A character missing from that table is "they".
-- The face appears once per screen. Sizes come from `avatarSize` in `ui.tsx` (36, 48, 64, 96); the Talk popup draws it larger to fit the screen. The colour behind it is picked from small swatches, not more faces. While a call is minimised, the call bar shows the face and the header shows only the name.
+- The face appears once per screen. Sizes come from `avatarSize` in `ui.tsx` (36, 48, 64, 96); the Talk popup draws it larger to fit the screen. The colour behind it is picked from small swatches, not more faces. While a call is minimised, the round call bubble at the bottom right shows the face and the top bar shows only the name.
 - Each character's colours live in its own `debo-paint-*.ts` file, and each character's `expresses` table in `debo-characters.ts` says how it shows each mood. A test fails if any character misses a mood.
 - Kabir is a man, so labels about the assistant say "he" and "his" while he is picked ("How he talks and what he knows"), and his voice starts as Blake, the male voice. Every other character is "she". The words come from `pronoun` in `debo-characters.ts`.
 - The brand mascot is still the tomato. The landing page, pitch site, favicon and app icon still use `docs/assets/debo.svg`. The "no human face" rule above is about that brand mascot. Anaya and Kabir are characters the person picks for themselves in the app, and are never used as the brand.
@@ -62,7 +62,7 @@ Rules:
 - Ink on sky, paper, butter and mint all pass WCAG AA for body text. Never put white text on butter, mint or blush.
 - Butter belongs to Debo. Do not use it for buttons, banners or backgrounds.
 - Mint means the person is in control. Do not use it as decoration.
-- No gradients, no glows, no glass effects.
+- No gradients, no glows, no glass effects. One exception in the app: the slim top bar is the page colour, slightly see-through, with a blur behind it on the web, so content can scroll under it without the bar taking space. Nothing else is frosted.
 - Danger actions use ink with clear words ("Delete this memory"), not a red page.
 
 ## Type

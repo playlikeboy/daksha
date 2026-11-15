@@ -1,7 +1,9 @@
 import { ArrowUpRight, Check, ChevronRight, type LucideIcon, RotateCw, X } from "lucide-react-native";
-import { Component, type ReactNode } from "react";
+import { Component, type ReactNode, useEffect, useRef } from "react";
 import {
   ActivityIndicator,
+  Animated,
+  Easing,
   Image,
   Modal,
   Platform,
@@ -28,7 +30,7 @@ import {
 } from "./astryx-tokens";
 import { useAssistantName } from "./debo-character-store";
 import { type CharacterId, characters } from "./debo-characters";
-import { DeboFace } from "./debo-face";
+import { DeboFace, useReducedMotion } from "./debo-face";
 import type { Mood } from "./debo-mood";
 import { colors } from "./palette";
 
@@ -191,10 +193,13 @@ export function IconButton({
   icon: Icon,
   label,
   onPress,
+  quiet,
 }: {
   icon: LucideIcon;
   label: string;
   onPress: () => void;
+  /** No fill until pressed, for buttons on a see-through bar. */
+  quiet?: boolean;
 }) {
   return (
     <Pressable
@@ -208,7 +213,7 @@ export function IconButton({
           alignItems: "center",
           justifyContent: "center",
           borderRadius: radius.full,
-          backgroundColor: pressed ? colors.line : colors.card,
+          backgroundColor: pressed ? colors.line : quiet ? "transparent" : colors.card,
         },
       ]}
     >
@@ -340,24 +345,119 @@ export function ErrorNotice({ error, onRetry }: { error?: string; onRetry?: () =
   ) : null;
 }
 /**
- * Grey blocks in the shape of the cards that are loading, so the screen does not jump
- * when they arrive. They hold still (no shimmer), so reduced motion needs nothing extra.
+ * A slow, soft pulse shared by every grey block in one skeleton, so they breathe together
+ * instead of flickering one by one. With reduce motion on, the blocks hold still.
  */
-export function Skeleton({ label, rows = 2 }: { label: string; rows?: number }) {
-  const bar = (width: `${number}%`, height: number, color: string) => (
-    <View style={{ width, height, borderRadius: radius.inner, backgroundColor: color }} />
+function usePulse() {
+  const reduce = useReducedMotion();
+  const value = useRef(new Animated.Value(1)).current;
+  useEffect(() => {
+    if (reduce) {
+      value.setValue(1);
+      return;
+    }
+    const native = Platform.OS !== "web";
+    const loop = Animated.loop(
+      Animated.sequence([
+        Animated.timing(value, { toValue: 0.45, duration: 800, easing: Easing.inOut(Easing.quad), useNativeDriver: native }),
+        Animated.timing(value, { toValue: 1, duration: 800, easing: Easing.inOut(Easing.quad), useNativeDriver: native }),
+      ]),
+    );
+    loop.start();
+    return () => loop.stop();
+  }, [reduce, value]);
+  return value;
+}
+
+type Bar = (
+  width: `${number}%` | number,
+  height: number,
+  tone?: "strong" | "soft",
+  round?: boolean,
+  corner?: number,
+) => ReactNode;
+
+/** The shapes each kind of list takes while it loads. They match the real rows' sizes. */
+const skeletonShapes: Record<"cards" | "rows" | "chat" | "apps", (bar: Bar, i: number) => ReactNode> = {
+  // A card with a title and two lines of text (journal entries, memories, tasks, settings).
+  cards: (bar) => (
+    <View style={[s.card, { gap: spacing[3] }]}>
+      {bar("40%", spacing[4])}
+      {bar("95%", spacing[3], "soft")}
+      {bar("70%", spacing[3], "soft")}
+    </View>
+  ),
+  // A list row: a small square, a name and a detail line (conversations, people, mail, notifications).
+  rows: (bar, i) => (
+    <View style={[s.row, { gap: spacing[3], minHeight: spacing[11] + spacing[4] }]}>
+      {bar(spacing[11], spacing[11])}
+      <View style={{ flex: 1, gap: spacing[2] }}>
+        {bar(i % 2 ? "45%" : "60%", spacing[4])}
+        {bar(i % 2 ? "75%" : "85%", spacing[3])}
+      </View>
+    </View>
+  ),
+  // Chat bubbles, alternating sides like a real conversation.
+  chat: (bar, i) => (
+    <View style={{ alignItems: i % 2 ? "flex-start" : "flex-end", gap: spacing[2] }}>
+      {bar(i % 2 ? "78%" : "52%", i % 2 ? spacing[12] + spacing[8] : spacing[11], "strong", false, radius.page)}
+    </View>
+  ),
+  // An app row: a round logo, name, a line of text and a button on the right.
+  apps: (bar, i) => (
+    <View style={[s.card, s.row, { gap: spacing[3], padding: spacing[4] }]}>
+      {bar(spacing[11], spacing[11], "soft", true)}
+      <View style={{ flex: 1, gap: spacing[2] }}>
+        {bar(i % 2 ? "35%" : "50%", spacing[4])}
+        {bar("80%", spacing[3], "soft")}
+      </View>
+      {bar(spacing[12] + spacing[8], spacing[11], "soft", true)}
+    </View>
+  ),
+};
+
+/**
+ * Grey blocks in the shape of what is loading, so the screen does not jump when it arrives.
+ * `variant` picks the shape: cards (default), list rows, chat bubbles or app rows. Screen
+ * readers hear one "loading" label, not the blocks.
+ */
+export function Skeleton({
+  label,
+  rows = 2,
+  variant = "cards",
+  heading = variant === "cards",
+}: {
+  label: string;
+  rows?: number;
+  variant?: keyof typeof skeletonShapes;
+  /** A short bar above the list, where a screen's intro line goes. */
+  heading?: boolean;
+}) {
+  const pulse = usePulse();
+  // "soft" bars sit on white cards; "strong" ones also show on the grey page.
+  const bar: Bar = (width, height, tone = "strong", round, corner) => (
+    <View
+      style={{
+        width,
+        height,
+        borderRadius: corner ?? (round ? radius.full : radius.inner),
+        backgroundColor: tone === "strong" ? colors.line : colors.subtle,
+      }}
+    />
   );
   return (
-    <View accessible accessibilityRole="progressbar" accessibilityLabel={label} style={{ gap: screenGap }}>
-      {bar("80%", spacing[4], colors.line)}
+    <Animated.View
+      accessible
+      accessibilityRole="progressbar"
+      accessibilityLabel={label}
+      accessibilityState={{ busy: true }}
+      style={{ gap: variant === "rows" ? spacing[3] : screenGap, opacity: pulse }}
+    >
+      {heading && bar("80%", spacing[4])}
       {Array.from({ length: rows }, (_, i) => (
-        <View key={i} style={[s.card, { gap: spacing[3] }]}>
-          {bar("40%", spacing[4], colors.line)}
-          {bar("95%", spacing[3], colors.subtle)}
-          {bar("70%", spacing[3], colors.subtle)}
-        </View>
+        <View key={i}>{skeletonShapes[variant](bar, i)}</View>
       ))}
-    </View>
+    </Animated.View>
   );
 }
 export function Sheet({

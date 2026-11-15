@@ -14,7 +14,8 @@ import { capital, usePronouns, useTalkSettingsName } from "./debo-pronouns";
 import { Button, Card, colors, ErrorNotice, Field, LinkRow, radius, s, SectionHeading, Sheet, Skeleton, spacing } from "./ui";
 import { OwnKeysSetting } from "./own-keys-ui";
 import { useWorkspace } from "./workspace";
-import { Brain, UserRound } from "lucide-react-native";
+import { Brain, Play, Square, UserRound } from "lucide-react-native";
+import { hasSample, SAMPLE_TEXT, useVoiceSample } from "./voice-samples";
 
 type Voice = { id: string; name: string; description: string; gender: string };
 type Settings = {
@@ -95,6 +96,7 @@ export function TalkSettingsSheet() {
   const [saved, setSaved] = useState("");
   const [error, setError] = useState("");
   const [busy, setBusy] = useState(false);
+  const sample = useVoiceSample();
 
   const load = useCallback(async () => {
     setError("");
@@ -157,39 +159,70 @@ export function TalkSettingsSheet() {
         <Card style={{ gap: spacing[3] }}>
           <SectionHeading title="Voice" />
           <Text style={s.muted}>
-            Pick the voice you hear on calls. It starts on your next call. Samples are not built yet, so the
-            description is the guide.
+            Pick the voice you hear on calls. It starts on your next call. Press play to hear each one say a
+            short hello.
           </Text>
           <View accessibilityRole="radiogroup" accessibilityLabel="Voice" style={{ gap: spacing[2] }}>
             {reply?.voices.map((v) => {
               const picked = voiceId === v.id;
+              const heard = sample.playing === v.id;
               return (
-                <Pressable
+                <View
                   key={v.id}
-                  accessibilityRole="radio"
-                  accessibilityLabel={`${v.name}. ${v.description}`}
-                  accessibilityState={{ checked: picked, disabled: busy }}
-                  disabled={busy}
-                  onPress={() => void save({ voice: v.id }, `${v.name} will speak on your next call.`)}
-                  style={{
-                    padding: spacing[3],
-                    borderRadius: radius.chat,
-                    borderWidth: 1,
-                    borderColor: picked ? colors.blueDark : colors.line,
-                    backgroundColor: picked ? colors.sky : colors.card,
-                    gap: spacing[1],
-                    minHeight: spacing[11],
-                  }}
+                  style={[
+                    s.row,
+                    {
+                      borderRadius: radius.chat,
+                      borderWidth: 1,
+                      borderColor: picked ? colors.blueDark : colors.line,
+                      backgroundColor: picked ? colors.sky : colors.card,
+                      paddingRight: spacing[2],
+                    },
+                  ]}
                 >
-                  <Text style={[s.text, { fontWeight: "600" }]}>
-                    {v.name}
-                    {picked ? " (in use)" : ""}
-                  </Text>
-                  <Text style={s.muted}>{v.description}</Text>
-                </Pressable>
+                  <Pressable
+                    accessibilityRole="radio"
+                    accessibilityLabel={`${v.name}. ${v.description}`}
+                    accessibilityState={{ checked: picked, disabled: busy }}
+                    disabled={busy}
+                    onPress={() => void save({ voice: v.id }, `${v.name} will speak on your next call.`)}
+                    style={{ flex: 1, padding: spacing[3], gap: spacing[1], minHeight: spacing[11] }}
+                  >
+                    <Text style={[s.text, { fontWeight: "600" }]}>
+                      {v.name}
+                      {picked ? " (in use)" : ""}
+                    </Text>
+                    <Text style={s.muted}>{v.description}</Text>
+                  </Pressable>
+                  {hasSample(v.id) && (
+                    <Pressable
+                      accessibilityRole="button"
+                      accessibilityLabel={heard ? `Stop the ${v.name} sample` : `Hear ${v.name} say: ${SAMPLE_TEXT}`}
+                      accessibilityState={{ selected: heard }}
+                      onPress={() => sample.toggle(v.id)}
+                      style={({ pressed }) => ({
+                        width: spacing[11],
+                        height: spacing[11],
+                        borderRadius: radius.full,
+                        alignItems: "center",
+                        justifyContent: "center",
+                        backgroundColor: heard ? colors.accent : pressed ? colors.line : colors.subtle,
+                      })}
+                    >
+                      {heard ? (
+                        <Square size={16} color={colors.onAccent} fill={colors.onAccent} />
+                      ) : (
+                        <Play size={18} color={colors.text} fill={colors.text} />
+                      )}
+                    </Pressable>
+                  )}
+                </View>
               );
             })}
           </View>
+          <Text style={s.small}>
+            Samples are made with the same voices your calls use, at normal speed. They play on this device only.
+          </Text>
           <Choices
             label={`How fast ${p.they} ${p.verb("speak")}`}
             options={SPEEDS.map((o) => ({ id: String(o.value), label: o.label }))}

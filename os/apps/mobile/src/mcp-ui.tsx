@@ -5,7 +5,7 @@
 // is a shortcut for a person's OWN Composio account (not the apps Debo connects for them).
 import { KeyRound, LogIn, Plus, Server, ShieldAlert } from "lucide-react-native";
 import { useCallback, useEffect, useRef, useState } from "react";
-import { ActivityIndicator, AppState, Platform, Text, View } from "react-native";
+import { AppState, Platform, Text, View } from "react-native";
 import {
   addToolServer,
   COMPOSIO_CONNECT_URL,
@@ -21,7 +21,7 @@ import {
   type ToolServer,
 } from "./mcp-data";
 import { dropSignInWindow, openSignInPage, reserveSignInWindow } from "./open-connect-link";
-import { Button, Card, Chip, colors, ErrorNotice, Field, relativeDate, s, spacing } from "./ui";
+import { Button, Card, Chip, colors, ErrorNotice, Field, relativeDate, s, Skeleton, spacing } from "./ui";
 import { useWorkspace } from "./workspace";
 
 const errorText = (e: unknown) => (e instanceof Error ? e.message : String(e));
@@ -175,10 +175,7 @@ export function ToolServersSection() {
       </Text>
       <ErrorNotice error={error} />
       {!servers && !error && (
-        <View style={[s.row, { gap: spacing[3] }]} accessibilityLabel="Loading your tool servers">
-          <ActivityIndicator size="small" color={colors.blueDark} />
-          <Text style={s.muted}>Loading tool servers…</Text>
-        </View>
+        <Skeleton label="Loading your tool servers" variant="apps" rows={1} />
       )}
       {servers?.map((server) => (
         <Card key={server.id} style={{ gap: spacing[3], padding: spacing[4] }}>
