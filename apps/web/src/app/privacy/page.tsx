@@ -306,6 +306,49 @@ export default function PrivacyPage() {
             <>A recording can be up to 200 MB and 60 minutes. You can add up to 4 hours and 40 recordings a day.</>,
           ]}
         />
+        <h3 className="mt-6 font-semibold">Pictures Debo makes</h3>
+        <p>In the new app you can ask Debo to make a picture, in chat or on a call. If pictures are not switched on, Debo says so and none of the below applies.</p>
+        <List
+          items={[
+            <>
+              The words describing the picture go to Cloudflare Workers AI (a picture model called FLUX.1 schnell), which
+              draws it. Cloudflare says it does not use content processed by Workers AI to train AI models. If you set
+              your own OpenRouter picture model (below), the words go to OpenRouter and the model you picked instead.
+            </>,
+            <>
+              The picture is kept in the same private Cloudflare R2 bucket as recordings, and shown to you with a link
+              that stops working after an hour. Debo keeps the words it was made from, when, and which service made it.
+              This is in &ldquo;Download my data&rdquo;.
+            </>,
+            <>
+              Debo refuses sexual pictures and pictures meant to fool people, and the picture service has its own
+              safety filter. You can make up to 20 pictures a day on Debo&rsquo;s service.
+            </>,
+            <>You can delete a picture, which removes the file too. &ldquo;Delete my data&rdquo; removes them all.</>,
+          ]}
+        />
+        <h3 className="mt-6 font-semibold">Using your own AI keys</h3>
+        <p>In the new app&rsquo;s settings, a folded section called &ldquo;Advanced: use your own keys&rdquo; lets you add your own Anthropic or OpenRouter key. Most people never use it. If you don&rsquo;t, none of this applies.</p>
+        <List
+          items={[
+            <>
+              Debo checks a key with one small request to that company before saving it, then stores it encrypted. It is
+              never shown again, never written to our logs and never in &ldquo;Download my data&rdquo;, which only says
+              that a key is set. The screen shows only its last four characters.
+            </>,
+            <>
+              With your own key, what you say in chats and calls, the parts of your entries Debo uses to answer, and
+              picture descriptions go to that company on your account, under its terms and privacy policy, and it bills
+              you. OpenRouter passes your requests on to the model maker you picked. Debo&rsquo;s daily limits do not
+              apply to what runs on your key.
+            </>,
+            <>
+              On calls, your key is used for what Debo says. Hearing you and speaking out loud still go through
+              Debo&rsquo;s voice service, as described above.
+            </>,
+            <>Removing a key deletes it. &ldquo;Delete my data&rdquo; deletes every key.</>,
+          ]}
+        />
       </Section>
 
       <Section id="connected-apps" title="Connecting your apps (new app, optional)">

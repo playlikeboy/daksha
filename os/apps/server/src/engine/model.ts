@@ -418,9 +418,12 @@ export async function executeModelTask(
   const memories = await service.db.list<{ text: string; source: string }>(owner, "memories");
   // The abort listener below cannot fire for an already-aborted signal. A task
   // paused or cancelled during these reads must not start a model run.
+  // The person's own AI key, if they set one: the task runs on it, like their chats.
+  const ownModel = await service.ownKeys?.chatChoice(owner, config.model).catch(() => undefined);
   ctx.signal.throwIfAborted();
   const agent = tanstackAgent({
-    model: config.model,
+    model: ownModel?.spec ?? config.model,
+    apiKey: ownModel?.apiKey,
     maxSteps: 16,
     tools,
     shouldContinue: () => outcome === undefined,

@@ -34,6 +34,8 @@ import { backgroundFailure } from "../log.ts";
 import { SearchService } from "../search.ts";
 import type { ConnectorService } from "../connectors/service.ts";
 import type { McpService } from "../mcp/service.ts";
+import type { ImageService } from "../images/service.ts";
+import type { OwnKeysService } from "../own-keys/service.ts";
 import type { DeboService } from "../debo/service.ts";
 import type { WorkspaceService } from "../workspace.ts";
 import { analyzeSpending } from "./finance.ts";
@@ -59,6 +61,10 @@ export class AgentService {
   connectors?: ConnectorService;
   /** The person's own tool servers (MCP). */
   mcp?: McpService;
+  /** The person's own AI keys. With one set, their chats and tasks run on it. */
+  ownKeys?: OwnKeysService;
+  /** Pictures Debo makes (make_image). */
+  images?: ImageService;
   readonly worker: TaskWorker;
   readonly search: SearchService;
   private maintenance?: ReturnType<typeof setInterval>;
