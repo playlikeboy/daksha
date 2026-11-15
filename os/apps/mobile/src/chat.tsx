@@ -10,6 +10,7 @@ import {
 import { ArrowDown, ArrowUp, FileText, Mic, RotateCcw, Square, X } from "lucide-react-native";
 import { useCallback, useEffect, useRef, useState, useSyncExternalStore } from "react";
 import {
+  ActivityIndicator,
   Keyboard,
   KeyboardAvoidingView,
   Platform,
@@ -39,6 +40,7 @@ import {
 import { DesktopToolCard } from "./desktop-tool-card";
 import { confirmedJevSelection, displayJevUserMessage, latestJevPanelId } from "./jev-actions";
 import { JevInteractionContext, JevToolCard } from "./jev-tool-card";
+import { listState } from "./loading-state";
 import { MailToolCard } from "./mail-tool-card";
 import { useChatMood } from "./debo-mood-hooks";
 import { deboMood } from "./debo-mood-store";
@@ -553,7 +555,14 @@ export function ChatScreen({
             </Button>
           </>
         )}
-        {!visible.length ? (
+        {listState(loaded, visible.length) === "loading" && !historyError && (
+          <ActivityIndicator
+            accessibilityLabel="Loading conversation"
+            color={colors.blueDark}
+            style={{ flexGrow: 1 }}
+          />
+        )}
+        {listState(loaded, visible.length) === "empty" ? (
           <View
             style={{
               flexGrow: 1,
