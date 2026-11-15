@@ -47,6 +47,8 @@ test("an old record with only some fields is still valid and gives defaults", ()
   assert.deepEqual(voiceFor(null), { voice: CHARACTER_VOICES.debo, speed: 1 });
   assert.deepEqual(voiceFor({ voice: "gone-voice", speed: 9 }, "diya"), { voice: CHARACTER_VOICES.diya, speed: 1.3 });
   assert.equal(voiceFor({ voice: VOICES[3].id }, "debo").voice, VOICES[3].id);
+  // Kabir, the young man, starts with Blake, the male voice.
+  assert.equal(voiceFor(null, "kabir").voice, VOICES.find((v) => v.name === "Blake")?.id);
 });
 
 test("style settings change the prompt, and tone is used too", () => {

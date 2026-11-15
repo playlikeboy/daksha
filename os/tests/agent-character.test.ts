@@ -61,11 +61,11 @@ test("the chosen character is saved with the identity, and old records stay vali
   assert.equal(saved.name, "Anaya");
   assert.equal(saved.avatar, "sand");
 
-  for (const character of ["debo", "diya", "mishti"])
+  for (const character of ["debo", "diya", "kabir", "mishti"])
     await read("/identity", { name: "Debo", tone: "warm", character });
   assert.equal((await read<AgentWorkspace>("")).identity.character, "mishti");
 
-  // Anything that is not one of the four is refused and changes nothing.
+  // Anything that is not one of the five is refused and changes nothing.
   for (const character of ["tomato", "", 3, null])
     assert.equal((await request("/identity", { name: "Debo", tone: "warm", character })).status, 422);
   assert.equal((await read<AgentWorkspace>("")).identity.character, "mishti");

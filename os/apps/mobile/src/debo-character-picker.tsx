@@ -1,4 +1,4 @@
-// "Choose who you talk to": the four characters, live, with their names.
+// "Choose who you talk to": the five characters, live, with their names.
 // Picking one is a single tap. The parent saves it and every face in the app follows.
 import { Pressable, Text, View } from "react-native";
 import { type CharacterId, characterIds, characters } from "./debo-characters";

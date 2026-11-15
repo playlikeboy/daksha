@@ -1,4 +1,4 @@
-// The face of whoever the person talks to: Debo, Diya, Anaya or Mishti.
+// The face of whoever the person talks to: Debo, Diya, Anaya, Mishti or Kabir.
 //
 // This is the one component every screen uses. It reads the chosen character
 // (debo-character-store.ts) and the shared mood (debo-mood-store.ts), runs the shared
@@ -12,6 +12,7 @@ import { Platform, Pressable, View } from "react-native";
 import { AnayaArt } from "./debo-art-anaya";
 import { DeboArt } from "./debo-art-debo";
 import { DiyaArt } from "./debo-art-diya";
+import { KabirArt } from "./debo-art-kabir";
 import { MishtiArt } from "./debo-art-mishti";
 import { useDeboCharacter } from "./debo-character-store";
 import type { CharacterId } from "./debo-characters";
@@ -26,6 +27,7 @@ const arts: Record<CharacterId, (props: ArtProps) => React.ReactNode> = {
   diya: DiyaArt,
   anaya: AnayaArt,
   mishti: MishtiArt,
+  kabir: KabirArt,
 };
 
 export interface DeboFaceProps {

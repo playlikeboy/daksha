@@ -10,14 +10,15 @@ import {
   isCharacterId,
   missingMoods,
   poseFor,
+  pronounsFor,
   suggestedName,
 } from "../src/debo-characters.ts";
 import { basePose } from "../src/debo-face-poses.ts";
 import { allMoods } from "../src/debo-mood.ts";
 
-test("the app and the shared domain package know the same four characters", () => {
+test("the app and the shared domain package know the same five characters", () => {
   assert.deepEqual([...characterIds].sort(), [...agentCharacters].sort());
-  assert.equal(characterIds.length, 4);
+  assert.equal(characterIds.length, 5);
   assert.equal(defaultCharacter, "debo");
 });
 
@@ -39,9 +40,16 @@ test("every character defines every mood", () => {
 
 test("characters have different names, and none clashes with the sample people", () => {
   const names = characterIds.map((id) => characters[id].name);
-  assert.deepEqual(names, ["Debo", "Diya", "Anaya", "Mishti"]);
+  assert.deepEqual(names, ["Debo", "Diya", "Anaya", "Mishti", "Kabir"]);
   assert.equal(new Set(names).size, names.length);
   for (const taken of ["Neha", "Aarav", "Meera"]) assert.ok(!names.includes(taken));
+});
+
+test("labels say he for Kabir and she for everyone else", () => {
+  assert.equal(pronounsFor("kabir").subject, "he");
+  assert.equal(pronounsFor("kabir").Possessive, "His");
+  assert.equal(pronounsFor("kabir").object, "him");
+  for (const id of characterIds.filter((id) => id !== "kabir")) assert.equal(pronounsFor(id).subject, "she");
 });
 
 test("a missing or unknown character means the default, so old accounts get Debo", () => {

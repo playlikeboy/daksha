@@ -116,7 +116,7 @@ export interface AgentNotification {
   read: boolean;
 }
 /** The characters a person can talk to. The drawings live in apps/mobile (debo-characters.ts). */
-export const agentCharacters = ["debo", "diya", "anaya", "mishti"] as const;
+export const agentCharacters = ["debo", "diya", "anaya", "mishti", "kabir"] as const;
 export type AgentCharacter = (typeof agentCharacters)[number];
 export interface AgentIdentity {
   name: string;

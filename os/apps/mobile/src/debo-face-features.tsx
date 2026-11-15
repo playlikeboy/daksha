@@ -4,7 +4,7 @@
 // A character does not redraw these. It hands over a `FeatureSpec`: where its eyes and
 // mouth sit, what an open eye looks like, how big the mouth is, and its own extras.
 // This file turns that into animated layers driven by the rig's numbers, so a mood
-// looks the same in spirit on all four characters and only the style differs.
+// looks the same in spirit on every character and only the style differs.
 import type { ReactNode } from "react";
 import { Animated } from "react-native";
 import { Ellipse, Path } from "react-native-svg";

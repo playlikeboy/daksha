@@ -22,6 +22,7 @@ const exemptFiles: Record<string, string> = {
   "debo-paint-debo.ts": "the paint of Debo, the soft blue creature. A character, not UI",
   "debo-paint-anaya.ts": "the paint of Anaya, the young woman. A character, not UI",
   "debo-paint-mishti.ts": "the paint of Mishti, the cat. A character, not UI",
+  "debo-paint-kabir.ts": "the paint of Kabir, the young man. A character, not UI",
 };
 
 const files = [

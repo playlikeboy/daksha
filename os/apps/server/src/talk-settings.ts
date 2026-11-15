@@ -51,6 +51,8 @@ export const CHARACTER_VOICES: Record<AgentCharacter, string> = {
   diya: VOICES[1].id,
   anaya: VOICES[2].id,
   mishti: VOICES[0].id,
+  // A young man, so the one male voice LiveKit Inference lists.
+  kabir: VOICES[3].id,
 };
 
 export const talkSettingsInput = z.object({
