@@ -10,6 +10,11 @@
 #            needs the owner's paid Apple Developer account (see os/apps/mobile/README.md).
 #
 # When it runs:
+#   a push to main that changes the phone app (os/apps/mobile, os/packages, the lockfile
+#                           or this file): build both, then publish a new release tagged
+#                           v<version>-build.<run number>, so /releases/latest always holds
+#                           the newest APK. The run number plus one is the Android versionCode,
+#                           so each build installs over the one before.
 #   a pushed tag v*         build both, then publish a GitHub Release with the files
 #   workflow_dispatch       build both, keep them as run artifacts, no release
 #   push to mobile-release  same as workflow_dispatch (a place to test this file)
@@ -28,7 +33,13 @@ name: Release mobile
 on:
   push:
     tags: ["v*"]
-    branches: [mobile-release]
+    branches: [main, mobile-release]
+    paths:
+      - "os/apps/mobile/**"
+      - "os/packages/**"
+      - "os/pnpm-lock.yaml"
+      - ".github/workflows/release-mobile.yml"
+      - ".github/release-mobile-notes.md"
   workflow_dispatch:
 
 concurrency:
@@ -48,6 +59,7 @@ jobs:
     timeout-minutes: 60
     outputs:
       version: ${{ steps.version.outputs.version }}
+      tag: ${{ steps.version.outputs.tag }}
     env:
       ANDROID_KEYSTORE_BASE64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
       ANDROID_KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
@@ -74,12 +86,27 @@ jobs:
         run: |
           version=$(node -p "require('./os/apps/mobile/app.json').expo.version")
           echo "version=$version" >> "$GITHUB_OUTPUT"
+          if [ "${GITHUB_REF_TYPE}" = "tag" ]; then
+            echo "tag=${GITHUB_REF_NAME}" >> "$GITHUB_OUTPUT"
+          else
+            echo "tag=v$version-build.${GITHUB_RUN_NUMBER}" >> "$GITHUB_OUTPUT"
+          fi
           if [ "${GITHUB_REF_TYPE}" = "tag" ] && [ "${GITHUB_REF_NAME}" != "v$version" ]; then
             echo "::warning::Tag ${GITHUB_REF_NAME} does not match the app version $version in os/apps/mobile/app.json. The files are named after the app version."
           fi
 
       - name: Install
         run: pnpm --dir os install --frozen-lockfile
+
+      - name: Give this build its own Android version code
+        working-directory: os/apps/mobile
+        run: |
+          node -e '
+            const fs = require("fs");
+            const app = JSON.parse(fs.readFileSync("app.json", "utf8"));
+            app.expo.android.versionCode = Number(process.env.GITHUB_RUN_NUMBER) + 1;
+            fs.writeFileSync("app.json", JSON.stringify(app, null, 2));
+          '
 
       - name: Make the Android project
         working-directory: os/apps/mobile
@@ -165,8 +192,8 @@ jobs:
           if-no-files-found: error
 
   release:
-    # Only on a version tag. The simulator build is optional: a failure there does not stop the Android release.
-    if: ${{ !cancelled() && startsWith(github.ref, 'refs/tags/v') && needs.android.result == 'success' }}
+    # On a version tag or a push to main. The simulator build is optional: a failure there does not stop the Android release.
+    if: ${{ !cancelled() && (startsWith(github.ref, 'refs/tags/v') || github.ref == 'refs/heads/main') && needs.android.result == 'success' }}
     needs: [android, ios-simulator]
     runs-on: ubuntu-latest
     permissions:
@@ -184,13 +211,20 @@ jobs:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           GH_REPO: ${{ github.repository }}
           VERSION: ${{ needs.android.outputs.version }}
+          TAG: ${{ needs.android.outputs.tag }}
         run: |
           ls -l files
           sed "s/__VERSION__/$VERSION/g" .github/release-mobile-notes.md > notes.md
+          echo "" >> notes.md
+          echo "Built from commit ${GITHUB_SHA::7}." >> notes.md
           files=(files/*)
-          if gh release view "$GITHUB_REF_NAME" >/dev/null 2>&1; then
-            gh release upload "$GITHUB_REF_NAME" "${files[@]}" --clobber
-          else
-            gh release create "$GITHUB_REF_NAME" "${files[@]}" \
+          if gh release view "$TAG" >/dev/null 2>&1; then
+            gh release upload "$TAG" "${files[@]}" --clobber
+          elif [ "${GITHUB_REF_TYPE}" = "tag" ]; then
+            gh release create "$TAG" "${files[@]}" \
               --title "Debo $VERSION (early test build)" --notes-file notes.md --verify-tag
+          else
+            # A tag made here with the workflow token does not start this workflow again.
+            gh release create "$TAG" "${files[@]}" --target "$GITHUB_SHA" --latest \
+              --title "Debo $VERSION, build ${GITHUB_RUN_NUMBER} (early test build)" --notes-file notes.md
           fi

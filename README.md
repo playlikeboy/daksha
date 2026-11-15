@@ -12,6 +12,18 @@
   <a href="./docs/ROADMAP.md">Roadmap</a>
 </p>
 
+## Watch the launch film
+
+<p align="center">
+  <a href="https://about.debo.life/debo-launch.mp4">
+    <img src="https://about.debo.life/debo-launch-poster.webp" alt="Play the Debo launch film, about a minute long" width="100%">
+  </a>
+</p>
+
+<p align="center"><a href="https://about.debo.life/debo-launch.mp4">Play the launch film (about a minute)</a> · <a href="https://about.debo.life/debo-demo.mp4">the full app walkthrough</a></p>
+
+Both are made from screen recordings of the live app with a demo account. All names and entries in them are made-up sample text.
+
 ## What Debo is
 
 Debo keeps the bits of your life in one place: your journal, your voice notes and videos, and later your papers and photos. You ask it about your own life in plain words, by text or by voice, like "When did Riya move to Pune?" or "What did the doctor say in March?".
@@ -29,7 +41,7 @@ Debo is early. Do not treat any feature as finished until you have checked it in
 | The API the app talks to | https://api.debo.life |
 | Investor site | https://pitch.debo.life |
 | Privacy page | https://debo.life/privacy |
-| Android app (early test build) | [GitHub Releases](https://github.com/playlikeboy/debo.life/releases/latest), file `debo.apk` |
+| Android app (early test build) | [GitHub Releases](https://github.com/playlikeboy/debo.life/releases/latest), file `debo.apk`. A new build is published each time the phone app changes on `main`. |
 
 There is no iPhone app yet. On an iPhone, use https://my.debo.life in Safari and choose Share, then Add to Home Screen.
 
@@ -112,7 +124,7 @@ Every deploy is a GitHub Actions workflow in [`.github/workflows`](./.github/wor
 | `deploy-site.yml` | push to `main` that touches `apps/site` | the landing page, about.debo.life |
 | `deploy-pitch.yml` | push to `main` that touches `apps/pitch` | pitch.debo.life |
 | `deploy-os.yml` | push to `main` that touches `os/` or `packages/` | the API (api.debo.life), the browser worker and the web app (my.debo.life) on Cloudflare |
-| `release-mobile.yml` | a pushed tag `v*` (builds only on a manual run or on the `mobile-release` branch) | builds the phone apps and publishes a GitHub Release |
+| `release-mobile.yml` | a push to `main` that changes the phone app, or a pushed tag `v*` (builds only on a manual run or on the `mobile-release` branch) | builds the phone apps and publishes a GitHub Release |
 
 The voice worker is deployed by hand with `lk agent deploy` from `apps/voice-agent`.
 
@@ -123,7 +135,7 @@ The phone app is the same Expo app as my.debo.life, built as a real native app (
 - **Android:** each release has `debo.apk`. It is an early test build, signed with a debug key, installed by hand. It is not on Google Play and cannot be until the owner makes a proper upload key. Nobody has run it on a real phone yet.
 - **iPhone:** no installable app. A release may carry an unsigned build for the iOS Simulator on a Mac, for developers only. A real iPhone build needs a paid Apple Developer account.
 
-How to build, what the workflow does and what is needed for the stores: [`os/apps/mobile/README.md`](./os/apps/mobile/README.md). To publish a release, put the version in `os/apps/mobile/app.json`, merge to `main`, then push a tag such as `v0.1.0`.
+How to build, what the workflow does and what is needed for the stores: [`os/apps/mobile/README.md`](./os/apps/mobile/README.md). Every push to `main` that changes the phone app publishes a new build as `v<version>-build.<run number>`. For a named version, put the version in `os/apps/mobile/app.json`, merge to `main`, then push a tag such as `v0.2.0`.
 
 ## Who sees your data
 

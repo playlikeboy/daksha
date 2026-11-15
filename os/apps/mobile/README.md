@@ -51,7 +51,9 @@ The workflow [`.github/workflows/release-mobile.yml`](../../../.github/workflows
 | Push of a tag `v*` | Builds Android and the iOS Simulator app, then publishes a GitHub Release with the files |
 | Manual run, or a push to the `mobile-release` branch | Builds both and keeps them as run artifacts. No release. |
 
-**To release:** set the version in `app.json` (`expo.version`), merge to `main`, then push a tag with the same number, for example `git tag v0.1.0 && git push origin v0.1.0`. The release is a normal release, not a pre-release, on purpose: the landing page links to `https://github.com/playlikeboy/debo.life/releases/latest/download/debo.apk`, and GitHub's `latest` address skips pre-releases. The notes come from [`.github/release-mobile-notes.md`](../../../.github/release-mobile-notes.md).
+**Automatic builds:** every push to `main` that changes `os/apps/mobile`, `os/packages`, `os/pnpm-lock.yaml` or the workflow builds both apps and publishes a release tagged `v<version>-build.<run number>`, marked as the latest, so the download link always gives the newest APK. Its Android `versionCode` is the run number plus one, so a newer build installs over an older one (as long as both are signed with the same key).
+
+**To release a named version:** set the version in `app.json` (`expo.version`), merge to `main`, then push a tag with the same number, for example `git tag v0.1.0 && git push origin v0.1.0`. The release is a normal release, not a pre-release, on purpose: the landing page links to `https://github.com/playlikeboy/debo.life/releases/latest/download/debo.apk`, and GitHub's `latest` address skips pre-releases. The notes come from [`.github/release-mobile-notes.md`](../../../.github/release-mobile-notes.md).
 
 ### Android
 
