@@ -3,6 +3,8 @@
 import { useCallback, useEffect, useState } from "react";
 import { Text, View } from "react-native";
 import { errorText } from "./debo-api";
+import { useAssistantName } from "./debo-character-store";
+import { capital, usePronouns } from "./debo-pronouns";
 import { Button, Card, ErrorNotice, Field, s, spacing } from "./ui";
 import { useWorkspace } from "./workspace";
 
@@ -10,6 +12,8 @@ type Persona = { role: string; notes: string } | null;
 
 export function PersonaSetting() {
   const { api } = useWorkspace();
+  const name = useAssistantName();
+  const p = usePronouns();
   const [persona, setPersona] = useState<Persona>(null);
   const [role, setRole] = useState("");
   const [busy, setBusy] = useState(false);
@@ -42,11 +46,11 @@ export function PersonaSetting() {
 
   return (
     <Card style={{ marginTop: spacing[5], gap: spacing[3] }}>
-      <Text style={s.heading}>A role for Debo</Text>
+      <Text style={s.heading}>A role for {name}</Text>
       <Text style={s.muted} accessibilityLiveRegion="polite">
         {persona
-          ? `Debo is playing: ${persona.role}. She stays in this role in chat and on calls until you stop it.`
-          : "Debo is being herself. You can ask her to act as someone, like a friend or a study buddy, in chat or on a call. Or set a role here."}
+          ? `${name} is playing: ${persona.role}. ${capital(p.they)} ${p.verb("stay")} in this role in chat and on calls until you stop it.`
+          : `${name} is being ${p.themself}. You can ask ${p.them} to act as someone, like a friend or a study buddy, in chat or on a call. Or set a role here.`}
       </Text>
       <ErrorNotice error={error} />
       {persona && (
