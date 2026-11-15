@@ -4,7 +4,6 @@ import {
   ArrowDownToLine,
   ArrowUpRight,
   CalendarDays,
-  Check,
   CheckCheck,
   ChevronLeft,
   ChevronRight,
@@ -17,7 +16,6 @@ import {
   Plus,
   Search,
   ShieldCheck,
-  Sparkles,
   Upload,
 } from "lucide-react-native";
 import { useEffect, useState } from "react";
@@ -29,7 +27,6 @@ import {
   Pressable,
   Text,
   TextInput,
-  useWindowDimensions,
   View,
 } from "react-native";
 import type {
@@ -52,12 +49,13 @@ import {
   fontSize,
   IconButton,
   LinkRow,
-  Mascot,
   radius,
   relativeDate,
   resultSummary,
   s,
+  screenGap,
   SectionHeading,
+  Segmented,
   Sheet,
   timeLabel,
 } from "./ui";
@@ -69,351 +67,6 @@ function todayDate() {
 }
 function eventDate(event: CalendarEvent) {
   return event.allDay ? event.start : localDateTime(event.start, event.timeZone).date;
-}
-export function TodayScreen() {
-  const { workspace: w, navigate, open, ask } = useWorkspace();
-  const linked = useGoogleLinked();
-  const wide = useWindowDimensions().width > 1180;
-  const pending = w.actions.filter((a) => a.status === "awaiting_review");
-  const unread = w.mail.filter((m) => m.unread);
-  const today = todayDate();
-  const events = w.events
-    .filter((e) => eventDate(e) === today)
-    .sort((a, b) => a.start.localeCompare(b.start));
-  return (
-    <View style={{ gap: 25 }}>
-      <View
-        style={[
-          {
-            backgroundColor: colors.blue,
-            borderRadius: radius.page,
-            padding: 32,
-            minHeight: 228,
-            overflow: "hidden",
-          },
-          s.row,
-        ]}
-      >
-        <View style={{ flex: 1, gap: 15, zIndex: 1 }}>
-          <View style={[s.row, { gap: 7 }]}>
-            <Sparkles size={13} color={colors.blueDark} />
-            <Text style={[s.label, { color: colors.blueText }]}>A little clarity, every day</Text>
-          </View>
-          <Text
-            style={{
-              fontSize: wide ? fontSize["4xl"] : fontSize["2xl"],
-              lineHeight: wide ? 45 : 36,
-              letterSpacing: -1.7,
-              fontWeight: "500",
-              color: colors.text,
-            }}
-          >
-            Your day, with a little{"\n"}more room to breathe.
-          </Text>
-          <Text style={[s.muted, { maxWidth: 420, color: colors.muted }]}>
-            {events.length ? `${events.length} things on your calendar` : "Your calendar has room"}
-            {unread.length ? `, ${unread.length} unread emails` : ""}.{"\n"}Let’s make space for
-            what matters.
-          </Text>
-          <Button
-            onPress={() => ask("Help me plan my day")}
-            icon={Sparkles}
-            primary
-            style={{ alignSelf: "flex-start", marginTop: 5 }}
-          >
-            Plan my day
-          </Button>
-        </View>
-        {wide && (
-          <View style={{ width: 220, height: 210, alignItems: "center", justifyContent: "center" }}>
-            <View
-              style={{
-                position: "absolute",
-                width: 190,
-                height: 190,
-                borderRadius: radius.full,
-                backgroundColor: colors.blue,
-              }}
-            />
-            <View
-              style={{
-                position: "absolute",
-                width: 145,
-                height: 145,
-                borderRadius: radius.full,
-                borderWidth: 1,
-                borderColor: colors.line,
-              }}
-            />
-            <Mascot size={94} />
-            <View
-              style={[
-                s.row,
-                {
-                  position: "absolute",
-                  top: 17,
-                  left: -19,
-                  padding: 11,
-                  gap: 7,
-                  backgroundColor: colors.card,
-                  borderRadius: radius.container,
-                  transform: [{ rotate: "-7deg" }],
-                },
-              ]}
-            >
-              <Check size={14} color={colors.success} />
-              <Text style={s.small}>A lighter day</Text>
-            </View>
-            <View
-              style={[
-                s.row,
-                {
-                  position: "absolute",
-                  bottom: 18,
-                  right: -8,
-                  padding: 12,
-                  gap: 8,
-                  backgroundColor: colors.card,
-                  borderRadius: radius.container,
-                  transform: [{ rotate: "5deg" }],
-                },
-              ]}
-            >
-              <CalendarDays size={17} color={colors.blueDark} />
-              <Text style={s.small}>Everything, together</Text>
-            </View>
-          </View>
-        )}
-      </View>
-      <View style={{ flexDirection: "row", gap: 13, flexWrap: "wrap" }}>
-        {[
-          {
-            label: "UNREAD EMAILS",
-            value: unread.length,
-            note: "A fresh look at your inbox",
-            icon: Mail,
-            section: "mail" as const,
-            tint: colors.sky,
-          },
-          {
-            label: "ON THE CALENDAR",
-            value: events.length,
-            note: "Make room for your priorities",
-            icon: CalendarDays,
-            section: "calendar" as const,
-            tint: colors.green,
-          },
-          {
-            label: "WAITING FOR YOU",
-            value: pending.length,
-            note: "Your review keeps things moving",
-            icon: ShieldCheck,
-            section: "activity" as const,
-            tint: colors.lavender,
-          },
-        ].map((item) => (
-          <Pressable
-            key={item.label}
-            accessibilityRole="button"
-            onPress={() => navigate(item.section)}
-            style={{ flex: 1, minWidth: 180 }}
-          >
-            <Card style={{ padding: 21, height: 126 }}>
-              <View style={s.between}>
-                <Text style={[s.label, { fontSize: fontSize.sm, letterSpacing: 1 }]}>
-                  {item.label}
-                </Text>
-                <View
-                  style={[
-                    s.iconBox,
-                    {
-                      width: 31,
-                      height: 31,
-                      borderRadius: radius.element,
-                      backgroundColor: item.tint,
-                    },
-                  ]}
-                >
-                  <item.icon size={15} color={colors.text} />
-                </View>
-              </View>
-              <Text
-                style={{
-                  fontSize: fontSize["2xl"],
-                  color: colors.text,
-                  letterSpacing: -1,
-                  marginTop: -2,
-                }}
-              >
-                {String(item.value).padStart(2, "0")}
-              </Text>
-              <Text style={[s.small, { fontSize: fontSize.sm, marginTop: 3 }]}>{item.note}</Text>
-            </Card>
-          </Pressable>
-        ))}
-      </View>
-      <View style={{ flexDirection: wide ? "row" : "column", gap: 22 }}>
-        <Card style={{ flex: 1 }}>
-          <SectionHeading
-            title="On your calendar"
-            action="Full calendar"
-            onPress={() => navigate("calendar")}
-          />
-          {events.length ? (
-            events.slice(0, 3).map((e, i) => <AgendaRow key={e.id} event={e} index={i} />)
-          ) : linked ? (
-            <Empty
-              icon={CalendarDays}
-              title="Nothing on your calendar today"
-              detail="You have no events today."
-            />
-          ) : (
-            <CalendarInApps />
-          )}
-          {linked && (
-          <Pressable
-            onPress={() => open({ type: "event" })}
-            style={[
-              s.row,
-              {
-                gap: 8,
-                paddingTop: 15,
-                marginTop: 9,
-                borderTopWidth: 1,
-                borderTopColor: colors.line,
-              },
-            ]}
-          >
-            <Plus size={15} color={colors.muted} />
-            <Text style={s.small}>Make time for something</Text>
-          </Pressable>
-          )}
-        </Card>
-        <Card style={{ flex: 1 }}>
-          <SectionHeading
-            title="From your inbox"
-            action="Open mail"
-            onPress={() => navigate("mail")}
-          />
-          {w.mail.length ? (
-            w.mail.slice(0, 3).map((m, i) => (
-              <Pressable
-                key={m.id}
-                onPress={() => open({ type: "mail", mail: m })}
-                style={[
-                  s.row,
-                  {
-                    gap: 12,
-                    paddingVertical: 13,
-                    borderTopWidth: i ? 1 : 0,
-                    borderTopColor: colors.line,
-                  },
-                ]}
-              >
-                <Avatar name={m.sender} index={i} />
-                <View style={{ flex: 1, gap: 3 }}>
-                  <View style={s.between}>
-                    <Text style={[s.text, { fontSize: fontSize.supporting, fontWeight: "600" }]}>
-                      {m.sender}
-                    </Text>
-                    <Text style={[s.small, { fontSize: fontSize.sm }]}>{timeLabel(m.date)}</Text>
-                  </View>
-                  <Text
-                    numberOfLines={1}
-                    style={[s.text, { fontSize: fontSize.supporting, lineHeight: 18 }]}
-                  >
-                    {m.subject}
-                  </Text>
-                  <Text numberOfLines={1} style={[s.small, { fontSize: fontSize.sm }]}>
-                    {m.body.replace(/\n/g, " ")}
-                  </Text>
-                </View>
-                {m.unread && (
-                  <View
-                    style={{
-                      width: 5,
-                      height: 5,
-                      borderRadius: radius.inner,
-                      backgroundColor: colors.blueDark,
-                    }}
-                  />
-                )}
-              </Pressable>
-            ))
-          ) : (
-            <Empty
-              icon={Inbox}
-              title="Inbox is quiet"
-              detail="Connect Gmail in Apps, then ask Debo about your inbox in chat."
-            />
-          )}
-        </Card>
-      </View>
-      <View style={{ flexDirection: wide ? "row" : "column", gap: 22 }}>
-        <Card style={{ flex: 1, backgroundColor: colors.subtle }}>
-          <SectionHeading title="A hand with the little things" />
-          <Text style={[s.muted, { marginBottom: 15 }]}>
-            Start with a thought. We’ll take it from there.
-          </Text>
-          {[
-            "What needs my attention today?",
-            "Help me catch up on my inbox",
-            "Show my recent documents",
-          ].map((prompt) => (
-            <Pressable
-              key={prompt}
-              onPress={() => ask(prompt)}
-              style={[
-                s.between,
-                { borderTopWidth: 1, borderTopColor: colors.line, paddingVertical: 13 },
-              ]}
-            >
-              <Text style={[s.text, { fontSize: fontSize.supporting }]}>{prompt}</Text>
-              <ArrowUpRight size={15} color={colors.muted} />
-            </Pressable>
-          ))}
-        </Card>
-        <Card style={{ flex: 1 }}>
-          <SectionHeading
-            title={pending.length ? "Ready for your review" : "Recent activity"}
-            action="View all"
-            onPress={() => navigate("activity")}
-          />
-          {pending.length
-            ? pending
-                .slice(0, 3)
-                .map((a) => (
-                  <LinkRow
-                    key={a.id}
-                    title={a.title}
-                    detail="Prepared · waiting for your approval"
-                    onPress={() => open({ type: "review", action: a })}
-                    icon={ShieldCheck}
-                    tint={colors.lavender}
-                  />
-                ))
-            : w.activity.slice(0, 3).map((a) => (
-                <View key={a.id} style={[s.row, { gap: 13, paddingVertical: 12 }]}>
-                  <View
-                    style={[s.iconBox, { width: 32, height: 32, backgroundColor: colors.green }]}
-                  >
-                    <Check size={14} color={colors.text} />
-                  </View>
-                  <View style={{ flex: 1 }}>
-                    <Text style={[s.text, { fontSize: fontSize.supporting }]}>{a.title}</Text>
-                    <Text style={s.small}>{relativeDate(a.date)}</Text>
-                  </View>
-                </View>
-              ))}
-          {!pending.length && !w.activity.length && (
-            <Text style={s.muted}>
-              Your workspace is ready. Things you do here will appear in your activity.
-            </Text>
-          )}
-        </Card>
-      </View>
-    </View>
-  );
 }
 function Avatar({ name, index = 0 }: { name: string; index?: number }) {
   return (
@@ -1151,15 +804,16 @@ export function ActivityScreen() {
   const pending = w.actions.filter((a) => a.status === "awaiting_review");
   const actions = w.actions.filter((a) => filter === "all" || a.status === "awaiting_review");
   return (
-    <View style={{ gap: 20 }}>
-      <View style={[s.row, { gap: 10 }]}>
-        <Button small primary={filter === "all"} onPress={() => setFilter("all")}>
-          All activity
-        </Button>
-        <Button small primary={filter === "review"} onPress={() => setFilter("review")}>
-          Needs review · {pending.length}
-        </Button>
-      </View>
+    <View style={{ gap: screenGap }}>
+      <Segmented
+        label="Show activity"
+        options={[
+          { id: "all", label: "All activity" },
+          { id: "review", label: `Needs review · ${pending.length}` },
+        ]}
+        value={filter}
+        onChange={setFilter}
+      />
       {actions.length > 0 && (
         <Card>
           <SectionHeading title="Your actions" />

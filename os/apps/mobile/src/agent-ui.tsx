@@ -59,6 +59,7 @@ import {
   resultSummary,
   s,
   SectionHeading,
+  Segmented,
   Sheet,
 } from "./ui";
 import { useWorkspace } from "./workspace";
@@ -201,13 +202,12 @@ export function AgentActivityScreen() {
   return (
     <View style={{ gap: 20 }}>
       <AgentStatus />
-      <View style={[s.row, { gap: 8 }]}>
-        {["All", "In progress", "Finished"].map((item) => (
-          <Button key={item} small primary={filter === item} onPress={() => setFilter(item)}>
-            {item}
-          </Button>
-        ))}
-      </View>
+      <Segmented
+        label="Show tasks"
+        options={["All", "In progress", "Finished"].map((item) => ({ id: item, label: item }))}
+        value={filter}
+        onChange={setFilter}
+      />
       {tasks.map((task) => (
         <TaskCard key={task.id} task={task} />
       ))}
