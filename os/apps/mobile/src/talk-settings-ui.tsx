@@ -8,6 +8,7 @@ import { useAgentWorkspace } from "./agent-workspace";
 import { errorText } from "./debo-api";
 import { useAssistantName } from "./debo-character-store";
 import { PeopleSetting } from "./debo-people-setting";
+import { RemindersSetting } from "./debo-reminders-setting";
 import { PersonaSetting } from "./debo-persona-setting";
 import { capital, usePronouns, useTalkSettingsName } from "./debo-pronouns";
 import { Button, Card, colors, ErrorNotice, Field, LinkRow, radius, s, SectionHeading, Sheet, Skeleton, spacing } from "./ui";
@@ -221,6 +222,8 @@ export function TalkSettingsSheet() {
         <PersonaSetting />
 
         <PeopleSetting />
+
+        <RemindersSetting />
 
         <Card style={{ gap: spacing[3] }}>
           <SectionHeading title={`What ${name} should always know`} />

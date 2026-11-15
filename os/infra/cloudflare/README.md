@@ -74,6 +74,9 @@ The container entry (`api/src/index.ts`) passes a fixed list of names into the c
 | `WORKER_TOKEN` (api and browser) | `DEBO_OS_WORKER_TOKEN` | **create**: `openssl rand -hex 32` | os only |
 | `COMPOSIO_API_KEY` | `COMPOSIO_API_KEY` | optional (turns on "Connect your apps"; see [CONNECTORS.md](../../docs/CONNECTORS.md)) | Composio |
 | `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET` | not wired in CI | optional | Google |
+| `DEBO_OS_VAPID_PUBLIC_KEY`, `DEBO_OS_VAPID_PRIVATE_KEY` | same names | **create** (optional: web push for reminders; without both, push is off and the app hides the switch). Make the pair once with `npx web-push generate-vapid-keys` on your own machine and paste each value into its secret; never commit them. Changing the pair later stops every saved browser subscription, so people turn the switch on again | os only (no outside account) |
+
+`DEBO_OS_VAPID_SUBJECT` is an optional plain var (default `https://debo.life`): the contact push services see.
 
 `CPK_INTELLIGENCE_API_KEY` is gone. `OPENFUSE_ACCESS_KEY` and `OPENAI_API_KEY` are no longer needed. Secrets never go in the image or in `wrangler.jsonc`. Worker secrets are copied into the container's environment at start.
 

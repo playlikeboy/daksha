@@ -42,7 +42,14 @@ export function accountRoutes(
       : null;
     return c.json({
       exportedAt: new Date().toISOString(),
-      records: rows.filter((row) => row.kind !== "mcp_servers"),
+      // Push devices: the push service address and when it was added. The device keys stay out.
+      records: rows
+        .filter((row) => row.kind !== "mcp_servers")
+        .map((row) =>
+          row.kind === "push-subscriptions" && row.data && typeof row.data === "object"
+            ? { ...row, data: { ...(row.data as Record<string, unknown>), keys: undefined } }
+            : row,
+        ),
       journal,
       connectedApps: apps,
       toolServers,

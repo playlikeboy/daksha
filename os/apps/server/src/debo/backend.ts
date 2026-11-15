@@ -145,6 +145,11 @@ export interface DeboBackend {
   afterChange(owner: string, entryId: string, change: "saved" | "deleted"): Promise<void>;
   /** Whether the AI side (answers) has a provider key. Entries work without it. */
   askConfigured: boolean;
+  /**
+   * Promises the person made in one entry ("I told Mum I'd call on Sunday"), found by one
+   * small model call. Missing when no model is set up. `today` is YYYY-MM-DD in their zone.
+   */
+  findPromises?(text: string, today: string): Promise<{ text: string; quote: string; due: string | null }[]>;
 }
 
 type Env = Record<string, string | undefined>;
@@ -296,5 +301,12 @@ export function realBackend(url: string, env: Env): DeboBackend {
       }
     },
     askConfigured: llmConfigured(env),
+    ...(llmConfigured(env)
+      ? {
+          async findPromises(text: string, today: string) {
+            return (await llm().findPromises(text, today)).promises;
+          },
+        }
+      : {}),
   };
 }

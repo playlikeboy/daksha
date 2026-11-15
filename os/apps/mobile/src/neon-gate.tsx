@@ -27,6 +27,7 @@ import {
   type SignInResult,
   refreshDelay,
 } from "./neon-auth";
+import { forgetDeviceReminders } from "./debo-device-reminders";
 import { clearSessionToken, loadSessionToken, saveSessionToken } from "./session-store";
 import { Button, Card, colors, ErrorNotice, Field, fontSize, Mascot, s } from "./ui";
 
@@ -92,6 +93,8 @@ export function NeonGate({
     clearTimeout(retry.current);
     stored.current = null;
     await clearSessionToken();
+    // Reminders this device holds or gets belong to the person who just left.
+    await forgetDeviceReminders().catch(() => {});
     setSession(undefined);
     setNotice(message);
     setPhase("out");

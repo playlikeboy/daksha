@@ -101,6 +101,11 @@ export const CALL_IDLE_MS = 10 * 60_000;
 /** The app says a call ended. Wait this long for Debo's last words to be saved first. */
 const CALL_END_GRACE_MS = 2_000;
 
+/** What the server hears about a typed entry: saved (with its words) or deleted. */
+export type EntryChange =
+  | { entryId: string; change: "saved"; text: string; happenedAt?: string }
+  | { entryId: string; change: "deleted" };
+
 export class DeboService {
   private readonly pending = new Set<Promise<unknown>>();
   private readonly recordings: MediaService | null;
@@ -111,6 +116,11 @@ export class DeboService {
   private readonly lastCallSweep = new Map<string, number>();
   /** Set by the server: deleting a call also deletes its copy in Chat. */
   onCallDeleted?: (owner: string, callId: string) => Promise<void>;
+  /**
+   * Set by the server: a typed entry was saved, edited or deleted, so promises found in it
+   * can be suggested (or taken away). Runs after the entry is safe; must not throw.
+   */
+  onEntryChange?: (owner: string, change: EntryChange) => Promise<void>;
   /** How long to wait after "call ended" for the last words to be saved. Tests set 0. */
   callEndGraceMs = CALL_END_GRACE_MS;
   /** Sample mode only: the in-memory bucket, to be served at /api/dev-r2. Never set in a live workspace. */
@@ -291,6 +301,7 @@ export class DeboService {
     const entry = await backend.entries.create(owner, text, happenedAt);
     await this.record(backend, owner, actor, "saved", [entry.id]);
     this.later(backend.afterChange(owner, entry.id, "saved"));
+    this.entryChanged(owner, { entryId: entry.id, change: "saved", text, happenedAt: entry.happenedAt.toISOString() });
     return this.entryView(entry);
   }
 
@@ -301,6 +312,7 @@ export class DeboService {
     if (!(await backend.entries.update(owner, id, text))) throw new AppError(ENTRY_GONE, 404);
     await this.record(backend, owner, "you", "edited", [id]);
     this.later(backend.afterChange(owner, id, "saved"));
+    this.entryChanged(owner, { entryId: id, change: "saved", text });
   }
 
   async deleteEntry(owner: string, id: string): Promise<void> {
@@ -311,6 +323,7 @@ export class DeboService {
     if (!(await backend.entries.remove(owner, id))) throw new AppError(ENTRY_GONE, 404);
     await this.record(backend, owner, "you", "deleted", [id]);
     this.later(backend.afterChange(owner, id, "deleted"));
+    this.entryChanged(owner, { entryId: id, change: "deleted" });
     await this.dropCallChat(owner, id);
   }
 
@@ -319,6 +332,28 @@ export class DeboService {
   // memories) runs once per call: when the app says the call ended, or, if it
   // never does (closed tab), when the call has been quiet for CALL_IDLE_MS and
   // the person next uses voice or the journal, or the background sweep runs.
+
+  /** Promises the person made in an entry, or none when no model is set up. Never throws. */
+  async findPromises(owner: string, text: string, today: string) {
+    const backend = this.journalOf(owner);
+    if (!backend?.findPromises) return [];
+    try {
+      return await backend.findPromises(text, today);
+    } catch (error) {
+      console.error("find promises failed", { owner, reason: error instanceof Error ? error.name : "unknown" });
+      return [];
+    }
+  }
+
+  private entryChanged(owner: string, change: EntryChange) {
+    const listener = this.onEntryChange;
+    if (!listener) return;
+    this.later(
+      listener(owner, change).catch((error) =>
+        console.error("entry follow-up failed", { owner, reason: error instanceof Error ? error.name : "unknown" }),
+      ),
+    );
+  }
 
   /** A call's copy in Chat has the same words, so deleting the call deletes it too. */
   private async dropCallChat(owner: string, callId: string) {
