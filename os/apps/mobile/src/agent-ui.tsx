@@ -54,14 +54,16 @@ import {
   Field,
   fontSize,
   LinkRow,
-  Mascot,
+  mascotTint,
   radius,
   resultSummary,
   s,
   SectionHeading,
   Segmented,
   Sheet,
+  spacing,
 } from "./ui";
+import { useTalkSettingsName } from "./debo-pronouns";
 import { useWorkspace } from "./workspace";
 
 export function statusLabel(value: string) {
@@ -1747,6 +1749,7 @@ export function NotificationsSheet() {
 export function AppsScreen() {
   const { navigate, open } = useWorkspace();
   const { data, mutate } = useAgentWorkspace();
+  const talkSettingsName = useTalkSettingsName();
   const [query, setQuery] = useState("");
   const [settings, setSettings] = useState(false);
   const [name, setName] = useState(data?.identity.name || "Debo");
@@ -1877,7 +1880,7 @@ export function AppsScreen() {
       <LinkRow
         icon={SlidersHorizontal}
         title="Voice, personality and notes"
-        detail="How she talks and what she knows"
+        detail={talkSettingsName}
         onPress={() => open({ type: "talk-settings" })}
       />
       <Button onPress={() => setSettings(!settings)}>
@@ -1911,23 +1914,41 @@ export function AppsScreen() {
               </View>
             )}
             <Text style={s.muted}>Colour behind the face</Text>
-            <View style={[s.row, { gap: 16, justifyContent: "center", marginBottom: 12 }]}>
-              {(["sky", "sand", "lilac"] as const).map((item) => (
-                <Pressable
-                  key={item}
-                  accessibilityRole="radio"
-                  accessibilityLabel={`${statusLabel(item)} avatar`}
-                  accessibilityState={{ checked: avatar === item }}
-                  onPress={() => setAvatar(item)}
-                  style={{
-                    padding: 7,
-                    borderRadius: radius.page,
-                    backgroundColor: avatar === item ? colors.sky : colors.canvas,
-                  }}
-                >
-                  <Mascot size={62} variant={item} />
-                </Pressable>
-              ))}
+            {/* Small swatches, not three more faces: the character shows once per screen. */}
+            <View
+              accessibilityRole="radiogroup"
+              accessibilityLabel="Colour behind the face"
+              style={[s.row, { gap: spacing[4], marginBottom: spacing[3] }]}
+            >
+              {(["sky", "sand", "lilac"] as const).map((item) => {
+                const picked = avatar === item;
+                return (
+                  <Pressable
+                    key={item}
+                    accessibilityRole="radio"
+                    accessibilityLabel={statusLabel(item)}
+                    accessibilityState={{ checked: picked }}
+                    onPress={() => setAvatar(item)}
+                    style={{ alignItems: "center", gap: spacing[1], minWidth: spacing[11] }}
+                  >
+                    <View
+                      style={{
+                        width: spacing[11],
+                        height: spacing[11],
+                        borderRadius: radius.full,
+                        padding: spacing[1],
+                        borderWidth: 2,
+                        borderColor: picked ? colors.text : "transparent",
+                      }}
+                    >
+                      <View style={{ flex: 1, borderRadius: radius.full, backgroundColor: mascotTint[item] }} />
+                    </View>
+                    <Text style={[s.small, picked && { color: colors.text, fontWeight: "600" }]}>
+                      {statusLabel(item)}
+                    </Text>
+                  </Pressable>
+                );
+              })}
             </View>
             <Field label="Name" value={name} onChangeText={setName} />
             <View style={[s.row, { gap: 8 }]}>
