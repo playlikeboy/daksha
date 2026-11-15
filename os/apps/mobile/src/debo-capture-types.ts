@@ -24,7 +24,7 @@ export type LiveRecording = {
   stop(): Promise<Capture>;
   /** Stop and throw the recording away. */
   cancel(): void;
-  /** Web only: the camera picture, to show while recording. */
+  /** A video only. Web: the camera picture, to show while recording. Phone: the camera recorder LivePreview shows. */
   stream?: unknown;
 };
 
