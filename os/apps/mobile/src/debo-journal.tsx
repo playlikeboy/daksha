@@ -1,20 +1,21 @@
-import { BookOpen, Mic, Pencil, RotateCw, Search, Trash2, Video } from "lucide-react-native";
+import { BookOpen, ChevronRight, Mic, Pencil, RotateCw, Search, Trash2, Video } from "lucide-react-native";
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { ActivityIndicator, Text, View } from "react-native";
+import { ActivityIndicator, Pressable, Text, View } from "react-native";
 import { deboApi, errorText } from "./debo-api";
 import { Composer } from "./debo-composer";
 import {
   type DeboStatus,
   type EntryView,
   entryDay,
-  entryFocus,
   formatDuration,
   formatSize,
   kindName,
   preview,
 } from "./debo-data";
 import { deboMood } from "./debo-mood-store";
+import { EntryPage } from "./debo-entry-page";
 import { RecordingPlayer } from "./debo-player";
+import { rememberEntryName } from "./routes";
 import { Button, Card, colors, Empty, ErrorNotice, Field, s, screenGap, Skeleton, spacing } from "./ui";
 import { useWorkspace } from "./workspace";
 
@@ -32,8 +33,14 @@ export function NotSetUp({ status, what }: { status?: DeboStatus; what: string }
   );
 }
 
-/** Write, read, find, edit and delete journal entries. */
+/** Write, read, find, edit and delete journal entries. /journal/<slug>-<id> opens one entry on its own page. */
 export function JournalScreen() {
+  const { route } = useWorkspace();
+  const entryId = route?.section === "journal" ? route.entryId : undefined;
+  return entryId ? <EntryPage key={entryId} id={entryId} /> : <JournalList />;
+}
+
+function JournalList() {
   const { api } = useWorkspace();
   const debo = useMemo(() => deboApi(api), [api]);
   const [status, setStatus] = useState<DeboStatus>();
@@ -42,9 +49,6 @@ export function JournalScreen() {
   const [error, setError] = useState("");
   const [find, setFind] = useState("");
   const [finding, setFinding] = useState("");
-  const [focus, setFocus] = useState(entryFocus.get());
-
-  useEffect(() => entryFocus.subscribe(setFocus), []);
 
   const load = useCallback(
     async (query?: string, quiet = false) => {
@@ -88,8 +92,6 @@ export function JournalScreen() {
     );
   if (!status.configured) return <NotSetUp status={status} what="Your journal" />;
 
-  const focused = focus ? entries.find((e) => e.id === focus) : undefined;
-  const rest = entries.filter((e) => e.id !== focused?.id);
 
   return (
     <View style={{ gap: screenGap }}>
@@ -137,14 +139,6 @@ export function JournalScreen() {
         )}
       </View>
 
-      {focus && !focused && (
-        <Card style={{ backgroundColor: colors.orange }}>
-          <Text style={s.text}>That entry is gone. It may have been deleted.</Text>
-          <Button small style={{ alignSelf: "flex-start", marginTop: 10 }} onPress={() => entryFocus.set(undefined)}>
-            Close this note
-          </Button>
-        </Card>
-      )}
 
       {!finding && entries.length === 0 ? (
         <Empty
@@ -154,16 +148,7 @@ export function JournalScreen() {
         />
       ) : (
         <View accessibilityRole="list" style={{ gap: spacing[3] }}>
-          {focused && (
-            <EntryCard
-              entry={focused}
-              highlighted
-              startOpen
-              onChanged={() => load(finding)}
-              onClose={() => entryFocus.set(undefined)}
-            />
-          )}
-          {rest.map((entry) => (
+          {entries.map((entry) => (
             <EntryCard key={entry.id} entry={entry} onChanged={() => load(finding)} />
           ))}
         </View>
@@ -185,9 +170,13 @@ function EntryCard({
   onChanged: () => Promise<void>;
   onClose?: () => void;
 }) {
-  const { api, notify } = useWorkspace();
+  const { api, notify, navigate } = useWorkspace();
   const debo = useMemo(() => deboApi(api), [api]);
   const [open, setOpen] = useState(!!startOpen);
+  const openPage = () => {
+    rememberEntryName(entry.id, entry.title);
+    navigate("journal", { entryId: entry.id });
+  };
   const [editing, setEditing] = useState(false);
   const [text, setText] = useState(entry.text);
   const [confirming, setConfirming] = useState(false);
@@ -222,7 +211,12 @@ function EntryCard({
         ...(highlighted ? { borderWidth: 2, borderColor: colors.blueDark } : {}),
       }}
     >
-      <View style={[s.row, { gap: spacing[2], flexWrap: "wrap" }]}>
+      <Pressable
+        accessibilityRole="link"
+        accessibilityLabel={`Open ${recording || call ? `${kindName(entry.kind)}, ${day}` : `entry from ${day}`}: ${entry.title}`}
+        onPress={openPage}
+        style={({ pressed }) => [s.row, { gap: spacing[2], flexWrap: "wrap", minHeight: spacing[11], opacity: pressed ? 0.6 : 1 }]}
+      >
         {(recording || call) && (entry.kind === "video" ? <Video size={16} color={colors.blueDark} /> : <Mic size={16} color={colors.blueDark} />)}
         <Text style={[s.small, { fontWeight: "600", color: colors.text }]}>
           {recording || call ? `${kindName(entry.kind)}, ${day}` : day}
@@ -238,7 +232,10 @@ function EntryCard({
             {formatSize(media.sizeBytes)}
           </Text>
         )}
-      </View>
+        <View style={{ flex: 1 }} />
+        <Text style={[s.small, { color: colors.text, fontWeight: "600" }]}>Open</Text>
+        <ChevronRight size={16} color={colors.text} />
+      </Pressable>
 
       {media && (
         <RecordingPlayer
