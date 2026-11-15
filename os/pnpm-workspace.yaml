@@ -14,6 +14,8 @@ allowBuilds:
   better-sqlite3: false
   protobufjs: false
   '@astryxdesign/core': false
+  # Its install script edits an android folder it guesses at; the app's own config plugin does that job.
+  '@supersami/rn-foreground-service': false
 minimumReleaseAgeExclude:
   - '@tanstack/ai-anthropic@0.18.13'
   - '@tanstack/ai-gemini@0.32.1'
