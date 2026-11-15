@@ -23,9 +23,9 @@ The new landing page and the app take their colours from Astryx's default Neutra
 
 In the app (`os/apps/mobile`) Debo's face is drawn in code (`debo-face.tsx`) and has twelve moods: idle, listening, thinking, speaking, happy, proud, shy, curious, sleepy, worried, pouty and angry. Moods are animation only: they never change, delay or refuse an answer. `debo-mood.ts` picks the mood from what is happening and from the tone of what the person wrote, using one readable table of English, Hindi and Hinglish cue words, with no network call. Pouty is a light, playful sulk that melts away on the next kind or neutral message. Angry is rare and brief and never insulting. In serious moments (a sad or scared message, an error the person must act on, deleting, the privacy text) she stays calm. Settings has "Reactions": All, Calm (no pouty or angry) or Off. The device's reduce motion setting keeps her still. This is the exception to "Debo never looks angry" above, and it is playful, not aimed at the person.
 
-### Who you talk to: four characters (app only)
+### Who you talk to: five characters (app only)
 
-In the app, About Debo has "Choose who you talk to". The person picks one of four characters. All four are drawn in code, have the same twelve moods and use the same face component, so every place that shows a face changes at once. The choice is saved in the person's account (`character` on the assistant's identity) and the older colour setting (`avatar`) is still the colour behind the face.
+In the app, About Debo has "Choose who you talk to". The person picks one of five characters. All five are drawn in code, have the same twelve moods and use the same face component, so every place that shows a face changes at once. The choice is saved in the person's account (`character` on the assistant's identity) and the older colour setting (`avatar`) is still the colour behind the face.
 
 | Character | What it is | Name offered |
 |---|---|---|
@@ -33,12 +33,14 @@ In the app, About Debo has "Choose who you talk to". The person picks one of fou
 | Diya | The red tomato (the brand drawing, `docs/assets/debo.svg`). | Diya |
 | Anaya | A warm young woman of about twenty, head and shoulders, in a teal kurta. Flat cartoon style, nothing more than a friendly face. | Anaya |
 | Mishti | A small round orange cat. | Mishti |
+| Kabir | A friendly young man of about twenty-one, head and shoulders, short dark hair with two little tufts on top, in a mustard hoodie. Drawn in the same simple flat style as Debo: few shapes, no outline or shading lines, big glossy eyes with one shine. Nothing more than a friendly face. | Kabir |
 
 - Everyone who never chose gets Debo the creature. That includes accounts made before this existed: they had no way to pick, so they have no saved character, and they now see Debo. A name they typed stays as it is.
 - Picking a character offers its name as the assistant's name. If the name is still "Debo" or another character's name, it changes with the pick. If the person typed a name of their own, it is kept and the app asks "Call me Mishti?" with "Use Mishti" and "Keep Nova". The assistant answers to the saved name in chat and voice.
 - Each character's colours live in its own `debo-paint-*.ts` file, and each character's `expresses` table in `debo-characters.ts` says how it shows each mood. A test fails if any character misses a mood.
-- The brand mascot is still the tomato. The landing page, pitch site, favicon and app icon still use `docs/assets/debo.svg`. The "no human face" rule above is about that brand mascot. Anaya is a character the person picks for themselves in the app, and is never used as the brand.
-- Static pictures of the four, for docs and sharing: `docs/assets/avatar-debo.svg`, `avatar-diya.svg`, `avatar-anaya.svg`, `avatar-mishti.svg`. The landing page shows copies of them (`apps/site/public/characters/`) in its "Choose who you talk to" card, as the choice inside the app, not as the brand.
+- Kabir is a man, so labels about the assistant say "he" and "his" while he is picked ("How he talks and what he knows"), and his voice starts as Blake, the male voice. Every other character is "she". The words come from `pronoun` in `debo-characters.ts`.
+- The brand mascot is still the tomato. The landing page, pitch site, favicon and app icon still use `docs/assets/debo.svg`. The "no human face" rule above is about that brand mascot. Anaya and Kabir are characters the person picks for themselves in the app, and are never used as the brand.
+- Static pictures of the five, for docs and sharing: `docs/assets/avatar-debo.svg`, `avatar-diya.svg`, `avatar-anaya.svg`, `avatar-mishti.svg`, `avatar-kabir.svg`. The landing page shows copies of them (`apps/site/public/characters/`) in its "Choose who you talk to" card, as the choice inside the app, not as the brand.
 
 ## Colour
 

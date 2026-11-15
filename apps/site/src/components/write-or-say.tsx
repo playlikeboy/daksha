@@ -7,12 +7,13 @@ import { Band } from "./band";
 import { Phone } from "./phone";
 import { SectionHead } from "./section-head";
 
-// The four characters from the app's "Choose who you talk to". Copies of docs/assets/avatar-*.svg.
+// The five characters from the app's "Choose who you talk to". Copies of docs/assets/avatar-*.svg.
 const CHARACTERS = [
   { name: "Debo", src: "/characters/avatar-debo.svg", alt: "Debo, a small round blue creature" },
   { name: "Diya", src: "/characters/avatar-diya.svg", alt: "Diya, the red tomato" },
   { name: "Anaya", src: "/characters/avatar-anaya.svg", alt: "Anaya, a cartoon young woman in a teal kurta" },
   { name: "Mishti", src: "/characters/avatar-mishti.svg", alt: "Mishti, a small round orange cat" },
+  { name: "Kabir", src: "/characters/avatar-kabir.svg", alt: "Kabir, a cartoon young man in a mustard hoodie" },
 ];
 
 export function WriteOrSay() {
@@ -88,7 +89,7 @@ export function WriteOrSay() {
                 <Badge variant="info" label="New, early version" />
               </HStack>
               <Text as="p" type="large" weight="normal" color="secondary" textWrap="pretty">
-                Pick one of four characters, and give it the name you like. Its face moves while you talk.
+                Pick one of five characters, and give it the name you like. Its face moves while you talk.
               </Text>
             </VStack>
             <HStack gap={3} wrap="wrap">
