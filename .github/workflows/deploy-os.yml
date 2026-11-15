@@ -21,6 +21,8 @@
 #     CF_AI_API_TOKEN                               - Workers AI token
 #   Optional:
 #     NEON_AI_GATEWAY_BASE_URL, NEON_AI_GATEWAY_TOKEN - search by meaning (keyword search works without)
+#     DEBO_OS_VAPID_PUBLIC_KEY, DEBO_OS_VAPID_PRIVATE_KEY - web push for reminders (npx web-push generate-vapid-keys);
+#                                                   without both, push is off and the app hides the switch
 name: Deploy OS
 
 on:
@@ -126,13 +128,16 @@ jobs:
           TOKEN_ENCRYPTION_KEY: ${{ secrets.DEBO_OS_TOKEN_ENCRYPTION_KEY }}
           SESSION_SIGNING_KEY: ${{ secrets.DEBO_OS_SESSION_SIGNING_KEY }}
           WORKER_TOKEN: ${{ secrets.DEBO_OS_WORKER_TOKEN }}
+          DEBO_OS_VAPID_PUBLIC_KEY: ${{ secrets.DEBO_OS_VAPID_PUBLIC_KEY }}
+          DEBO_OS_VAPID_PRIVATE_KEY: ${{ secrets.DEBO_OS_VAPID_PRIVATE_KEY }}
         run: |
           # Empty values are dropped, so an optional secret that is not set just turns its feature off.
           jq -n 'env | {DATABASE_URL, NEON_AUTH_BASE_URL, NEON_AUTH_JWKS_URL, ANTHROPIC_API_KEY,
                   NEON_AI_GATEWAY_BASE_URL, NEON_AI_GATEWAY_TOKEN, MEM0_API_KEY, COMPOSIO_API_KEY,
                   R2_ACCOUNT_ID, R2_ACCESS_KEY_ID, R2_SECRET_ACCESS_KEY, CF_AI_API_TOKEN,
                   LIVEKIT_URL, LIVEKIT_API_KEY, LIVEKIT_API_SECRET, VOICE_AGENT_SECRET,
-                  TOKEN_ENCRYPTION_KEY, SESSION_SIGNING_KEY, WORKER_TOKEN}
+                  TOKEN_ENCRYPTION_KEY, SESSION_SIGNING_KEY, WORKER_TOKEN,
+                  DEBO_OS_VAPID_PUBLIC_KEY, DEBO_OS_VAPID_PRIVATE_KEY}
                  | with_entries(select(.value != null and .value != ""))' \
             > "$RUNNER_TEMP/api-secrets.json"
           npx wrangler deploy -c api/wrangler.jsonc \
