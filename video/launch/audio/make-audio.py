@@ -3,12 +3,12 @@
 
 Every sound is synthesised here from sine waves and noise. There are no samples and no
 recordings, so there is nothing to license. The sounds are timed from the edits themselves:
-../src/timeline.js (launch film) and ../demo/timeline.js (demo walkthrough), so if an edit
-changes, run this again.
+../src/timeline.js (launch film), ../demo/timeline.js (demo walkthrough) and
+../film2/timeline.js (the second launch film), so if an edit changes, run this again.
 
     python3 video/launch/audio/make-audio.py --out video/launch/build/audio
 
-Writes launch.wav and demo.wav: 48 kHz stereo, mastered to about -16 LUFS with a true peak
+Writes launch.wav, demo.wav and film2.wav: 48 kHz stereo, mastered to about -16 LUFS with a true peak
 under -1.5 dBTP. Needs Python 3 with numpy, Node (to read the timelines) and ffmpeg.
 """
 import argparse
@@ -45,6 +45,12 @@ def read_launch():
         "';this.T=buildTimeline(new Proxy({},{get:()=>0}),\"h\")',c);"
         "console.log(JSON.stringify(c.T))" % json.dumps(path)
     )
+    return json.loads(subprocess.check_output(["node", "-e", js]).decode())
+
+
+def read_film2():
+    path = os.path.join(LAUNCH_DIR, "film2", "timeline.js")
+    js = "console.log(JSON.stringify(require(%s).buildFilm2('h')))" % json.dumps(path)
     return json.loads(subprocess.check_output(["node", "-e", js]).decode())
 
 
@@ -433,10 +439,190 @@ def demo_audio(path):
     return {"duration": D, "bar": bar, "cuts": step_times[1:], "taps": T["taps"]}
 
 
+# ---------------------------------------------------------------- film2: brighter, faster
+
+# D major, I V vi IV: D, A, Bm, G. One chord a bar, about 118 beats a minute.
+CHORDS2 = [
+    {"pad": [62, 66, 69, 74], "bass": 38, "arp": [74, 78, 81, 86]},
+    {"pad": [61, 64, 69, 73], "bass": 45, "arp": [73, 76, 81, 85]},
+    {"pad": [62, 66, 71, 74], "bass": 47, "arp": [74, 78, 83, 86]},
+    {"pad": [62, 67, 71, 74], "bass": 43, "arp": [74, 79, 83, 86]},
+]
+ARP2 = [0, 2, 1, 3, 2, 1, 3, 2]
+MOTIF2 = [(0, 0, 78, 1), (0, 1, 81, 0.5), (0, 1.5, 78, 0.5), (0, 2.5, 76, 1.5),
+          (1, 0, 76, 1), (1, 1, 73, 1), (1, 2.5, 69, 1.5),
+          (2, 0, 74, 1), (2, 1, 78, 0.5), (2, 1.5, 81, 1), (2, 2.5, 83, 1.5),
+          (3, 0, 81, 1.5), (3, 2, 78, 1), (3, 3, 74, 1)]
+PENTA = [74, 76, 78, 81, 83, 86, 88, 90]
+
+
+def clap():
+    n = int(0.25 * SR)
+    t = times(n)
+    y = np.zeros(n)
+    for k, d in enumerate((0.0, 0.011, 0.022)):
+        i = int(d * SR)
+        y[i:] += band_noise(n - i, 900, 7000) * np.exp(-times(n - i) * (90 if k < 2 else 22)) * (0.6 if k < 2 else 1)
+    return fade_edges(y * 0.8, a=0.0005)
+
+
+def marimba(f, dur=0.5):
+    n = int(dur * SR)
+    t = times(n)
+    y = np.sin(2 * np.pi * f * t) * np.exp(-t * 9) + 0.35 * np.sin(2 * np.pi * f * 4 * t) * np.exp(-t * 30)
+    return fade_edges(y, a=0.001)
+
+
+def tick(f=3200, d=0.025):
+    n = int(d * SR)
+    t = times(n)
+    y = np.sin(2 * np.pi * f * t) * np.exp(-t * 260) + 0.4 * band_noise(n, 3000, 10000) * np.exp(-t * 500)
+    return fade_edges(y, a=0.0005, r=0.005)
+
+
+def riser(dur):
+    n = int(dur * SR)
+    t = times(n)
+    f = 300 * (8 ** (t / dur))
+    tone = 0.25 * np.sin(2 * np.pi * np.cumsum(f) / SR)
+    y = (band_noise(n, 2000, 12000) * 0.5 + tone) * (t / dur) ** 2
+    return fade_edges(y, r=0.01)
+
+
+def music2(dur, origin, end_hit, plan):
+    bars = max(1, int(round((end_hit - origin) / (4 * 60 / 118.0))))
+    bar = (end_hit - origin) / bars
+    beat = bar / 4
+    pads, plucks, bass, drums, lead = (Bus(dur) for _ in range(5))
+    first = -int(np.ceil((origin + Bus.PRE) / bar))
+    for b in range(first, bars):
+        t0 = origin + b * bar
+        ch = CHORDS2[b % 4]
+        if inside(t0 + 0.01, plan["pad"]):
+            for m in ch["pad"]:
+                pads.add(t0, pad_note(hz(m), bar * 0.98, bright=1.6), 0.11)
+        for i in range(8):
+            t = t0 + i * beat / 2
+            if inside(t, plan["arp"]):
+                plucks.add(t, pluck_note(hz(ch["arp"][ARP2[i]])), 0.2, pan=0.4 if i % 2 else -0.4)
+            elif i % 2 == 0 and inside(t, plan.get("arp_sparse", [])):
+                plucks.add(t, pluck_note(hz(ch["arp"][ARP2[i]])), 0.16, pan=0.3 if i % 4 else -0.3)
+        for i in range(8):
+            t = t0 + i * beat / 2
+            if inside(t, plan["bass"]):
+                m = ch["bass"] + (12 if i % 2 else 0)
+                bass.add(t, bass_note(hz(m), beat * 0.42), 0.36 if i % 2 == 0 else 0.22)
+        for i in range(16):
+            t = t0 + i * beat / 4
+            if not inside(t, plan["drums"]):
+                if i % 4 == 0 and inside(t, plan.get("kick_only", [])):
+                    drums.add(t, kick(), 0.42)
+                continue
+            if i % 4 == 0:
+                drums.add(t, kick(), 0.55)
+            if i in (4, 12):
+                drums.add(t, clap(), 0.2, pan=0.05)
+            if i % 4 == 2:
+                drums.add(t, hat(open_=True), 0.07, pan=0.3)
+            drums.add(t, hat(), 0.035 if i % 2 else 0.05, pan=-0.25)
+        for (bb, bt, m, ln) in MOTIF2:
+            if b % 4 != bb:
+                continue
+            t = t0 + bt * beat
+            if inside(t, plan["lead"]):
+                lead.add(t, marimba(hz(m), 0.6), 0.16, pan=0.15)
+                lead.add(t, bell_note(hz(m + 12), 0.8 + ln * beat, decay=0.7), 0.035, pan=-0.15)
+    ch = CHORDS2[0]
+    for m in ch["pad"] + [ch["pad"][0] + 12]:
+        pads.add(end_hit, pad_note(hz(m), 3.4, bright=1.6), 0.13)
+    bass.add(end_hit, bass_note(hz(ch["bass"]), 2.5), 0.4)
+    drums.add(end_hit, kick(), 0.5)
+    wet = reverb(pads.x * 0.8 + ping_pong(plucks.x, beat * 0.75, fb=0.3) + lead.x, 1.8, 0.3)
+    mix = wet + bass.x + reverb(drums.x, 0.6, 0.1)
+    return mix, bar
+
+
+def film2_audio(path):
+    T = read_film2()
+    D, S = T["D"], T["S"]
+    origin = T["texts"][2]["lines"][0]["times"][0]  # the beat drops on the first "Debo remembers"
+    end_hit = S["end"]["t0"] + S["end"]["logo"]
+    bars = int(round((end_hit - origin) / (4 * 60 / 118.0)))
+    bar = (end_hit - origin) / bars
+    snap = lambda x: origin + np.round((x - origin) / bar) * bar
+    drop = origin
+    talk0, talk1 = snap(S["talk"]["t0"]), snap(S["talk"]["t0"] + S["talk"]["out"])
+    done = S["approve"]["t0"] + S["approve"]["done"]
+    fin = snap(T["texts"][-1]["t0"])
+    plan = {
+        "pad": [(-3, end_hit)],
+        "arp_sparse": [(-3, drop)],
+        "arp": [(drop, fin)],
+        "bass": [(drop, talk0), (talk1, fin)],
+        "kick_only": [(drop - 2 * bar, drop)],
+        "drums": [(drop, talk0), (talk1, snap(done) - bar), (snap(done), fin)],
+        "lead": [(drop + 4 * bar, talk0), (talk1, fin)],
+    }
+    mix, bar = music2(D, origin, end_hit, plan)
+    sfx = Bus(D)
+    r = np.random.RandomState(3)
+    for c in T["cues"]:
+        t, k = c["t"], c["k"]
+        if k == "word":
+            m = PENTA[(c["n"] + c["b"]) % 5]
+            sfx.add(t, pop(hz(m) * 1.0, hz(m) * 0.55), 0.13, pan=r.uniform(-0.3, 0.3))
+        elif k == "glyph":
+            sfx.add(t, pop(1500, 700), 0.24, pan=r.uniform(-0.3, 0.3))
+            sfx.add(t + 0.02, bell_note(hz(PENTA[(c["n"] + 3) % 8] + 12), 0.9, decay=0.5), 0.07)
+        elif k == "type":
+            n = int(c["d"] / 0.055)
+            for i in range(n):
+                sfx.add(t + i * 0.055 + r.uniform(0, 0.02), tick(r.uniform(2600, 3800)), r.uniform(0.04, 0.08), pan=0.2)
+        elif k == "pop":
+            sfx.add(t, pop(1100, 560), 0.3)
+        elif k == "chip":
+            sfx.add(t, pop(1700, 900), 0.2, pan=r.uniform(-0.4, 0.4))
+        elif k == "tap":
+            sfx.add(t, tap(), 0.38, pan=0.1)
+        elif k == "whoosh":
+            sfx.add(t - 0.12, whoosh(0.6, 400, 5000, peak=0.45), 0.24)
+        elif k == "swish":
+            sfx.add(t - 0.05, whoosh(0.4, 1200, 8000, peak=0.4), 0.16)
+        elif k == "out":
+            sfx.add(t - 0.05, whoosh(0.45, 300, 2500, peak=0.5), 0.12)
+        elif k == "ding":
+            sfx.add(t, bell_note(hz(86), 1.4, decay=0.5), 0.12, pan=0.2)
+            sfx.add(t + 0.08, bell_note(hz(93), 1.4, decay=0.5), 0.1, pan=0.25)
+        elif k == "burst":
+            sfx.add(t - 0.1, whoosh(0.7, 300, 6000, peak=0.3), 0.26)
+            for i in range(8):
+                sfx.add(t + 0.035 * i + 0.08, pop(1200 + 90 * i, 650 + 40 * i), 0.13, pan=-0.6 + 0.17 * i)
+        elif k == "flip":
+            for i in range(3):
+                sfx.add(t + 0.12 * i + 0.1, whoosh(0.16, 2000, 9000, peak=0.5) * 0.9, 0.16)
+                sfx.add(t + 0.12 * i + 0.18, tick(1800, 0.03), 0.12)
+        elif k == "check":
+            sfx.add(t - 1.2, riser(1.2), 0.12)
+            sfx.add(t + 0.32, tick(2400, 0.04), 0.4)
+            chime(sfx, t + 0.3, root=81, gain=0.3)
+        elif k == "sparkle":
+            many = 10 if c.get("small") else 26
+            for i in range(many):
+                sfx.add(t + r.uniform(0, 1.3 if many > 10 else 0.5), bell_note(hz(PENTA[r.randint(8)] + 12), 0.7, decay=0.35),
+                        r.uniform(0.03, 0.07), pan=r.uniform(-0.8, 0.8))
+            if many > 10:
+                sfx.add(t - 0.02, pop(900, 300), 0.35)
+        elif k == "logo":
+            sfx.add(t, pop(700, 380), 0.45)
+            chime(sfx, t, root=74, gain=0.38)
+    master(crop(mix + sfx.x, D), D, path)
+    return {"duration": D, "bar": bar, "drop": drop, "talk": [talk0, talk1], "end": end_hit}
+
+
 if __name__ == "__main__":
     ap = argparse.ArgumentParser()
     ap.add_argument("--out", required=True)
-    ap.add_argument("--only", choices=["launch", "demo"])
+    ap.add_argument("--only", choices=["launch", "demo", "film2"])
     a = ap.parse_args()
     os.makedirs(a.out, exist_ok=True)
     info = {}
@@ -444,6 +630,8 @@ if __name__ == "__main__":
         info["launch"] = launch_audio(os.path.join(a.out, "launch.wav"))
     if a.only in (None, "demo"):
         info["demo"] = demo_audio(os.path.join(a.out, "demo.wav"))
+    if a.only in (None, "film2"):
+        info["film2"] = film2_audio(os.path.join(a.out, "film2.wav"))
     with open(os.path.join(a.out, "cues.json"), "w") as f:
         json.dump(info, f, indent=1)
     print(json.dumps(info))
