@@ -91,12 +91,11 @@ export function MishtiArt({ size, rig }: ArtProps) {
           <Path d="M120 58C182 54 224 92 226 142C228 194 184 220 120 220C56 220 12 194 14 142C16 92 58 54 120 58Z" fill={c.fur} />
           <Path d="M226 142C228 194 184 220 120 220C66 220 26 200 16 160C48 196 108 204 156 192C200 182 222 166 226 142Z" fill={c.furShade} />
           <Path d="M104 66L106 86M120 62L120 90M136 66L134 86" fill="none" stroke={c.stripe} strokeWidth={6} strokeLinecap="round" />
-          <Path d="M20 138L38 142M20 154L38 152M220 138L202 142M220 154L202 152" fill="none" stroke={c.stripe} strokeWidth={5} strokeLinecap="round" />
           <Ellipse cx={116} cy={168} rx={42} ry={27} fill={c.muzzle} />
           <Ellipse cx={124} cy={168} rx={42} ry={27} fill={c.muzzle} />
           <Ellipse cx={60} cy={100} rx={14} ry={7} fill={c.highlight} opacity={0.35} transform="rotate(-40 60 100)" />
           <Path d="M110 152H130L120 163Z" fill={c.nose} stroke={c.nose} strokeWidth={4} strokeLinejoin="round" />
-          <Path d="M82 164L44 154M82 170L42 172M82 176L48 190M158 164L196 154M158 170L198 172M158 176L192 190" fill="none" stroke={c.whisker} strokeWidth={2.5} strokeLinecap="round" opacity={0.75} />
+          <Path d="M82 164L46 158M82 174L48 180M158 164L194 158M158 174L192 180" fill="none" stroke={c.whisker} strokeWidth={2.5} strokeLinecap="round" opacity={0.75} />
         </Layer>
         <FaceFeatures rig={rig} size={size} spec={spec} />
       </Animated.View>

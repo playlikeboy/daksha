@@ -106,7 +106,6 @@ export function AnayaArt({ size, rig }: ArtProps) {
       <Animated.View pointerEvents="none" style={head}>
         <Layer size={size}>
           <Path d="M120 22C66 22 42 68 42 118C42 160 34 190 46 216L194 216C206 190 198 160 198 118C198 68 174 22 120 22Z" fill={c.hair} />
-          <Path d="M58 150C56 176 54 196 58 212M182 150C184 176 186 196 182 212" fill="none" stroke={c.hairShine} strokeWidth={4} strokeLinecap="round" opacity={0.5} />
         </Layer>
       </Animated.View>
 
@@ -115,13 +114,7 @@ export function AnayaArt({ size, rig }: ArtProps) {
         <Layer size={size}>
           <Path d="M104 150L104 182Q120 202 136 182L136 150Z" fill={c.skinShade} />
           <Path d="M26 238C26 206 60 190 92 184Q120 208 148 184C180 190 214 206 214 238Q120 250 26 238Z" fill={c.kurta} />
-          <Path d="M214 238C214 214 196 200 172 192C196 210 202 224 198 242Q208 242 214 238Z" fill={c.kurtaShade} opacity={0.6} />
           <Path d="M92 184Q120 208 148 184" fill="none" stroke={c.trim} strokeWidth={6} strokeLinecap="round" />
-          <Path d="M120 207L120 242" stroke={c.trim} strokeWidth={3.5} strokeLinecap="round" />
-          <G fill={c.trimDot}>
-            <Circle cx={120} cy={218} r={3} />
-            <Circle cx={120} cy={230} r={3} />
-          </G>
         </Layer>
       </Animated.View>
 
@@ -135,7 +128,6 @@ export function AnayaArt({ size, rig }: ArtProps) {
         {/* The fringe: swept across the forehead from a side parting. */}
         <Layer size={size}>
           <Path d="M58 118C50 62 80 26 122 26C166 26 192 62 182 118C178 96 168 76 150 66C136 78 110 82 92 80C78 90 66 102 58 118Z" fill={c.hair} />
-          <Path d="M100 40C120 34 148 38 164 54" fill="none" stroke={c.hairShine} strokeWidth={4} strokeLinecap="round" opacity={0.55} />
         </Layer>
 
         {/* Two front locks beside her face. They sway, lift and flick. */}
