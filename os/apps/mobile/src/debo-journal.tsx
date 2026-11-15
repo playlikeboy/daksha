@@ -79,7 +79,13 @@ export function JournalScreen() {
   };
   if (loading) return <Skeleton label="Loading your journal" />;
   // The first load failed, so there is nothing to show yet except the error and a way back.
-  if (!status) return <ErrorNotice error={error || "Your journal did not load."} onRetry={retry} />;
+  if (!status)
+    return (
+      <ErrorNotice
+        error="Your journal did not load. Check your connection, then try again. Your entries are safe."
+        onRetry={retry}
+      />
+    );
   if (!status.configured) return <NotSetUp status={status} what="Your journal" />;
 
   const focused = focus ? entries.find((e) => e.id === focus) : undefined;
