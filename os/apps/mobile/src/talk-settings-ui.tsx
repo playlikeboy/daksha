@@ -9,6 +9,7 @@ import { errorText } from "./debo-api";
 import { useAssistantName, usePronouns } from "./debo-character-store";
 import { PeopleSetting } from "./debo-people-setting";
 import { PersonaSetting } from "./debo-persona-setting";
+import { OwnKeysSetting } from "./own-keys-ui";
 import { Button, Card, colors, ErrorNotice, Field, LinkRow, radius, s, SectionHeading, Sheet, spacing } from "./ui";
 import { useWorkspace } from "./workspace";
 import { Brain, UserRound } from "lucide-react-native";
@@ -243,6 +244,8 @@ export function TalkSettingsSheet() {
           {saved}
         </Text>
         <ErrorNotice error={error} />
+
+        <OwnKeysSetting />
       </View>
     </Sheet>
   );
