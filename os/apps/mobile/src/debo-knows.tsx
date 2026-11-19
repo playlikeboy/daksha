@@ -158,15 +158,23 @@ function MemoryCard({ memory, onChanged }: { memory: MemoryView; onChanged: () =
           <Button
             small
             icon={Pencil}
+            accessibilityLabel={`Fix this memory: ${memory.text}`}
             onPress={() => {
               setText(memory.text);
               setEditing(true);
             }}
           >
-            Fix this memory
+            Fix this
           </Button>
-          <Button small danger icon={Trash2} onPress={() => setConfirming(true)}>
-            Forget this memory
+          {/* Short words (DESIGN.md's memory card), so both fit side by side on a phone. */}
+          <Button
+            small
+            danger
+            icon={Trash2}
+            accessibilityLabel={`Forget this memory: ${memory.text}`}
+            onPress={() => setConfirming(true)}
+          >
+            Forget this
           </Button>
         </View>
       )}
