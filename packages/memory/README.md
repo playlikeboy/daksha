@@ -1,8 +1,8 @@
 # @debo/memory
 
-Status: works against the hosted Mem0 Platform (tested with a throwaway user). Used by the web app after an entry is saved, edited or deleted, by the "What Debo knows" page, and on account delete.
+Status: works against the hosted Mem0 Platform (tested with a throwaway user). Used by the web app after an entry is saved, edited or deleted, by the "What Daksha knows" page, and on account delete.
 
-What Debo knows about a person, always with the entry it came from. The hosted Mem0 Platform (`MemoryClient` from `mem0ai` 3.3.1, not `mem0ai/oss`) behind one small API. See `docs/MEMORY.md` and decisions 5, 18 and 20 in `docs/DECISIONS.md`.
+What Daksha knows about a person, always with the entry it came from. The hosted Mem0 Platform (`MemoryClient` from `mem0ai` 3.3.1, not `mem0ai/oss`) behind one small API. See `docs/MEMORY.md` and decisions 5, 18 and 20 in `docs/DECISIONS.md`.
 
 ## Public API
 
@@ -30,7 +30,7 @@ What Debo knows about a person, always with the entry it came from. The hosted M
 
 ## Cloudflare Workers
 
-The hosted client (`mem0ai`, main entry) uses `fetch` for every call we make. It also imports `axios` and `uuid` at load time and creates an axios instance it never uses for these calls. It does not import `better-sqlite3`; that is only in `mem0ai/oss`, which Debo no longer imports. On first use per isolate it calls `GET /v1/ping/` once.
+The hosted client (`mem0ai`, main entry) uses `fetch` for every call we make. It also imports `axios` and `uuid` at load time and creates an axios instance it never uses for these calls. It does not import `better-sqlite3`; that is only in `mem0ai/oss`, which Daksha no longer imports. On first use per isolate it calls `GET /v1/ping/` once.
 
 ## Testing
 

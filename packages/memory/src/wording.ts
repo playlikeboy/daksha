@@ -1,5 +1,5 @@
 // Older memories read like a file about someone: "User went for a long walk".
-// Debo speaks to the person as "you" (docs/WRITING.md, rule 4). New memories
+// Daksha speaks to the person as "you" (docs/WRITING.md, rule 4). New memories
 // are written that way by Mem0 (see INSTRUCTIONS in index.ts). For older
 // ones, this turns the common third-person openings into "you" when the page
 // shows them. Display only: nothing stored in Mem0 changes.
@@ -35,7 +35,7 @@ function baseForm(word: string): string {
   return lower.slice(0, -1);
 }
 
-/** The memory as Debo should say it to the person. */
+/** The memory as Daksha should say it to the person. */
 export function speakToPerson(text: string): string {
   let out = text.replace(/\b(?:the )?user's\b/gi, (_match, offset: number) => (offset === 0 ? "Your" : "your"));
 

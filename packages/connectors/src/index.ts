@@ -18,7 +18,7 @@ const ConnectorsEnv = z.object({
   COMPOSIO_GOOGLECALENDAR_VERSION: z.string().min(1),
 });
 
-/** The apps Debo can connect, in the order of docs/CONNECTORS.md. Only the first is wired. */
+/** The apps Daksha can connect, in the order of docs/CONNECTORS.md. Only the first is wired. */
 export type ConnectorApp = "googlecalendar";
 
 // Composio tool used to list events. Check the exact slug in the Composio

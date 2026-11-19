@@ -19,14 +19,14 @@ export type ChatMessage = {
   createdAt: Date;
 };
 
-/** Debo's side of one exchange. */
+/** Daksha's side of one exchange. */
 export type ChatReply = { kind: Exclude<ChatKind, "question">; text: string; sourceIds: string[] };
 
 const Id = z.string().uuid();
 
 /** Short name for the chat list: the first question's first line, cut to 60 characters. */
 export function chatTitleFrom(question: string): string {
-  const line = question.split("\n").find((l) => l.trim())?.trim() ?? "Chat with Debo";
+  const line = question.split("\n").find((l) => l.trim())?.trim() ?? "Chat with Daksha";
   return line.length > 60 ? `${line.slice(0, 57)}…` : line;
 }
 
@@ -79,7 +79,7 @@ export async function getConversation(
 }
 
 /**
- * Save one question and Debo's reply, in one transaction and one connection.
+ * Save one question and Daksha's reply, in one transaction and one connection.
  * Creates the chat on its first exchange. Returns false, and saves nothing,
  * if a chat with this id belongs to someone else.
  */

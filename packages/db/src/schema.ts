@@ -35,12 +35,12 @@ const tsvector = customType<{ data: string }>({
 
 /**
  * What a source is. A voice or video entry keeps its transcript as the text.
- * A voice_call is one live conversation with Debo: its text is the call
+ * A voice_call is one live conversation with Daksha: its text is the call
  * written out line by line (see voice-call.ts).
  */
 export type SourceKind = "journal" | "voice" | "video" | "voice_call";
 
-/** One thing the person gave Debo: a journal entry, a voice note or a video. */
+/** One thing the person gave Daksha: a journal entry, a voice note or a video. */
 export const sources = pgTable(
   "sources",
   {
@@ -86,7 +86,7 @@ export const usage = pgTable(
 export type ActivityAction = "saved" | "edited" | "deleted" | "answered" | "did-not-know" | "exported" | "fixed-memory" | "forgot-memory";
 
 /**
- * The record a person can read: what Debo saved, changed, deleted and answered.
+ * The record a person can read: what Daksha saved, changed, deleted and answered.
  * Ids and times only, never content. Promise 7: nothing happens in secret.
  */
 export const activity = pgTable(
@@ -131,7 +131,7 @@ export const chunks = pgTable(
 );
 
 /**
- * One chat with Debo. The id is the chat's thread id, made in the browser,
+ * One chat with Daksha. The id is the chat's thread id, made in the browser,
  * so the first answer can save it without an extra round trip. The title is
  * the first question, cut short, so the person can find the chat again.
  */
@@ -149,18 +149,18 @@ export const conversations = pgTable(
   (t) => [index("conversations_user_updated_idx").on(t.userId, t.updatedAt)],
 );
 
-/** Who said a chat message: the person, or Debo. */
+/** Who said a chat message: the person, or Daksha. */
 export type ChatRole = "person" | "debo";
 
 /**
- * What kind of message it is. The person always asks a `question`. Debo
+ * What kind of message it is. The person always asks a `question`. Daksha
  * replies with an `answer` (with sources), `unknown` (nothing found),
  * `limit` (daily limit reached), `error` (could not answer) or `stopped`
  * (the person stopped the answer; the text is what was shown by then).
  */
 export type ChatKind = "question" | "answer" | "unknown" | "limit" | "error" | "stopped";
 
-/** One message in a chat. Debo's answers keep the ids of the entries they used. */
+/** One message in a chat. Daksha's answers keep the ids of the entries they used. */
 export const messages = pgTable(
   "messages",
   {
@@ -226,7 +226,7 @@ export const media = pgTable(
     transcriptStartedAt: timestamp("transcript_started_at", { withTimezone: true }),
     language: text("language"),
     segments: jsonb("segments").$type<TranscriptSegment[]>(),
-    // SHA-256 of the file, set while it is transcribed. Lets Debo reuse a transcript for the same file.
+    // SHA-256 of the file, set while it is transcribed. Lets Daksha reuse a transcript for the same file.
     contentHash: text("content_hash"),
     createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
   },

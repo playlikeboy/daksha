@@ -27,11 +27,11 @@ Rules kept in code: read-only (no tool that sends, creates or deletes), Composio
 
 ## Turning it on
 
-1. Make a Composio account and a project for Debo.
+1. Make a Composio account and a project for Daksha.
 2. Copy the project's API key into `COMPOSIO_API_KEY`.
 3. Add the Google Calendar toolkit and make an auth config that asks for **read-only** calendar access. Copy its id.
 4. In the toolkit's tool list, check that the "list events" tool is called `GOOGLECALENDAR_EVENTS_LIST` (fix the name in `src/index.ts` if not) and copy the current toolkit version to pin.
 5. Add the three values locally (`.env`) and as Worker secrets.
-6. Then build the screens: the permission ask ("Debo wants to read your calendar events so it can answer questions about your plans"), a `connections` table, the sync job, and the activity record lines. See `docs/CONNECTORS.md`.
+6. Then build the screens: the permission ask ("Daksha wants to read your calendar events so it can answer questions about your plans"), a `connections` table, the sync job, and the activity record lines. See `docs/CONNECTORS.md`.
 
 Composio holds the person's app tokens. Say this on the privacy page before turning it on.

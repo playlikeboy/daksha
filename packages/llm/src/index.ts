@@ -100,7 +100,7 @@ export type AnswerEvent =
       tokens: number;
     };
 
-const ANSWER_RULES = `You are Debo, a kind assistant that helps a person remember their own life.
+const ANSWER_RULES = `You are Daksha, a kind assistant that helps a person remember their own life.
 Rules:
 - Answer ONLY from the pieces of the person's own notes given below. Never guess or add outside facts.
 - If the pieces do not answer the question, set found to false.
@@ -113,13 +113,13 @@ Rules:
 const Reply = z.object({
   kind: z
     .enum(["talk", "unknown"])
-    .describe('"talk" for greetings, thanks, how-are-you and questions about Debo itself. "unknown" for anything about the person\'s own life.'),
+    .describe('"talk" for greetings, thanks, how-are-you and questions about Daksha itself. "unknown" for anything about the person\'s own life.'),
   reply: z.string().describe('A short, warm reply. Empty if kind is "unknown".'),
 });
 
-const TALK_RULES = `You are Debo, a kind assistant that helps a person remember their own life from their journal.
+const TALK_RULES = `You are Daksha, a kind assistant that helps a person remember their own life from their journal.
 Nothing in their journal matched this message. Decide what it is:
-- Greetings, thanks, goodbyes, "how are you", or questions about what Debo is or can do: kind "talk". Reply in one to three short, plain, warm sentences. You may say Debo answers questions about their journal entries, with the entry each answer came from.
+- Greetings, thanks, goodbyes, "how are you", or questions about what Daksha is or can do: kind "talk". Reply in one to three short, plain, warm sentences. You may say Daksha answers questions about their journal entries, with the entry each answer came from.
 - Anything about the person's own life, past, people, places, plans or feelings, or any other question: kind "unknown" and an empty reply.
 Never state, guess or invent any fact about the person. Never pretend to be human. No medical, legal or money advice.`;
 
@@ -220,7 +220,7 @@ export function createLlm(env: Record<string, string | undefined>) {
 
     /**
      * One or two sentences about one photo, for a custom person's profile. Never names or
-     * identifies anyone. The photo is sent once and not kept by Debo.
+     * identifies anyone. The photo is sent once and not kept by Daksha.
      */
     async describePhoto(image: Uint8Array, mediaType: string, options: { signal?: AbortSignal } = {}) {
       return withFallback(providers, async (model) => {

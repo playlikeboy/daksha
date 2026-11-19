@@ -1,5 +1,5 @@
 // @debo/brain: the one path from a question to an answer, with no web
-// framework in it. The Debo web app and the agent platform in os/ both call
+// framework in it. The Daksha web app and the agent platform in os/ both call
 // this, so the rules hold everywhere:
 // - answers come only from the person's own pieces, with sources;
 // - no source, no answer ("I don't have anything about that yet"), except
@@ -44,7 +44,7 @@ export type AskEvent =
 
 export const UNKNOWN_MESSAGE = "I don’t have anything about that yet. Write an entry about it, then ask again.";
 export const LIMIT_MESSAGE =
-  "You have asked a lot today, and Debo has reached its daily limit for you. You can ask again after midnight UTC. Your entries are safe.";
+  "You have asked a lot today, and Daksha has reached its daily limit for you. You can ask again after midnight UTC. Your entries are safe.";
 
 /** Tokens one person may use on our AI key per day (UTC). See docs/BYOK-AND-PLANS.md, "Limits". */
 export function dailyTokenLimit(env: Record<string, string | undefined> = process.env): number {

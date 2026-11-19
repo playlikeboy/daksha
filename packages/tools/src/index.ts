@@ -1,4 +1,4 @@
-// @debo/tools: the one shape every tool Debo can use must have.
+// @debo/tools: the one shape every tool Daksha can use must have.
 //
 // A tool never decides whether it may run. The policy engine (@debo/tasks)
 // looks at `risk` and the person's settings and answers allow, ask or deny
@@ -12,9 +12,9 @@ import type { z } from "zod";
 /**
  * How much harm a tool can do. The policy engine maps this to allow, ask or deny.
  * - read: reads the person's own data or the public web. Changes nothing.
- * - local: changes something inside Debo that the person can undo (a draft, a note).
- * - external-write: changes something outside Debo (sends, posts, books, creates).
- * - destructive: deletes or overwrites, inside or outside Debo.
+ * - local: changes something inside Daksha that the person can undo (a draft, a note).
+ * - external-write: changes something outside Daksha (sends, posts, books, creates).
+ * - destructive: deletes or overwrites, inside or outside Daksha.
  * - admin: changes accounts, keys, permissions or money.
  */
 export type ToolRisk = "read" | "local" | "external-write" | "destructive" | "admin";

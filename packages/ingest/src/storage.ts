@@ -1,4 +1,4 @@
-// File storage for the originals people give Debo (voice notes, papers, photos).
+// File storage for the originals people give Daksha (voice notes, papers, photos).
 //
 // Neon Object Storage speaks the S3 API, so we use the AWS SDK. Buckets are
 // private: files are only ever handed out through short-lived signed links.

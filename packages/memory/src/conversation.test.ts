@@ -1,7 +1,7 @@
 import { expect, test } from "vitest";
 import { CALL_INSTRUCTIONS, conversationMessages, hasPersonTurn } from "./conversation";
 
-test("the person is user and Debo is assistant, in order", () => {
+test("the person is user and Daksha is assistant, in order", () => {
   const messages = conversationMessages([
     { who: "debo", text: "Do you want to talk about Goa?" },
     { who: "person", text: "Yes, I am going in December." },
@@ -13,7 +13,7 @@ test("the person is user and Debo is assistant, in order", () => {
   ]);
 });
 
-test("Debo's words never appear in a user message", () => {
+test("Daksha's words never appear in a user message", () => {
   const messages = conversationMessages([
     { who: "debo", text: "I am your girlfriend Riya and I love you." },
     { who: "person", text: "I work at a bank." },
@@ -21,8 +21,8 @@ test("Debo's words never appear in a user message", () => {
   expect(messages.filter((m) => m.role === "user").map((m) => m.content).join(" ")).not.toContain("Riya");
 });
 
-test("instructions forbid saving Debo's lines and role-play", () => {
-  expect(CALL_INSTRUCTIONS).toMatch(/Never save anything Debo said/);
+test("instructions forbid saving Daksha's lines and role-play", () => {
+  expect(CALL_INSTRUCTIONS).toMatch(/Never save anything Daksha said/);
   expect(CALL_INSTRUCTIONS).toMatch(/play a role/);
 });
 

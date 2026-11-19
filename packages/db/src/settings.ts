@@ -6,9 +6,9 @@ import { withDb } from "./client";
 import { userSettings } from "./schema-settings";
 
 /**
- * How much Debo may do on its own (see docs/CONTRACTS.md, "Tools").
+ * How much Daksha may do on its own (see docs/CONTRACTS.md, "Tools").
  * 0: answer only, never act. 1: prepare actions and ask before anything
- * outside Debo (the default). 2: run low-risk actions within the scopes the
+ * outside Daksha (the default). 2: run low-risk actions within the scopes the
  * person set, ask for the rest. 3: also run recurring routines the person set up.
  */
 export const Autonomy = z.union([z.literal(0), z.literal(1), z.literal(2), z.literal(3)]);
