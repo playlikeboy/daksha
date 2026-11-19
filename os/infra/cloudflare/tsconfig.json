@@ -9,5 +9,5 @@
     "noEmit": true,
     "skipLibCheck": true
   },
-  "include": ["api/src", "browser/src"]
+  "include": ["api/src", "browser/src", "app/src"]
 }

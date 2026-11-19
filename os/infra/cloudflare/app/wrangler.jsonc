@@ -5,17 +5,23 @@
   //   npx wrangler deploy -c app/wrangler.jsonc
   "$schema": "../node_modules/wrangler/config-schema.json",
   "name": "debo-os-app",
+  // A small Worker in front of the files: it answers my.debo.life with a 307 to my.daksha.life
+  // and hands everything else to the files (src/redirect.ts, docs/DOMAINS.md).
+  "main": "src/index.ts",
   "compatibility_date": "2026-11-01",
   "workers_dev": true,
   "preview_urls": false,
-  // my.debo.life is the address from before the rename (docs/RENAME.md). The page there sends
-  // people on to my.daksha.life (the first script in apps/mobile/public/index.html).
+  // my.daksha.life is the app. my.debo.life is the address from before the rename; every request
+  // there gets a 307 to the same path and query on my.daksha.life.
   "routes": [
     { "pattern": "my.daksha.life", "custom_domain": true },
     { "pattern": "my.debo.life", "custom_domain": true }
   ],
   "assets": {
     "directory": "../../../apps/mobile/dist/web",
-    "not_found_handling": "single-page-application"
+    "binding": "ASSETS",
+    "not_found_handling": "single-page-application",
+    // Run the Worker first even when a file matches, so files on my.debo.life move too.
+    "run_worker_first": true
   }
 }
