@@ -11,6 +11,7 @@ import { SiteFooter } from "../components/site-footer";
 import { SiteHeader } from "../components/site-header";
 import { Trust } from "../components/trust";
 import { WriteOrSay } from "../components/write-or-say";
+import { YourPeople } from "../components/your-people";
 
 // Structured data for search engines. It says what Debo is and nothing more:
 // no ratings, no prices, no counts, because none exist yet.
@@ -51,6 +52,7 @@ export default function Home() {
             <WriteOrSay />
             <Ask />
             <Knows />
+            <YourPeople />
             <Apps />
             <Demo />
             <GetApp />

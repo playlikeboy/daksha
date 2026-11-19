@@ -13,6 +13,7 @@ import {
   turnOffDeviceReminders,
   turnOnDeviceReminders,
 } from "./debo-device-reminders";
+import { useSettingsChanged } from "./settings-events";
 import { Button, Card, CheckRow, ErrorNotice, Field, s, spacing } from "./ui";
 import { useWorkspace } from "./workspace";
 
@@ -55,6 +56,8 @@ export function RemindersSetting() {
   useEffect(() => {
     void load();
   }, [load]);
+  // A change made by asking in chat or on a call shows here too.
+  useSettingsChanged(["reminders"], load);
 
   const run = async (work: () => Promise<unknown>, done: string) => {
     setBusy(true);

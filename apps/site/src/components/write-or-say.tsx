@@ -89,7 +89,7 @@ export function WriteOrSay() {
                 <Badge variant="info" label="New, early version" />
               </HStack>
               <Text as="p" type="large" weight="normal" color="secondary" textWrap="pretty">
-                Pick one of five characters, and give it the name you like. Its face moves while you talk.
+                Pick one of five characters, or make your own, and give it the name you like. Its face moves while you talk.
               </Text>
             </VStack>
             <HStack gap={3} wrap="wrap">
