@@ -10,3 +10,6 @@
 # The reminders service worker: always fresh, so a fix reaches every browser at once.
 /sw.js
   Cache-Control: public, max-age=0, must-revalidate
+# The brand font files rarely change, so browsers keep them for a week.
+/fonts/*
+  Cache-Control: public, max-age=604800
