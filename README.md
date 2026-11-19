@@ -18,12 +18,12 @@
 ## Watch the launch film
 
 <p align="center">
-  <a href="https://www.daksha.life/debo-launch.mp4">
-    <img src="https://www.daksha.life/debo-launch-poster.webp" alt="Play the Daksha launch film, about a minute long" width="100%">
+  <a href="https://www.daksha.life/daksha-launch.mp4">
+    <img src="https://www.daksha.life/daksha-launch-poster.webp" alt="Play the Daksha launch film, about a minute long" width="100%">
   </a>
 </p>
 
-<p align="center"><a href="https://www.daksha.life/debo-launch.mp4">Play the launch film (about a minute)</a> · <a href="https://www.daksha.life/debo-demo.mp4">the full app walkthrough</a></p>
+<p align="center"><a href="https://www.daksha.life/daksha-launch.mp4">Play the launch film (about a minute)</a> · <a href="https://www.daksha.life/daksha-demo.mp4">the full app walkthrough</a></p>
 
 The launch film is an animation: its cards are redrawn from the app's own screens and words, and it shows only what the app does today. The walkthrough is recorded from the app in demo mode (see `docs/MEDIA.md`). All names and entries in both are made-up sample text.
 

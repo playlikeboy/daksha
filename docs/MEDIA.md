@@ -14,7 +14,8 @@ How to take the app screenshots on the landing page (`apps/site`) and the pitch 
 | `apps/pitch/public/shots/*.webp` | Crops of the same screens (journal list, knows, talk, apps) | Pitch site, "Product" |
 | `apps/pitch/public/shots/chat-light.webp` | A real answer with a source chip | Pitch site hero and "Product". Not retaken (see below) |
 | `og.png` in `apps/site`, `apps/web`, `apps/pitch`, `os/apps/mobile` | The share picture, with the knows screenshot | Link previews |
-| `apps/site/public/debo-demo.mp4`, `.webm`, `-poster.webp`, `.en.vtt` | The walkthrough film | Landing page, `src/media.ts` |
+| `apps/site/public/daksha-demo.mp4`, `.webm`, `-poster.webp`, `.en.vtt` | The walkthrough film | Landing page, `src/media.ts`, README |
+| `os/apps/mobile/public/screenshots/*` | The install pictures: copies of the chat, journal and knows shots, and the three side by side | The app's `manifest.webmanifest` |
 
 - Landing page shots are 780x1688: the phone size 390x844 at 2x. Keep that size; the page reserves that shape, so a new size would make the page jump.
 - Pitch shots are 780 wide crops with fixed heights (journal 933, knows 1067, talk 833, apps 1067, chat 767). `deck.tsx` lists the sizes.
@@ -54,7 +55,7 @@ ffmpeg -y -i shots/talk.png         -vf crop=780:833:0:86   -c:v libwebp -qualit
 ffmpeg -y -i shots/apps.png         -vf crop=780:1067:0:112 -c:v libwebp -quality 82 $P/apps-light.webp
 ```
 
-Then the share picture, from the repo root: `node scripts/og/build-og.mjs`. Raise the `?v=` number after `og.png` (in the site, pitch and web layouts, `apps/site/src/app/page.tsx` and `os/apps/mobile/public/index.html`) so link previews fetch the new one.
+Then the share picture, from the repo root: `node scripts/og/build-og.mjs`. `node scripts/icons/build-icons.mjs` copies the new shots into the app's install pictures (it also redraws the icons, which come out the same). Raise the `?v=` number after `og.png` (in the site, pitch and web layouts, `apps/site/src/app/page.tsx` and `os/apps/mobile/public/index.html`) so link previews fetch the new one.
 
 ## 4. Make the walkthrough film
 
@@ -65,14 +66,15 @@ From the repo root:
 ```sh
 node video/launch/render.mjs --edit demo --web $PWD/apps/web --cap $PWD/os/artifacts/site-media --out video/launch/build/out --workers 6
 python3 video/launch/audio/make-audio.py --out video/launch/build/audio --only demo
-ffmpeg -framerate 30 -i video/launch/build/out/frames-demo/%05d.jpg -i video/launch/build/audio/demo.wav -map 0:v -map 1:a -vf "scale=in_range=pc:out_range=tv,format=yuv420p" -c:v libx264 -preset slow -crf 20 -maxrate 6M -bufsize 12M -color_range tv -c:a aac -b:a 160k -movflags +faststart -shortest apps/site/public/debo-demo.mp4
-ffmpeg -i apps/site/public/debo-demo.mp4 -c:v libvpx-vp9 -crf 35 -b:v 0 -row-mt 1 -pix_fmt yuv420p -c:a libopus -b:a 128k apps/site/public/debo-demo.webm
-ffmpeg -ss 23 -i apps/site/public/debo-demo.mp4 -frames:v 1 -vf scale=1280:-1 -c:v libwebp -quality 85 apps/site/public/debo-demo-poster.webp
+ffmpeg -framerate 30 -i video/launch/build/out/frames-demo/%05d.jpg -i video/launch/build/audio/demo.wav -map 0:v -map 1:a -vf "scale=in_range=pc:out_range=tv,format=yuv420p" -c:v libx264 -preset slow -crf 20 -maxrate 6M -bufsize 12M -color_range tv -c:a aac -b:a 160k -movflags +faststart -shortest apps/site/public/daksha-demo.mp4
+ffmpeg -i apps/site/public/daksha-demo.mp4 -c:v libvpx-vp9 -crf 35 -b:v 0 -row-mt 1 -pix_fmt yuv420p -c:a libopus -b:a 128k apps/site/public/daksha-demo.webm
+ffmpeg -ss 23 -i apps/site/public/daksha-demo.mp4 -frames:v 1 -vf scale=1280:-1 -c:v libwebp -quality 85 apps/site/public/daksha-demo-poster.webp
 ```
 
-- `--only 8,30` renders just those seconds, for checking. A contact sheet is a quick check by eye: `ffmpeg -i apps/site/public/debo-demo.mp4 -vf "fps=0.5,scale=320:-1,tile=6x5" -frames:v 1 sheet.jpg`.
-- Keep each file under 20 MB (Cloudflare serves static files up to 25 MiB). The November 2026 film is about 4.8 MB.
-- If a clip's length or a caption changes, change `public/debo-demo.en.vtt` (only the words on screen, with times from `timeline.js`) and the walkthrough entry in `apps/site/src/media.ts`: `description`, `seconds` and `uploaded`.
+- `--only 8,30` renders just those seconds, for checking. A contact sheet is a quick check by eye: `ffmpeg -i apps/site/public/daksha-demo.mp4 -vf "fps=0.5,scale=320:-1,tile=6x5" -frames:v 1 sheet.jpg`.
+- Keep each file under 20 MB (Cloudflare serves static files up to 25 MiB). The November 2026 film is about 4.9 MB.
+- Before the rename the films were published as `debo-*.mp4` and so on. Those names answer with a 307 to the `daksha-*` file (`apps/site/src/host-redirect.ts`), so old links keep working.
+- If a clip's length or a caption changes, change `public/daksha-demo.en.vtt` (only the words on screen, with times from `timeline.js`) and the walkthrough entry in `apps/site/src/media.ts`: `description`, `seconds` and `uploaded`.
 
 ## What demo mode cannot show
 

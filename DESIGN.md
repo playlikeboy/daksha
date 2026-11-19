@@ -62,7 +62,7 @@ How it is built:
 - Nothing plays by itself. The film starts, with sound, only when pressed. `preload="none"` means no part of the film downloads before that.
 - Without JavaScript the poster is a plain link to the film file.
 - The skin is the Neutral video skin. Its controls stay dark in both themes, which suits a dark film frame; only the accent, font and corners follow ours.
-- Each film has a "words on screen" track (`public/debo-launch.en.vtt`, `public/debo-demo.en.vtt`). The films have no speech, so the track holds only the words the film shows, timed from the film's own timeline in `video/launch`. When the footage changes, change or remove its track.
+- Each film has a "words on screen" track (`public/daksha-launch.en.vtt`, `public/daksha-demo.en.vtt`). The films have no speech, so the track holds only the words the film shows, timed from the film's own timeline in `video/launch`. When the footage changes, change or remove its track.
 - The long description of each film is a hidden paragraph linked to the player, for screen readers. The same text, with the poster, length and file, goes to search engines as a `VideoObject`.
 
 - Its eyes follow the pointer. This is the one playful moment on a screen. Do not add a second.

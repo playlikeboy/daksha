@@ -4,7 +4,7 @@ The site shows the second launch film (`film2/`, 72 seconds, 1920x1080 plus a 10
 
 ## The second launch film (film2)
 
-Bright white screen, a soft blue glow at the bottom, words that build one at a time with small icons between them, and cards rebuilt from the app (not screenshots) that float, tilt and stack. A line comes back between the cards: "Daksha remembers your days", "Daksha answers from your journal", "Daksha shows you what it knows", "Daksha talks with you", "Daksha remembers your people", "Daksha asks before it acts", and it ends on "Daksha keeps you in control".
+Bright white screen, a soft blue glow at the bottom, words that build one at a time with small icons between them, and cards rebuilt from the app (not screenshots) that float, tilt and stack. A line comes back between the cards: "Daksha remembers your days", "Daksha answers from your journal", "Daksha shows you what it knows", "Daksha talks with you", "Daksha remembers your people", "Daksha asks before it acts", and it ends on "Daksha keeps you in control", then the tomato, the name and www.daksha.life.
 
 - `film2/timeline.js` holds every time: the word blocks, the card scenes and the sound cues.
 - `film2/engine.js` draws a frame for any time t. The card text uses the app's real words ("Looking through your journal…", "Waiting for your yes", "Approve", "Not now", "Fix this memory", "Forget this memory", "Journal, 12 November").
@@ -23,10 +23,10 @@ This writes `build/out/film2-h.mp4`, `build/out/film2-v.mp4` and `build/audio/fi
 
 ```
 cd video/launch/build
-ffmpeg -i out/film2-h.mp4 -i audio/film2.wav -map 0:v -map 1:a -vf "scale=in_range=pc:out_range=tv,format=yuv420p" -c:v libx264 -preset slow -crf 20 -maxrate 6M -bufsize 12M -color_range tv -c:a aac -b:a 160k -movflags +faststart -shortest ../../../apps/site/public/debo-launch.mp4
-ffmpeg -i out/film2-v.mp4 -i audio/film2.wav -map 0:v -map 1:a -vf "scale=in_range=pc:out_range=tv,format=yuv420p" -c:v libx264 -preset slow -crf 20 -maxrate 6M -bufsize 12M -color_range tv -c:a aac -b:a 160k -movflags +faststart -shortest ../../../apps/site/public/debo-launch-vertical.mp4
-ffmpeg -i ../../../apps/site/public/debo-launch.mp4 -c:v libvpx-vp9 -crf 35 -b:v 0 -row-mt 1 -pix_fmt yuv420p -c:a libopus -b:a 128k ../../../apps/site/public/debo-launch.webm
-ffmpeg -ss 22.5 -i ../../../apps/site/public/debo-launch.mp4 -frames:v 1 -vf scale=1280:-1 -c:v libwebp -quality 85 ../../../apps/site/public/debo-launch-poster.webp
+ffmpeg -i out/film2-h.mp4 -i audio/film2.wav -map 0:v -map 1:a -vf "scale=in_range=pc:out_range=tv,format=yuv420p" -c:v libx264 -preset slow -crf 20 -maxrate 6M -bufsize 12M -color_range tv -c:a aac -b:a 160k -movflags +faststart -shortest ../../../apps/site/public/daksha-launch.mp4
+ffmpeg -i out/film2-v.mp4 -i audio/film2.wav -map 0:v -map 1:a -vf "scale=in_range=pc:out_range=tv,format=yuv420p" -c:v libx264 -preset slow -crf 20 -maxrate 6M -bufsize 12M -color_range tv -c:a aac -b:a 160k -movflags +faststart -shortest ../../../apps/site/public/daksha-launch-vertical.mp4
+ffmpeg -i ../../../apps/site/public/daksha-launch.mp4 -c:v libvpx-vp9 -crf 35 -b:v 0 -row-mt 1 -pix_fmt yuv420p -c:a libopus -b:a 128k ../../../apps/site/public/daksha-launch.webm
+ffmpeg -ss 22.5 -i ../../../apps/site/public/daksha-launch.mp4 -frames:v 1 -vf scale=1280:-1 -c:v libwebp -quality 85 ../../../apps/site/public/daksha-launch-poster.webp
 ```
 
 Check it by eye: a contact sheet with one frame a second (`ffmpeg -i film2-h.mp4 -vf "fps=1,scale=384:-1,tile=8x9" -frames:v 1 sheet.jpg`), and a few short stretches frame by frame for smooth motion.
@@ -73,8 +73,8 @@ You need Node 22, ffmpeg (with libx264 and libvpx-vp9), and the Playwright that 
 4. Check the result by eye (a contact sheet with one frame per second is enough), then make the web files from `final-h.mp4`:
 
    ```
-   ffmpeg -i final-h.mp4 -c:v libvpx-vp9 -crf 35 -b:v 0 -row-mt 1 -an -pix_fmt yuv420p apps/site/public/debo-launch.webm
-   ffmpeg -ss 6.2 -i final-h.mp4 -frames:v 1 -vf scale=1280:-1 -c:v libwebp -quality 85 apps/site/public/debo-launch-poster.webp
+   ffmpeg -i final-h.mp4 -c:v libvpx-vp9 -crf 35 -b:v 0 -row-mt 1 -an -pix_fmt yuv420p apps/site/public/daksha-launch.webm
+   ffmpeg -ss 6.2 -i final-h.mp4 -frames:v 1 -vf scale=1280:-1 -c:v libwebp -quality 85 apps/site/public/daksha-launch-poster.webp
    ```
 
    Then add the sound to both cuts as shown under "Sound" below (this also puts them in `apps/site/public`).
@@ -90,9 +90,9 @@ python3 video/launch/audio/make-audio.py --out video/launch/build/audio
 It writes `launch.wav` and `demo.wav` (48 kHz stereo, about -16 LUFS, true peak under -1.5 dBTP) and `cues.json`. Then add the sound to the finished video. The launch film's picture does not need to be made again:
 
 ```
-ffmpeg -i final-h.mp4 -i build/audio/launch.wav -map 0:v -map 1:a -c:v copy -c:a aac -b:a 160k -movflags +faststart -shortest apps/site/public/debo-launch.mp4
-ffmpeg -i final-v.mp4 -i build/audio/launch.wav -map 0:v -map 1:a -c:v copy -c:a aac -b:a 160k -movflags +faststart -shortest apps/site/public/debo-launch-vertical.mp4
-ffmpeg -i apps/site/public/debo-launch.webm -i build/audio/launch.wav -map 0:v -map 1:a -c:v copy -c:a libopus -b:a 128k -shortest out.webm
+ffmpeg -i final-h.mp4 -i build/audio/launch.wav -map 0:v -map 1:a -c:v copy -c:a aac -b:a 160k -movflags +faststart -shortest apps/site/public/daksha-launch.mp4
+ffmpeg -i final-v.mp4 -i build/audio/launch.wav -map 0:v -map 1:a -c:v copy -c:a aac -b:a 160k -movflags +faststart -shortest apps/site/public/daksha-launch-vertical.mp4
+ffmpeg -i apps/site/public/daksha-launch.webm -i build/audio/launch.wav -map 0:v -map 1:a -c:v copy -c:a libopus -b:a 128k -shortest out.webm
 ```
 
 Both cuts of the film share one edit, so they share one sound track.

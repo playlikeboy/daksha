@@ -63,8 +63,9 @@ To list every file again: `git grep -Iil debo`. To count by pattern: `git grep -
 | The voice agent's API address | `apps/voice-agent/src/main.ts` | Default `https://api.daksha.life`. It also reads `DAKSHA_URL` first, then `DEBO_URL`. |
 | The sign-in email sender | `apps/web/src/lib/email.ts` | `signin@mail.daksha.life`, named Daksha. `DAKSHA_EMAIL_FROM` can override the address. |
 | The web-push contact | `os/apps/server/src/push.ts` | Default subject `https://daksha.life`. `DAKSHA_OS_VAPID_*` are read first, then `DEBO_OS_VAPID_*`. |
-| The share images | `scripts/og/og.html` and the four `og.png` files it makes | Rebuilt with `node scripts/og/build-og.mjs`: the name on them is Daksha. The phone screenshot inside them is an old one and still shows Debo (see "Possible later steps"). |
-| The launch film sources | `video/launch` | The words, so the next render says Daksha. The films already published still say Debo (see below). |
+| The share images | `scripts/og/og.html` and the four `og.png` files it makes | Rebuilt with `node scripts/og/build-og.mjs`: the name on them, and the screenshot inside them, say Daksha. Asked for as `og.png?v=4`. |
+| The launch film sources | `video/launch` | The words. The launch film's end card now shows www.daksha.life. |
+| The films, the screenshots and the deck PDF | `apps/site/public/daksha-launch.*`, `daksha-launch-vertical.mp4`, `daksha-demo.*`, the `shots/` of the site and pitch, the app's install `screenshots/`, `apps/pitch/public/daksha-pitch-deck.pdf` | Made again from the renamed app (demo mode, made-up content) and the renamed film sources (`docs/MEDIA.md`). The old `debo-*` film and PDF addresses answer with a 307 to the new files (`apps/site/src/host-redirect.ts`, `apps/pitch/src/host-redirect.ts`). |
 | The APK | `release-mobile.yml`, `apps/site/src/links.ts`, README | Each release publishes `daksha-<version>.apk` and `daksha.apk`, and the site, README and download links point at `.../releases/latest/download/daksha.apk`. A copy named `debo.apk` is still uploaded, so old links keep working. The iOS Simulator zip is `daksha-<version>-ios-simulator.zip`. |
 | Download file names | `os/apps/server/src/account.ts`, `os/apps/mobile/src/neon-gate.tsx`, `apps/web/src/app/api/export/route.ts` | `daksha-data.json` and `daksha-export-<date>.zip` |
 | The mascot component in the old web app | `apps/web/src/components/debo.tsx` | The React component is now called `Daksha` (the file keeps its name). |
@@ -109,14 +110,11 @@ What a person notices: on my.daksha.life they sign in once more, because browser
 | File and folder names, code identifiers | `debo-*.tsx`, `os/apps/server/src/debo/`, `DeboService`, `deboApi`, CSS classes like `debo-eye` | Never seen by a person. Renaming them is churn with merge risk. |
 | Wire names between the app, API and voice agent | LiveKit agent `debo-voice`, text topic `debo.sources`, RPC `debo.interrupt`, API paths `/api/debo/*`, error code `NOT_A_DEBO_ACCOUNT` | Installed phone apps and the deployed voice agent use them. Changing one side breaks the other. |
 | The LiveKit project | `apps/voice-agent/livekit.toml` `subdomain = "https-debo-life-..."` | It is the name of an existing LiveKit Cloud project. |
-| Screenshots of the app | `apps/site/public/shots/*`, `os/apps/mobile/public/screenshots/*`, the screenshot inside `og.png`, the pitch's `shots/` | They are pictures of the live app, which still says Debo until this is deployed. |
-| Published media files | `debo-launch.mp4`, `debo-demo.mp4`, their posters, `debo.svg`, `debo-banner.svg`, `debo-pitch-deck.pdf` | Their addresses are linked from the README and elsewhere. The films and the PDF have the old name drawn into them; see "Possible later steps". |
-| Film descriptions and captions on the landing page | `apps/site/src/media.ts`, `apps/site/public/debo-launch.en.vtt`, `apps/site/public/debo-demo.en.vtt` | They describe the films as they are, and the films still say Debo. Each description starts by saying the film was made before the rename. Another job makes the films again; then these change with them. |
+| Logo file names | `debo.svg`, `debo-banner.svg` | Their addresses are linked from the README and elsewhere. They draw the tomato, not the name. |
 
 ### Possible later steps
 
-- Re-render the launch films (`video/launch`) and the pitch deck PDF so they say Daksha, then update `apps/site/src/media.ts` and the two `.vtt` files and remove them from the allowlist.
-- Take new screenshots of the app once it is deployed (site, pitch, install screenshots), then run `node scripts/og/build-og.mjs` again.
+- Retake the pitch's `shots/chat-light.webp` (a real answer with a source chip, in the app's old look; it does not show the name) when a demo with a model is safe to run (`docs/MEDIA.md`).
 - Rename `@debo/*` packages to `@daksha/*` (mechanical: package.json names, imports, `pnpm-lock.yaml`, tsconfig paths).
 - New Workers named `daksha-*` with the same routes, then delete the `debo-*` ones.
 - Move `PUBLIC_API_URL` to `api.daksha.life` once the new callbacks are registered (see `docs/DOMAINS.md`).
@@ -150,9 +148,6 @@ README.md | Debo is now Daksha
 docs/DECISIONS.md | Debo is renamed Daksha|debo\.life
 docs/DOMAINS.md | debo\.life
 apps/site/src/brand.ts | it was Debo until the rename
-apps/site/src/media.ts | films were made before the rename|caption files say Debo|still says Debo
-apps/site/public/debo-launch.en.vtt
-apps/site/public/debo-demo.en.vtt
 apps/web/src/app/privacy/page.tsx | Daksha used to be called Debo
 apps/web/src/lib/host-redirect.ts | debo\.life
 apps/web/src/lib/host-redirect.test.ts | debo\.life|DEBO\.LIFE
