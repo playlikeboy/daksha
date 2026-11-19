@@ -178,7 +178,7 @@ export function RecordingPanel({
   const limitLine = `Up to ${Math.round(status.limits.maxBytes / (1024 * 1024))} MB and ${days} minutes each.`;
 
   return (
-    <Card style={{ gap: spacing[3], backgroundColor: colors.subtle }}>
+    <Card style={{ gap: spacing[3] }}>
       <ErrorNotice error={error} />
 
       {stage === "choose" && (

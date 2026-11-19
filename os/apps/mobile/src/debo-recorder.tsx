@@ -364,7 +364,7 @@ export function Recorder({
                         ? "Recording. Speak as you normally would."
                         : preview?.level
                           ? "Your microphone is on so you can see it hears you. Nothing is kept until you save."
-                          : "Press the red button to start."}
+                          : "Press Start recording below."}
                   </Text>
                 </View>
               </View>
@@ -460,7 +460,7 @@ function Timer({ elapsed, stage, size, onDark, pill }: { elapsed: number; stage:
   const color = onDark ? colors.onInk : colors.text;
   return (
     <View
-      accessibilityLiveRegion="polite"
+      // No live region: the time changes every second, and reading it out each time drowns everything else.
       accessibilityLabel={`${live ? "Recording" : stage === "paused" ? "Paused" : "Ready"}, ${formatDuration(elapsed)}`}
       style={[
         s.row,
