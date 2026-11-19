@@ -295,6 +295,8 @@ export function TaskDetail({ taskId }: { taskId: string }) {
   const [answer, setAnswer] = useState("");
   const [fieldJson, setFieldJson] = useState("");
   const [showFieldJson, setShowFieldJson] = useState(false);
+  /** Stopping a task asks once more, so a stray tap does not end work in progress. */
+  const [sureCancel, setSureCancel] = useState(false);
   const [fields, setFields] = useState<Record<string, string | boolean>>({});
   const task = data?.tasks.find((item) => item.id === taskId) || detail?.task;
   const milestone = data?.goals
@@ -449,9 +451,14 @@ export function TaskDetail({ taskId }: { taskId: string }) {
                 danger
                 icon={X}
                 busy={busy}
-                onPress={() => void act("control", { action: "cancel" })}
+                onPress={() => (sureCancel ? void act("control", { action: "cancel" }) : setSureCancel(true))}
               >
-                Cancel task
+                {sureCancel ? "Yes, stop this task" : "Cancel task"}
+              </Button>
+            )}
+            {activeTask(task) && sureCancel && (
+              <Button small disabled={busy} onPress={() => setSureCancel(false)}>
+                Keep going
               </Button>
             )}
           </View>
