@@ -1,6 +1,6 @@
 // Upload sessions for custom people: the consent tick, the limits, where files go in the bucket,
 // and how they are deleted. Exported on their own so other sources (voice notes and call
-// recordings, Workstream D) use the same rules.
+// recordings, voice-clone/) use the same rules.
 //
 // - Files go to the private media bucket under `persona-uploads/<owner>/<session>/`, a
 //   temporary folder apart from journal recordings. Nothing a person sends names a key.

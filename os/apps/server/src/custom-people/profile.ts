@@ -2,7 +2,7 @@
 //
 // `buildProfile` is the one place every source meets: chat messages (with the chosen sender),
 // photo notes, video transcripts, and lines another source already knows are the person's own
-// (`spokenLines`, from voice notes and call recordings with the speakers separated; Workstream D).
+// (`spokenLines`, from voice notes and call recordings with the speakers separated; voice-clone/).
 // Only lines written or said by the person can become example lines, and the model's picks are
 // checked against them word for word.
 import type { ChatMessage } from "./whatsapp.ts";

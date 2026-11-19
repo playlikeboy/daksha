@@ -156,10 +156,11 @@ How to build, what the workflow does and what is needed for the stores: [`os/app
 From [the privacy page](https://debo.life/privacy), which is the place to read the exact words:
 
 - **Neon** runs the database, sign-in and file storage (United States, Amazon Web Services us-east-2). The Neon AI Gateway, with models run by Databricks, turns text into numbers for search by meaning.
-- **Anthropic** writes the answers from the pieces of your entries that match your question.
+- **Anthropic** writes the answers from the pieces of your entries that match your question. For a custom person, it also reads the scrubbed chat lines and the photos you add, and writes their profile.
 - **Mem0** stores the memories Debo picks out of your entries.
-- **Cloudflare** runs the websites, sends sign-in emails, stores voice notes and videos in a private bucket, and writes out their words (Workers AI, Whisper).
+- **Cloudflare** runs the websites, sends sign-in emails, stores voice notes and videos in a private bucket, and writes out their words (Workers AI, Whisper). For a custom person's videos it writes out the words the same way, and for their voice notes and calls it tells the voices apart (Workers AI, Deepgram Nova-3). The raw files are deleted after reading, and the other speakers' words are thrown away.
 - **LiveKit** carries a voice call; it uses Deepgram to turn speech into text and Cartesia to turn Debo's answer into speech. The terms of those three on training and keeping audio have not been checked yet.
+- **Cartesia** also keeps a copy of a custom person's voice, only if you choose to make one, until you delete it (or the person, or your account).
 
 Debo does not sell your data, show ads, or train AI on it. It is not end-to-end encrypted. Rules for how data is handled: [`docs/PRIVACY-AND-TRUST.md`](./docs/PRIVACY-AND-TRUST.md).
 

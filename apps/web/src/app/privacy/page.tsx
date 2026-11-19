@@ -37,7 +37,7 @@ export default function PrivacyPage() {
       </a>
 
       <h1 className="h-section mt-8">How Debo handles your data</h1>
-      <p className="mt-4 text-[1.125rem] text-ink-soft">Last updated 15 November 2026.</p>
+      <p className="mt-4 text-[1.125rem] text-ink-soft">Last updated 19 November 2026.</p>
 
       <div className="mt-8 max-w-[40rem] rounded-[24px] border-2 border-ink bg-paper p-6">
         <p>
@@ -350,6 +350,79 @@ export default function PrivacyPage() {
             <>A recording can be up to 200 MB and 60 minutes. You can add up to 4 hours and 40 recordings a day.</>,
           ]}
         />
+        <h3 className="mt-6 font-semibold">Pictures Debo makes</h3>
+        <p>In the new app you can ask Debo to make a picture, in chat or on a call. If pictures are not switched on, Debo says so and none of the below applies.</p>
+        <List
+          items={[
+            <>
+              The words describing the picture go to Cloudflare Workers AI (a picture model called FLUX.1 schnell), which
+              draws it. Cloudflare says it does not use content processed by Workers AI to train AI models. If you set
+              your own OpenRouter picture model (below), the words go to OpenRouter and the model you picked instead.
+            </>,
+            <>
+              The picture is kept in the same private Cloudflare R2 bucket as recordings, and shown to you with a link
+              that stops working after an hour. Debo keeps the words it was made from, when, and which service made it.
+              This is in &ldquo;Download my data&rdquo;.
+            </>,
+            <>
+              Debo refuses sexual pictures and pictures meant to fool people, and the picture service has its own
+              safety filter. You can make up to 20 pictures a day on Debo&rsquo;s service.
+            </>,
+            <>You can delete a picture, which removes the file too. &ldquo;Delete my data&rdquo; removes them all.</>,
+          ]}
+        />
+        <h3 className="mt-6 font-semibold">People you make</h3>
+        <p>
+          In the new app you can make your own people to talk to, such as a friend, a family member, someone who has died,
+          or a made-up character. You can describe them in words, or add a WhatsApp chat export, photos and videos so Debo
+          learns how they talk. You can also add voice notes and call recordings of them, described in the next part. This is an
+          early version. If you never make anyone, none of this applies.
+        </p>
+        <List
+          items={[
+            <>
+              A chat export holds other people&rsquo;s messages, not only yours. Before you add files you tick a box saying
+              you&rsquo;re allowed to use them and it&rsquo;s for your own private use. Debo keeps when you ticked it and
+              the words you agreed to.
+            </>,
+            <>
+              The files go to the same private Cloudflare R2 bucket as recordings, in a separate temporary folder. Debo reads
+              them once, then deletes them, whether reading worked or not. If anything is left behind, it is deleted within
+              24 hours.
+            </>,
+            <>
+              Debo reads only the last 5,000 messages of a chat, and uses only the messages of the person you pick. Before
+              any AI reads them, Debo takes out phone numbers, emails, one-time codes, card and account numbers, links and
+              addresses. This is a careful filter, not a guarantee: unusual formats can slip through.
+            </>,
+            <>
+              The cleaned messages and the photos go to Anthropic (Claude), which describes each photo in a sentence or
+              two (it never says who anyone is, and does no face recognition) and writes a short profile. If you set your
+              own Anthropic key, they go on your key instead; otherwise, if Anthropic fails, they go to the Neon AI Gateway, as
+              for answers. The sound of each video goes to Cloudflare Workers AI
+              (Whisper) to be written out, as for recordings. Anthropic&rsquo;s business terms say it may not train its
+              AI on what we send it, and Cloudflare says it does not use content processed by Workers AI to train AI
+              models.
+            </>,
+            <>
+              Debo keeps only the profile: a short summary of how they talk, up to 40 lines they really wrote or said,
+              nicknames, languages and short facts, each with where it came from, and the lines kept from their voice notes
+              and calls. You can see it, remove any line or fact, change
+              the person or delete them in the app, under &ldquo;People you made&rdquo;. Profiles are kept until you
+              delete them, are in &ldquo;Download my data&rdquo;, and are deleted with your account.
+            </>,
+            <>
+              When you talk to one of them, their profile is sent to the AI with your messages, like a role. They are
+              always honest that they are an AI if you sincerely ask, never sexual, drop the role if you seem to be in
+              crisis, and never send messages or act outside Debo as that person.
+            </>,
+            <>
+              You can give them a face from the face builder. A face is only drawing choices (a shape, colours, hair and
+              small extras), never a photo. Faces are kept in your account, are in &ldquo;Download my data&rdquo;, and are
+              deleted with your account.
+            </>,
+          ]}
+        />
         <h3 className="mt-6 font-semibold">Voice notes and call recordings of a custom person, and voice copies</h3>
         <p>In the new app you can add voice notes or call recordings of a custom person you made, so Debo learns how they talk, and you can choose to copy their voice for your calls with them. If you never add one, none of this applies.</p>
         <List
@@ -396,72 +469,6 @@ export default function PrivacyPage() {
               copy at Cartesia, then in Debo. If the key that made it is gone, Debo removes it on its side and tells you
               to delete it in your Cartesia account. The person&rsquo;s kept lines and the consent ticks are in
               &ldquo;Download my data&rdquo; and are deleted with the custom person or your account.
-            </>,
-          ]}
-        />
-        <h3 className="mt-6 font-semibold">Pictures Debo makes</h3>
-        <p>In the new app you can ask Debo to make a picture, in chat or on a call. If pictures are not switched on, Debo says so and none of the below applies.</p>
-        <List
-          items={[
-            <>
-              The words describing the picture go to Cloudflare Workers AI (a picture model called FLUX.1 schnell), which
-              draws it. Cloudflare says it does not use content processed by Workers AI to train AI models. If you set
-              your own OpenRouter picture model (below), the words go to OpenRouter and the model you picked instead.
-            </>,
-            <>
-              The picture is kept in the same private Cloudflare R2 bucket as recordings, and shown to you with a link
-              that stops working after an hour. Debo keeps the words it was made from, when, and which service made it.
-              This is in &ldquo;Download my data&rdquo;.
-            </>,
-            <>
-              Debo refuses sexual pictures and pictures meant to fool people, and the picture service has its own
-              safety filter. You can make up to 20 pictures a day on Debo&rsquo;s service.
-            </>,
-            <>You can delete a picture, which removes the file too. &ldquo;Delete my data&rdquo; removes them all.</>,
-          ]}
-        />
-        <h3 className="mt-6 font-semibold">People you make</h3>
-        <p>
-          In the new app you can make your own people to talk to, such as a friend, a family member, someone who has died,
-          or a made-up character. You can describe them in words, or add a WhatsApp chat export, photos and videos so Debo
-          learns how they talk. This is an early version. If you never make anyone, none of this applies.
-        </p>
-        <List
-          items={[
-            <>
-              A chat export holds other people&rsquo;s messages, not only yours. Before you add files you tick a box saying
-              you&rsquo;re allowed to use them and it&rsquo;s for your own private use. Debo keeps when you ticked it and
-              the words you agreed to.
-            </>,
-            <>
-              The files go to the same private Cloudflare R2 bucket as recordings, in a separate temporary folder. Debo reads
-              them once, then deletes them, whether reading worked or not. If anything is left behind, it is deleted within
-              24 hours.
-            </>,
-            <>
-              Debo reads only the last 5,000 messages of a chat, and uses only the messages of the person you pick. Before
-              any AI reads them, Debo takes out phone numbers, emails, one-time codes, card and account numbers, links and
-              addresses. This is a careful filter, not a guarantee: unusual formats can slip through.
-            </>,
-            <>
-              The cleaned messages and the photos go to Anthropic (Claude), which describes each photo in a sentence or
-              two (it never says who anyone is, and does no face recognition) and writes a short profile. If you set your
-              own Anthropic key, they go on your key instead; otherwise, if Anthropic fails, they go to the Neon AI Gateway, as
-              for answers. The sound of each video goes to Cloudflare Workers AI
-              (Whisper) to be written out, as for recordings. Anthropic&rsquo;s business terms say it may not train its
-              AI on what we send it, and Cloudflare says it does not use content processed by Workers AI to train AI
-              models.
-            </>,
-            <>
-              Debo keeps only the profile: a short summary of how they talk, up to 40 lines they really wrote, nicknames,
-              languages and short facts, each with where it came from. You can see it, remove any line or fact, change
-              the person or delete them in the app, under &ldquo;People you made&rdquo;. Profiles are kept until you
-              delete them, are in &ldquo;Download my data&rdquo;, and are deleted with your account.
-            </>,
-            <>
-              When you talk to one of them, their profile is sent to the AI with your messages, like a role. They are
-              always honest that they are an AI if you sincerely ask, never sexual, drop the role if you seem to be in
-              crisis, and never send messages or act outside Debo as that person.
             </>,
           ]}
         />
