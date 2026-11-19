@@ -9,7 +9,8 @@
 // os/docs/JOURNAL-MEDIA.md.
 import { AudioLines, Check, Mic, Paperclip, Square, Video } from "lucide-react-native";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { Platform, Pressable, Text, TextInput, View } from "react-native";
+import { Platform, Pressable, View } from "react-native";
+import { Text, TextInput } from "./text";
 import { deboApi, errorText } from "./debo-api";
 import { type Dictation, recordingSupport, startDictation } from "./debo-capture";
 import { type DeboStatus, type EntryView, happenedAtFor, todayInput, wordCountLabel } from "./debo-data";
@@ -175,6 +176,13 @@ export function Composer({ status, onSaved }: { status: DeboStatus; onSaved: () 
   }
 
   const isToday = day === todayInput();
+  // "Wednesday 12 November" instead of "2026-11-12". Noon, so no time zone moves the day.
+  const dayWords = (() => {
+    const date = new Date(`${day}T12:00:00`);
+    return Number.isNaN(date.getTime())
+      ? day
+      : date.toLocaleDateString("en-GB", { weekday: "long", day: "numeric", month: "long" });
+  })();
   const busyWriting = writing > 0;
 
   return (
@@ -239,7 +247,7 @@ export function Composer({ status, onSaved }: { status: DeboStatus; onSaved: () 
             <Text style={[s.text, { color: colors.blueText, flex: 1, minWidth: 140 }]}>
               {busyWriting ? "Listening. Writing out what you said…" : "Listening. Speak now."}
             </Text>
-            <Button primary small icon={Square} onPress={() => void stopSpeaking()}>
+            <Button small icon={Square} onPress={() => void stopSpeaking()}>
               Stop
             </Button>
           </View>
@@ -253,8 +261,8 @@ export function Composer({ status, onSaved }: { status: DeboStatus; onSaved: () 
               Nothing is kept. The microphone is only on while you see “Listening”.
             </Text>
             <View style={[s.row, { gap: spacing[2], flexWrap: "wrap" }]}>
+              {/* Two equal buttons: "Not now" is never smaller or greyer than the yes (DESIGN.md). */}
               <Button
-                primary
                 icon={Mic}
                 onPress={() => {
                   rememberConsent();
@@ -329,12 +337,12 @@ export function Composer({ status, onSaved }: { status: DeboStatus; onSaved: () 
       <View style={[s.between, { gap: spacing[3], flexWrap: "wrap" }]}>
         <Pressable
           accessibilityRole="button"
-          accessibilityLabel={isToday ? "When did this happen? Today. Change the day." : `When did this happen? ${day}. Change the day.`}
+          accessibilityLabel={isToday ? "When did this happen? Today. Change the day." : `When did this happen? ${dayWords}. Change the day.`}
           onPress={() => setDayOpen(!dayOpen)}
           style={{ minHeight: spacing[11], justifyContent: "center" }}
         >
           <Text style={[s.small, { color: colors.blueDark, fontWeight: "600" }]}>
-            {isToday ? "Happened today" : `Happened ${day}`} · {dayOpen ? "Done" : "Change the day"}
+            {isToday ? "Happened today" : `Happened ${dayWords}`} · {dayOpen ? "Done" : "Change the day"}
           </Text>
         </Pressable>
         <Button primary icon={Check} busy={saving} disabled={!text.trim()} onPress={() => void save()}>
@@ -342,7 +350,10 @@ export function Composer({ status, onSaved }: { status: DeboStatus; onSaved: () 
         </Button>
       </View>
       {dayOpen && <DayField value={day} onChange={setDay} />}
-      {Platform.OS === "web" && <Text style={s.small}>Tip: press Ctrl or ⌘ with Enter to save.</Text>}
+      {/* Only where there is a keyboard and a mouse: a phone has no Ctrl key to press. */}
+      {Platform.OS === "web" && globalThis.matchMedia?.("(pointer: fine)").matches && (
+        <Text style={s.small}>Tip: press Ctrl or ⌘ with Enter to save.</Text>
+      )}
         </>
       )}
     </View>

@@ -2,7 +2,8 @@
 // the shared face. It only opens on a local sample install, at `?face=gallery`.
 // Add `&only=anaya` to show one character, and `&still=1` to hold them all still.
 import { useState } from "react";
-import { ScrollView, Text, TextInput, View } from "react-native";
+import { ScrollView, View } from "react-native";
+import { Text, TextInput } from "./text";
 import { deboCharacter, useDeboCharacter } from "./debo-character-store";
 import { characterIds, characters } from "./debo-characters";
 import { DeboFace } from "./debo-face";

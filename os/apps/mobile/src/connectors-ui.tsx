@@ -3,7 +3,8 @@
 // Daksha never sees the password. Colours and sizes come from ui.tsx tokens only.
 import { Link2, Search, ShieldCheck } from "lucide-react-native";
 import { useCallback, useEffect, useRef, useState } from "react";
-import { ActivityIndicator, AppState, Image, Platform, Text, View } from "react-native";
+import { ActivityIndicator, AppState, Image, Platform, View } from "react-native";
+import { Text } from "./text";
 import {
   type AppConnection,
   type AppItem,
@@ -267,14 +268,14 @@ export function ConnectAppsSection({ query }: { query: string }) {
               style={[s.row, { gap: spacing[2], flexWrap: "wrap" }]}
               accessibilityLabel="Categories"
             >
-              <Button small primary={!category} onPress={() => setCategory(undefined)}>
+              <Button small selected={!category} onPress={() => setCategory(undefined)}>
                 All
               </Button>
               {current.page.categories.map((c) => (
                 <Button
                   key={c.name}
                   small
-                  primary={category?.toLowerCase() === c.name.toLowerCase()}
+                  selected={category?.toLowerCase() === c.name.toLowerCase()}
                   onPress={() => setCategory(c.name)}
                 >
                   {c.name}
@@ -424,11 +425,11 @@ function AppRow({
                 {`Open ${item.name} sign-in again`}
               </Button>
               <Button small disabled={busy} onPress={() => onDisconnect(connection)}>
-                Cancel
+                Stop connecting
               </Button>
             </>
           ) : item.connectable ? (
-            <Button small primary icon={Link2} busy={busy} onPress={onConnect}>
+            <Button small icon={Link2} busy={busy} onPress={onConnect}>
               {state ? `Connect ${item.name} again` : `Connect ${item.name}`}
             </Button>
           ) : null}

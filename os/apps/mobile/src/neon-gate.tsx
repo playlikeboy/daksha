@@ -13,12 +13,10 @@ import {
   AppState,
   Platform,
   Pressable,
-  ScrollView,
   Share,
-  Text,
   View,
 } from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
+import { Text } from "./text";
 import { API_URL, FuseApi } from "./api";
 import {
   AuthProblem,
@@ -29,7 +27,8 @@ import {
 } from "./neon-auth";
 import { forgetDeviceReminders } from "./debo-device-reminders";
 import { clearSessionToken, loadSessionToken, saveSessionToken } from "./session-store";
-import { Button, Card, colors, ErrorNotice, Field, fontSize, Mascot, s } from "./ui";
+import { Button, Card, colors, ErrorNotice, Field, s, spacing } from "./ui";
+import { WelcomeFrame } from "./welcome-frame";
 
 interface Account {
   email: string;
@@ -179,8 +178,13 @@ export function NeonGate({
       {phase === "loading" ? (
         <ActivityIndicator color={colors.blueDark} accessibilityLabel="Opening Daksha" />
       ) : phase === "offline" ? (
-        <Card style={{ width: "100%" }}>
-          <ErrorNotice error={notice} />
+        <Card style={{ width: "100%", gap: spacing[3] }}>
+          <ErrorNotice
+            error={
+              notice ||
+              "I can't reach Daksha right now. Check your internet, then press Try again. I'll also try again by myself in 30 seconds."
+            }
+          />
           <Button primary onPress={() => void refresh()}>
             Try again
           </Button>
@@ -195,34 +199,7 @@ export function NeonGate({
 
 function Frame({ children }: { children: ReactNode }) {
   return (
-    <SafeAreaView style={{ flex: 1, backgroundColor: colors.canvas }}>
-      <ScrollView
-        keyboardShouldPersistTaps="handled"
-        contentContainerStyle={{
-          flexGrow: 1,
-          justifyContent: "center",
-          alignItems: "center",
-          padding: 16,
-        }}
-      >
-        <View style={{ width: "100%", maxWidth: 420, gap: 18, alignItems: "center" }}>
-          <Mascot size={64} />
-          <Text
-            accessibilityRole="header"
-            style={{ fontSize: fontSize["2xl"], color: colors.text, letterSpacing: -1, fontWeight: "500" }}
-          >
-            Welcome to Daksha.
-          </Text>
-          <Text style={[s.muted, { textAlign: "center", marginTop: -8 }]}>
-            A friendly place to keep your days and ask about them.
-          </Text>
-          {children}
-          <Text style={[s.small, { textAlign: "center", maxWidth: 340 }]}>
-            What you give Daksha is yours. You can download it or delete it all at any time.
-          </Text>
-        </View>
-      </ScrollView>
-    </SafeAreaView>
+    <WelcomeFrame subtitle="A friendly place to keep your days and ask about them.">{children}</WelcomeFrame>
   );
 }
 
@@ -290,8 +267,8 @@ function AuthScreen({
 
   if (codeFor)
     return (
-      <Card style={{ width: "100%" }}>
-        <Text accessibilityRole="header" style={[s.heading, { marginBottom: 8 }]}>
+      <Card style={{ width: "100%", padding: spacing[6] }}>
+        <Text accessibilityRole="header" style={[s.title, { marginBottom: spacing[2] }]}>
           Confirm your email
         </Text>
         <Text style={[s.muted, { marginBottom: 16 }]}>
@@ -330,8 +307,8 @@ function AuthScreen({
     );
 
   return (
-    <Card style={{ width: "100%" }}>
-      <Text accessibilityRole="header" style={[s.heading, { marginBottom: 14 }]}>
+    <Card style={{ width: "100%", padding: spacing[6] }}>
+      <Text accessibilityRole="header" style={[s.title, { marginBottom: spacing[5] }]}>
         {mode === "sign-up" ? "Create your account" : "Sign in"}
       </Text>
       {mode === "sign-up" && (
@@ -371,7 +348,7 @@ function AuthScreen({
       )}
       <ErrorNotice error={error} />
       <Status note={note} />
-      <Button primary busy={busy} onPress={submit}>
+      <Button primary busy={busy} onPress={submit} style={{ minHeight: spacing[12], marginTop: spacing[1] }}>
         {mode === "sign-up" ? "Create my account" : "Sign in"}
       </Button>
       <Pressable
@@ -384,7 +361,7 @@ function AuthScreen({
         }}
         style={{ minHeight: 44, justifyContent: "center", marginTop: 8 }}
       >
-        <Text style={[s.muted, { textAlign: "center", color: colors.blueDark }]}>
+        <Text style={[s.text, { textAlign: "center", fontWeight: "600", textDecorationLine: "underline" }]}>
           {mode === "sign-in" ? "New here? Create an account" : "Already have an account? Sign in"}
         </Text>
       </Pressable>

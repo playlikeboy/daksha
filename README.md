@@ -1,5 +1,5 @@
 > [!NOTE]
-> **Debo is now Daksha.** Same app, new name, new home at https://daksha.life. The old debo.life addresses still work and lead to the new ones. What changed and what kept its old name for compatibility is in [`docs/RENAME.md`](./docs/RENAME.md).
+> **Debo is now Daksha.** Same app, new name, new home at https://www.daksha.life. The old debo.life addresses still work and lead to the new ones. What changed and what kept its old name for compatibility is in [`docs/RENAME.md`](./docs/RENAME.md); the addresses are in [`docs/DOMAINS.md`](./docs/DOMAINS.md).
 
 <p align="center">
   <img src="./docs/assets/debo-banner.svg" alt="Daksha, a small red tomato, next to the words: Daksha, a friendly assistant that remembers your life." width="100%">
@@ -8,7 +8,7 @@
 <p align="center"><strong>A friendly assistant that remembers your life, and always shows where it learned it.</strong></p>
 
 <p align="center">
-  <a href="https://about.daksha.life">Website</a> ·
+  <a href="https://www.daksha.life">Website</a> ·
   <a href="https://my.daksha.life">Open the app</a> ·
   <a href="https://daksha.life/privacy">Privacy</a> ·
   <a href="https://github.com/playlikeboy/daksha/releases/latest">Android app</a> ·
@@ -18,14 +18,14 @@
 ## Watch the launch film
 
 <p align="center">
-  <a href="https://about.daksha.life/debo-launch.mp4">
-    <img src="https://about.daksha.life/debo-launch-poster.webp" alt="Play the Daksha launch film, about a minute long" width="100%">
+  <a href="https://www.daksha.life/debo-launch.mp4">
+    <img src="https://www.daksha.life/debo-launch-poster.webp" alt="Play the Daksha launch film, about a minute long" width="100%">
   </a>
 </p>
 
-<p align="center"><a href="https://about.daksha.life/debo-launch.mp4">Play the launch film (about a minute)</a> · <a href="https://about.daksha.life/debo-demo.mp4">the full app walkthrough</a></p>
+<p align="center"><a href="https://www.daksha.life/debo-launch.mp4">Play the launch film (about a minute)</a> · <a href="https://www.daksha.life/debo-demo.mp4">the full app walkthrough</a></p>
 
-The launch film is an animation: its cards are redrawn from the app's own screens and words, and it shows only what the app does today. The walkthrough is a real screen recording of the live app with a demo account. All names and entries in both are made-up sample text.
+The launch film is an animation: its cards are redrawn from the app's own screens and words, and it shows only what the app does today. The walkthrough is recorded from the app in demo mode (see `docs/MEDIA.md`). All names and entries in both are made-up sample text.
 
 ## What Daksha is
 
@@ -50,7 +50,7 @@ You can also change settings just by asking: "talk a bit slower", "call yourself
 
 | What | Address |
 |---|---|
-| Landing page | https://about.daksha.life (https://daksha.life redirects people here) |
+| Landing page | https://www.daksha.life (https://daksha.life redirects people here) |
 | The app (web, installable to a phone's home screen) | https://my.daksha.life |
 | The API the app talks to | https://api.daksha.life |
 | Investor site | https://pitch.daksha.life |
@@ -65,7 +65,7 @@ There are two pnpm workspaces. The root one holds the landing page and the older
 
 ```
 apps/                    root workspace
-  site/                  Landing page (about.daksha.life). Next.js on Cloudflare Workers, one plain stylesheet.
+  site/                  Landing page (www.daksha.life). Next.js on Cloudflare Workers, one plain stylesheet.
   pitch/                 Investor site (pitch.daksha.life). Same stack.
   web/                   The retired first app. Its screens now send people to the new app.
                          It still serves /privacy (daksha.life/privacy) and the /api routes.
@@ -135,7 +135,7 @@ Every deploy is a GitHub Actions workflow in [`.github/workflows`](./.github/wor
 | Workflow | Runs on | Deploys |
 |---|---|---|
 | `deploy.yml` | push to `main` | `apps/web` to daksha.life (also applies database migrations) |
-| `deploy-site.yml` | push to `main` that touches `apps/site` | the landing page, about.daksha.life |
+| `deploy-site.yml` | push to `main` that touches `apps/site` | the landing page, www.daksha.life |
 | `deploy-pitch.yml` | push to `main` that touches `apps/pitch` | pitch.daksha.life |
 | `deploy-os.yml` | push to `main` that touches `os/` or `packages/` | the API (api.daksha.life), the browser worker and the web app (my.daksha.life) on Cloudflare |
 | `release-mobile.yml` | a push to `main` that changes the phone app, or a pushed tag `v*` (builds only on a manual run or on the `mobile-release` branch) | builds the phone apps and publishes a GitHub Release |

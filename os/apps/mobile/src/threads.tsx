@@ -12,12 +12,13 @@ import {
   Sparkles,
 } from "lucide-react-native";
 import { createContext, type ReactNode, useContext, useEffect, useRef, useState } from "react";
-import { Pressable, Text, View } from "react-native";
+import { Pressable, View } from "react-native";
+import { Text } from "./text";
 import { useTalkSettingsName } from "./debo-pronouns";
 import { isInstalledApp, openGetApp } from "./get-app";
 import { onboarding } from "./onboarding-store";
 import { useSavedThreads } from "./thread-list";
-import { Button, colors, ErrorNotice, Field, LinkRow, Sheet, Skeleton, s } from "./ui";
+import { Button, colors, ErrorNotice, Field, LinkRow, Sheet, Skeleton, s, spacing } from "./ui";
 import { useWorkspace } from "./workspace";
 
 function newThreadId() {
@@ -236,7 +237,7 @@ export function ThreadsSheet({ onClose }: { onClose: () => void }) {
                       select({ id: thread.id, existing: true });
                       onClose();
                     }}
-                    style={[s.row, { gap: 10 }]}
+                    style={[s.row, { gap: spacing[3], minHeight: spacing[11] }]}
                   >
                     <MessageCircle size={19} color={colors.text} />
                     <Text style={[s.text, { flex: 1 }]}>

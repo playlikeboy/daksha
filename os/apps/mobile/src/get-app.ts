@@ -3,7 +3,7 @@
 // and never inside the installed app or the phone builds, where the person already has the app.
 import { Linking, Platform } from "react-native";
 
-export const GET_APP_URL = "https://about.daksha.life/#get-app";
+export const GET_APP_URL = "https://www.daksha.life/#get-app";
 
 /** True when Daksha runs as an installed app (its own window) or as a phone build. */
 export function isInstalledApp(): boolean {

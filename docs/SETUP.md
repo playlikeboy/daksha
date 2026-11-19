@@ -130,7 +130,7 @@ pnpm --filter @debo/web run deploy
 
 That builds the app with OpenNext and runs `wrangler deploy`. Wrangler needs `CLOUDFLARE_ACCOUNT_ID` and `CLOUDFLARE_API_TOKEN` in your shell, or run `npx wrangler login` first.
 
-- The Worker is called `debo-web` and serves `daksha.life` and `www.daksha.life`, set in `apps/web/wrangler.jsonc`. Since the new app and landing page exist, `apps/web/src/proxy.ts` redirects `/` to https://about.daksha.life and the old `/home/*` and `/auth/*` screens to https://my.daksha.life. `/privacy` and every `/api/*` route (sign-in email webhook, voice, export, delete account) are outside that redirect and work as before. The landing page itself is the separate Worker `debo-site` (`apps/site`, workflow `deploy-site.yml`) at about.daksha.life.
+- The Worker is called `debo-web` and serves `daksha.life`, set in `apps/web/wrangler.jsonc`, plus `debo.life` and `www.debo.life` from before the rename. `apps/web/src/proxy.ts` (rules in `src/lib/host-redirect.ts`) sends `/` and other pages to the same path on the landing page at https://www.daksha.life, and the old `/home/*` and `/auth/*` screens to https://my.daksha.life, all with a 307. `/privacy`, files like `robots.txt`, and every `/api/*` route (sign-in email webhook, voice, export, delete account) are served. On `debo.life` and `www.debo.life`, pages go to daksha.life, and `/api/*` is still served. The landing page itself is the separate Worker `debo-site` (`apps/site`, workflow `deploy-site.yml`) at www.daksha.life. Every host and what it does is in [`DOMAINS.md`](./DOMAINS.md).
 - The database is reached through a Cloudflare Hyperdrive binding called `HYPERDRIVE` (config `debo-db`). **Query caching is off** on that config (`npx wrangler hyperdrive update <id> --caching-disabled true`). With caching on, a person's new entry did not show up for up to a minute, and their journal query results would be cached at the edge. Keep it off. This is a Cloudflare setting, not a file in the repo.
 - Secrets are set once per value with `npx wrangler secret put <NAME>` in `apps/web`. Use the names in `.env.example`. Never put them in `wrangler.jsonc`. The Worker needs: `NEON_AUTH_BASE_URL`, `NEON_AUTH_COOKIE_SECRET`, `AWS_ENDPOINT_URL_S3`, `AWS_REGION`, `AWS_ACCESS_KEY_ID`, `AWS_SECRET_ACCESS_KEY`, `NEON_AI_GATEWAY_BASE_URL`, `NEON_AI_GATEWAY_TOKEN` and `ANTHROPIC_API_KEY`. Optional: `DAILY_TOKEN_LIMIT` (tokens per person per day on our key, default 40,000).
 
@@ -139,7 +139,7 @@ That builds the app with OpenNext and runs `wrangler deploy`. Wrangler needs `CL
 Set once on GitHub:
 
 - Description: "Daksha: a friendly assistant that remembers your life."
-- Website: https://daksha.life
+- Website: https://www.daksha.life
 - Topics: `ai-assistant`, `personal-memory`, `journaling`, `nextjs`, `typescript`, `mcp`, `voice-assistant`, `pgvector`
 - Turn on private vulnerability reporting and dependency alerts.
 
@@ -148,6 +148,6 @@ With the GitHub CLI:
 ```bash
 gh repo edit playlikeboy/daksha \
   --description "Daksha: a friendly assistant that remembers your life." \
-  --homepage "https://daksha.life" \
+  --homepage "https://www.daksha.life" \
   --add-topic ai-assistant,personal-memory,journaling,nextjs,typescript,mcp,voice-assistant,pgvector
 ```

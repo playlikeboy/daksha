@@ -6,11 +6,15 @@
   "main": ".open-next/worker.js",
   "compatibility_date": "2026-11-01",
   "compatibility_flags": ["nodejs_compat", "global_fetch_strictly_public"],
+  // daksha.life serves /privacy and every /api/* route (the Neon Auth sign-in email webhook,
+  // voice, export, delete account); its pages send people to the landing page at
+  // www.daksha.life and the old screens to my.daksha.life (src/proxy.ts, docs/DOMAINS.md).
+  // www.daksha.life is NOT here: it is the landing page, on debo-site (apps/site/wrangler.jsonc).
+  // A custom domain can only be on one Worker.
+  // debo.life and www.debo.life are the addresses from before the rename. Their pages send
+  // people on to daksha.life, and /api/* keeps working there, so old webhook addresses work.
   "routes": [
     { "pattern": "daksha.life", "custom_domain": true },
-    { "pattern": "www.daksha.life", "custom_domain": true },
-    // The old addresses from before the rename (docs/RENAME.md). They serve the same pages,
-    // so old links to /privacy and the sign-in email webhook keep working.
     { "pattern": "debo.life", "custom_domain": true },
     { "pattern": "www.debo.life", "custom_domain": true }
   ],

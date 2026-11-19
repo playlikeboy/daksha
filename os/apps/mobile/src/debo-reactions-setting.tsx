@@ -1,5 +1,6 @@
 // Settings card: how much Daksha's face reacts. Saved on this device only.
-import { Text, View } from "react-native";
+import { View } from "react-native";
+import { Text } from "./text";
 import type { Reactions } from "./debo-mood";
 import { deboMood, useDeboMood } from "./debo-mood-store";
 import { Button, Card, s, spacing } from "./ui";
@@ -21,7 +22,7 @@ export function ReactionsSetting() {
           <Button
             key={choice.value}
             small
-            primary={reactions === choice.value}
+            selected={reactions === choice.value}
             onPress={() => deboMood.setReactions(choice.value)}
           >
             {choice.label}

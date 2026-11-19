@@ -1,12 +1,12 @@
 # Daksha OS on Cloudflare
 
-> **Where it runs now (14 November 2026).** The new app is served at `https://my.daksha.life` and its API at `https://api.daksha.life`. The deploy workflow runs on a push to `main` that touches `os/`, `packages/` or the workflow. `https://my.daksha.life` is in Neon Auth's trusted domains. `daksha.life` itself is still the older web app (`debo-web`). Where the text below says a `workers.dev` address, read these two addresses.
+> **Where it runs now (19 November 2026).** The app is served at `https://my.daksha.life` and its API at `https://api.daksha.life`. The deploy workflow runs on a push to `main` that touches `os/`, `packages/` or the workflow. `daksha.life` itself is still the older web app (`debo-web`). Where the text below says a `workers.dev` address, read these two addresses. The addresses from before the rename stay attached: `https://api.debo.life` is the same API and never redirects (installed phone apps and the OAuth callbacks use it), and `https://my.debo.life` answers every request with a 307 to the same path on `https://my.daksha.life` (`app/src/redirect.ts`). See [`docs/DOMAINS.md`](../../../docs/DOMAINS.md).
 
 
 Three Workers. Nothing here touches `debo-web` or `daksha.life`. Nothing is deployed yet.
 
 ```
-browser ──> debo-os-app (static assets, SPA fallback)          my.daksha.life later
+browser ──> debo-os-app (static assets, SPA fallback)          my.daksha.life (my.debo.life: 307)
 browser ──> debo-os-api (Worker) ──> DeboApi container (Hono + task worker) ──> Daksha's Neon database
                  ^ cron every 5 min wakes it         │ http://browser.internal (intercepted)
                                                      v
@@ -17,9 +17,9 @@ browser ──> debo-os-api (Worker) ──> DeboApi container (Hono + task work
 |---|---|---|---|
 | `debo-os-api` | `api/wrangler.jsonc`, `api/Dockerfile` | the API, one container named `main` | `basic` (1/4 vCPU, 1 GiB) |
 | `debo-os-browser` | `browser/wrangler.jsonc`, `../../apps/worker/Dockerfile` | Playwright + Chromium | `standard-1` (1/2 vCPU, 4 GiB) |
-| `debo-os-app` | `app/wrangler.jsonc` | Expo web export from `apps/mobile/dist/web` | assets only |
+| `debo-os-app` | `app/wrangler.jsonc` | Expo web export from `apps/mobile/dist/web`, with a small Worker in front (`app/src`) | assets, plus a 307 from my.debo.life |
 
-Preview URLs: `https://debo-os-api.<account>.workers.dev`, `https://debo-os-app.<account>.workers.dev`. There are no custom-domain routes yet; the commented ones for `api.daksha.life` and `my.daksha.life` are in the configs.
+Preview URLs: `https://debo-os-api.<account>.workers.dev`, `https://debo-os-app.<account>.workers.dev`. The custom domains are the `routes` in the configs (see `docs/DOMAINS.md`).
 
 ## How the API image is built
 
@@ -51,7 +51,7 @@ The journal features read and write Daksha's existing `public` tables (`sources`
 
 ## Variables and secrets
 
-Plain settings in `api/wrangler.jsonc`: `WORKSPACE_MODE=live`, `AGENT_BACKEND=model`, `MODEL=anthropic/claude-haiku-5-5`, `AUTH_MODE=neon`, `OS_DB_SCHEMA=os`, `TASK_WORKER_ENABLED`, `TRUST_PROXY`, `API_SLEEP_AFTER`, `PUBLIC_API_URL`, `ALLOWED_ORIGINS`. The workflow overrides the last two with the real workers.dev URLs. `MODEL` is an Anthropic model, so no OpenAI key is needed. `DAILY_TOKEN_LIMIT` (default 40000 per person per day) can be added as a plain var.
+Plain settings in `api/wrangler.jsonc`: `WORKSPACE_MODE=live`, `AGENT_BACKEND=model`, `MODEL=anthropic/claude-haiku-5-5`, `AUTH_MODE=neon`, `OS_DB_SCHEMA=os`, `TASK_WORKER_ENABLED`, `TRUST_PROXY`, `API_SLEEP_AFTER`, `PUBLIC_API_URL`, `ALLOWED_ORIGINS`. The workflow overrides the last two with the real addresses (`PUBLIC_API_URL=https://api.debo.life`, kept there because the Google, Composio and tool server callbacks are registered on it; `ALLOWED_ORIGINS=https://my.daksha.life,https://my.debo.life`, with `my.daksha.life` first) and adds `PUBLIC_API_URL_ALIASES=https://api.daksha.life`, the address the app is built with. Sign-in follows the alias a request came in on; callbacks and signed links always use `PUBLIC_API_URL`. `MODEL` is an Anthropic model, so no OpenAI key is needed. `DAILY_TOKEN_LIMIT` (default 40000 per person per day) can be added as a plain var.
 
 The container entry (`api/src/index.ts`) passes a fixed list of names into the container. Anything not on that list never reaches the API.
 
@@ -116,9 +116,9 @@ curl https://debo-os-api.<sub>.workers.dev/api/health
 
 Deploy the browser first: the API config has a service binding to it. The workflow's smoke test checks that `/api/health` says `auth.mode` is `neon`, that the browser is configured, that `/api/debo/status` answers 401 without a sign-in, and that the app serves a deep link.
 
-## Switching to daksha.life later
+## Moving the callbacks to api.daksha.life later
 
-Uncomment the `routes` in `api/wrangler.jsonc` and `app/wrangler.jsonc`, set `PUBLIC_API_URL=https://api.daksha.life` and `ALLOWED_ORIGINS=https://my.daksha.life`, rebuild the web app with `EXPO_PUBLIC_API_URL=https://api.daksha.life`, add `https://my.daksha.life` to Neon Auth's trusted origins, redeploy. Update the Google redirect URI. `debo-web` is not involved.
+The app and its sign-in already use `api.daksha.life`. Only the callbacks still use `api.debo.life`. To move them: add `https://api.daksha.life/api/google/callback` to the Google OAuth client and `https://api.daksha.life/api/connectors/callback` to Composio (if it keeps an allowlist), then in `deploy-os.yml` swap them: `PUBLIC_API_URL=https://api.daksha.life` and `PUBLIC_API_URL_ALIASES=https://api.debo.life`. Tool servers (MCP) register themselves again for the new callback the next time a person signs in to one. Keep the `api.debo.life` route either way: installed phone apps use it.
 
 ## Voice notes and videos
 

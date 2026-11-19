@@ -1,5 +1,6 @@
 # Deploy the landing page (apps/site) to Cloudflare Workers as "debo-site".
-# It is served at about.daksha.life. daksha.life is still served by debo-web.
+# It is served at www.daksha.life. about.daksha.life and about.debo.life send pages there with a 307.
+# daksha.life itself is still served by debo-web (docs/DOMAINS.md).
 # Runs on a push to main that touches the landing page, or by hand.
 # Secrets used (names only): CLOUDFLARE_API_TOKEN, CLOUDFLARE_ACCOUNT_ID.
 name: Deploy site
@@ -47,9 +48,19 @@ jobs:
       - name: Live check
         run: |
           for i in $(seq 1 20); do
-            code=$(curl -s -m 20 -o /dev/null -w '%{http_code}' https://about.daksha.life/ || true)
+            code=$(curl -s -m 20 -o /dev/null -w '%{http_code}' https://www.daksha.life/ || true)
             echo "attempt $i: $code"
             [ "$code" = "200" ] && exit 0
             sleep 10
           done
-          echo "::error::about.daksha.life did not answer 200"; exit 1
+          echo "::error::www.daksha.life did not answer 200"; exit 1
+
+      # The older addresses answer 307 to the same path and query on www.daksha.life. Only a
+      # warning: a custom domain can take a few minutes after a deploy to settle.
+      - name: Check the old addresses
+        run: |
+          for host in about.daksha.life about.debo.life; do
+            got=$(curl -s -m 20 -o /dev/null -w '%{http_code} %{redirect_url}' "https://$host/?from=check" || true)
+            echo "$host -> $got"
+            [ "$got" = "307 https://www.daksha.life/?from=check" ] || echo "::warning::$host did not answer 307 to www.daksha.life yet"
+          done

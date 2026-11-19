@@ -1235,10 +1235,97 @@ p {
   aspect-ratio: 16 / 9;
 }
 
-.film__frame video {
+/*
+  The player (film-player.tsx) fills the frame, so the frame's aspect ratio
+  holds the space and nothing moves when the player loads. The poster and play
+  button come first; the Video.js skin replaces them near the screen. The skin
+  is themed only through its public --media-* settings.
+*/
+.film-player,
+.film-player__poster,
+.film-player__skin {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+
+.film-player__skin {
+  --media-accent-color: var(--tomato);
+  --media-accent-text-color: var(--btn-ink);
+  --media-font-family: var(--font-body);
+  --media-border-radius: var(--radius-l);
+  --media-border-color: transparent;
+  --media-object-fit: cover;
+}
+
+.film-player__skin video::cue {
+  font-family: var(--font-body);
+}
+
+.film-player__poster {
+  display: block;
+  border-radius: inherit;
+}
+
+.film-player__poster img {
   width: 100%;
   height: 100%;
   object-fit: cover;
+}
+
+.film-player__play {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  translate: -50% -50%;
+  display: grid;
+  place-items: center;
+  width: clamp(56px, 9vw, 84px);
+  aspect-ratio: 1;
+  padding-left: 4px;
+  border-radius: 999px;
+  background: var(--btn);
+  color: var(--btn-ink);
+  box-shadow: var(--shadow-2);
+}
+
+.film-player__poster:focus-visible {
+  outline-offset: -6px;
+}
+
+/* The same button inside the loaded player, until the film first starts. */
+.film-player__big {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  z-index: 2;
+  translate: -50% -50%;
+  padding: 0;
+  border: 0;
+  border-radius: 999px;
+  background: none;
+  cursor: pointer;
+}
+
+.film-player__big .film-player__play {
+  position: static;
+  translate: none;
+}
+
+.film-player__big[data-started] {
+  display: none;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .film-player__play {
+    transition: scale 0.2s var(--ease-spring);
+  }
+
+  .film-player__poster:hover .film-player__play,
+  .film-player__big:hover .film-player__play {
+    scale: 1.08;
+  }
 }
 
 .film__caption {

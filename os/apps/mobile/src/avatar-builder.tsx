@@ -6,7 +6,8 @@
 // Opened as a sheet from the character picker ("Make your own", or "Edit" on a saved face).
 // The server checks every field again (apps/server/src/custom-avatars.ts).
 import { useEffect, useState } from "react";
-import { Pressable, Text, View } from "react-native";
+import { Pressable, View } from "react-native";
+import { Text } from "./text";
 import {
   type AccessoryKind,
   accessoryKinds,
@@ -83,7 +84,7 @@ function Choices<T extends string>({
       <Text style={s.muted}>{label}</Text>
       <View accessibilityRole="radiogroup" accessibilityLabel={label} style={[s.row, { gap: spacing[2], flexWrap: "wrap" }]}>
         {options.map((o) => (
-          <Button key={o.id} small primary={value === o.id} onPress={() => onPick(o.id)}>
+          <Button key={o.id} small selected={value === o.id} onPress={() => onPick(o.id)}>
             {o.label}
           </Button>
         ))}
@@ -145,23 +146,29 @@ export function AvatarBuilderSheet({
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
   const [sureDelete, setSureDelete] = useState(false);
+  // If the saved face does not load, the form stays hidden: saving the blank starting face
+  // would quietly replace the person's drawing.
+  const [loadFailed, setLoadFailed] = useState("");
+  const [attempt, setAttempt] = useState(0);
   const inUse = !!avatarId && character === "custom" && data?.identity.customAvatar === avatarId;
 
   useEffect(() => {
     if (!avatarId) return;
     let live = true;
+    setLoading(true);
+    setLoadFailed("");
     getAvatar(api, avatarId)
       .then((saved) => {
         if (!live) return;
         const { id: _id, createdAt: _c, updatedAt: _u, ...rest } = saved;
         setConfig(rest);
       })
-      .catch((e) => live && setError(errorText(e)))
+      .catch((e) => live && setLoadFailed(`This face did not load, so nothing can be changed yet. ${errorText(e)}`))
       .finally(() => live && setLoading(false));
     return () => {
       live = false;
     };
-  }, [api, avatarId]);
+  }, [api, avatarId, attempt]);
 
   const set = (changes: Partial<AvatarConfig>) => setConfig((old) => ({ ...old, ...changes }));
   const setColour = (part: keyof AvatarColours, hex: string) => setConfig((old) => ({ ...old, colours: { ...old.colours, [part]: hex } }));
@@ -228,13 +235,15 @@ export function AvatarBuilderSheet({
     >
       {loading ? (
         <Skeleton label="Loading the face" rows={3} />
+      ) : loadFailed ? (
+        <ErrorNotice error={loadFailed} onRetry={() => setAttempt((n) => n + 1)} />
       ) : (
         <View style={{ gap: spacing[4] }}>
           <Card style={{ gap: spacing[3], alignItems: "center" }}>
             <CustomFace size={160} config={config} mood={mood} label={`Preview of ${config.name || "your face"}, looking ${MOOD_WORDS[mood].toLowerCase()}`} />
             <View accessibilityRole="radiogroup" accessibilityLabel="Try a mood" style={[s.row, { gap: spacing[2], flexWrap: "wrap", justifyContent: "center" }]}>
               {allMoods.map((m) => (
-                <Button key={m} small primary={mood === m} onPress={() => setMood(m)}>
+                <Button key={m} small selected={mood === m} onPress={() => setMood(m)}>
                   {MOOD_WORDS[m]}
                 </Button>
               ))}
@@ -311,6 +320,11 @@ export function AvatarBuilderSheet({
             {avatarId && (
               <Button danger busy={busy} onPress={() => void remove()}>
                 {sureDelete ? `Yes, delete ${config.name}` : "Delete this face"}
+              </Button>
+            )}
+            {avatarId && sureDelete && (
+              <Button disabled={busy} onPress={() => setSureDelete(false)}>
+                Keep it
               </Button>
             )}
           </View>

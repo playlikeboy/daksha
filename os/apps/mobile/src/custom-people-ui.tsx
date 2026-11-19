@@ -5,7 +5,8 @@
 // again (apps/server/src/custom-people, apps/server/src/voice-clone).
 import { FileUp, MessageCircle, Pencil, Smile, Trash2, UserRoundPlus } from "lucide-react-native";
 import { useCallback, useEffect, useState } from "react";
-import { Pressable, Text, View } from "react-native";
+import { Pressable, View } from "react-native";
+import { Text } from "./text";
 import { type CustomPerson, initials, type PeopleReply, PeopleReplySchema } from "./custom-people-data";
 import { CustomPersonUploadSheet } from "./custom-person-upload";
 import { type AvatarConfig, type CustomAvatar, useCustomAvatars } from "./debo-custom-avatars";
@@ -81,7 +82,7 @@ function FacePicker({
     <View style={{ gap: spacing[2] }}>
       <Text style={s.muted}>Their face</Text>
       <View accessibilityRole="radiogroup" accessibilityLabel="Their face" style={[s.row, { gap: spacing[2], flexWrap: "wrap" }]}>
-        <Button small primary={!draft.avatarId} onPress={() => onPick(undefined)}>
+        <Button small selected={!draft.avatarId} onPress={() => onPick(undefined)}>
           Just initials
         </Button>
         {faces.map((f) => (
@@ -174,11 +175,11 @@ function PersonEditor({
         <View style={{ gap: spacing[2] }}>
           <Text style={s.muted}>Their voice on calls</Text>
           <View accessibilityRole="radiogroup" accessibilityLabel="Their voice on calls" style={[s.row, { gap: spacing[2], flexWrap: "wrap" }]}>
-            <Button small primary={!d.voice} onPress={() => setD({ ...d, voice: undefined })}>
+            <Button small selected={!d.voice} onPress={() => setD({ ...d, voice: undefined })}>
               Same as now
             </Button>
             {voices.map((v) => (
-              <Button key={v.id} small primary={d.voice === v.id} onPress={() => setD({ ...d, voice: v.id })}>
+              <Button key={v.id} small selected={d.voice === v.id} onPress={() => setD({ ...d, voice: v.id })}>
                 {v.name}
               </Button>
             ))}
@@ -282,10 +283,10 @@ function PersonRow({
           {person.styleSummary ? <Text style={s.text}>{person.styleSummary}</Text> : <Text style={s.muted}>Nothing learned from files yet.</Text>}
           {person.facts.map((f, i) => (
             <View key={`f-${i}`} style={[s.row, { gap: spacing[2] }]}>
-              <Text style={[s.small, { flex: 1 }]}>
+              <Text style={[s.text, { flex: 1 }]}>
                 {f.text} <Text style={s.muted}>({factSources[f.source] ?? f.source})</Text>
               </Text>
-              <Button small onPress={() => onRemoveLine("facts", i)}>
+              <Button small accessibilityLabel={`Remove: ${f.text}`} onPress={() => onRemoveLine("facts", i)}>
                 Remove
               </Button>
             </View>
@@ -293,8 +294,8 @@ function PersonRow({
           {person.examples.length > 0 && <Text style={s.muted}>Lines they really wrote or said</Text>}
           {person.examples.map((line, i) => (
             <View key={`e-${i}`} style={[s.row, { gap: spacing[2] }]}>
-              <Text style={[s.small, { flex: 1 }]}>"{line}"</Text>
-              <Button small onPress={() => onRemoveLine("examples", i)}>
+              <Text style={[s.text, { flex: 1 }]}>"{line}"</Text>
+              <Button small accessibilityLabel={`Remove the line: ${line}`} onPress={() => onRemoveLine("examples", i)}>
                 Remove
               </Button>
             </View>

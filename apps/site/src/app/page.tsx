@@ -14,9 +14,11 @@ import { SiteFooter } from "../components/site-footer";
 import { SiteHeader } from "../components/site-header";
 import { Trust } from "../components/trust";
 import { YourPeople } from "../components/your-people";
+import { LAUNCH_FILM, videoJsonLd, WALKTHROUGH_FILM } from "../media";
 
 // Structured data for search engines. It says what Daksha is and nothing more:
-// no ratings, no prices, no counts, because none exist yet.
+// no ratings, no prices, no counts, because none exist yet. The two films
+// come from media.ts, so their entries change with the files.
 const JSON_LD = {
   "@context": "https://schema.org",
   "@graph": [
@@ -28,7 +30,7 @@ const JSON_LD = {
       operatingSystem: "Web, Android",
       description:
         "A friendly assistant that remembers your life. Write a journal or talk out loud, then ask about your own past and plans. Every answer shows its source.",
-      image: `${SITE_URL}/og.png?v=2`,
+      image: `${SITE_URL}/og.png?v=3`,
     },
     {
       "@type": "FAQPage",
@@ -38,6 +40,8 @@ const JSON_LD = {
         acceptedAnswer: { "@type": "Answer", text: item.a },
       })),
     },
+    videoJsonLd(LAUNCH_FILM),
+    videoJsonLd(WALKTHROUGH_FILM),
   ],
 };
 

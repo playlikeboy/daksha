@@ -1,6 +1,7 @@
 import { Monitor, Play } from "lucide-react-native";
 import { useEffect, useState } from "react";
-import { ActivityIndicator, AppState, Image, Platform, Text, View } from "react-native";
+import { ActivityIndicator, AppState, Image, Platform, View } from "react-native";
+import { Text } from "./text";
 import { z } from "zod";
 import type { ComputerSnapshot } from "../../../packages/domain/src/computer";
 import { useComputerDraft } from "./computer-drafts";

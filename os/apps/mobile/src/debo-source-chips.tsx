@@ -1,7 +1,8 @@
 import { BookOpen, FileText, Mic, Search, Video } from "lucide-react-native";
-import { ActivityIndicator, Pressable, Text, View } from "react-native";
+import { ActivityIndicator, Pressable, View } from "react-native";
+import { Text } from "./text";
 import { entryFocus, readDeboTool, type SourceChip } from "./debo-data";
-import { Button, Card, colors, ErrorNotice, fontSize, radius, s } from "./ui";
+import { Button, Card, colors, ErrorNotice, fontSize, radius, s, spacing } from "./ui";
 import { useWorkspace } from "./workspace";
 
 /** Open the journal on one entry. Used by every source chip. */
@@ -34,18 +35,18 @@ export function SourceChips({ sources }: { sources: SourceChip[] }) {
               minHeight: 44,
               paddingHorizontal: 12,
               borderRadius: radius.full,
-              backgroundColor: pressed ? colors.blue : colors.sky,
+              backgroundColor: pressed ? colors.successLine : colors.green,
               maxWidth: "100%",
             })}
           >
             {source.label.startsWith("Voice note") ? (
-              <Mic size={14} color={colors.blueText} />
+              <Mic size={14} color={colors.success} />
             ) : source.label.startsWith("Video") ? (
-              <Video size={14} color={colors.blueText} />
+              <Video size={14} color={colors.success} />
             ) : (
-              <BookOpen size={14} color={colors.blueText} />
+              <BookOpen size={14} color={colors.success} />
             )}
-            <Text style={[s.text, { fontSize: fontSize.supporting, color: colors.blueText, flexShrink: 1 }]}>
+            <Text style={[s.text, { fontSize: fontSize.base, lineHeight: spacing[5], color: colors.success, fontWeight: "600", flexShrink: 1 }]}>
               {source.label}
             </Text>
           </Pressable>

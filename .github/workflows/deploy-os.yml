@@ -1,4 +1,6 @@
-# Deploy the new Daksha app (os/) to Cloudflare Workers + Containers at my.daksha.life and api.daksha.life.
+# Deploy the Daksha app (os/) to Cloudflare Workers + Containers at my.daksha.life and api.daksha.life.
+# api.debo.life is the same API and keeps serving (installed phone apps and the OAuth callbacks use it).
+# my.debo.life sends people on to my.daksha.life with a 307 (see docs/DOMAINS.md).
 # Runs on a push to main that touches it, or by hand. Separate from deploy.yml: it never touches the debo-web Worker, which still serves daksha.life.
 # Deploys three Workers: debo-os-browser (private), debo-os-api, debo-os-app.
 # Secrets used (names only; set in GitHub repo settings > Secrets). See
@@ -78,16 +80,20 @@ jobs:
       # wrangler builds the container images with Docker (BuildKit).
       - uses: docker/setup-buildx-action@v3
 
-      # The new app lives on its own addresses. daksha.life itself stays on the debo-web Worker.
+      # The app lives on its own addresses. daksha.life itself stays on the debo-web Worker.
       - name: Set the addresses
         id: urls
         run: |
+          # The address built into the app, and where it signs in.
           echo "api=https://api.daksha.life" >> "$GITHUB_OUTPUT"
           echo "app=https://my.daksha.life" >> "$GITHUB_OUTPUT"
-          # Browsers allowed to call the API. The new app comes first: the API uses the first
-          # https:// origin for links back to the app and for phone sign-in. my.debo.life is the
-          # address from before the rename (docs/RENAME.md); a tab still running an old copy works.
-          echo "origins=https://my.daksha.life,https://my.debo.life" >> "$GITHUB_OUTPUT"
+          # PUBLIC_API_URL stays on api.debo.life for now: the Google, Composio and tool server
+          # callbacks are built from it and are registered with those services on that address.
+          # api.debo.life also keeps serving the phone apps that were installed before the rename.
+          echo "callback_api=https://api.debo.life" >> "$GITHUB_OUTPUT"
+          # The app's address from before the rename. Its Worker sends every request on to
+          # the same path on my.daksha.life.
+          echo "old_app=https://my.debo.life" >> "$GITHUB_OUTPUT"
 
       - name: Install
         run: |
@@ -148,10 +154,16 @@ jobs:
                   DEBO_OS_VAPID_PUBLIC_KEY, DEBO_OS_VAPID_PRIVATE_KEY, DEBO_OS_VAPID_SUBJECT}
                  | with_entries(select(.value != null and .value != ""))' \
             > "$RUNNER_TEMP/api-secrets.json"
+          # PUBLIC_API_URL is api.debo.life (callbacks); api.daksha.life is an alias, so health and
+          # sign-in called on it hand out api.daksha.life (os/apps/server/src/public-address.ts).
+          # my.daksha.life comes first in ALLOWED_ORIGINS: the API uses the first https origin as the
+          # app's own address (links back to the app, and the Origin for phone sign-in).
+          # my.debo.life stays allowed for a tab that still runs an old copy.
           npx wrangler deploy -c api/wrangler.jsonc \
             --secrets-file "$RUNNER_TEMP/api-secrets.json" \
-            --var "PUBLIC_API_URL:${{ steps.urls.outputs.api }}" \
-            --var "ALLOWED_ORIGINS:${{ steps.urls.outputs.origins }}"
+            --var "PUBLIC_API_URL:${{ steps.urls.outputs.callback_api }}" \
+            --var "PUBLIC_API_URL_ALIASES:${{ steps.urls.outputs.api }}" \
+            --var "ALLOWED_ORIGINS:${{ steps.urls.outputs.app }},${{ steps.urls.outputs.old_app }}"
 
       - name: Deploy the app
         working-directory: os/infra/cloudflare
@@ -161,7 +173,10 @@ jobs:
         run: |
           api="${{ steps.urls.outputs.api }}"
           app="${{ steps.urls.outputs.app }}"
-          # A new container can take several minutes to provision after the first deploy.
+          callback_api="${{ steps.urls.outputs.callback_api }}"
+          old_app="${{ steps.urls.outputs.old_app }}"
+          # A new container can take several minutes to provision after the first deploy, and a
+          # new custom domain a few minutes to get its certificate.
           ok=""
           for i in $(seq 1 40); do
             body=$(curl -s --max-time 30 "$api/api/health" || true)
@@ -172,9 +187,20 @@ jobs:
           echo "API health: $body"
           echo "$body" | jq -e '.browserConfigured == true' >/dev/null || { echo "::error::browser not configured"; exit 1; }
           echo "$body" | jq -e '.auth.mode == "neon"' >/dev/null || { echo "::error::API is not in Neon Auth mode"; exit 1; }
+          # The app built against api.daksha.life must sign in there, not on api.debo.life.
+          echo "$body" | jq -e --arg url "$api/api/neon-auth" '.auth.neonAuthUrl == $url' >/dev/null \
+            || { echo "::error::$api/api/health does not hand out its own sign-in address"; exit 1; }
           # The journal route must answer 401 (it needs sign-in), not 404 or a crash.
           test "$(curl -s -o /dev/null -w '%{http_code}' "$api/api/debo/status")" = "401"
+          # api.debo.life must keep serving: installed phone apps and the OAuth callbacks use it.
+          old=$(curl -s --max-time 30 "$callback_api/api/health" || true)
+          echo "$old" | jq -e --arg url "$callback_api/api/neon-auth" '.ok == true and .auth.neonAuthUrl == $url' >/dev/null \
+            || { echo "::error::$callback_api/api/health is not answering with its own sign-in address"; exit 1; }
           test "$(curl -s -o /dev/null -w '%{http_code}' "$app/")" = "200"
           # Single-page-app fallback: a deep link must serve the app shell.
           test "$(curl -s -o /dev/null -w '%{http_code}' "$app/some/deep/link")" = "200"
-          echo "Preview is up: app $app, api $api"
+          # The old app address answers 307 to the same path and query on the new one.
+          moved=$(curl -s -o /dev/null -w '%{http_code} %{redirect_url}' "$old_app/journal?x=1")
+          echo "$old_app/journal?x=1 -> $moved"
+          test "$moved" = "307 $app/journal?x=1"
+          echo "Up: app $app, api $api (also $callback_api)"

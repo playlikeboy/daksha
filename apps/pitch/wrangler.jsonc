@@ -1,13 +1,14 @@
 {
   "$schema": "node_modules/wrangler/config-schema.json",
   // The investor pitch site: Next.js on Cloudflare Workers through OpenNext.
-  // Served at pitch.daksha.life. Not indexed by search engines.
+  // Served at pitch.daksha.life. pitch.debo.life, the address from before the rename, answers
+  // pages with a 307 to the same path and query on pitch.daksha.life (src/proxy.ts,
+  // docs/DOMAINS.md). Not indexed by search engines.
   "name": "debo-pitch",
   "main": ".open-next/worker.js",
   "compatibility_date": "2026-11-01",
   "compatibility_flags": ["nodejs_compat", "global_fetch_strictly_public"],
   "workers_dev": true,
-  // pitch.debo.life is the address from before the rename (docs/RENAME.md), kept so old links work.
   "routes": [
     { "pattern": "pitch.daksha.life", "custom_domain": true },
     { "pattern": "pitch.debo.life", "custom_domain": true }

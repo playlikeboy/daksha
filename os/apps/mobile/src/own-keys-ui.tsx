@@ -5,7 +5,8 @@
 // See apps/server/src/own-keys/.
 import { ChevronDown, ChevronRight } from "lucide-react-native";
 import { useCallback, useEffect, useState } from "react";
-import { Pressable, Text, View } from "react-native";
+import { Pressable, View } from "react-native";
+import { Text } from "./text";
 import { z } from "zod";
 import { errorText } from "./debo-api";
 import { Button, Card, colors, ErrorNotice, Field, s, spacing } from "./ui";
@@ -53,12 +54,12 @@ function ModelPicker({
       <Text style={s.muted}>{label}</Text>
       <View accessibilityRole="radiogroup" accessibilityLabel={label} style={[s.row, { gap: spacing[2], flexWrap: "wrap" }]}>
         {noneLabel ? (
-          <Button small primary={value === ""} onPress={() => onChange("")}>
+          <Button small selected={value === ""} onPress={() => onChange("")}>
             {noneLabel}
           </Button>
         ) : null}
         {choices.map((c) => (
-          <Button key={c.id} small primary={value === c.id} onPress={() => onChange(c.id)}>
+          <Button key={c.id} small selected={value === c.id} onPress={() => onChange(c.id)}>
             {c.label}
           </Button>
         ))}
@@ -97,6 +98,8 @@ function ProviderKey({
   const [busy, setBusy] = useState(false);
   const [note, setNote] = useState("");
   const [error, setError] = useState("");
+  /** Removing a key deletes it, so it asks once more first. */
+  const [sure, setSure] = useState(false);
 
   async function save() {
     setBusy(true);
@@ -170,12 +173,27 @@ function ProviderKey({
         <Button primary busy={busy} disabled={!reply.available || (!saved && !key.trim())} onPress={() => void save()}>
           {saved ? "Check and save changes" : "Check and save key"}
         </Button>
-        {saved ? (
-          <Button danger busy={busy} onPress={() => void remove()}>
+        {saved && !sure ? (
+          <Button danger disabled={busy} onPress={() => setSure(true)}>
             Remove key
           </Button>
         ) : null}
       </View>
+      {saved && sure ? (
+        <View accessibilityRole="alert" style={{ gap: spacing[2] }}>
+          <Text style={s.text}>
+            Remove this key? It is deleted for good. Daksha goes back to its own way of doing this, and you would need to paste the key again to use it.
+          </Text>
+          <View style={[s.row, { gap: spacing[2], flexWrap: "wrap" }]}>
+            <Button danger busy={busy} onPress={() => void remove().then(() => setSure(false))}>
+              Yes, remove the key
+            </Button>
+            <Button disabled={busy} onPress={() => setSure(false)}>
+              Keep it
+            </Button>
+          </View>
+        </View>
+      ) : null}
       <Text accessibilityLiveRegion="polite" style={s.small}>
         {note}
       </Text>

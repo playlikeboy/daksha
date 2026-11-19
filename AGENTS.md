@@ -5,7 +5,7 @@ Rules for every AI agent and human working in this repo. Read this file first, e
 ## What this project is
 
 - **Name:** Daksha
-- **Website:** https://about.daksha.life (landing page, `apps/site`). The app is https://my.daksha.life (`os/apps/mobile`). https://daksha.life only redirects to those two, and still serves `/privacy` and the `/api/*` routes from `apps/web`.
+- **Website:** https://www.daksha.life (landing page, `apps/site`). The app is https://my.daksha.life (`os/apps/mobile`), and its API https://api.daksha.life. https://daksha.life sends pages to the landing page and still serves `/privacy` and the `/api/*` routes from `apps/web`. The old debo.life addresses send people on to the new ones, except `api.debo.life`, which keeps serving (see `docs/DOMAINS.md`).
 - **Repo:** https://github.com/playlikeboy/daksha
 - **One line:** Daksha is a friendly assistant that remembers your life, so you can ask it anything about your own past and plans.
 - **Who it is for:** ordinary people, not developers. Assume the reader has never heard the words "vector", "token" or "MCP".

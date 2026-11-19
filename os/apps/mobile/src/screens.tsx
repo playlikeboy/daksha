@@ -24,10 +24,9 @@ import {
   Linking,
   Platform,
   Pressable,
-  Text,
-  TextInput,
   View,
 } from "react-native";
+import { Text, TextInput } from "./text";
 import type {
   Artifact,
   BrowserSession,
@@ -60,6 +59,7 @@ import {
   spacing,
   timeLabel,
 } from "./ui";
+import { statusWords } from "./status-words";
 import { useWorkspace } from "./workspace";
 
 function todayDate() {
@@ -219,13 +219,13 @@ export function MailScreen() {
       <ErrorNotice error={error} />
       <Card>
         <View style={[s.row, { gap: spacing[3], marginBottom: spacing[4], flexWrap: "wrap" }]}>
-          <Button small primary={tab === "all"} onPress={() => setTab("all")}>
+          <Button small selected={tab === "all"} onPress={() => setTab("all")}>
             All messages
           </Button>
-          <Button small primary={tab === "unread"} onPress={() => setTab("unread")}>
+          <Button small selected={tab === "unread"} onPress={() => setTab("unread")}>
             Unread · {w.mail.filter((m) => m.unread).length}
           </Button>
-          <Button small primary={tab === "drafts"} onPress={() => setTab("drafts")}>
+          <Button small selected={tab === "drafts"} onPress={() => setTab("drafts")}>
             Drafts · {drafts.length}
           </Button>
         </View>
@@ -447,7 +447,7 @@ export function CalendarScreen() {
               <Button
                 key={c.id}
                 small
-                primary={c.id === calendarId}
+                selected={c.id === calendarId}
                 onPress={() => setCalendarId(c.id)}
               >
                 {c.name}
@@ -637,7 +637,7 @@ export function BrowserScreen() {
                     {b.url}
                   </Text>
                 </View>
-                <Chip tint={b.status === "active" ? colors.green : colors.canvas}>{b.status}</Chip>
+                <Chip tint={b.status === "active" ? colors.green : colors.canvas}>{statusWords(b.status)}</Chip>
                 <ArrowUpRight size={17} color={colors.muted} />
               </View>
               {!!b.previewUrl && (
@@ -852,7 +852,7 @@ export function ActivityScreen() {
                           : colors.canvas
                     }
                   >
-                    {a.status.replace(/_/g, " ")}
+                    {statusWords(a.status)}
                   </Chip>
                   <Text style={s.small}>{relativeDate(a.createdAt)}</Text>
                 </View>
@@ -892,7 +892,7 @@ export function ActivityScreen() {
                     {dateLabel(a.date)} · {timeLabel(a.date)}
                   </Text>
                 </View>
-                <Chip>{a.status}</Chip>
+                <Chip>{statusWords(a.status)}</Chip>
               </View>
             ))
           ) : (

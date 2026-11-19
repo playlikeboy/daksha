@@ -4,7 +4,8 @@
 // they are read, on success and on failure; the sheet says so.
 import { Check, Circle, CircleAlert, CircleDashed, FileUp, Loader } from "lucide-react-native";
 import { useCallback, useEffect, useRef, useState } from "react";
-import { Text, View } from "react-native";
+import { View } from "react-native";
+import { Text } from "./text";
 import {
   type CustomPerson,
   type PickedFile,

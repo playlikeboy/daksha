@@ -2,7 +2,8 @@
 // chat or on a call ("my sister Riya's birthday is 3 March"). Here you can see everyone she
 // keeps, fix any detail, add someone yourself, or remove them.
 import { useCallback, useEffect, useState } from "react";
-import { Text, View } from "react-native";
+import { View } from "react-native";
+import { Text } from "./text";
 import { errorText } from "./debo-api";
 import { useAssistantName } from "./debo-character-store";
 import { usePronouns } from "./debo-pronouns";
@@ -45,6 +46,8 @@ export function PeopleSetting() {
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
   const [status, setStatus] = useState("");
+  /** The person whose removal is waiting for a second yes. */
+  const [removing, setRemoving] = useState<string>();
 
   const load = useCallback(async () => {
     try {
@@ -105,10 +108,32 @@ export function PeopleSetting() {
       ) : null}
       {people.map((p) => (
         <View key={p.id} style={{ gap: spacing[1] }}>
-          <Text style={[s.small, { fontWeight: "600" }]}>{p.name}</Text>
+          <Text style={[s.text, { fontWeight: "600" }]}>{p.name}</Text>
           {summary(p) ? <Text style={s.muted}>{summary(p)}</Text> : null}
           {p.notes ? <Text style={s.muted}>{p.notes}</Text> : null}
-          <View style={s.row}>
+          {removing === p.id ? (
+            <View accessibilityRole="alert" style={{ gap: spacing[2] }}>
+              <Text style={s.text}>{`Remove ${p.name}, their birthday and your notes about them? This can't be undone.`}</Text>
+              <View style={[s.row, { gap: spacing[2], flexWrap: "wrap" }]}>
+                <Button
+                  small
+                  danger
+                  busy={busy}
+                  onPress={() =>
+                    void run(() => api.request(`/api/people/${p.id}`, undefined, "DELETE"), `Removed ${p.name}.`).then(() =>
+                      setRemoving(undefined),
+                    )
+                  }
+                >
+                  {`Yes, remove ${p.name}`}
+                </Button>
+                <Button small disabled={busy} onPress={() => setRemoving(undefined)}>
+                  Keep them
+                </Button>
+              </View>
+            </View>
+          ) : (
+          <View style={[s.row, { gap: spacing[2], flexWrap: "wrap" }]}>
             <Button
               small
               disabled={busy}
@@ -121,12 +146,13 @@ export function PeopleSetting() {
             <Button
               small
               danger
-              busy={busy}
-              onPress={() => void run(() => api.request(`/api/people/${p.id}`, undefined, "DELETE"), `Removed ${p.name}.`)}
+              disabled={busy}
+              onPress={() => setRemoving(p.id)}
             >
               {`Remove ${p.name}`}
             </Button>
           </View>
+          )}
         </View>
       ))}
       <Text style={[s.small, { fontWeight: "600" }]}>{draft.id ? `Editing ${draft.name}` : "Add someone"}</Text>

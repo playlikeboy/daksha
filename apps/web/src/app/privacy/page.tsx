@@ -234,6 +234,10 @@ export default function PrivacyPage() {
         <p>
           A new version of Daksha is being tried at my.daksha.life. You sign in with the same account, and it reads and
           writes the same journal entries and memories described on this page, with the same companies involved.
+          Daksha used to be called Debo. Its old addresses, like my.debo.life, now send you on to the same page at
+          daksha.life. Your account and data are the same. Your browser keeps sign-in and unsaved drafts per address,
+          so you may need to sign in once more on my.daksha.life. The landing page is www.daksha.life, and this page
+          stays at daksha.life/privacy.
         </p>
         <List
           items={[

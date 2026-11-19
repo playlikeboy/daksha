@@ -3,7 +3,8 @@
 // (EntryPlayer) draws its own controls for a voice note, around a hidden audio element.
 import { Download, Pause, Play, RotateCcw, RotateCw } from "lucide-react-native";
 import { useEffect, useRef, useState } from "react";
-import { ActivityIndicator, Pressable, Text, View } from "react-native";
+import { ActivityIndicator, Pressable, View } from "react-native";
+import { Text } from "./text";
 import { errorText } from "./debo-api";
 import { timeMark } from "./debo-data";
 import { type EntryPlayerProps, SPEEDS, speedLabel } from "./debo-player-types";

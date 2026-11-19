@@ -25,8 +25,8 @@ Signed links for files and the browser console carry the owner and an HMAC over 
 
 A phone app is not a browser, so two things differ.
 
-- **No Origin header.** React Native's networking sends no `Origin` header. The API's own check (`apps/server/src/app.ts`) only refuses a request whose `Origin` is present and not allowed, so a phone request with none passes. Neon Auth (Better Auth) can refuse a cookie request that has none, and its trusted origins are only `https://daksha.life`, `https://www.daksha.life` and `https://my.daksha.life`. So the pass-through (`neon-auth-proxy.ts`) fills in the app's own address (the first `https://` entry of `ALLOWED_ORIGINS`, `https://my.daksha.life` in production) as `Origin` when the caller sent neither `Origin` nor `Sec-Fetch-Site`. Browsers always send `Sec-Fetch-Site`, so this never applies to a browser request. Tests: `tests/neon-auth-proxy.test.ts`.
-- **The cookie.** The session cookie is kept by the phone's own network layer (iOS and Android cookie stores) and sent back because every call uses `credentials: "include"`. The app builds are pointed at `https://api.daksha.life`.
+- **No Origin header.** React Native's networking sends no `Origin` header. The API's own check (`apps/server/src/app.ts`) only refuses a request whose `Origin` is present and not allowed, so a phone request with none passes. Neon Auth (Better Auth) can refuse a cookie request that has none, and only origins in its trusted domains are accepted (`https://my.daksha.life` and the other daksha.life hosts are there, next to the old debo.life ones; see `docs/DOMAINS.md`). So the pass-through (`neon-auth-proxy.ts`) fills in the app's own address (the first `https://` entry of `ALLOWED_ORIGINS`, `https://my.daksha.life` in production) as `Origin` when the caller sent neither `Origin` nor `Sec-Fetch-Site`. Browsers always send `Sec-Fetch-Site`, so this never applies to a browser request. Tests: `tests/neon-auth-proxy.test.ts`.
+- **The cookie.** The session cookie is kept by the phone's own network layer (iOS and Android cookie stores) and sent back because every call uses `credentials: "include"`. New app builds are pointed at `https://api.daksha.life`. Phone apps installed before the rename have `https://api.debo.life` built in; it is the same API and keeps working.
 
 Not verified: none of this has run on a real phone or against the live Neon Auth from a phone. If a phone shows "Your session ended" straight after signing in, the first things to check are whether Neon Auth still sets the cookie as `SameSite=None; Secure` and whether the phone's cookie store keeps a `Partitioned` cookie.
 
@@ -39,7 +39,8 @@ Not verified: none of this has run on a real phone or against the live Neon Auth
 | `NEON_AUTH_JWKS_URL` | The key set URL. Defaults to `<base>/.well-known/jwks.json`. |
 | `OS_DB_SCHEMA` | Postgres schema for the `records` table. Default `os` in `neon` mode. Created on start with `CREATE SCHEMA IF NOT EXISTS`. |
 | `DATABASE_URL` | Daksha's Neon Postgres. The table is `os.records`, so it never touches Daksha's tables in `public` or Neon Auth's `neon_auth` schema. |
-| `ALLOWED_ORIGINS` | Must list the web app's origin. Neon Auth's trusted origins must list it too, or the browser's sign-in call is refused. |
+| `ALLOWED_ORIGINS` | Must list the web app's origin. Neon Auth's trusted origins must list it too, or the browser's sign-in call is refused. The first `https://` entry is the app's own address. |
+| `PUBLIC_API_URL_ALIASES` | Optional. Other addresses the same API answers on, comma-separated (`https://api.daksha.life` in production). `/api/health` hands out sign-in on the alias it was called on, so the app at `my.daksha.life` signs in through `api.daksha.life` and its cookie stays same-site. See `docs/DOMAINS.md`. |
 
 Live mode in `neon` mode does not need `OPENFUSE_ACCESS_KEY`. It still needs `TOKEN_ENCRYPTION_KEY`.
 

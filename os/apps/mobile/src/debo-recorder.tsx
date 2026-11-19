@@ -7,7 +7,8 @@
 // Nothing leaves the device until "Save recording".
 import { Circle, Pause, Play, RefreshCw, Square, SwitchCamera, Trash2, Upload, X } from "lucide-react-native";
 import { type ReactNode, useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { Modal, Platform, Pressable, ScrollView, Text, useWindowDimensions, View } from "react-native";
+import { Modal, Platform, Pressable, ScrollView, useWindowDimensions, View } from "react-native";
+import { Text } from "./text";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { deboApi, errorText } from "./debo-api";
 import {
@@ -364,7 +365,7 @@ export function Recorder({
                         ? "Recording. Speak as you normally would."
                         : preview?.level
                           ? "Your microphone is on so you can see it hears you. Nothing is kept until you save."
-                          : "Press the red button to start."}
+                          : "Press Start recording below."}
                   </Text>
                 </View>
               </View>
@@ -460,7 +461,7 @@ function Timer({ elapsed, stage, size, onDark, pill }: { elapsed: number; stage:
   const color = onDark ? colors.onInk : colors.text;
   return (
     <View
-      accessibilityLiveRegion="polite"
+      // No live region: the time changes every second, and reading it out each time drowns everything else.
       accessibilityLabel={`${live ? "Recording" : stage === "paused" ? "Paused" : "Ready"}, ${formatDuration(elapsed)}`}
       style={[
         s.row,

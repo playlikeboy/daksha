@@ -4,7 +4,7 @@
 
 Status: Daksha is being built. Only this landing page is live. The features below are planned, not available yet.
 
-- Website: https://daksha.life
+- Website: https://www.daksha.life
 - Source and plan: https://github.com/playlikeboy/daksha
 
 ## Planned features

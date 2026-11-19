@@ -2,9 +2,10 @@
 <html lang="%LANG_ISO_CODE%">
   <head>
     <meta charset="utf-8" />
-    <!-- my.debo.life is the address from before the rename to Daksha (docs/RENAME.md). This app
-         talks to api.daksha.life, whose sign-in cookie a debo.life page cannot keep, so the old
-         address sends people on to the same place at my.daksha.life before anything loads. -->
+    <!-- my.debo.life is the address from before the rename to Daksha (docs/DOMAINS.md). Its Worker
+         answers every request there with a 307 to my.daksha.life (os/infra/cloudflare/app/src/index.ts).
+         This script is a second guard for a copy of this page served some other way: the app talks
+         to api.daksha.life, whose sign-in cookie a debo.life page cannot keep. -->
     <script>
       if (/(^|\.)debo\.life$/.test(location.hostname)) {
         location.replace("https://my.daksha.life" + location.pathname + location.search + location.hash);
@@ -17,7 +18,7 @@
 
     <!-- Install as an app. The manifest makes Chrome open Daksha in its own window, with no address bar. -->
     <link rel="manifest" href="/manifest.webmanifest" />
-    <meta name="theme-color" content="#F1F1F1" />
+    <meta name="theme-color" content="#FBF6EF" />
     <meta name="application-name" content="Daksha" />
     <meta name="mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
@@ -31,17 +32,17 @@
     <!-- Share picture. -->
     <meta property="og:type" content="website" />
     <meta property="og:site_name" content="Daksha" />
-    <meta property="og:url" content="https://my.daksha.life" />
+    <meta property="og:url" content="https://my.debo.life" />
     <meta property="og:title" content="Daksha: a friendly assistant that remembers your life" />
     <meta property="og:description" content="Ask about your own life. Every answer shows where it came from." />
-    <meta property="og:image" content="https://my.daksha.life/og.png?v=2" />
+    <meta property="og:image" content="https://my.debo.life/og.png?v=3" />
     <meta property="og:image:width" content="1200" />
     <meta property="og:image:height" content="630" />
     <meta property="og:image:alt" content="Daksha, a small red tomato, next to a phone showing the app, and the words: a friendly assistant that remembers your life" />
     <meta name="twitter:card" content="summary_large_image" />
     <meta name="twitter:title" content="Daksha: a friendly assistant that remembers your life" />
     <meta name="twitter:description" content="Ask about your own life. Every answer shows where it came from." />
-    <meta name="twitter:image" content="https://my.daksha.life/og.png?v=2" />
+    <meta name="twitter:image" content="https://my.debo.life/og.png?v=3" />
     <meta name="twitter:image:alt" content="Daksha, a small red tomato, next to a phone showing the app, and the words: a friendly assistant that remembers your life" />
 
     <!-- Daksha does not nag people to install it. Chrome would show its own small install bar; this keeps it away.
@@ -70,20 +71,128 @@
         flex: 1;
       }
     </style>
-    <!-- Daksha's own browser details (DESIGN.md, accessibility floor). Colours are the Astryx
-         Neutral tokens in src/astryx-tokens.ts: accent #1B1B1B, soft blue #B9D7FF. -->
+    <!-- Brand fonts, the same pair as the landing page (DESIGN.md, Type), served from this site:
+         Figtree for text and Bricolage Grotesque for headings, both SIL Open Font License 1.1
+         (public/fonts/*-OFL.txt). `swap` shows the fallback at once, so text is never invisible.
+         The files are the Latin and Latin Extended subsets from Fontsource 5.3.0. -->
+    <link rel="preload" href="/fonts/figtree-latin-400-normal.woff2" as="font" type="font/woff2" crossorigin />
+    <link rel="preload" href="/fonts/bricolage-grotesque-latin-wght-normal.woff2" as="font" type="font/woff2" crossorigin />
+    <style id="debo-fonts">
+      @font-face {
+        font-family: "Figtree";
+        font-style: normal;
+        font-weight: 400;
+        font-display: swap;
+        src: url(/fonts/figtree-latin-400-normal.woff2) format("woff2");
+        unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+      }
+      @font-face {
+        font-family: "Figtree";
+        font-style: normal;
+        font-weight: 500;
+        font-display: swap;
+        src: url(/fonts/figtree-latin-500-normal.woff2) format("woff2");
+        unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+      }
+      @font-face {
+        font-family: "Figtree";
+        font-style: normal;
+        font-weight: 600;
+        font-display: swap;
+        src: url(/fonts/figtree-latin-600-normal.woff2) format("woff2");
+        unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+      }
+      @font-face {
+        font-family: "Figtree";
+        font-style: normal;
+        font-weight: 700 900;
+        font-display: swap;
+        src: url(/fonts/figtree-latin-700-normal.woff2) format("woff2");
+        unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+      }
+      @font-face {
+        font-family: "Figtree";
+        font-style: normal;
+        font-weight: 400;
+        font-display: swap;
+        src: url(/fonts/figtree-latin-ext-400-normal.woff2) format("woff2");
+        unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;
+      }
+      @font-face {
+        font-family: "Figtree";
+        font-style: normal;
+        font-weight: 500;
+        font-display: swap;
+        src: url(/fonts/figtree-latin-ext-500-normal.woff2) format("woff2");
+        unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;
+      }
+      @font-face {
+        font-family: "Figtree";
+        font-style: normal;
+        font-weight: 600;
+        font-display: swap;
+        src: url(/fonts/figtree-latin-ext-600-normal.woff2) format("woff2");
+        unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;
+      }
+      @font-face {
+        font-family: "Figtree";
+        font-style: normal;
+        font-weight: 700 900;
+        font-display: swap;
+        src: url(/fonts/figtree-latin-ext-700-normal.woff2) format("woff2");
+        unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;
+      }
+      @font-face {
+        font-family: "Bricolage Grotesque";
+        font-style: normal;
+        font-weight: 200 800;
+        font-display: swap;
+        src: url(/fonts/bricolage-grotesque-latin-wght-normal.woff2) format("woff2-variations");
+        unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+      }
+      @font-face {
+        font-family: "Bricolage Grotesque";
+        font-style: normal;
+        font-weight: 200 800;
+        font-display: swap;
+        src: url(/fonts/bricolage-grotesque-latin-ext-wght-normal.woff2) format("woff2-variations");
+        unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;
+      }
+    </style>
+    <!-- Daksha's own browser details (DESIGN.md, accessibility floor). Colours are the brand
+         tokens in src/brand-tokens.ts: ink #221B16, paper #FBF6EF, tomato wash #FDE3DC. -->
     <style id="debo-base">
+      html,
+      body {
+        background: #fbf6ef;
+        color: #221b16;
+        -webkit-font-smoothing: antialiased;
+        -moz-osx-font-smoothing: grayscale;
+      }
       /* A clear ring on whatever the keyboard is on, and none for mouse or touch. */
       :focus-visible {
-        outline: 3px solid #1b1b1b;
+        outline: 3px solid #221b16;
         outline-offset: 3px;
       }
       :focus:not(:focus-visible) {
         outline: none;
       }
+      /* A text field shows the ring whenever it has the caret, however it was reached. */
+      input:focus,
+      textarea:focus {
+        outline: 3px solid #221b16;
+        outline-offset: 2px;
+      }
+      input,
+      textarea {
+        caret-color: #b8281c;
+      }
       ::selection {
-        background: #b9d7ff;
-        color: #000000;
+        background: #fde3dc;
+        color: #221b16;
+      }
+      * {
+        scrollbar-color: #d4c5b2 transparent;
       }
       /* Reduce motion: stop CSS transitions and animations too, not only the drawn ones. */
       @media (prefers-reduced-motion: reduce) {

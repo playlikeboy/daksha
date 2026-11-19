@@ -1,14 +1,17 @@
 {
   "$schema": "node_modules/wrangler/config-schema.json",
-  // The daksha.life landing page: Next.js on Cloudflare Workers through OpenNext.
-  // Served at about.daksha.life. The app itself is at my.daksha.life.
+  // The Daksha landing page: Next.js on Cloudflare Workers through OpenNext.
+  // Served at www.daksha.life. The app itself is at my.daksha.life.
+  // about.daksha.life and about.debo.life answer pages with a 307 to the same path and query on
+  // www.daksha.life (src/proxy.ts, docs/DOMAINS.md). Their files (films, pictures) are still
+  // served as they are, so old links to a film keep playing.
   "name": "debo-site",
   "main": ".open-next/worker.js",
   "compatibility_date": "2026-11-01",
   "compatibility_flags": ["nodejs_compat", "global_fetch_strictly_public"],
   "workers_dev": true,
-  // about.debo.life is the address from before the rename (docs/RENAME.md), kept so old links work.
   "routes": [
+    { "pattern": "www.daksha.life", "custom_domain": true },
     { "pattern": "about.daksha.life", "custom_domain": true },
     { "pattern": "about.debo.life", "custom_domain": true }
   ],

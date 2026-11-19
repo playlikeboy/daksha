@@ -61,3 +61,23 @@ jobs:
           code=$(curl -s -o /dev/null -w '%{http_code}' https://daksha.life/privacy)
           echo "daksha.life/privacy returned $code"
           test "$code" = "200"
+
+      # The landing page moved to www.daksha.life, and debo.life moved to daksha.life, both with
+      # a 307 that keeps the path. /api/* is served on every host. The webhook route answers
+      # anything but 404 or a redirect when it is there. Only warnings: a custom domain can take
+      # a few minutes after a deploy to settle.
+      - name: Check the redirects
+        run: |
+          check() {
+            got=$(curl -s -m 20 -o /dev/null -w '%{http_code} %{redirect_url}' "$1" || true)
+            echo "$1 -> $got"
+            [ "$got" = "$2" ] || echo "::warning::$1 answered '$got', expected '$2'"
+          }
+          check "https://daksha.life/?from=check" "307 https://www.daksha.life/?from=check"
+          check "https://debo.life/privacy?from=check" "307 https://daksha.life/privacy?from=check"
+          check "https://www.debo.life/" "307 https://www.daksha.life/"
+          for url in https://daksha.life/api/neon-auth/webhook https://debo.life/api/neon-auth/webhook; do
+            code=$(curl -s -m 20 -o /dev/null -w '%{http_code}' "$url" || true)
+            echo "$url -> $code"
+            case "$code" in 404|30*|000) echo "::warning::$url answered $code";; esac
+          done

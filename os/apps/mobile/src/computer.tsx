@@ -8,7 +8,8 @@ import {
   Terminal,
 } from "lucide-react-native";
 import { useCallback, useEffect, useState } from "react";
-import { AppState, Image, Pressable, Text, View } from "react-native";
+import { AppState, Image, Pressable, View } from "react-native";
+import { Text } from "./text";
 import type { BrowserSession } from "../../../packages/domain/src";
 import type { ComputerSnapshot } from "../../../packages/domain/src/computer";
 import { browserAddress } from "./browser-address";
@@ -246,7 +247,7 @@ export function ComputerSheet() {
           {tabs.map((item) => (
             <Button
               key={item}
-              primary={shown === item}
+              selected={shown === item}
               icon={tabIcons[item]}
               onPress={() => setTab(item)}
             >

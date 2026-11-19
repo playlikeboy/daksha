@@ -2,7 +2,8 @@
 // upload sheet (files can't come through chat or a call). The others say what changed.
 import { FileUp, UserRound } from "lucide-react-native";
 import { useState } from "react";
-import { ActivityIndicator, Text, View } from "react-native";
+import { ActivityIndicator, View } from "react-native";
+import { Text } from "./text";
 import { z } from "zod";
 import { CustomPersonUploadSheet } from "./custom-person-upload";
 import { Button, Card, colors, s } from "./ui";

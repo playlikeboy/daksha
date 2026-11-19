@@ -4,17 +4,17 @@
 // above it instead of covering the send button.
 import { createContext, useContext, useEffect, useRef } from "react";
 import { Platform, View, type ViewProps } from "react-native";
-import { colorsLight } from "./astryx-tokens";
+import { brandColors } from "./brand-tokens";
 
 /**
- * The top bar's fill: the page colour (an Astryx token) with an alpha channel, so it is
+ * The top bar's fill: the page colour (a brand token) with an alpha channel, so it is
  * still a theme colour. See-through enough on the web to show the blur; nearly solid on
  * phones, which have no blur here.
  */
 export const frost = (() => {
   const alpha = Platform.OS === "web" ? 0.8 : 0.96;
   const byte = Math.round(alpha * 255).toString(16).padStart(2, "0");
-  return `${colorsLight.backgroundBody.slice(0, 7)}${byte}`;
+  return `${brandColors.paper}${byte}`;
 })();
 
 export interface Chrome {
@@ -45,8 +45,8 @@ export function Frosted({ style, ...props }: ViewProps) {
     // react-native-web hands back the DOM node. Its style types do not know backdrop-filter.
     const node = ref.current as unknown as HTMLElement | null;
     if (!node?.style) return;
-    node.style.setProperty("backdrop-filter", "saturate(1.6) blur(16px)");
-    node.style.setProperty("-webkit-backdrop-filter", "saturate(1.6) blur(16px)");
+    node.style.setProperty("backdrop-filter", "blur(16px)");
+    node.style.setProperty("-webkit-backdrop-filter", "blur(16px)");
   }, []);
   return <View ref={ref} style={style} {...props} />;
 }

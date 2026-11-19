@@ -3,13 +3,26 @@
 // line under the name shows only when something is happening ("Listening", a task),
 // so most of the time the bar is just a small face and a name.
 import { Bell, Menu } from "lucide-react-native";
-import { Pressable, Text, View } from "react-native";
+import { Pressable, View } from "react-native";
+import { Text } from "./text";
 import { Frosted, frost } from "./chrome";
 import { ComputerEntry } from "./computer";
-import { avatarSize, colors, fontSize, IconButton, Mascot, radius, screenPadding, spacing } from "./ui";
+import {
+  avatarSize,
+  colors,
+  fontSize,
+  headingFamily,
+  IconButton,
+  Mascot,
+  radius,
+  screenPadding,
+  spacing,
+  typeSize,
+} from "./ui";
 
 export function TopBar({
   height,
+  wide,
   name,
   status,
   showFace,
@@ -22,6 +35,8 @@ export function TopBar({
   onBell,
 }: {
   height: number;
+  /** On a wide screen the bar has no bottom line: it would stop short of the window edges. */
+  wide?: boolean;
   name: string;
   /** Only when something is happening. Nothing means no second line. */
   status?: string;
@@ -49,7 +64,7 @@ export function TopBar({
         gap: spacing[1],
         paddingHorizontal: screenPadding.phone - spacing[2],
         backgroundColor: frost,
-        borderBottomWidth: 1,
+        borderBottomWidth: wide ? 0 : 1,
         borderBottomColor: colors.line,
       }}
     >
@@ -83,7 +98,14 @@ export function TopBar({
         <View style={{ flex: 1, minWidth: 0 }}>
           <Text
             numberOfLines={1}
-            style={{ fontSize: fontSize.lg, lineHeight: spacing[6], fontWeight: "600", color: colors.text }}
+            style={{
+              fontFamily: headingFamily,
+              fontSize: typeSize.lg,
+              lineHeight: spacing[6],
+              fontWeight: "700",
+              letterSpacing: -0.2,
+              color: colors.text,
+            }}
           >
             {name}
           </Text>
@@ -91,7 +113,7 @@ export function TopBar({
             <Text
               numberOfLines={1}
               accessibilityLiveRegion="polite"
-              style={{ fontSize: fontSize.sm, lineHeight: spacing[4], color: colors.muted }}
+              style={{ fontSize: fontSize.base, lineHeight: spacing[5], color: colors.muted }}
             >
               {status}
             </Text>
@@ -116,7 +138,7 @@ export function TopBar({
               position: "absolute",
               top: spacing[2],
               right: spacing[2],
-              backgroundColor: colors.stop,
+              backgroundColor: colors.brand,
             }}
           />
         )}

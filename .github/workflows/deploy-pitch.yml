@@ -1,5 +1,5 @@
 # Deploy the investor pitch site (apps/pitch) to Cloudflare Workers as "debo-pitch".
-# It is served at pitch.daksha.life.
+# It is served at pitch.daksha.life. pitch.debo.life sends pages there with a 307 (docs/DOMAINS.md).
 # Runs on a push to main that touches the pitch site, or by hand.
 # Secrets used (names only): CLOUDFLARE_API_TOKEN, CLOUDFLARE_ACCOUNT_ID.
 name: Deploy pitch site
@@ -53,3 +53,10 @@ jobs:
             sleep 10
           done
           echo "::error::pitch.daksha.life did not answer 200"; exit 1
+
+      # pitch.debo.life answers 307 to the same path on pitch.daksha.life. Only a warning.
+      - name: Check the old address
+        run: |
+          got=$(curl -s -m 20 -o /dev/null -w '%{http_code} %{redirect_url}' "https://pitch.debo.life/market?from=check" || true)
+          echo "pitch.debo.life -> $got"
+          [ "$got" = "307 https://pitch.daksha.life/market?from=check" ] || echo "::warning::pitch.debo.life did not answer 307 yet"

@@ -8,7 +8,8 @@
 // needs no review any more, so it never shows here.
 import { Check, X } from "lucide-react-native";
 import { useState } from "react";
-import { Text, View } from "react-native";
+import { View } from "react-native";
+import { Text } from "./text";
 import type { ActionProposal } from "../../../packages/domain/src";
 import { reviewsWaiting } from "./debo-talk-call";
 import { Button, Card, colors, ErrorNotice, s, spacing } from "./ui";
@@ -76,17 +77,18 @@ export function TalkApprovals() {
       style={{ alignSelf: "stretch", gap: spacing[2] }}
     >
       {waiting.slice(0, 1).map((action) => (
-        <Card key={action.id} style={{ padding: spacing[3], gap: spacing[2], backgroundColor: colors.subtle }}>
+        <Card key={action.id} style={{ padding: spacing[4], gap: spacing[2] }}>
           <Text style={[s.small, { color: colors.blueDark, fontWeight: "600" }]}>Waiting for your yes</Text>
           <Text style={[s.text, { fontWeight: "600" }]}>{action.title}</Text>
           <Text style={s.muted}>{approvalSummary(action)}</Text>
           {lines(action).map((line) => (
-            <Text key={line.label} numberOfLines={2} style={s.small}>
+            <Text key={line.label} style={s.small}>
               {line.label}: {line.value}
             </Text>
           ))}
           <View style={[s.row, { gap: spacing[2] }]}>
-            <Button primary small icon={Check} busy={busy === action.id} onPress={() => void decide(action, "approve")}>
+            {/* Two equal buttons: "Not now" is never smaller or greyer than the yes (DESIGN.md). */}
+            <Button small icon={Check} busy={busy === action.id} onPress={() => void decide(action, "approve")}>
               Approve
             </Button>
             <Button small icon={X} disabled={busy === action.id} onPress={() => void decide(action, "deny")}>

@@ -5,7 +5,8 @@
 // is a shortcut for a person's OWN Composio account (not the apps Daksha connects for them).
 import { KeyRound, LogIn, Plus, Server, ShieldAlert } from "lucide-react-native";
 import { useCallback, useEffect, useRef, useState } from "react";
-import { AppState, Platform, Text, View } from "react-native";
+import { AppState, Platform, View } from "react-native";
+import { Text } from "./text";
 import {
   addToolServer,
   COMPOSIO_CONNECT_URL,
@@ -21,7 +22,7 @@ import {
   type ToolServer,
 } from "./mcp-data";
 import { dropSignInWindow, openSignInPage, reserveSignInWindow } from "./open-connect-link";
-import { Button, Card, Chip, colors, ErrorNotice, Field, relativeDate, s, Skeleton, spacing } from "./ui";
+import { Button, Card, CheckRow, Chip, colors, ErrorNotice, Field, relativeDate, s, Skeleton, spacing } from "./ui";
 import { useWorkspace } from "./workspace";
 
 const errorText = (e: unknown) => (e instanceof Error ? e.message : String(e));
@@ -46,6 +47,8 @@ export function ToolServersSection() {
   const [confirming, setConfirming] = useState<string>();
   const [form, setForm] = useState(emptyForm);
   const [composioKey, setComposioKey] = useState<typeof composioStart>();
+  // Most people never need this, so it starts folded away unless a server is already added.
+  const [shown, setShown] = useState(false);
   const alive = useRef(true);
   useEffect(() => {
     alive.current = true;
@@ -166,9 +169,20 @@ export function ToolServersSection() {
     }
   }
 
+  if (!shown && !servers?.length && !error)
+    return (
+      <View style={{ gap: spacing[2], alignItems: "flex-start" }}>
+        <Text accessibilityRole="header" style={s.heading}>For developers</Text>
+        <Text style={s.muted}>Add a tool server of your own. You don't need this to use Daksha.</Text>
+        <Button small onPress={() => setShown(true)}>
+          Show tool servers
+        </Button>
+      </View>
+    );
+
   return (
     <View style={{ gap: spacing[3] }} accessibilityLabel="Your own tool servers">
-      <Text style={s.heading}>Your own tool servers</Text>
+      <Text accessibilityRole="header" style={s.heading}>Your own tool servers</Text>
       <Text style={s.muted}>
         If you run or trust a tool server (MCP), Daksha can use its tools in chat and by voice. Every
         tool waits for your yes, unless you allow a server to read without asking.
@@ -362,16 +376,12 @@ export function ToolServersSection() {
             autoCorrect={false}
             keyboardType="url"
           />
-          <View style={s.row}>
-            <Button
-              small
-              primary={form.signIn}
-              icon={LogIn}
-              onPress={() => setForm({ ...form, signIn: !form.signIn, secret: "", headerName: "" })}
-            >
-              {form.signIn ? "Sign in instead of a secret (OAuth): on" : "Sign in instead of a secret (OAuth): off"}
-            </Button>
-          </View>
+          {/* A real checkbox: screen readers hear on or off, and the words wrap on a phone. */}
+          <CheckRow
+            label="Sign in on the server's own page instead of typing a secret"
+            checked={form.signIn}
+            onPress={() => setForm({ ...form, signIn: !form.signIn, secret: "", headerName: "" })}
+          />
           {form.signIn ? (
             <Text style={s.small}>
               Daksha opens the server’s own sign-in page. After you sign in, Daksha keeps the sign-in

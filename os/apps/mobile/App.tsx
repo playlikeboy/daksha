@@ -18,10 +18,10 @@ import {
   Platform,
   Pressable,
   ScrollView,
-  Text,
   useWindowDimensions,
   View,
 } from "react-native";
+import { Text } from "./src/text";
 import { SafeAreaProvider, SafeAreaView, useSafeAreaInsets } from "react-native-safe-area-context";
 import type { Section, Workspace } from "../../packages/domain/src";
 import {
@@ -60,9 +60,11 @@ import { KnowsScreen } from "./src/debo-knows";
 import { Details } from "./src/details";
 import { BrowserScreen, CalendarScreen, FilesScreen, MailScreen } from "./src/screens";
 import { AccountCard, NeonGate, useAuthInfo } from "./src/neon-gate";
+import { WelcomeFrame } from "./src/welcome-frame";
 import { ThreadsProvider, ThreadsSheet, useFuseThread } from "./src/threads";
 import {
   avatarSize,
+  bodyText,
   Button,
   Card,
   colors,
@@ -75,7 +77,7 @@ import {
   s,
   screenGap,
   screenPadding,
-  shadow,
+  brandShadow,
   Skeleton,
   spacing,
 } from "./src/ui";
@@ -116,7 +118,7 @@ function NotFound() {
   const { navigate } = useWorkspace();
   return (
     <View style={{ gap: spacing[4], alignItems: "flex-start" }}>
-      <Text accessibilityRole="header" style={[s.title, { fontSize: fontSize["2xl"] }]}>
+      <Text accessibilityRole="header" style={s.pageTitle}>
         That page isn't here
       </Text>
       <Text style={s.muted}>The link may be old or mistyped. Your chat is one tap away.</Text>
@@ -199,56 +201,45 @@ function AccessKeyApp() {
           <WorkspaceApp token={token} />
         </CopilotKitProvider>
       ) : (
-        <SafeAreaView
-          style={{
-            flex: 1,
-            backgroundColor: colors.canvas,
-            justifyContent: "center",
-            alignItems: "center",
-            padding: spacing[6],
-          }}
-        >
-          <View style={{ width: "100%", maxWidth: 420, gap: spacing[5], alignItems: "center" }}>
-            <Mascot size={avatarSize.lg} />
-            <Text
-              style={{
-                fontSize: fontSize["3xl"],
-                color: colors.text,
-                letterSpacing: -1,
-                fontWeight: "500",
-              }}
-            >
-              Welcome to Daksha.
-            </Text>
-            <Text style={[s.muted, { textAlign: "center" }]}>A little room for your day.</Text>
-            {busy ? (
-              <ActivityIndicator color={colors.blueDark} />
-            ) : (
-              <Card style={{ width: "100%" }}>
-                <ErrorNotice error={error} />
-                <Field
-                  label="Workspace access key"
-                  value={accessKey}
-                  onChangeText={setAccessKey}
-                  secureTextEntry
-                  placeholder="Required for a live workspace"
-                />
-                <Button primary onPress={() => void connect(accessKey || undefined)}>
-                  Open workspace
-                </Button>
-                <Text style={[s.small, { marginTop: spacing[4] }]}>
-                  Local workspaces open without a key. Make sure your Daksha server is running at{" "}
-                  {API_URL}.
-                </Text>
-              </Card>
-            )}
-          </View>
-        </SafeAreaView>
+        <WelcomeFrame subtitle="A little room for your day.">
+          {busy ? (
+            <ActivityIndicator color={colors.blueDark} />
+          ) : (
+            <Card style={{ width: "100%", padding: spacing[6] }}>
+              <ErrorNotice error={error} />
+              <Field
+                label="Workspace access key"
+                value={accessKey}
+                onChangeText={setAccessKey}
+                secureTextEntry
+                placeholder="Required for a live workspace"
+              />
+              <Button primary onPress={() => void connect(accessKey || undefined)} style={{ minHeight: spacing[12] }}>
+                Open workspace
+              </Button>
+              <Text style={[s.small, { marginTop: spacing[4] }]}>
+                Local workspaces open without a key. Make sure your Daksha server is running at{" "}
+                {API_URL}.
+              </Text>
+            </Card>
+          )}
+        </WelcomeFrame>
       )}
     </SafeAreaProvider>
   );
 }
 const onWeb = Platform.OS === "web";
+/**
+ * What to say when the workspace does not load. A plain sentence with a next step, and the
+ * server's own words only when it sent a readable message (not "TypeError: Failed to fetch").
+ */
+function workspaceError(e: unknown): string {
+  const message = e instanceof Error ? e.message : String(e);
+  const plain = /^[A-Z][^{}<>]*[.!?]$/.test(message) && !/^(TypeError|Error|Request failed)/.test(message);
+  return plain
+    ? message
+    : "I couldn't open your workspace. Check your internet connection, then press Try again.";
+}
 /**
  * Where the person is. On the web the address bar is the truth: each move adds a
  * browser history entry, so back, forward and reload work. On the phone the route
@@ -300,11 +291,11 @@ function WorkspaceApp({ token, sessionKey }: { token: string; sessionKey?: strin
     setError("");
   }, [api]);
   useEffect(() => {
-    void refresh().catch((e) => setError(String(e)));
+    void refresh().catch((e) => setError(workspaceError(e)));
   }, [refresh]);
   useEffect(() => {
     const listener = AppState.addEventListener("change", (state) => {
-      if (state === "active") void refresh().catch((e) => setError(String(e)));
+      if (state === "active") void refresh().catch((e) => setError(workspaceError(e)));
     });
     return () => listener.remove();
   }, [refresh]);
@@ -340,10 +331,7 @@ function WorkspaceApp({ token, sessionKey }: { token: string; sessionKey?: strin
         <Mascot size={avatarSize.lg} />
         {error ? (
           <>
-            <ErrorNotice error={error} />
-            <Button onPress={() => void refresh().catch((e) => setError(String(e)))}>
-              Try again
-            </Button>
+            <ErrorNotice error={error} onRetry={() => void refresh().catch((e) => setError(workspaceError(e)))} />
           </>
         ) : (
           // The face is already moving, so it is the loading sign; no spinner needed.
@@ -552,7 +540,7 @@ function WorkspaceShell({
                 {title && (
                   <Text
                     accessibilityRole="header"
-                    style={[s.title, { fontSize: fontSize["2xl"], marginBottom: screenGap }]}
+                    style={[s.pageTitle, { marginBottom: screenGap }]}
                   >
                     {title.title}
                   </Text>
@@ -609,6 +597,7 @@ function WorkspaceShell({
             </ChromeContext.Provider>
             <TopBar
               height={barHeight}
+              wide={desktop}
               name={agentName}
               status={status}
               showFace={!talkBarShown}
@@ -644,7 +633,7 @@ function WorkspaceShell({
                 padding: spacing[1],
                 backgroundColor: colors.card,
                 borderRadius: radius.full,
-                boxShadow: shadow.low,
+                boxShadow: brandShadow.raised,
                 borderWidth: 1,
                 borderColor: colors.line,
               }}
@@ -666,14 +655,18 @@ function WorkspaceShell({
                 // A visible word under each icon, so no one has to guess what a shape means.
                 const icon = (
                   <>
-                    <item.icon size={22} strokeWidth={active ? 2.2 : 1.8} color={colors.text} />
+                    <item.icon
+                      size={22}
+                      strokeWidth={active ? 2.2 : 1.8}
+                      color={active ? colors.brandText : colors.muted}
+                    />
                     <Text
                       numberOfLines={1}
                       style={{
                         fontFamily,
                         fontSize: fontSize.sm,
                         lineHeight: spacing[4],
-                        fontWeight: active ? "600" : "500",
+                        fontWeight: active ? "700" : "500",
                         color: active ? colors.text : colors.muted,
                       }}
                     >
@@ -721,7 +714,8 @@ function WorkspaceShell({
             pointerEvents="box-none"
             style={{
               position: "absolute",
-              bottom: insets.bottom + tabHeight + spacing[3],
+              // Above the tabs, and above the composer on Chat, so it never covers the message box.
+              bottom: insets.bottom + tabHeight + (section === "chat" ? composerHeight : 0) + spacing[3],
               left: spacing[5],
               // Leave the floating call bubble's corner free.
               right: talkBarShown ? spacing[12] + spacing[12] : spacing[5],
@@ -729,11 +723,15 @@ function WorkspaceShell({
             }}
           >
             <View
+              accessibilityRole="alert"
+              accessibilityLiveRegion="polite"
               style={[
                 s.row,
                 {
                   gap: spacing[2],
-                  padding: spacing[4],
+                  paddingVertical: spacing[1],
+                  paddingLeft: spacing[4],
+                  paddingRight: spacing[1],
                   backgroundColor: colors.ink,
                   borderRadius: radius.page,
                   maxWidth: 560,
@@ -741,13 +739,14 @@ function WorkspaceShell({
               ]}
             >
               <Check size={16} color={colors.blue} />
-              <Text style={{ color: colors.onInk, fontSize: fontSize.base, flexShrink: 1 }}>
+              <Text style={{ fontFamily, color: colors.onInk, ...bodyText, flexShrink: 1, paddingVertical: spacing[2] }}>
                 {toast}
               </Text>
               <Pressable
                 accessibilityRole="button"
-                accessibilityLabel="Dismiss notification"
+                accessibilityLabel="Close this message"
                 onPress={clearToast}
+                style={{ width: spacing[11], height: spacing[11], alignItems: "center", justifyContent: "center" }}
               >
                 <X size={16} color={colors.onInk} />
               </Pressable>

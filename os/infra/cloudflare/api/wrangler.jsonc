@@ -12,10 +12,12 @@
   "workers_dev": true,
   "preview_urls": false,
 
-  // The API's public address. The deploy workflow passes PUBLIC_API_URL and
-  // ALLOWED_ORIGINS (https://my.daksha.life, then the old https://my.debo.life) to match.
-  // api.debo.life is the address from before the rename (docs/RENAME.md). Phone apps already
-  // installed have it built in, so it must keep working.
+  // The API's public addresses (see docs/DOMAINS.md). api.daksha.life is the address new
+  // builds of the app use. api.debo.life is the same API and never redirects: phone apps
+  // installed before the rename have it built in, and the Google, Composio and tool server
+  // callbacks are registered on it. The deploy workflow passes PUBLIC_API_URL
+  // (https://api.debo.life, for the callbacks), PUBLIC_API_URL_ALIASES (https://api.daksha.life)
+  // and ALLOWED_ORIGINS (https://my.daksha.life first) to match.
   "routes": [
     { "pattern": "api.daksha.life", "custom_domain": true },
     { "pattern": "api.debo.life", "custom_domain": true }

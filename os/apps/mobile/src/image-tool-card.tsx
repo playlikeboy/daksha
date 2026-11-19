@@ -2,7 +2,8 @@
 // a fresh short-lived link is asked for each time, so it shows again when the thread is opened later.
 import { ImageIcon } from "lucide-react-native";
 import { useEffect, useState } from "react";
-import { ActivityIndicator, Image, Text, View } from "react-native";
+import { ActivityIndicator, Image, View } from "react-native";
+import { Text } from "./text";
 import { z } from "zod";
 import { errorText } from "./debo-api";
 import { Card, colors, ErrorNotice, radius, s } from "./ui";

@@ -1,6 +1,7 @@
 import { Brain, Pencil, Trash2 } from "lucide-react-native";
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { Text, View } from "react-native";
+import { View } from "react-native";
+import { Text } from "./text";
 import { deboApi, errorText } from "./debo-api";
 import { type DeboStatus, type MemoryView } from "./debo-data";
 import { NotSetUp } from "./debo-journal";
@@ -158,15 +159,23 @@ function MemoryCard({ memory, onChanged }: { memory: MemoryView; onChanged: () =
           <Button
             small
             icon={Pencil}
+            accessibilityLabel={`Fix this memory: ${memory.text}`}
             onPress={() => {
               setText(memory.text);
               setEditing(true);
             }}
           >
-            Fix this memory
+            Fix this
           </Button>
-          <Button small danger icon={Trash2} onPress={() => setConfirming(true)}>
-            Forget this memory
+          {/* Short words (DESIGN.md's memory card), so both fit side by side on a phone. */}
+          <Button
+            small
+            danger
+            icon={Trash2}
+            accessibilityLabel={`Forget this memory: ${memory.text}`}
+            onPress={() => setConfirming(true)}
+          >
+            Forget this
           </Button>
         </View>
       )}

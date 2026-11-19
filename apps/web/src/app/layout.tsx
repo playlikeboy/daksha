@@ -8,7 +8,7 @@ const description =
   "Give Daksha your journals, voice notes, papers and photos. Ask about your own life and get answers that show where they came from. Being built now.";
 
 // Made by scripts/og/build-og.mjs. The ?v= changes when the picture changes, so chat apps fetch it again.
-const OG_IMAGE = "https://daksha.life/og.png?v=2";
+const OG_IMAGE = "https://daksha.life/og.png?v=3";
 const OG_ALT =
   "Daksha, a small red tomato, next to a phone showing the app, and the words: a friendly assistant that remembers your life";
 

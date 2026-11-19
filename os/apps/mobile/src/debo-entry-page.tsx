@@ -6,7 +6,8 @@
 // conversation. Under each: what Daksha learned from it, and similar entries.
 import { ArrowLeft, AudioLines, BookOpen, FileText, Pencil, Phone, RotateCw, Trash2, Video } from "lucide-react-native";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { ActivityIndicator, Platform, Pressable, ScrollView, Text, View } from "react-native";
+import { ActivityIndicator, Platform, Pressable, ScrollView, View } from "react-native";
+import { Text } from "./text";
 import { deboApi, errorText } from "./debo-api";
 import { useAssistantName } from "./debo-character-store";
 import {
@@ -27,7 +28,7 @@ import { deboMood } from "./debo-mood-store";
 import { EntryPlayer, type PlayerControl } from "./debo-player";
 import { downloadName } from "./debo-player-types";
 import { entryNameOf, pathFor, rememberEntryName, titleFor } from "./routes";
-import { avatarSize, Button, colors, Empty, ErrorNotice, Field, fontSize, Mascot, radius, s, screenGap, spacing } from "./ui";
+import { avatarSize, Button, colors, Empty, ErrorNotice, Field, fontSize, Mascot, radius, s, screenGap, Skeleton, spacing } from "./ui";
 import { useWorkspace } from "./workspace";
 
 type Kind = EntryView["kind"];
@@ -155,7 +156,7 @@ export function EntryPage({ id }: { id: string }) {
           {!!length && <Text style={s.small}>· {length}</Text>}
           {media && <Text style={s.small}>· {formatSize(media.sizeBytes)}</Text>}
         </View>
-        <Text accessibilityRole="header" style={[s.title, { fontSize: fontSize["3xl"], lineHeight: fontSize["3xl"] + spacing[2], letterSpacing: -0.6 }]}>
+        <Text accessibilityRole="header" style={s.pageTitle}>
           {entry.title || kindName(entry.kind)}
         </Text>
         <Text style={s.muted}>Happened on {day}</Text>
@@ -180,6 +181,13 @@ export function EntryPage({ id }: { id: string }) {
 // ---- Written entry ----
 
 /** Paragraphs split at blank lines, as the person wrote them. */
+/** The page already shows the title as its heading, so the text below starts after it. */
+function bodyAfterTitle(text: string, title: string): string {
+  const [first = "", ...rest] = text.split("\n");
+  const body = rest.join("\n").trim();
+  return body && first.trim() === title.trim() ? body : text;
+}
+
 function Reading({ text }: { text: string }) {
   const paragraphs = text.split(/\n\s*\n/).map((p) => p.trim()).filter(Boolean);
   return (
@@ -287,7 +295,7 @@ function WrittenBody({ entry, onChanged, onDeleted }: { entry: EntryView; onChan
         />
       ) : (
         <View style={[s.card, { padding: spacing[6] }]}>
-          <Reading text={entry.text} />
+          <Reading text={bodyAfterTitle(entry.text, entry.title)} />
         </View>
       )}
       <ErrorNotice error={actions.error} />
@@ -561,6 +569,8 @@ function LearnedFrom({ entry }: { entry: EntryView }) {
   const [off, setOff] = useState("");
   const [error, setError] = useState("");
   const [fixing, setFixing] = useState<string>();
+  /** The memory waiting for a second yes before it is forgotten, as on What Daksha knows. */
+  const [forgetting, setForgetting] = useState<string>();
   const [busy, setBusy] = useState("");
   const load = useCallback(async () => {
     setError("");
@@ -582,9 +592,9 @@ function LearnedFrom({ entry }: { entry: EntryView }) {
   if (off) return null;
   return (
     <View style={{ gap: spacing[3] }}>
-      <Text style={s.heading}>{heading}</Text>
+      <Text accessibilityRole="header" style={s.heading}>{heading}</Text>
       <ErrorNotice error={error} onRetry={() => void load()} />
-      {!memories && !error && <View style={[s.card, { height: spacing[12] + spacing[4], backgroundColor: colors.subtle }]} />}
+      {!memories && !error && <Skeleton label={`Loading ${heading.toLowerCase()}`} rows={1} heading={false} />}
       {memories?.length === 0 && (
         <Text style={s.muted}>
           {entry.kind === "call"
@@ -616,28 +626,44 @@ function LearnedFrom({ entry }: { entry: EntryView }) {
         ) : (
           <View key={m.id} style={[s.card, { gap: spacing[3], padding: spacing[4], backgroundColor: colors.green }]}>
             <Text style={[s.text, { color: colors.success }]}>{m.text}</Text>
+            {forgetting === m.id && (
+              <Text style={[s.text, { color: colors.success }]}>Forget this for good? Daksha won't use it in answers any more.</Text>
+            )}
             <View style={[s.row, { gap: spacing[2], flexWrap: "wrap" }]}>
-              <Button small icon={Pencil} onPress={() => setFixing(m.id)}>
-                Fix this
-              </Button>
+              {forgetting !== m.id && (
+                <Button small icon={Pencil} onPress={() => setFixing(m.id)}>
+                  Fix this
+                </Button>
+              )}
               <Button
                 small
+                danger
                 icon={Trash2}
                 busy={busy === m.id}
                 onPress={() => {
+                  if (forgetting !== m.id) {
+                    setForgetting(m.id);
+                    return;
+                  }
                   setBusy(m.id);
                   debo
                     .forgetMemory(m.id)
                     .then(() => {
                       notify("Forgotten.");
+                      setForgetting(undefined);
                       return load();
                     })
                     .catch((e) => setError(errorText(e)))
                     .finally(() => setBusy(""));
                 }}
               >
-                Forget this
+                {forgetting === m.id ? "Yes, forget it" : "Forget this"}
               </Button>
+              {forgetting === m.id && (
+                <Button small disabled={busy === m.id} onPress={() => setForgetting(undefined)}>
+                  Keep it
+                </Button>
+              )}
             </View>
           </View>
         ),
