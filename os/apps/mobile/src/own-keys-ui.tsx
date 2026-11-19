@@ -11,11 +11,11 @@ import { errorText } from "./debo-api";
 import { Button, Card, colors, ErrorNotice, Field, s, spacing } from "./ui";
 import { useWorkspace } from "./workspace";
 
-type Provider = "anthropic" | "openrouter";
+type Provider = "anthropic" | "openrouter" | "cartesia";
 
 const Choice = z.object({ id: z.string(), label: z.string() });
 const KeyView = z.object({
-  provider: z.enum(["anthropic", "openrouter"]),
+  provider: z.enum(["anthropic", "openrouter", "cartesia"]),
   set: z.literal(true),
   endsIn: z.string(),
   model: z.string().optional(),
@@ -103,7 +103,7 @@ function ProviderKey({
     setError("");
     setNote("");
     try {
-      const body: Record<string, string> = { model };
+      const body: Record<string, string> = provider === "cartesia" ? {} : { model };
       if (key.trim()) body.key = key.trim();
       if (provider === "openrouter") body.imageModel = imageModel;
       const answer = await api.request<{ message: string }>(`/api/own-keys/${provider}`, body, "PUT");
@@ -146,7 +146,7 @@ function ProviderKey({
         autoComplete="off"
         textContentType="password"
       />
-      {provider === "anthropic" ? (
+      {provider === "cartesia" ? null : provider === "anthropic" ? (
         <ModelPicker label="Claude model for chat" choices={reply.choices.anthropic} value={model} onChange={setModel} />
       ) : (
         <>
@@ -227,7 +227,7 @@ export function OwnKeysSetting() {
           </Text>
           <Text style={s.small}>
             On calls, your key is used for what she says. Hearing you and speaking out loud stay on Debo's voice
-            service.
+            service, except a copied voice of one of your custom people, which uses your Cartesia key.
           </Text>
           {reply && !reply.available ? (
             <Text style={s.small}>This Debo can't store keys safely yet, so keys can't be saved here.</Text>
@@ -247,6 +247,14 @@ export function OwnKeysSetting() {
                 title="OpenRouter"
                 detail="Your key from openrouter.ai. Pick a chat model to chat on it (used only if no Anthropic key is set), and a picture model to make pictures on it. The chat model must support tools."
                 saved={saved("openrouter")}
+                reply={reply}
+                onChanged={load}
+              />
+              <ProviderKey
+                provider="cartesia"
+                title="Cartesia"
+                detail="Your key from play.cartesia.ai. Only used to copy the voice of one of your custom people, and to speak in that voice on your calls with them. The voice copy is kept in your Cartesia account until you remove it."
+                saved={saved("cartesia")}
                 reply={reply}
                 onChanged={load}
               />
