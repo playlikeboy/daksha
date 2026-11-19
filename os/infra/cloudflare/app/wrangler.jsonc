@@ -8,7 +8,12 @@
   "compatibility_date": "2026-11-01",
   "workers_dev": true,
   "preview_urls": false,
-  "routes": [{ "pattern": "my.debo.life", "custom_domain": true }],
+  // The same app on both sites. On my.daksha.life it talks to api.daksha.life
+  // (os/apps/mobile/src/api-address.ts, docs/DOMAINS.md).
+  "routes": [
+    { "pattern": "my.debo.life", "custom_domain": true },
+    { "pattern": "my.daksha.life", "custom_domain": true }
+  ],
   "assets": {
     "directory": "../../../apps/mobile/dist/web",
     "not_found_handling": "single-page-application"

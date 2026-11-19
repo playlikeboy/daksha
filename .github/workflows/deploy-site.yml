@@ -53,3 +53,11 @@ jobs:
             sleep 10
           done
           echo "::error::about.debo.life did not answer 200"; exit 1
+
+      # about.daksha.life serves the same page (docs/DOMAINS.md). Only a warning: a new
+      # custom domain can take a few minutes to get its certificate.
+      - name: Check the daksha.life twin
+        run: |
+          code=$(curl -s -m 20 -o /dev/null -w '%{http_code}' https://about.daksha.life/ || true)
+          echo "about.daksha.life returned $code"
+          [ "$code" = "200" ] || echo "::warning::about.daksha.life did not answer 200 yet"

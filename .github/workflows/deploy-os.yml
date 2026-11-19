@@ -1,4 +1,5 @@
 # Deploy the new Debo app (os/) to Cloudflare Workers + Containers at my.debo.life and api.debo.life.
+# The same app and API also answer at my.daksha.life and api.daksha.life (see docs/DOMAINS.md).
 # Runs on a push to main that touches it, or by hand. Separate from deploy.yml: it never touches the debo-web Worker, which still serves debo.life.
 # Deploys three Workers: debo-os-browser (private), debo-os-api, debo-os-app.
 # Secrets used (names only; set in GitHub repo settings > Secrets). See
@@ -83,6 +84,9 @@ jobs:
         run: |
           echo "api=https://api.debo.life" >> "$GITHUB_OUTPUT"
           echo "app=https://my.debo.life" >> "$GITHUB_OUTPUT"
+          # The daksha.life twins. The app on my.daksha.life picks api.daksha.life itself.
+          echo "api_twin=https://api.daksha.life" >> "$GITHUB_OUTPUT"
+          echo "app_twin=https://my.daksha.life" >> "$GITHUB_OUTPUT"
 
       - name: Install
         run: |
@@ -141,10 +145,13 @@ jobs:
                   DEBO_OS_VAPID_PUBLIC_KEY, DEBO_OS_VAPID_PRIVATE_KEY}
                  | with_entries(select(.value != null and .value != ""))' \
             > "$RUNNER_TEMP/api-secrets.json"
+          # my.debo.life stays first: the API uses the first https origin as the app's own
+          # address (links back to the app, and the Origin for phone sign-in).
           npx wrangler deploy -c api/wrangler.jsonc \
             --secrets-file "$RUNNER_TEMP/api-secrets.json" \
             --var "PUBLIC_API_URL:${{ steps.urls.outputs.api }}" \
-            --var "ALLOWED_ORIGINS:${{ steps.urls.outputs.app }}"
+            --var "PUBLIC_API_URL_ALIASES:${{ steps.urls.outputs.api_twin }}" \
+            --var "ALLOWED_ORIGINS:${{ steps.urls.outputs.app }},${{ steps.urls.outputs.app_twin }}"
 
       - name: Deploy the app
         working-directory: os/infra/cloudflare
@@ -171,3 +178,12 @@ jobs:
           # Single-page-app fallback: a deep link must serve the app shell.
           test "$(curl -s -o /dev/null -w '%{http_code}' "$app/some/deep/link")" = "200"
           echo "Preview is up: app $app, api $api"
+          # The daksha.life twins only warn: a new custom domain can take a few minutes to get
+          # its certificate, and the debo.life hosts above are what must work.
+          api_twin="${{ steps.urls.outputs.api_twin }}"
+          app_twin="${{ steps.urls.outputs.app_twin }}"
+          twin=$(curl -s --max-time 30 "$api_twin/api/health" || true)
+          echo "$twin" | jq -e --arg url "$api_twin/api/neon-auth" '.ok == true and .auth.neonAuthUrl == $url' >/dev/null \
+            || echo "::warning::$api_twin/api/health is not answering with its own sign-in address yet"
+          test "$(curl -s -o /dev/null -w '%{http_code}' "$app_twin/")" = "200" \
+            || echo "::warning::$app_twin/ did not answer 200 yet"

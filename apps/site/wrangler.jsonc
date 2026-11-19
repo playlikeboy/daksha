@@ -2,12 +2,17 @@
   "$schema": "node_modules/wrangler/config-schema.json",
   // The debo.life landing page: Next.js on Cloudflare Workers through OpenNext.
   // Served at about.debo.life. The app itself is at my.debo.life.
+  // about.daksha.life serves the same page; its canonical address stays about.debo.life
+  // (see docs/DOMAINS.md).
   "name": "debo-site",
   "main": ".open-next/worker.js",
   "compatibility_date": "2026-11-01",
   "compatibility_flags": ["nodejs_compat", "global_fetch_strictly_public"],
   "workers_dev": true,
-  "routes": [{ "pattern": "about.debo.life", "custom_domain": true }],
+  "routes": [
+    { "pattern": "about.debo.life", "custom_domain": true },
+    { "pattern": "about.daksha.life", "custom_domain": true }
+  ],
   "assets": {
     "directory": ".open-next/assets",
     "binding": "ASSETS"

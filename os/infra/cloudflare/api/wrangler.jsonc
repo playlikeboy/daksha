@@ -12,9 +12,14 @@
   "workers_dev": true,
   "preview_urls": false,
 
-  // The API's public address. The deploy workflow passes PUBLIC_API_URL and
-  // ALLOWED_ORIGINS (https://my.debo.life) to match.
-  "routes": [{ "pattern": "api.debo.life", "custom_domain": true }],
+  // The API's public addresses. api.debo.life is the main one; api.daksha.life is the
+  // same API for the app at my.daksha.life (see docs/DOMAINS.md). The deploy workflow
+  // passes PUBLIC_API_URL (https://api.debo.life), PUBLIC_API_URL_ALIASES
+  // (https://api.daksha.life) and ALLOWED_ORIGINS (https://my.debo.life first) to match.
+  "routes": [
+    { "pattern": "api.debo.life", "custom_domain": true },
+    { "pattern": "api.daksha.life", "custom_domain": true }
+  ],
 
   "containers": [
     {

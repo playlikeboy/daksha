@@ -287,7 +287,15 @@ Why: talking with someone familiar can help a person relax, feel close, or share
 
 Check before relying on it: nothing here was run against a real model, real WhatsApp exports from real people, real photos, real Workers AI diarization or a real Cartesia account. No Cartesia key exists yet, so copied voices are not tried at all. The settings tools were tested against the store, not a live model; check that she changes only what was asked. The phone UI was not run on a device. The privacy page names Cartesia, Workers AI and Anthropic for these flows.
 
-## 34. Video.js 10 for the films on the landing page
+## 34. daksha.life as a twin of debo.life, each app on its own API address
+
+2026-11-19 · decided (the owner's request: make debo.life and daksha.life both work and show the same thing, without renaming the brand)
+
+Choice: every debo.life host gets a daksha.life twin on the same Worker (`daksha.life`, `www.`, `about.`, `my.`, `api.`, `pitch.`). debo.life stays the main site: links, canonical addresses and callbacks stay on it. The app on `my.daksha.life` talks to `api.daksha.life`, and the API hands out sign-in on the address it was called on, from a fixed list (`PUBLIC_API_URL_ALIASES`).
+
+Why: sign-in keeps its cookie on the API address, and browsers refuse it as a third-party cookie when the API is a different site from the page. Neon Auth accepts several trusted origins, so each site can sign in on its own API host. A redirect from `my.daksha.life` to `my.debo.life` was the fallback and was not needed. Details and the owner's steps: `docs/DOMAINS.md`.
+
+## 35. Video.js 10 for the films on the landing page
 2026-11-19 · decided
 
 Choice: the launch film and the walkthrough on `apps/site` play in Video.js 10 (`@videojs/react` 10.3.0, Apache-2.0) with its Neutral video skin, themed through its public `--media-*` settings. The player code loads only when a film comes near the screen. Files, posters, words-on-screen tracks and descriptions are listed once in `apps/site/src/media.ts`.
