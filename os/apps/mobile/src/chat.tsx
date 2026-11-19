@@ -296,6 +296,10 @@ export function ChatScreen({
   const [draft, setDraft] = useState("");
   const [focused, setFocused] = useState(false);
   const [inputHeight, setInputHeight] = useState(44);
+  // After sending, the box goes back to one line.
+  useEffect(() => {
+    if (!draft) setInputHeight(44);
+  }, [draft]);
   const [showResults, setShowResults] = useState(false);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
@@ -606,13 +610,8 @@ export function ChatScreen({
             }}
           >
             <Text
-              style={{
-                fontSize: fontSize["2xl"],
-                letterSpacing: -1,
-                color: colors.text,
-                textAlign: "center",
-                maxWidth: 350,
-              }}
+              accessibilityRole="header"
+              style={[s.title, { fontSize: fontSize["2xl"], lineHeight: spacing[8], textAlign: "center", maxWidth: 350 }]}
             >
               Hi, I&apos;m {assistantName}.
             </Text>
@@ -863,7 +862,7 @@ export function ChatScreen({
                       ?.reject(new Error("Choice removed from queue."));
                     choiceCompletions.current.delete(message.id);
                   }}
-                  style={{ padding: 8 }}
+                  style={{ width: spacing[11], height: spacing[11], alignItems: "center", justifyContent: "center" }}
                 >
                   <X size={16} color={colors.muted} />
                 </Pressable>
@@ -926,7 +925,7 @@ export function ChatScreen({
           }}
         >
           {attachments.length > 0 && (
-            <View style={[s.row, { gap: 6, flexWrap: "wrap", padding: 9 }]}>
+            <View style={[s.row, { gap: spacing[2], flexWrap: "wrap", padding: spacing[2] }]}>
               {w.files
                 .filter((f) => attachments.includes(f.id))
                 .map((f) => (
@@ -938,19 +937,20 @@ export function ChatScreen({
                     style={[
                       s.row,
                       {
-                        gap: 7,
+                        gap: spacing[2],
                         maxWidth: "100%",
+                        minHeight: spacing[11],
                         backgroundColor: colors.sky,
                         borderRadius: radius.container,
-                        paddingHorizontal: 11,
-                        paddingVertical: 8,
+                        paddingHorizontal: spacing[3],
+                        paddingVertical: spacing[2],
                       },
                     ]}
                   >
                     <FileText size={14} color={colors.blueDark} />
                     <Text
                       numberOfLines={1}
-                      style={{ flexShrink: 1, fontSize: fontSize.supporting, color: colors.text }}
+                      style={{ flexShrink: 1, fontSize: fontSize.base, color: colors.text }}
                     >
                       {f.name}
                     </Text>
@@ -986,11 +986,12 @@ export function ChatScreen({
               </Text>
             </Pressable>
             <TextInput
-              accessibilityLabel="Message Debo"
+              accessibilityLabel={`Message ${assistantName}`}
               value={draft}
               onChangeText={setDraft}
               onContentSizeChange={(event) =>
-                setInputHeight(Math.max(44, Math.min(140, event.nativeEvent.contentSize.height)))
+                // An empty box is one line, even if the browser measured it before it had its width.
+                setInputHeight(draft ? Math.max(44, Math.min(140, event.nativeEvent.contentSize.height)) : 44)
               }
               placeholder={
                 !isReady
@@ -1036,7 +1037,7 @@ export function ChatScreen({
             />
             <Pressable
               accessibilityRole="button"
-              accessibilityLabel="Talk to Debo"
+              accessibilityLabel={`Talk to ${assistantName}`}
               onPress={() => navigate("talk")}
               style={({ pressed }) => ({
                 width: 44,
