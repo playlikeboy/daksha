@@ -256,9 +256,9 @@ test("one upkeep sweep clears old voice recordings too", async () => {
   const started = await t.call(`/api/custom-people/${id}/audio`, "POST", { consent: true, mimeType: "audio/wav", sizeBytes: wav.byteLength });
   const key = `persona-uploads/${OWNER}/${started.json.uploadId}.wav`;
   t.store.put(key, wav);
-  const row = await t.db.get<{ createdAt: string }>(OWNER, "voice-uploads", started.json.uploadId);
+  const row = await t.db.get<{ id: string; createdAt: string }>(OWNER, "voice-uploads", started.json.uploadId);
   assert.ok(row);
-  await t.db.put(OWNER, "voice-uploads", { ...row, createdAt: new Date(Date.now() - 25 * 3_600_000).toISOString() });
+  await t.db.put<{ id: string; createdAt: string }>(OWNER, "voice-uploads", { ...row, createdAt: new Date(Date.now() - 25 * 3_600_000).toISOString() });
   assert.ok((await t.people.sweep()) >= 1);
   assert.ok(!t.store.objects.has(key));
 });
