@@ -6,7 +6,7 @@ const copy: VoiceCopy = {
   apiKey: "sk_car_TESTKEY0123456789abcdef",
   personName: "Asha",
   language: "hi",
-  opening: "Hi, it's Debo. I'm speaking as an AI version of Asha, in a copied voice. I'm not really Asha.",
+  opening: "Hi, it's Daksha. I'm speaking as an AI version of Asha, in a copied voice. I'm not really Asha.",
 };
 
 const config = { deboUrl: "https://api.example.test", secret: "s".repeat(40) };
@@ -42,7 +42,7 @@ describe("fetchVoiceCopy", () => {
     expect(JSON.parse(f.calls[0]?.body ?? "{}")).toEqual({ userId: "user-1" });
   });
 
-  it("falls back to Debo's voice on no copy, a refusal, or a bad answer", async () => {
+  it("falls back to Daksha's voice on no copy, a refusal, or a bad answer", async () => {
     expect(await fetchVoiceCopy(config, "u", fakeFetch(200, { voiceCopy: null }).fetcher)).toBeNull();
     expect(await fetchVoiceCopy(config, "u", fakeFetch(401, { error: "no" }).fetcher)).toBeNull();
     expect(await fetchVoiceCopy(config, "u", fakeFetch(200, { voiceCopy: { voiceId: "x" } }).fetcher)).toBeNull();
@@ -54,8 +54,8 @@ describe("fetchVoiceCopy", () => {
 });
 
 describe("greeting", () => {
-  it("always starts a copied-voice call by saying it is Debo's AI version", () => {
-    expect(greeting(copy)).toMatch(/^Hi, it's Debo\. I'm speaking as an AI version of Asha/);
+  it("always starts a copied-voice call by saying it is Daksha's AI version", () => {
+    expect(greeting(copy)).toMatch(/^Hi, it's Daksha\. I'm speaking as an AI version of Asha/);
     expect(greeting(null)).toBe("Hey! I'm here. What's on your mind?");
   });
 });

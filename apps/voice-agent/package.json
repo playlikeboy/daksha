@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "type": "module",
-  "description": "Debo's voice: a LiveKit Agents worker that hears, asks Debo's one brain, and speaks.",
+  "description": "Daksha's voice: a LiveKit Agents worker that hears, asks Daksha's one brain, and speaks.",
   "scripts": {
     "typecheck": "tsc --noEmit",
     "test": "vitest --run",

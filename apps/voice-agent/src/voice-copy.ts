@@ -1,6 +1,6 @@
-// Which voice a call speaks in. Usually one of Debo's own voices through
-// LiveKit Inference. When Debo is talking as a custom person who has a voice
-// copy, Debo's server says so once at the start of the call (POST
+// Which voice a call speaks in. Usually one of Daksha's own voices through
+// LiveKit Inference. When Daksha is talking as a custom person who has a voice
+// copy, Daksha's server says so once at the start of the call (POST
 // /api/voice/session, over the agent's secret), with the private Cartesia voice
 // id and the key that can speak it. That voice is not on LiveKit's own Cartesia
 // account, so the call then speaks through the Cartesia plugin
@@ -15,12 +15,12 @@ export const VoiceCopy = z.object({
   apiKey: z.string().min(16).max(400),
   personName: z.string().max(200),
   language: z.string().regex(/^[a-z]{2,3}$/),
-  /** Said first, before anything else: this is Debo's AI version of the person. */
+  /** Said first, before anything else: this is Daksha's AI version of the person. */
   opening: z.string().min(1).max(400),
 });
 export type VoiceCopy = z.infer<typeof VoiceCopy>;
 
-/** Ask Debo's server which voice to use. Any failure means "no voice copy": the call goes on in Debo's voice. */
+/** Ask Daksha's server which voice to use. Any failure means "no voice copy": the call goes on in Daksha's voice. */
 export async function fetchVoiceCopy(
   config: { deboUrl: string; secret: string },
   userId: string,
@@ -53,7 +53,7 @@ export function chooseTts<T>(
   return copy ? { tts: makers.cartesia(copy), copied: true } : { tts: makers.inference(), copied: false };
 }
 
-/** The first words of a call. In a copied voice, they always say it is Debo's AI version. */
+/** The first words of a call. In a copied voice, they always say it is Daksha's AI version. */
 export function greeting(copy: VoiceCopy | null): string {
   return copy ? `${copy.opening} What's on your mind?` : "Hey! I'm here. What's on your mind?";
 }

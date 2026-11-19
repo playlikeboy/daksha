@@ -1,5 +1,5 @@
-// The voice agent never answers by itself. Every question goes to Debo's one
-// brain on debo.life (POST /api/voice/brain), which searches the person's own
+// The voice agent never answers by itself. Every question goes to Daksha's one
+// brain on daksha.life (POST /api/voice/brain), which searches the person's own
 // entries, applies the daily limit and writes usage and activity, exactly as
 // chat does. This file turns that reply into a stream of text to speak.
 //
@@ -28,7 +28,7 @@ export type BrainRequest = {
 };
 
 /**
- * The feelings Cartesia Sonic-3 accepts that Debo's brain may ask for. The brain
+ * The feelings Cartesia Sonic-3 accepts that Daksha's brain may ask for. The brain
  * already limits itself to these; this is a second check so a bad word can
  * never reach the voice service.
  */
@@ -85,7 +85,7 @@ export async function askBrain(
     body: JSON.stringify(request),
     signal,
   });
-  if (!response.ok || !response.body) throw new Error(`Debo brain replied ${response.status}`);
+  if (!response.ok || !response.body) throw new Error(`Daksha brain replied ${response.status}`);
   return response.body;
 }
 

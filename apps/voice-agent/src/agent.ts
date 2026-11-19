@@ -17,8 +17,8 @@ export type DeboAgentConfig = {
 };
 
 /**
- * Debo's voice. The LLM step is replaced: instead of a model, it streams the
- * answer from Debo's brain, and sends the answer's sources to the person's
+ * Daksha's voice. The LLM step is replaced: instead of a model, it streams the
+ * answer from Daksha's brain, and sends the answer's sources to the person's
  * screen on the "debo.sources" text topic before speaking. The brain also says
  * how the reply should sound (an `emotion` event before the first words); it is
  * applied to the voice before this reply is spoken.
@@ -28,9 +28,9 @@ export class DeboVoiceAgent extends voice.Agent {
 
   constructor(config: DeboAgentConfig) {
     super({
-      // Not used for answers (llmNode below asks Debo's brain). Kept short
+      // Not used for answers (llmNode below asks Daksha's brain). Kept short
       // in case the framework shows it anywhere.
-      instructions: "You are Debo, a kind assistant that helps a person remember their own life.",
+      instructions: "You are Daksha, a kind assistant that helps a person remember their own life.",
     });
     this.#config = config;
   }
