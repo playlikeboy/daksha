@@ -30,7 +30,7 @@ const JSON_LD = {
       operatingSystem: "Web, Android",
       description:
         "A friendly assistant that remembers your life. Write a journal or talk out loud, then ask about your own past and plans. Every answer shows its source.",
-      image: `${SITE_URL}/og.png?v=3`,
+      image: `${SITE_URL}/og.png?v=4`,
     },
     {
       "@type": "FAQPage",

@@ -16,7 +16,7 @@ const TITLE = `${BRAND}: a friendly assistant that remembers your life`;
 const DESCRIPTION = `Write things down or say them out loud. Ask ${BRAND} about your own life and see the source of every answer. You can see, fix, download and delete everything.`;
 
 // Made by scripts/og/build-og.mjs. The ?v= changes when the picture changes, so chat apps fetch it again.
-const OG_IMAGE = `${SITE_URL}/og.png?v=3`;
+const OG_IMAGE = `${SITE_URL}/og.png?v=4`;
 const OG_ALT = `${BRAND}, a small red tomato, next to a phone showing the app, and the words: a friendly assistant that remembers your life`;
 
 export const metadata: Metadata = {
