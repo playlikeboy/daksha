@@ -81,7 +81,7 @@ function FacePicker({
     <View style={{ gap: spacing[2] }}>
       <Text style={s.muted}>Their face</Text>
       <View accessibilityRole="radiogroup" accessibilityLabel="Their face" style={[s.row, { gap: spacing[2], flexWrap: "wrap" }]}>
-        <Button small primary={!draft.avatarId} onPress={() => onPick(undefined)}>
+        <Button small selected={!draft.avatarId} onPress={() => onPick(undefined)}>
           Just initials
         </Button>
         {faces.map((f) => (
@@ -174,11 +174,11 @@ function PersonEditor({
         <View style={{ gap: spacing[2] }}>
           <Text style={s.muted}>Their voice on calls</Text>
           <View accessibilityRole="radiogroup" accessibilityLabel="Their voice on calls" style={[s.row, { gap: spacing[2], flexWrap: "wrap" }]}>
-            <Button small primary={!d.voice} onPress={() => setD({ ...d, voice: undefined })}>
+            <Button small selected={!d.voice} onPress={() => setD({ ...d, voice: undefined })}>
               Same as now
             </Button>
             {voices.map((v) => (
-              <Button key={v.id} small primary={d.voice === v.id} onPress={() => setD({ ...d, voice: v.id })}>
+              <Button key={v.id} small selected={d.voice === v.id} onPress={() => setD({ ...d, voice: v.id })}>
                 {v.name}
               </Button>
             ))}

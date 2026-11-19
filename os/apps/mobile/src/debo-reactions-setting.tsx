@@ -21,7 +21,7 @@ export function ReactionsSetting() {
           <Button
             key={choice.value}
             small
-            primary={reactions === choice.value}
+            selected={reactions === choice.value}
             onPress={() => deboMood.setReactions(choice.value)}
           >
             {choice.label}

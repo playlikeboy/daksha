@@ -78,7 +78,7 @@ function Choices<T extends string>({
       <Text style={s.muted}>{label}</Text>
       <View accessibilityRole="radiogroup" accessibilityLabel={label} style={[s.row, { gap: spacing[2], flexWrap: "wrap" }]}>
         {options.map((o) => (
-          <Button key={o.id} small primary={value === o.id} onPress={() => onPick(o.id)}>
+          <Button key={o.id} small selected={value === o.id} onPress={() => onPick(o.id)}>
             {o.label}
           </Button>
         ))}

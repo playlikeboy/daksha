@@ -83,7 +83,7 @@ function Choices<T extends string>({
       <Text style={s.muted}>{label}</Text>
       <View accessibilityRole="radiogroup" accessibilityLabel={label} style={[s.row, { gap: spacing[2], flexWrap: "wrap" }]}>
         {options.map((o) => (
-          <Button key={o.id} small primary={value === o.id} onPress={() => onPick(o.id)}>
+          <Button key={o.id} small selected={value === o.id} onPress={() => onPick(o.id)}>
             {o.label}
           </Button>
         ))}
@@ -234,7 +234,7 @@ export function AvatarBuilderSheet({
             <CustomFace size={160} config={config} mood={mood} label={`Preview of ${config.name || "your face"}, looking ${MOOD_WORDS[mood].toLowerCase()}`} />
             <View accessibilityRole="radiogroup" accessibilityLabel="Try a mood" style={[s.row, { gap: spacing[2], flexWrap: "wrap", justifyContent: "center" }]}>
               {allMoods.map((m) => (
-                <Button key={m} small primary={mood === m} onPress={() => setMood(m)}>
+                <Button key={m} small selected={mood === m} onPress={() => setMood(m)}>
                   {MOOD_WORDS[m]}
                 </Button>
               ))}

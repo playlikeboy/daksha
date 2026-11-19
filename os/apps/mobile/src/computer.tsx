@@ -246,7 +246,7 @@ export function ComputerSheet() {
           {tabs.map((item) => (
             <Button
               key={item}
-              primary={shown === item}
+              selected={shown === item}
               icon={tabIcons[item]}
               onPress={() => setTab(item)}
             >

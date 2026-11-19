@@ -985,7 +985,7 @@ export function DelegateSheet({ goalId, milestoneId }: { goalId?: string; milest
       )}
       <View style={[s.row, { flexWrap: "wrap", gap: spacing[2], marginBottom: spacing[5] }]}>
         {(["plan", "document", "finance", "agent"] as const).map((item) => (
-          <Button small primary={kind === item} key={item} onPress={() => setKind(item)}>
+          <Button small selected={kind === item} key={item} onPress={() => setKind(item)}>
             {item === "agent" ? "General task" : statusLabel(item)}
           </Button>
         ))}
@@ -1581,7 +1581,7 @@ function MonitorForm({ onDone }: { onDone: () => void }) {
       <Text style={[s.small, { marginBottom: spacing[3] }]}>Notify me when</Text>
       <View style={[s.row, { gap: spacing[2], flexWrap: "wrap", marginBottom: spacing[4] }]}>
         {(["change", "contains", "price_below"] as const).map((item) => (
-          <Button small primary={condition === item} key={item} onPress={() => setCondition(item)}>
+          <Button small selected={condition === item} key={item} onPress={() => setCondition(item)}>
             {item === "change"
               ? "Page changes"
               : item === "contains"
@@ -1994,7 +1994,7 @@ export function AppsScreen() {
             <Field label="Name" value={name} onChangeText={setName} />
             <View style={[s.row, { gap: spacing[2] }]}>
               {(["warm", "concise", "thoughtful"] as const).map((item) => (
-                <Button key={item} small primary={tone === item} onPress={() => setTone(item)}>
+                <Button key={item} small selected={tone === item} onPress={() => setTone(item)}>
                   {statusLabel(item)}
                 </Button>
               ))}

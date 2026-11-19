@@ -95,7 +95,8 @@ export const s = StyleSheet.create({
     borderRadius: radius.page,
   },
   primary: { backgroundColor: colors.accent },
-  secondary: { backgroundColor: colors.subtle },
+  // The quiet fill is the same grey as the page, so the edge is what shows a button there.
+  secondary: { backgroundColor: colors.subtle, borderWidth, borderColor: colors.lineStrong },
   buttonText: { ...face, ...textStyle.label },
   chip: {
     paddingHorizontal: spacing[3],
@@ -147,6 +148,8 @@ export function Button({
   busy,
   small,
   danger,
+  selected,
+  accessibilityLabel,
   style,
 }: {
   children: ReactNode;
@@ -157,18 +160,39 @@ export function Button({
   busy?: boolean;
   small?: boolean;
   danger?: boolean;
+  /**
+   * Makes the button one choice in a group (inside an `accessibilityRole="radiogroup"`).
+   * The picked one gets a white fill and a dark edge, so a row of choices never turns
+   * into a row of primary buttons, and screen readers hear which one is on.
+   */
+  selected?: boolean;
+  /** A fuller name for screen readers, when the visible words are short ("Remove"). */
+  accessibilityLabel?: string;
   style?: ViewStyle;
 }) {
+  const reduceMotion = useReducedMotion();
+  const choice = selected !== undefined;
   const color = primary ? colors.onAccent : danger ? colors.danger : colors.text;
   return (
     <Pressable
-      accessibilityRole="button"
+      accessibilityRole={choice ? "radio" : "button"}
+      accessibilityLabel={accessibilityLabel}
       disabled={disabled || busy}
-      accessibilityState={{ disabled: !!(disabled || busy), busy: !!busy }}
+      accessibilityState={{
+        disabled: !!(disabled || busy),
+        busy: !!busy,
+        ...(choice ? { checked: selected } : {}),
+      }}
       onPress={onPress}
       style={({ pressed }) => [
         s.button,
+        { maxWidth: "100%" },
         primary ? s.primary : s.secondary,
+        choice && {
+          borderWidth: 2,
+          borderColor: selected ? colors.text : colors.lineStrong,
+          backgroundColor: selected ? colors.card : colors.subtle,
+        },
         small && {
           minHeight: spacing[11],
           minWidth: spacing[11],
@@ -176,16 +200,20 @@ export function Button({
           paddingHorizontal: spacing[3],
         },
         (disabled || busy) && { opacity: 0.5 },
-        pressed && { transform: [{ scale: 0.98 }] },
+        pressed && !reduceMotion && { transform: [{ scale: 0.98 }] },
         style,
       ]}
     >
       {busy ? (
         <ActivityIndicator color={color} size="small" />
+      ) : choice && selected ? (
+        <Check size={15} color={color} />
       ) : Icon ? (
         <Icon size={15} color={color} />
       ) : null}
-      <Text style={[s.buttonText, { color }]}>{children}</Text>
+      <Text style={[s.buttonText, { color, flexShrink: 1, textAlign: "center" }, choice && selected && { fontWeight: "700" }]}>
+        {children}
+      </Text>
     </Pressable>
   );
 }
@@ -254,9 +282,11 @@ export function Segmented<T extends string>({
         flexDirection: "row",
         alignSelf: "flex-start",
         maxWidth: "100%",
+        flexWrap: "wrap",
         padding: spacing[1],
         gap: spacing[1],
-        borderRadius: radius.full,
+        // Still a pill on one line; a soft panel when the choices wrap on a narrow phone.
+        borderRadius: radius.page,
         backgroundColor: colors.line,
       }}
     >
@@ -326,7 +356,7 @@ export function Empty({
       >
         <Icon size={24} color={colors.blueDark} />
       </View>
-      <Text style={s.heading}>{title}</Text>
+      <Text accessibilityRole="header" style={[s.heading, { textAlign: "center" }]}>{title}</Text>
       <Text style={[s.muted, { textAlign: "center", maxWidth: 360 }]}>{detail}</Text>
       {children}
     </View>
@@ -476,8 +506,9 @@ export function Sheet({
   const { width } = useWindowDimensions();
   const insets = useSafeAreaInsets();
   const compact = width < 600;
+  const reduceMotion = useReducedMotion();
   return (
-    <Modal transparent animationType={compact ? "slide" : "fade"} visible onRequestClose={onClose}>
+    <Modal transparent animationType={reduceMotion ? "none" : compact ? "slide" : "fade"} visible onRequestClose={onClose}>
       <View style={[s.modalShade, compact && { padding: 0, justifyContent: "flex-end" }]}>
         <View
           accessibilityViewIsModal
@@ -515,10 +546,10 @@ export function Sheet({
             ]}
           >
             <View style={{ flex: 1, gap: spacing[1] }}>
-              <Text style={s.title}>{title}</Text>
+              <Text accessibilityRole="header" style={s.title}>{title}</Text>
               {!!subtitle && <Text style={s.muted}>{subtitle}</Text>}
             </View>
-            <IconButton icon={X} label="Close details" onPress={onClose} />
+            <IconButton icon={X} label={`Close ${title}`} onPress={onClose} />
           </View>
           <ScrollView
             keyboardShouldPersistTaps="handled"
@@ -545,7 +576,7 @@ export function CheckRow({
       accessibilityRole="checkbox"
       accessibilityState={{ checked }}
       onPress={onPress}
-      style={[s.row, { gap: spacing[3], paddingVertical: spacing[2] }]}
+      style={[s.row, { gap: spacing[3], paddingVertical: spacing[2], minHeight: spacing[11] }]}
     >
       <View
         style={{
@@ -576,7 +607,7 @@ export function SectionHeading({
 }) {
   return (
     <View style={[s.between, { marginBottom: spacing[5] }]}>
-      <Text style={s.heading}>{title}</Text>
+      <Text accessibilityRole="header" style={s.heading}>{title}</Text>
       {action && onPress && (
         <Pressable
           accessibilityRole="button"

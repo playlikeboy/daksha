@@ -267,14 +267,14 @@ export function ConnectAppsSection({ query }: { query: string }) {
               style={[s.row, { gap: spacing[2], flexWrap: "wrap" }]}
               accessibilityLabel="Categories"
             >
-              <Button small primary={!category} onPress={() => setCategory(undefined)}>
+              <Button small selected={!category} onPress={() => setCategory(undefined)}>
                 All
               </Button>
               {current.page.categories.map((c) => (
                 <Button
                   key={c.name}
                   small
-                  primary={category?.toLowerCase() === c.name.toLowerCase()}
+                  selected={category?.toLowerCase() === c.name.toLowerCase()}
                   onPress={() => setCategory(c.name)}
                 >
                   {c.name}

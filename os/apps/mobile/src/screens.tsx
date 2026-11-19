@@ -219,13 +219,13 @@ export function MailScreen() {
       <ErrorNotice error={error} />
       <Card>
         <View style={[s.row, { gap: spacing[3], marginBottom: spacing[4], flexWrap: "wrap" }]}>
-          <Button small primary={tab === "all"} onPress={() => setTab("all")}>
+          <Button small selected={tab === "all"} onPress={() => setTab("all")}>
             All messages
           </Button>
-          <Button small primary={tab === "unread"} onPress={() => setTab("unread")}>
+          <Button small selected={tab === "unread"} onPress={() => setTab("unread")}>
             Unread · {w.mail.filter((m) => m.unread).length}
           </Button>
-          <Button small primary={tab === "drafts"} onPress={() => setTab("drafts")}>
+          <Button small selected={tab === "drafts"} onPress={() => setTab("drafts")}>
             Drafts · {drafts.length}
           </Button>
         </View>
@@ -447,7 +447,7 @@ export function CalendarScreen() {
               <Button
                 key={c.id}
                 small
-                primary={c.id === calendarId}
+                selected={c.id === calendarId}
                 onPress={() => setCalendarId(c.id)}
               >
                 {c.name}

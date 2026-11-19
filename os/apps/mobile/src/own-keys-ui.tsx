@@ -53,12 +53,12 @@ function ModelPicker({
       <Text style={s.muted}>{label}</Text>
       <View accessibilityRole="radiogroup" accessibilityLabel={label} style={[s.row, { gap: spacing[2], flexWrap: "wrap" }]}>
         {noneLabel ? (
-          <Button small primary={value === ""} onPress={() => onChange("")}>
+          <Button small selected={value === ""} onPress={() => onChange("")}>
             {noneLabel}
           </Button>
         ) : null}
         {choices.map((c) => (
-          <Button key={c.id} small primary={value === c.id} onPress={() => onChange(c.id)}>
+          <Button key={c.id} small selected={value === c.id} onPress={() => onChange(c.id)}>
             {c.label}
           </Button>
         ))}
