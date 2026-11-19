@@ -64,7 +64,7 @@ function buildTimeline(M, L) {
       lines: [{ text: "You wrote it down somewhere." }, { text: "But where?", delay: 1.25, color: "#ffb0a8" }] },
     // Reveal
     { t0: 5.0, t1: 7.0, x: 0, y: 0, w: W, center: true, cy: V ? 1290 : 810, color: "#fff", size: V ? 170 : 150,
-      lines: [{ text: "Meet Debo." }], sub: "A friendly assistant that remembers your life.", subSize: V ? 48 : 54, subDelay: 0.6 },
+      lines: [{ text: "Meet Daksha." }], sub: "A friendly assistant that remembers your life.", subSize: V ? 48 : 54, subDelay: 0.6 },
     // Beats
     { t0: 8.5, t1: 16.9, x: left, y: top, w: tw, size: head, subSize: sub, lines: [{ text: "Write your day down." }],
       sub: "A few lines is enough. You can also speak it or record it." },
@@ -77,11 +77,11 @@ function buildTimeline(M, L) {
     { t0: 51.2, t1: 61.2 - 4.2, x: left, y: top, w: tw, size: head, subSize: sub, lines: [{ text: "See, fix or forget anything it knows." }],
       sub: "Every memory shows the entry it came from." },
     { t0: 57.4, t1: 61.8, x: left, y: top, w: tw, size: head, subSize: sub, lines: [{ text: "Your apps, only with your yes." }],
-      sub: "Debo asks before it sends, posts or changes anything outside Debo." },
+      sub: "Daksha asks before it sends, posts or changes anything outside Daksha." },
     // End card
     { t0: 64.0, t1: 99, x: 0, y: 0, w: W, center: true, cy: V ? 1230 : 700, color: "#fff", size: V ? 170 : 150,
-      lines: [{ text: "Debo" }], sub: "A friendly assistant that remembers your life.", subSize: V ? 46 : 50, subDelay: 0.45, noExit: true },
-    { t0: 65.4, t1: 99, x: 0, y: 0, w: W, center: true, cy: V ? 1570 : 905, url: "my.debo.life", noExit: true, size: V ? 64 : 68 },
+      lines: [{ text: "Daksha" }], sub: "A friendly assistant that remembers your life.", subSize: V ? 46 : 50, subDelay: 0.45, noExit: true },
+    { t0: 65.4, t1: 99, x: 0, y: 0, w: W, center: true, cy: V ? 1570 : 905, url: "my.daksha.life", noExit: true, size: V ? 64 : 68 },
   ];
 
   // Callouts: a pill with a line to a real spot on the screen (image coordinates).

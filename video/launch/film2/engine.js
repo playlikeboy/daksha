@@ -170,7 +170,7 @@ async function init() {
     const w = el("div", "abs", parent); css(w, { display: "flex", flexDirection: "column", alignItems: "center" });
     const f = el("div", "face", w); css(f, { width: size + "px", height: size + "px", boxShadow: "var(--shadow-s)" }); img(f, ART(who));
     const pill = el("div", "", w); css(pill, { marginTop: -size * 0.12 + "px", background: "#fff", borderRadius: "28px", padding: "10px 30px 12px", boxShadow: "var(--shadow-s)", textAlign: "center", position: "relative" });
-    el("div", "", pill, "Debo").style.cssText = "font-weight:700;font-size:34px;line-height:1.15";
+    el("div", "", pill, "Daksha").style.cssText = "font-weight:700;font-size:34px;line-height:1.15";
     const st = el("div", "shim", pill); st.style.cssText += "font-weight:600;font-size:29px;line-height:1.3;white-space:nowrap";
     return { w, f, pill, st, set(text, u) { if (st.textContent !== text) st.textContent = text; st.style.backgroundPosition = `${100 - ((u * 55) % 300)}% 0`; } };
   };
@@ -290,11 +290,11 @@ async function init() {
     const hk = tr(u, sc.open + 0.55, sc.open + 1.05, eo3); hl.style.backgroundSize = `${hk * 100}% 42%`;
   }
 
-  // ---------------------------------------------------------------- what Debo knows
+  // ---------------------------------------------------------------- what Daksha knows
   const K = scene("knows");
   const kc = el("div", "abs card", K.r); css(kc, { width: lay(1080, 930) + "px", padding: "40px 44px", display: "flex", flexDirection: "column", gap: "16px" });
   const kh = el("div", "row", kc); kh.style.gap = "18px"; gtile(kh, "eye", 58);
-  const khT = el("div", "", kh); el("div", "", khT, "What Debo knows").style.cssText = "font-weight:700;font-size:42px";
+  const khT = el("div", "", kh); el("div", "", khT, "What Daksha knows").style.cssText = "font-weight:700;font-size:42px";
   el("div", "", khT, "Each memory shows the entry it came from.").style.cssText = "font-size:27px;color:#6b7890;font-weight:500;margin-top:2px";
   const mem = [
     ["Neha wants Goa on 17 to 19 January.", "doc", "Journal, 12 November"],
@@ -344,7 +344,7 @@ async function init() {
 
   // ---------------------------------------------------------------- talk
   const Tk = scene("talk");
-  const who = ["debo", "diya", "anaya", "mishti", "kabir"], names = ["Debo", "Diya", "Anaya", "Mishti", "Kabir"];
+  const who = ["debo", "diya", "anaya", "mishti", "kabir"], names = ["Daksha", "Diya", "Anaya", "Mishti", "Kabir"];
   const fsz = lay(196, 150), gap = lay(270, 180);
   const tCap = el("div", "abs", Tk.r, "Choose who you talk to"); tCap.style.cssText += `font-weight:700;font-size:${lay(52, 50)}px;color:#2a3954;white-space:nowrap`;
   const faces = who.map((w, i) => {
@@ -484,7 +484,7 @@ async function init() {
   const ych = el("div", "row", yc); ych.style.gap = "18px"; gtile(ych, "calendar", 60);
   el("div", "", ych, "Add to your calendar").style.cssText = "font-weight:700;font-size:46px";
   el("div", "", yc, "Goa trip, 17 to 19 January").style.cssText = "font-weight:500;font-size:38px;color:#2a3954";
-  el("div", "", yc, "Nothing changes outside Debo until you say yes.").style.cssText = "font-weight:500;font-size:27px;color:#6b7890";
+  el("div", "", yc, "Nothing changes outside Daksha until you say yes.").style.cssText = "font-weight:500;font-size:27px;color:#6b7890";
   const yb = el("div", "row", yc); css(yb, { gap: "16px", marginTop: "18px" });
   const yOk = el("div", "btn pri", yb, svg("check", 30) + "Approve"); yOk.style.cssText += "font-size:34px;padding:20px 40px;position:relative";
   const yNo = el("div", "btn sec", yb, svg("x", 30) + "Not now"); yNo.style.cssText += "font-size:34px;padding:20px 40px";
@@ -564,9 +564,9 @@ async function init() {
   // ---------------------------------------------------------------- end card
   const E = scene("end"); E.t1 = T.D + 1; E.out = 99;
   const eLogo = el("div", "abs", E.r); css(eLogo, { width: lay(250, 260) + "px", height: lay(250, 260) + "px" }); img(eLogo, "/art/debo.svg").style.cssText = "width:100%;height:100%";
-  const eName = el("div", "abs", E.r, "Debo"); eName.style.cssText += `font-weight:800;font-size:${lay(150, 150)}px;letter-spacing:-0.03em`;
+  const eName = el("div", "abs", E.r, "Daksha"); eName.style.cssText += `font-weight:800;font-size:${lay(150, 150)}px;letter-spacing:-0.03em`;
   const eSub = el("div", "abs", E.r, "A friendly assistant that remembers your life."); eSub.style.cssText += `font-weight:500;font-size:${lay(44, 40)}px;color:#4a5872;white-space:nowrap`;
-  const eUrl = el("div", "abs pill", E.r, "my.debo.life"); eUrl.style.cssText += `background:#111a2b;color:#fff;font-weight:700;font-size:${lay(46, 46)}px;padding:20px 46px 22px;box-shadow:var(--shadow-s)`;
+  const eUrl = el("div", "abs pill", E.r, "my.daksha.life"); eUrl.style.cssText += `background:#111a2b;color:#fff;font-weight:700;font-size:${lay(46, 46)}px;padding:20px 46px 22px;box-shadow:var(--shadow-s)`;
   function drawEnd(t) {
     const sc = E, u = showScene(sc, t); if (u == null) return;
     const l = spr(u - sc.logo, 1.6, 5.5);

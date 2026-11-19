@@ -1,10 +1,10 @@
-# Debo launch video
+# Daksha launch video
 
 The site shows the second launch film (`film2/`, 72 seconds, 1920x1080 plus a 1080x1920 cut): an animation with no screen recordings. There is also the first launch film (`src/`, 69 seconds, cut from screen recordings) and a 66 second demo walkthrough (`demo/`, 1920x1080). All have music and sound effects, and no speech.
 
 ## The second launch film (film2)
 
-Bright white screen, a soft blue glow at the bottom, words that build one at a time with small icons between them, and cards rebuilt from the app (not screenshots) that float, tilt and stack. A line comes back between the cards: "Debo remembers your days", "Debo answers from your journal", "Debo shows you what it knows", "Debo talks with you", "Debo remembers your people", "Debo asks before it acts", and it ends on "Debo keeps you in control".
+Bright white screen, a soft blue glow at the bottom, words that build one at a time with small icons between them, and cards rebuilt from the app (not screenshots) that float, tilt and stack. A line comes back between the cards: "Daksha remembers your days", "Daksha answers from your journal", "Daksha shows you what it knows", "Daksha talks with you", "Daksha remembers your people", "Daksha asks before it acts", and it ends on "Daksha keeps you in control".
 
 - `film2/timeline.js` holds every time: the word blocks, the card scenes and the sound cues.
 - `film2/engine.js` draws a frame for any time t. The card text uses the app's real words ("Looking through your journal…", "Waiting for your yes", "Approve", "Not now", "Fix this memory", "Forget this memory", "Journal, 12 November").
@@ -31,7 +31,7 @@ ffmpeg -ss 22.5 -i ../../../apps/site/public/debo-launch.mp4 -frames:v 1 -vf sca
 
 Check it by eye: a contact sheet with one frame a second (`ffmpeg -i film2-h.mp4 -vf "fps=1,scale=384:-1,tile=8x9" -frames:v 1 sheet.jpg`), and a few short stretches frame by frame for smooth motion.
 
-The music for film2 is brighter and faster than the first film: D major, about 120 beats a minute, plucks, marimba, bass, kick, claps and hats. The beat drops on the first "Debo remembers", rests during the voice call, and stops for the last line. Sounds follow the cues in the timeline: pops on words, ticks while typing, whooshes on card moves, taps on buttons, flaps on the calendar flip, a tick and chime on the check, and sparkles on the confetti.
+The music for film2 is brighter and faster than the first film: D major, about 120 beats a minute, plucks, marimba, bass, kick, claps and hats. The beat drops on the first "Daksha remembers", rests during the voice call, and stops for the last line. Sounds follow the cues in the timeline: pops on words, ticks while typing, whooshes on card moves, taps on buttons, flaps on the calendar flip, a tick and chime on the check, and sparkles on the confetti.
 
 ## The first launch film
 

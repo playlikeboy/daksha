@@ -25,7 +25,7 @@ const mark = (k) => { marks[k] = Date.now() / 1000; console.log("mark", k); };
 const step = async (name, work) => { try { await work(); } catch (e) { console.log("STEP FAILED", name, String(e).split("\n")[0]); } };
 async function scroll(total, ms) { const n = 30; for (let i = 0; i < n; i++) { await p.mouse.wheel(0, total / n); await pause(ms / n); } }
 
-await p.goto("https://my.debo.life", { waitUntil: "networkidle" });
+await p.goto("https://my.daksha.life", { waitUntil: "networkidle" });
 await p.getByLabel("Email").fill(email);
 await p.getByLabel("Password").fill(password);
 await p.getByRole("button", { name: "Sign in", exact: true }).click();
@@ -58,7 +58,7 @@ await step("chat", async () => {
   await pause(1200);
   await p.getByText("New side chat", { exact: true }).click();
   await pause(2000);
-  const box = p.locator('[aria-label="Message Debo"]:visible').last();
+  const box = p.locator('[aria-label="Message Daksha"]:visible').last();
   await box.click();
   mark("q_start");
   await box.pressSequentially(QUESTION, { delay: 55 });
@@ -78,16 +78,16 @@ await step("chat", async () => {
 });
 
 await step("voice", async () => {
-  await p.locator('[aria-label="Talk to Debo"]:visible').first().click();
+  await p.locator('[aria-label="Talk to Daksha"]:visible').first().click();
   mark("voice_open");
   await pause(2500);
   await p.locator("button").filter({ hasText: "Start talking" }).click();
   mark("voice_start");
   await pause(9000);
   mark("voice_listening");
-  await p.getByLabel("Type to Debo", { exact: true }).click();
+  await p.getByLabel("Type to Daksha", { exact: true }).click();
   await pause(1000);
-  const box = p.getByLabel("Type to Debo instead");
+  const box = p.getByLabel("Type to Daksha instead");
   mark("feel_start");
   await box.pressSequentially(FEEL, { delay: 60 });
   mark("feel_typed");
@@ -101,7 +101,7 @@ await step("voice", async () => {
 });
 
 await step("knows", async () => {
-  await p.goto("https://my.debo.life/knows", { waitUntil: "networkidle" });
+  await p.goto("https://my.daksha.life/knows", { waitUntil: "networkidle" });
   await pause(3000);
   mark("knows_top");
   await scroll(520, 3500);

@@ -30,7 +30,7 @@ async function init() {
   const dot = el("div", "circle", stage);
   Object.assign(dot.style, { width: "300px", height: "300px", left: "1690px", top: "760px", background: "var(--peach)", opacity: 0.55 });
 
-  const bug = el("div", "", stage); bug.id = "bug"; bug.innerHTML = TOMATO.replace('class="tomato-svg"', "") + "<span>Debo</span>";
+  const bug = el("div", "", stage); bug.id = "bug"; bug.innerHTML = TOMATO.replace('class="tomato-svg"', "") + "<span>Daksha</span>";
 
   const cap = el("div", "", stage); cap.id = "cap";
   const capParts = TL.steps.map((s) => {
@@ -52,16 +52,16 @@ async function init() {
 
   // Intro and end cards, on red.
   const intro = el("div", "card", stage);
-  const ih = el("h1", "", intro); ih.style.fontSize = "120px"; const iws = words(ih, "Debo, start to finish");
+  const ih = el("h1", "", intro); ih.style.fontSize = "120px"; const iws = words(ih, "Daksha, start to finish");
   const ip = el("p", "", intro, "A real recording of the app. The waiting is sped up."); ip.style.fontSize = "50px"; ip.style.marginTop = "30px";
   const endRed = el("div", "wipe", stage);
   const big = el("div", "tomato", stage); big.innerHTML = TOMATO;
   Object.assign(big.style, { width: "360px", height: "360px", left: (1920 - 360) / 2 + "px", top: "120px" });
   const bigSvg = big.querySelector("svg"); bigSvg.style.width = "100%"; bigSvg.style.height = "100%";
   const end = el("div", "card", stage);
-  const eh = el("h1", "", end); eh.style.fontSize = "150px"; const ews = words(eh, "Debo");
+  const eh = el("h1", "", end); eh.style.fontSize = "150px"; const ews = words(eh, "Daksha");
   const ep = el("p", "", end, "A friendly assistant that remembers your life."); ep.style.fontSize = "50px"; ep.style.marginTop = "26px";
-  const eu = el("div", "", end); eu.style.marginTop = "56px"; const url = el("span", "url", eu, "my.debo.life");
+  const eu = el("div", "", end); eu.style.marginTop = "56px"; const url = el("span", "url", eu, "my.daksha.life");
 
   const segAt = (t) => { const s = TL.segs; if (t < s[0].t0) return 0; for (let i = 0; i < s.length; i++) if (t < s[i].t1) return i; return s.length - 1; };
   const srcAt = (g, t) => g.src[0] + clamp(t - g.t0, 0, g.t1 - g.t0) * g.speed;

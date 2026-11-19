@@ -1,4 +1,4 @@
-// The Debo tomato, shared by the launch film and the demo walkthrough.
+// The Daksha tomato, shared by the launch film and the demo walkthrough.
 const TOMATO = `<svg viewBox="0 0 240 240" xmlns="http://www.w3.org/2000/svg" class="tomato-svg">
 <ellipse cx="120" cy="226" rx="70" ry="8" fill="#1b1b1b" opacity="0.14"/>
 <path d="M120 66C150 52 204 60 221 118C234 174 190 218 120 218C50 218 6 174 19 118C36 60 90 52 120 66Z" fill="#e5392b"/>

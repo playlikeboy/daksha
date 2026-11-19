@@ -16,16 +16,16 @@ function buildDemo() {
     { src: [22.0, 25.4], speed: 1, step: 1 }, // save, "Entry saved"
     { src: [29.2, 32.0], speed: 2, step: 2 }, // to the chat, new side chat
     { src: [32.0, 39.6], speed: 1.5, step: 2 }, // typing the question
-    { src: [39.6, 49.3], speed: 5, step: 2 }, // Debo looks through the journal
+    { src: [39.6, 49.3], speed: 5, step: 2 }, // Daksha looks through the journal
     { src: [49.3, 51.0], speed: 0.5, step: 3 }, // the entries it found, shown slowly
     { src: [51.0, 58.0], speed: 1, step: 3 }, // the answer
     { src: [63.0, 65.5], speed: 1, step: 4 }, // talk: tap to start
     { src: [65.5, 68.5], speed: 3, step: 4 }, // connecting
-    { src: [68.5, 73.0], speed: 1.25, step: 4 }, // Debo says hello
+    { src: [68.5, 73.0], speed: 1.25, step: 4 }, // Daksha says hello
     { src: [73.0, 77.5], speed: 3, step: 4 }, // listening
     { src: [77.5, 81.5], speed: 1.25, step: 4 }, // typing instead of talking
     { src: [81.5, 84.5], speed: 3, step: 4 }, // thinking
-    { src: [84.5, 89.0], speed: 1.25, step: 4 }, // Debo answers
+    { src: [84.5, 89.0], speed: 1.25, step: 4 }, // Daksha answers
     { src: [97.3, 99.0], speed: 1, step: 5 }, // call ends, on to Apps
     { src: [99.0, 105.9], speed: 1, step: 5 }, // the Apps screen
   ];
@@ -42,11 +42,11 @@ function buildDemo() {
 
   const stepText = [
     { title: "Sign in", sub: "Your journal, chats and apps in one private place." },
-    { title: "Write a day", sub: "A few lines about what happened. Debo keeps it." },
+    { title: "Write a day", sub: "A few lines about what happened. Daksha keeps it." },
     { title: "Ask about your own life", sub: "Plain questions, in your own words." },
-    { title: "See where each answer came from", sub: "Debo names the journal entries it used." },
-    { title: "Talk to Debo", sub: "Say it out loud, or type when you can't talk." },
-    { title: "Connect your apps", sub: "Debo asks before it sends or changes anything outside Debo." },
+    { title: "See where each answer came from", sub: "Daksha names the journal entries it used." },
+    { title: "Talk to Daksha", sub: "Say it out loud, or type when you can't talk." },
+    { title: "Connect your apps", sub: "Daksha asks before it sends or changes anything outside Daksha." },
   ];
   const steps = stepText.map((s, i) => {
     const mine = segs.filter((g) => g.step === i);

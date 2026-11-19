@@ -31,7 +31,7 @@ async function init() {
   const imgs = TL.screen.map((s, i) => { const im = el("img", "", scr); im.style.zIndex = i; im.decoding = "sync"; im.style.opacity = 0; return im; });
   const svgNS = "http://www.w3.org/2000/svg";
   const lines = document.createElementNS(svgNS, "svg"); lines.id = "lines"; lines.setAttribute("viewBox", `0 0 ${TL.W} ${TL.H}`); stage.appendChild(lines);
-  const bug = el("div", "", stage); bug.id = "bug"; bug.innerHTML = TOMATO.replace('class="tomato-svg"', "") + "<span>Debo</span>";
+  const bug = el("div", "", stage); bug.id = "bug"; bug.innerHTML = TOMATO.replace('class="tomato-svg"', "") + "<span>Daksha</span>";
   bug.style.left = (TL.V ? 90 : 120) + "px"; bug.style.top = (TL.V ? 70 : 60) + "px";
 
   // Big tomato for the reveal and the end card.

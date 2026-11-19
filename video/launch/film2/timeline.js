@@ -12,9 +12,9 @@ function buildFilm2(L) {
   // size: "xl" big words, "md" the smaller middle line of a refrain.
   const say = (t0, t1, lines, opts = {}) => ({ t0, t1, lines, ...opts });
   const refrain = (t0, t1, glyph, verb, rest) =>
-    say(t0, t1, [{ size: "xl", parts: ["Debo"] }, { size: "md", parts: [{ g: glyph }, ...verb.split(" ")] }, { size: "xl", parts: rest.split(" ") }]);
+    say(t0, t1, [{ size: "xl", parts: ["Daksha"] }, { size: "md", parts: [{ g: glyph }, ...verb.split(" ")] }, { size: "xl", parts: rest.split(" ") }]);
   const texts = [
-    say(0.3, 2.55, [{ size: "xl", parts: ["Meet", { g: "debo" }, "Debo"] }]),
+    say(0.3, 2.55, [{ size: "xl", parts: ["Meet", { g: "debo" }, "Daksha"] }]),
     say(2.55, 5.35, [{ size: "xl", parts: ["A", "journal"] }, { size: "xl", parts: ["you", "can", { g: "chat" }, "talk", "to"] }]),
     refrain(5.35, 7.6, "pen", "remembers", "your days"),
     refrain(15.0, 17.3, "search", "answers", "from your journal"),
@@ -22,7 +22,7 @@ function buildFilm2(L) {
     refrain(34.6, 36.85, "mic", "talks", "with you"),
     refrain(43.6, 45.85, "cake", "remembers", "your people"),
     refrain(56.3, 58.6, "shield", "asks", "before it acts"),
-    say(64.6, 67.5, [{ size: "xl", parts: ["Debo"] }, { size: "md", parts: [{ g: "check" }, "keeps", "you"] }, { size: "xl", parts: ["in", "control"] }]),
+    say(64.6, 67.5, [{ size: "xl", parts: ["Daksha"] }, { size: "md", parts: [{ g: "check" }, "keeps", "you"] }, { size: "xl", parts: ["in", "control"] }]),
   ];
   // When each word lands: a steady build, a little slower on the last line.
   for (const b of texts) {

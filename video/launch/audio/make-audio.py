@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Makes the music and sound effects for the Debo videos.
+"""Makes the music and sound effects for the Daksha videos.
 
 Every sound is synthesised here from sine waves and noise. There are no samples and no
 recordings, so there is nothing to license. The sounds are timed from the edits themselves:
@@ -352,7 +352,7 @@ def write_wav(path, y):
 def launch_audio(path):
     T = read_launch()
     D = T["D"]
-    origin, end_hit = 5.0, 64.0  # "Meet Debo." and the end card
+    origin, end_hit = 5.0, 64.0  # "Meet Daksha." and the end card
     bar = (end_hit - origin) / round((end_hit - origin) / (4 * 60 / 105.0))
     talk = next(b["t0"] for b in T["text"] if b.get("lines") and b["lines"][0]["text"].startswith("Talk"))
     br0 = origin + np.ceil((talk - origin) / bar) * bar  # one quiet bar when "Talk to it" starts
@@ -545,7 +545,7 @@ def music2(dur, origin, end_hit, plan):
 def film2_audio(path):
     T = read_film2()
     D, S = T["D"], T["S"]
-    origin = T["texts"][2]["lines"][0]["times"][0]  # the beat drops on the first "Debo remembers"
+    origin = T["texts"][2]["lines"][0]["times"][0]  # the beat drops on the first "Daksha remembers"
     end_hit = S["end"]["t0"] + S["end"]["logo"]
     bars = int(round((end_hit - origin) / (4 * 60 / 118.0)))
     bar = (end_hit - origin) / bars

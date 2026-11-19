@@ -1,6 +1,6 @@
 # Audio sources and licences
 
-All sound in the Debo videos, both launch films (`debo-launch.mp4`, `debo-launch-vertical.mp4`, `debo-launch.webm`, `debo-demo.mp4`, `debo-demo.webm`) is made by `audio/make-audio.py` in this folder.
+All sound in the Daksha videos, both launch films (`debo-launch.mp4`, `debo-launch-vertical.mp4`, `debo-launch.webm`, `debo-demo.mp4`, `debo-demo.webm`) is made by `audio/make-audio.py` in this folder.
 
 | Sound | Where it comes from | Licence |
 |---|---|---|
