@@ -60,6 +60,7 @@ import {
   spacing,
   timeLabel,
 } from "./ui";
+import { statusWords } from "./status-words";
 import { useWorkspace } from "./workspace";
 
 function todayDate() {
@@ -637,7 +638,7 @@ export function BrowserScreen() {
                     {b.url}
                   </Text>
                 </View>
-                <Chip tint={b.status === "active" ? colors.green : colors.canvas}>{b.status}</Chip>
+                <Chip tint={b.status === "active" ? colors.green : colors.canvas}>{statusWords(b.status)}</Chip>
                 <ArrowUpRight size={17} color={colors.muted} />
               </View>
               {!!b.previewUrl && (
@@ -852,7 +853,7 @@ export function ActivityScreen() {
                           : colors.canvas
                     }
                   >
-                    {a.status.replace(/_/g, " ")}
+                    {statusWords(a.status)}
                   </Chip>
                   <Text style={s.small}>{relativeDate(a.createdAt)}</Text>
                 </View>
@@ -892,7 +893,7 @@ export function ActivityScreen() {
                     {dateLabel(a.date)} · {timeLabel(a.date)}
                   </Text>
                 </View>
-                <Chip>{a.status}</Chip>
+                <Chip>{statusWords(a.status)}</Chip>
               </View>
             ))
           ) : (

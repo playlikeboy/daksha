@@ -68,11 +68,10 @@ import {
   spacing,
 } from "./ui";
 import { useTalkSettingsName } from "./debo-pronouns";
+import { statusWords } from "./status-words";
 import { useWorkspace } from "./workspace";
 
-export function statusLabel(value: string) {
-  return value.replace(/_/g, " ").replace(/^./, (c) => c.toUpperCase());
-}
+export const statusLabel = statusWords;
 function stamp(value?: string) {
   return value
     ? new Date(value).toLocaleString(undefined, {
@@ -94,14 +93,12 @@ export function AgentStatus() {
   if (data?.worker.running && !error) return null;
   return (
     <View style={{ gap: spacing[2] }}>
-      <ErrorNotice error={error ? `Agent updates unavailable. ${error}` : ""} />
-      {!!error && (
-        <Button small onPress={() => void refresh().catch(() => {})}>
-          Reconnect agent
-        </Button>
-      )}
+      <ErrorNotice
+        error={error ? "I can't check on your tasks right now. Your saved work is safe." : ""}
+        onRetry={error ? () => void refresh().catch(() => {}) : undefined}
+      />
       {data && !data.worker.running && (
-        <Text style={s.small}>Worker is offline. Saved work will continue when it reconnects.</Text>
+        <Text style={s.small}>Tasks are paused for a moment. They carry on by themselves when I'm back.</Text>
       )}
     </View>
   );
@@ -223,7 +220,7 @@ export function AgentActivityScreen() {
         <Empty
           icon={ListChecks}
           title="No work here yet"
-          detail="Delegate a task in Chat. Its plan, progress and results stay here."
+          detail="Ask for something in Chat, like 'fill in this form' or 'watch this page'. Its plan, progress and results show here."
         />
       )}
       <SectionHeading title="Reviews & receipts" />
@@ -503,11 +500,11 @@ export function TaskDetail({ taskId }: { taskId: string }) {
               {task.kind === "document" && !fieldNames.length && (
                 <>
                   <Button small onPress={() => setShowFieldJson(!showFieldJson)}>
-                    Form field values
+                    Fill in the fields by hand
                   </Button>
                   {showFieldJson && (
                     <Field
-                      label="Fields (JSON: field name to value)"
+                      label={'Fields, written as {"field name": "value"}, for people who know this format'}
                       value={fieldJson}
                       onChangeText={setFieldJson}
                       multiline
@@ -632,7 +629,7 @@ export function TaskDetail({ taskId }: { taskId: string }) {
             </View>
           ))}
           {!detail?.events.length && (
-            <Text style={s.muted}>The worker will record each step here.</Text>
+            <Text style={s.muted}>Each step shows here as it happens.</Text>
           )}
         </View>
       )}
@@ -973,7 +970,7 @@ export function DelegateSheet({ goalId, milestoneId }: { goalId?: string; milest
   return (
     <Sheet
       title="Hand over an outcome"
-      subtitle="Debo saves a plan and keeps working on the server."
+      subtitle="Debo saves a plan and keeps working, even when you close the app."
       onClose={close}
     >
       {milestoneId && (
@@ -1052,8 +1049,8 @@ export function DelegateSheet({ goalId, milestoneId }: { goalId?: string; milest
       )}
       {kind === "agent" && !workspace.runtime.configured && (
         <Text style={[s.muted, { marginBottom: spacing[4] }]}>
-          General tasks and plans require a configured model. Document jobs, page watches and
-          spending summaries have guided workflows.
+          General tasks are not switched on here yet. Filling in forms, watching a page and
+          summing up spending still work.
         </Text>
       )}
       <ErrorNotice error={error} />
@@ -1068,7 +1065,7 @@ export function DelegateSheet({ goalId, milestoneId }: { goalId?: string; milest
         }
         onPress={() => void submit()}
       >
-        Delegate task
+        Start this task
       </Button>
     </Sheet>
   );
@@ -1867,7 +1864,7 @@ export function AppsScreen() {
     {
       section: "browser" as const,
       title: "Debo's computer",
-      detail: "Persistent browser sessions",
+      detail: "Websites Debo keeps open for you",
       icon: Globe2,
     },
     {

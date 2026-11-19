@@ -58,6 +58,7 @@ import {
   spacing,
   timeLabel,
 } from "./ui";
+import { statusWords } from "./status-words";
 import { TalkSettingsSheet } from "./talk-settings-ui";
 import { AvatarBuilderSheet } from "./avatar-builder";
 import { type Detail, useWorkspace } from "./workspace";
@@ -638,7 +639,7 @@ function ReviewDetail({ initial }: { initial: ActionProposal }) {
           </Text>
         </View>
         <Chip tint={pending ? colors.lavender : colors.green}>
-          {action.status.replace(/_/g, " ")}
+          {statusWords(action.status)}
         </Chip>
       </View>
       <Card style={{ gap: spacing[3] }}>
