@@ -1,11 +1,15 @@
 import { Platform } from "react-native";
+import { apiUrlForPage } from "./api-address";
 import { readApiPayload } from "./api-response";
 import { timeZoneHeaders } from "./time-zone";
 
-export const API_URL = (
+// On the web, my.daksha.life talks to api.daksha.life so its sign-in cookie stays same-site
+// (see api-address.ts). Phones have no page address and keep the built-in one.
+export const API_URL = apiUrlForPage(
   process.env.EXPO_PUBLIC_API_URL ||
-  (Platform.OS === "android" ? "http://10.0.2.2:8787" : "http://localhost:8787")
-).replace(/\/$/, "");
+    (Platform.OS === "android" ? "http://10.0.2.2:8787" : "http://localhost:8787"),
+  Platform.OS === "web" && typeof window !== "undefined" ? window.location?.host : undefined,
+);
 
 export class FuseApi {
   constructor(readonly token: string) {}
