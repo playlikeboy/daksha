@@ -6,12 +6,30 @@
  * addresses before) send pages to the same path and query there with a 307. Files (films,
  * pictures, fonts) are served by Cloudflare before this runs, so they keep working on every
  * host, and video keeps its Range requests.
+ *
+ * The films were published as debo-*.mp4 and so on before the rename. Those files are gone, so
+ * a request for one reaches this Worker, which sends it to the daksha-* file with a 307.
  */
 
 export const LANDING = "https://www.daksha.life";
 
 /** Hosts that move to the landing page. */
 export const MOVED_HOSTS = ["about.daksha.life", "about.debo.life"];
+
+/** Files published under the old name, and their name now. */
+export const RENAMED_FILES: Record<string, string> = Object.fromEntries(
+  [
+    "launch.mp4",
+    "launch.webm",
+    "launch-vertical.mp4",
+    "launch-poster.webp",
+    "launch.en.vtt",
+    "demo.mp4",
+    "demo.webm",
+    "demo-poster.webp",
+    "demo.en.vtt",
+  ].map((file) => [`/debo-${file}`, `/daksha-${file}`]),
+);
 
 export function siteRedirect(requestUrl: string, hostHeader?: string | null): string | null {
   let url: URL;
@@ -21,6 +39,8 @@ export function siteRedirect(requestUrl: string, hostHeader?: string | null): st
     return null;
   }
   const host = (hostHeader || url.host).toLowerCase().replace(/:\d+$/, "");
-  if (!MOVED_HOSTS.includes(host)) return null;
-  return `${LANDING}${url.pathname}${url.search}`;
+  const renamed = RENAMED_FILES[url.pathname];
+  if (MOVED_HOSTS.includes(host)) return `${LANDING}${renamed ?? url.pathname}${url.search}`;
+  if (renamed) return `${url.origin}${renamed}${url.search}`;
+  return null;
 }
