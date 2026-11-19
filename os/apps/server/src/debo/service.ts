@@ -151,6 +151,8 @@ export class DeboService {
   blobRoutes?: import("hono").Hono;
   /** The private bucket recordings use. Pictures Debo makes are kept here too, under the owner's folder. */
   readonly mediaStore?: import("./object-store.ts").ObjectStore;
+  /** The speech engine and audio tools recordings use. Custom people read their videos with them too. */
+  readonly mediaTools?: Pick<MediaDeps, "transcriber" | "audio">;
 
   /**
    * `backend` is null when there is no Debo database. `localOwners` are extra
@@ -164,6 +166,7 @@ export class DeboService {
   ) {
     const media = backend?.media;
     this.mediaStore = mediaDeps?.store;
+    this.mediaTools = mediaDeps ? { transcriber: mediaDeps.transcriber, audio: mediaDeps.audio } : undefined;
     this.recordings =
       backend && media && mediaDeps
         ? new MediaService(media, mediaDeps, {
