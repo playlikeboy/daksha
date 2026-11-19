@@ -14,7 +14,16 @@ Debo should feel like a small, kind friend who keeps your things safe. Two words
 
 A small, round, slightly squat red tomato with a soft highlight, a green leafy top with a short stem, two friendly dark eyes with small highlights, light blush cheeks and a small smile. It is drawn in flat SVG shapes with no outline. The master drawing is `docs/assets/debo.svg`; the landing page (`apps/site`), the app (`os/apps/mobile`) and the share image use copies of it. The older `apps/web` page still draws the earlier yellow character in `apps/web/src/components/debo-art.tsx` and is being replaced.
 
-The app takes its colours from Astryx's default Neutral theme (`@astryxdesign/theme-neutral`), not from the table below, which describes `apps/web`. Debo is the one red thing on its screens.
+### The app (`os/apps/mobile`)
+
+Since the November 2026 refresh the app looks like the landing page, so both feel like one product. The table further below still describes the older `apps/web`.
+
+- **Colour:** the landing page's warm tokens, kept in `src/brand-tokens.ts` and named for screens in `src/palette.ts`: paper page (`#FBF6EF`), white cards, warm ink (`#221B16`) for text and the primary button, warm secondary text (`#5B5047`), warm lines. Tomato (`#E5392B`) is for small marks only: the active tab's icon, the unread dot, the welcome's progress dots and empty-state icons (tomato ink `#B8281C` where it is text-sized). Sources are leaf green. Astryx Neutral (`src/astryx-tokens.ts`) still gives spacing and the colours the brand file does not name. `test/contrast.test.ts` checks every text pair for WCAG AA.
+- **Type:** Figtree for text and controls, Bricolage Grotesque (700 and 800) for screen titles, sheet titles and section headings (`s.pageTitle`, `s.title`, `s.heading` in `src/ui.tsx`). Every `Text` and `TextInput` comes from `src/text.tsx`, which sets Figtree, so no screen can forget it (a test checks). On the web the fonts are `@font-face` rules in `public/index.html` with `font-display: swap`; on Android and iOS the `expo-font` plugin in `app.json` builds the TTFs in `assets/fonts/` into the app.
+- **Shape:** cards 20px with a soft warm shadow, fields and chips 14px, sheets 28px, pill buttons. Primary buttons are ink, quiet buttons are white with a warm edge that darkens under the pointer.
+- **Focus:** a 3px ink ring on whatever the keyboard is on, and on any text field that has the caret.
+- **Sign-in:** `src/welcome-frame.tsx`. One column on a phone; on a wide screen the hello and three plain lines about what Debo does sit in a soft panel beside the card.
+- Debo's face is still the only character on a screen. The app stays light; a dark theme is still deferred (see "Do not").
 
 ### The landing page (`apps/site`)
 
