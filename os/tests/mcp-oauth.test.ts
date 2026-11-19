@@ -15,7 +15,7 @@ import type { Config } from "../apps/server/src/config.ts";
 import { createStore } from "../apps/server/src/db.ts";
 import { ConversationAgent } from "../apps/server/src/engine/conversation.ts";
 import { composioHeaderFor, isComposioUrl } from "../apps/server/src/mcp/composio.ts";
-import { signState, STATE_TTL_MS, verifyState } from "../apps/server/src/mcp/oauth.ts";
+import { OAuthVault, signState, STATE_TTL_MS, StoredOAuthProvider, verifyState } from "../apps/server/src/mcp/oauth.ts";
 import { mcpRoutes } from "../apps/server/src/mcp/routes.ts";
 import { requestBody, type Resolver } from "../apps/server/src/mcp/safe-fetch.ts";
 import { McpService } from "../apps/server/src/mcp/service.ts";
@@ -256,7 +256,7 @@ test("the checked fetch sends a form body as text with its length and type", () 
 
 // ---- signing in -----------------------------------------------------------------------------
 
-test("sign-in: Debo registers itself, uses PKCE S256, keeps the tokens encrypted and lists the tools", async (t) => {
+test("sign-in: Daksha registers itself, uses PKCE S256, keeps the tokens encrypted and lists the tools", async (t) => {
   const f = await fixture(t);
   const { id, signInUrl } = await signedIn(f);
   const page = new URL(signInUrl);
@@ -267,7 +267,7 @@ test("sign-in: Debo registers itself, uses PKCE S256, keeps the tokens encrypted
   // No scopes on the server's document, so only what keeps a sign-in going.
   assert.equal(page.searchParams.get("scope"), "openid offline_access");
   assert.equal(f.world.seen.registered.length, 1);
-  assert.equal(f.world.seen.registered[0]?.client_name, "Debo");
+  assert.equal(f.world.seen.registered[0]?.client_name, "Daksha");
   assert.equal(f.world.seen.registered[0]?.token_endpoint_auth_method, "none");
   // The code was swapped with the verifier whose S256 matches the challenge (the fake checks it).
   const exchange = f.world.seen.tokenRequests.find((r) => r.grant_type === "authorization_code");
@@ -476,4 +476,24 @@ test("Composio: the address must be Composio's, and the key goes in Composio's o
   assert.equal(project.headerName, "x-api-key");
   const everything = [await (await f.api.request("/api/mcp")).text(), JSON.stringify(f.logs), JSON.stringify(await f.db.listOwner(A))];
   for (const text of everything) assert.ok(!text.includes("ck_mine") && !text.includes("pk_project"));
+});
+
+test("a client registered for an old callback address registers again at the next sign-in, and keeps refreshing until then", async () => {
+  const db = await createStore();
+  const vault = new OAuthVault(db, KEY, A, "server-1");
+  const oldCallback = "https://api.old.example/api/mcp/oauth/callback";
+  const newCallback = "https://api.new.example/api/mcp/oauth/callback";
+  const now = () => Date.parse("2026-11-19T10:00:00Z");
+  const open = async (state?: string) => StoredOAuthProvider.open(vault, { redirectUrl: newCallback, now, ...(state ? { state } : {}) });
+  await vault.save({ client: { client_id: "old-client", redirect_uris: [oldCallback] } });
+  // Refreshing a token (no sign-in in progress) keeps the client that owns the tokens.
+  assert.equal((await open()).clientInformation()?.client_id, "old-client");
+  // A new sign-in leaves it out, so the SDK registers a client for the new address.
+  assert.equal((await open("s")).clientInformation(), undefined);
+  // A client registered for this address, or one with no addresses on record, is kept.
+  await vault.save({ client: { client_id: "new-client", redirect_uris: [newCallback] } });
+  assert.equal((await open("s")).clientInformation()?.client_id, "new-client");
+  await vault.save({ client: { client_id: "manual" } });
+  assert.equal((await open("s")).clientInformation()?.client_id, "manual");
+  await db.close();
 });

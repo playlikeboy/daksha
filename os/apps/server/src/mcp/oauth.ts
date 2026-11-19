@@ -1,5 +1,5 @@
 // Signing in to a tool server with OAuth, the way MCP asks for it: the server names its sign-in
-// service, Debo registers itself there (dynamic client registration), sends the person to sign
+// service, Daksha registers itself there (dynamic client registration), sends the person to sign
 // in with PKCE (S256), and gets back tokens it keeps encrypted. The SDK does the OAuth itself
 // (`auth()` in @modelcontextprotocol/sdk); this file only stores what the SDK hands it and makes
 // the `state` that ties the sign-in page back to one person and one server.
@@ -33,7 +33,7 @@ export const oauthRecordId = (serverId: string) => `mcp-oauth-${serverId}`;
 
 /**
  * The server's sign-in ran out or was taken back, and only the person can sign in again.
- * 409, not 401: a 401 from Debo means the person's Debo session ended.
+ * 409, not 401: a 401 from Daksha means the person's Daksha session ended.
  */
 export class SignInNeeded extends AppError {
   constructor() {
@@ -166,7 +166,7 @@ export class StoredOAuthProvider implements OAuthClientProvider {
     const methods = this.record.discovery?.authorizationServerMetadata?.token_endpoint_auth_methods_supported;
     const method = !methods || methods.includes("none") ? "none" : methods.includes("client_secret_post") ? "client_secret_post" : "client_secret_basic";
     return {
-      client_name: "Debo",
+      client_name: "Daksha",
       redirect_uris: [this.options.redirectUrl],
       grant_types: ["authorization_code", "refresh_token"],
       response_types: ["code"],
@@ -185,7 +185,14 @@ export class StoredOAuthProvider implements OAuthClientProvider {
   }
 
   clientInformation() {
-    return this.record.client;
+    const client = this.record.client;
+    // A client registered for another callback address (api.debo.life, before the rename to
+    // Daksha) would be refused when the person signs in again. Only then is it left out, so the
+    // SDK registers again and the new registration replaces it. Refreshing a token never uses
+    // the callback, so without a sign-in the old client keeps its tokens working.
+    const uris = (client as { redirect_uris?: unknown } | undefined)?.redirect_uris;
+    if (this.options.state && Array.isArray(uris) && !uris.includes(this.options.redirectUrl)) return undefined;
+    return client;
   }
   async saveClientInformation(client: OAuthClientInformationMixed) {
     await this.update({ client });
