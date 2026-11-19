@@ -65,7 +65,7 @@ There are two pnpm workspaces. The root one holds the landing page and the older
 
 ```
 apps/                    root workspace
-  site/                  Landing page (about.debo.life). Next.js on Cloudflare Workers, Astryx components.
+  site/                  Landing page (about.debo.life). Next.js on Cloudflare Workers, one plain stylesheet.
   pitch/                 Investor site (pitch.debo.life). Same stack.
   web/                   The retired first app. Its screens now send people to the new app.
                          It still serves /privacy (debo.life/privacy) and the /api routes.

@@ -1,16 +1,18 @@
-import { Layout, LayoutContent } from "@astryxdesign/core/Layout";
-import { Apps } from "../components/apps";
+import { BRAND, SITE_URL } from "../brand";
 import { Ask } from "../components/ask";
+import { Characters } from "../components/characters";
 import { Closing } from "../components/closing";
-import { Demo } from "../components/demo";
 import { Faq, QUESTIONS } from "../components/faq";
+import { Film } from "../components/film";
 import { GetApp } from "../components/get-app";
 import { Hero } from "../components/hero";
-import { Knows } from "../components/knows";
+import { Marquee } from "../components/marquee";
+import { More } from "../components/more";
+import { Section, SectionHead } from "../components/section";
+import { Showcase } from "../components/showcase";
 import { SiteFooter } from "../components/site-footer";
 import { SiteHeader } from "../components/site-header";
 import { Trust } from "../components/trust";
-import { WriteOrSay } from "../components/write-or-say";
 import { YourPeople } from "../components/your-people";
 
 // Structured data for search engines. It says what Debo is and nothing more:
@@ -20,13 +22,13 @@ const JSON_LD = {
   "@graph": [
     {
       "@type": "SoftwareApplication",
-      name: "Debo",
-      url: "https://about.debo.life",
+      name: BRAND,
+      url: SITE_URL,
       applicationCategory: "LifestyleApplication",
-      operatingSystem: "Web",
+      operatingSystem: "Web, Android",
       description:
         "A friendly assistant that remembers your life. Write a journal or talk out loud, then ask about your own past and plans. Every answer shows its source.",
-      image: "https://about.debo.life/og.png?v=2",
+      image: `${SITE_URL}/og.png?v=2`,
     },
     {
       "@type": "FAQPage",
@@ -39,30 +41,47 @@ const JSON_LD = {
   ],
 };
 
+// How it works: the four steps, with the phone that follows along.
+function HowItWorks() {
+  return (
+    <Section id="how">
+      <SectionHead
+        id="how"
+        title="Write it. Ask it. See it."
+        lead={`${BRAND} keeps your days safe in one place, and helps you find them again when you need them.`}
+      />
+      <Showcase />
+    </Section>
+  );
+}
+
+// The page, top to bottom. Each section is one component, so a new one slots
+// in with one line. Keep the order a story: what it is, how it works, why you
+// can trust the answers, who you talk to, what else it does, then the film,
+// the apps, your data, questions and a last call to start.
 export default function Home() {
   return (
     <>
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(JSON_LD) }} />
-      <Layout
-        height="auto"
-        header={<SiteHeader />}
-        content={
-          <LayoutContent role="main" label="Debo" isScrollable={false} padding={0}>
-            <Hero />
-            <WriteOrSay />
-            <Ask />
-            <Knows />
-            <YourPeople />
-            <Apps />
-            <Demo />
-            <GetApp />
-            <Trust />
-            <Faq />
-            <Closing />
-          </LayoutContent>
-        }
-        footer={<SiteFooter />}
-      />
+      <a className="skip-link" href="#main">
+        Skip to the main content
+      </a>
+      <SiteHeader />
+      <main id="main">
+        <Hero />
+        <Marquee />
+        <HowItWorks />
+        <Ask />
+        <Characters />
+        <YourPeople />
+        <More />
+        <Film />
+        <GetApp />
+        <Trust />
+        <Faq />
+        <Closing />
+      </main>
+      <SiteFooter />
     </>
   );
 }

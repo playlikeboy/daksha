@@ -1,31 +1,29 @@
-import { TOUCH } from "../touch";
-import { HStack, VStack } from "@astryxdesign/core/Layout";
-import { Card } from "@astryxdesign/core/Card";
-import { Button } from "@astryxdesign/core/Button";
-import { Heading, Text } from "@astryxdesign/core/Text";
+import { BRAND } from "../brand";
 import { START_URL } from "../links";
-import { Band } from "./band";
+import { ArrowIcon } from "./icons";
+import { Section } from "./section";
 
 export function Closing() {
   return (
-    <Band id="start">
-      <Card variant="red" padding={8}>
-        <VStack gap={5} hAlign="center">
-          <img src="/debo.svg" alt="Debo, a small red tomato" width={144} height={144} loading="lazy" />
-          <VStack gap={3} hAlign="center" maxWidth={560}>
-            <Heading level={2} type="display-2" weight="bold" id="start-title" justify="center" textWrap="balance">
-              Start with one line about today
-            </Heading>
-            <Text type="large" weight="normal" as="p" justify="center" textWrap="balance">
-              Write it down. Ask about it later. Debo will show you where the answer came from. It is free to start.
-            </Text>
-          </VStack>
-          <HStack gap={3} wrap="wrap" hAlign="center">
-            <Button label="Open Debo" variant="primary" size="lg" href={START_URL} style={TOUCH} />
-            <Button label="Get the app" variant="secondary" size="lg" href="#get-app" style={TOUCH} />
-          </HStack>
-        </VStack>
-      </Card>
-    </Band>
+    <Section id="start">
+      <div className="closing" data-reveal="blur">
+        <img src="/debo.svg" alt="" width={152} height={152} loading="lazy" />
+        <h2 className="h2" id="start-title">
+          Start with one line about today
+        </h2>
+        <p className="lead">
+          Write it down. Ask about it later. {BRAND} will show you where the answer came from. It is free to start.
+        </p>
+        <div className="btn-row">
+          <a className="btn btn--primary" href={START_URL}>
+            Open {BRAND}
+            <ArrowIcon />
+          </a>
+          <a className="btn btn--secondary" href="#get-app">
+            Get the app
+          </a>
+        </div>
+      </div>
+    </Section>
   );
 }

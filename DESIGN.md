@@ -14,7 +14,18 @@ Debo should feel like a small, kind friend who keeps your things safe. Two words
 
 A small, round, slightly squat red tomato with a soft highlight, a green leafy top with a short stem, two friendly dark eyes with small highlights, light blush cheeks and a small smile. It is drawn in flat SVG shapes with no outline. The master drawing is `docs/assets/debo.svg`; the landing page (`apps/site`), the app (`os/apps/mobile`) and the share image use copies of it. The older `apps/web` page still draws the earlier yellow character in `apps/web/src/components/debo-art.tsx` and is being replaced.
 
-The new landing page and the app take their colours from Astryx's default Neutral theme (`@astryxdesign/theme-neutral`), not from the table below, which describes `apps/web`. Debo is the one red thing on those screens. The landing page loads the theme's typeface, Figtree, from our own domain through `@fontsource/figtree` (no request to Google), and uses only Astryx components and props for layout; the one style value outside them is the 44px touch height, taken from the spacing token in `apps/site/src/touch.ts`.
+The app takes its colours from Astryx's default Neutral theme (`@astryxdesign/theme-neutral`), not from the table below, which describes `apps/web`. Debo is the one red thing on its screens.
+
+### The landing page (`apps/site`)
+
+The landing page has its own look, written in one plain stylesheet, `apps/site/src/app/site.css`, with no component library. It was rebuilt in November 2026 to feel modern, calm and warm for people who are not technical.
+
+- **Colour:** a warm paper background (`--bg` `#fbf6ef`), warm near-black ink (`--ink` `#221b16`), a slightly darker band colour for every other section, Debo's tomato red for small marks and the hero, and leaf green for sources. All tokens are on `:root` in `site.css`. Primary buttons are ink, not red.
+- **Dark mode:** the page follows the person's system setting. The moon button in the header switches it and keeps the choice in that browser (only the word "light" or "dark"). Every token has a dark value; screenshots of the app stay light inside a dark phone frame.
+- **Type:** headings in Bricolage Grotesque Variable (weight 700 to 800, tight tracking), body in Figtree. Both are self-hosted through `@fontsource-variable/bricolage-grotesque` and `@fontsource/figtree`, so there is no request to a font service.
+- **Shape:** soft rounded panels (20 to 32px), pill buttons, soft shadows with blur. No hard offset shadows on this page.
+- **The brand name** is one constant, `BRAND` in `apps/site/src/brand.ts`, so a rename changes every heading and button at once.
+- **Section order** is in `apps/site/src/app/page.tsx`, one line per section. New sections use `Section` and `SectionHead` from `apps/site/src/components/section.tsx`.
 
 - Its eyes follow the pointer. This is the one playful moment on a screen. Do not add a second.
 - Debo appears once per screen at most. It is a character, not a pattern.
@@ -90,8 +101,9 @@ Rules:
 
 - Debo's eyes follow the pointer. Debo blinks now and then.
 - Things a person opens or closes may animate for 150 to 200ms.
-- Nothing fades or slides in on scroll.
-- With `prefers-reduced-motion`, all motion stops and Debo's eyes rest in the centre.
+- In the app, nothing fades or slides in on scroll.
+- The landing page is the exception, because it has to win attention. There, Debo also breathes and hops when pressed, the hero title rises in when the page opens, sections rise or wipe into view as you scroll, a slow ribbon lists what Debo does, the "How it works" phone changes screen as you read each step, and the hero drifts a little as you scroll (only in browsers with scroll-linked animation). Everything is visible without the script; the reveals only hide content once the page's JavaScript is running.
+- With `prefers-reduced-motion`, all motion stops and Debo's eyes rest in the centre. On the landing page the ribbon becomes a still, wrapped list.
 
 ## Patterns that carry trust
 
@@ -118,7 +130,7 @@ Build these the same way everywhere.
 
 ## Do not
 
-- No dark mode until the light theme is finished and tested. Then design it on purpose.
+- No dark mode in the app until the light theme is finished and tested. Then design it on purpose. (The landing page has one, designed on purpose; see above.)
 - No stock photos, no AI-made illustrations of people.
 - No fake chat bubbles pretending to be real users.
 - No more than one primary button on a screen.

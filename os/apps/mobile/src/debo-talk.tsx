@@ -369,14 +369,10 @@ export function TalkPopup({ onClose }: { onClose: () => void }) {
               {status === "idle" && (
                 <View style={{ gap: spacing[3], alignItems: "center" }}>
                   <Text style={[s.muted, { textAlign: "center", fontSize: fontSize.base }]}>
-                    When you press Start talking, your phone or browser will ask to use the microphone.
-                    Debo listens only while the conversation is on, and the microphone status above always
-                    tells you. What you and Debo say is saved as text, and Debo learns from what you say. You
-                    can read it in your journal and delete it there. Debo never keeps your voice
-                    recording. You can minimise the conversation to a small bar and use the rest of the app
-                    while you talk; the bar always shows whether the microphone is on. On the web the call
-                    stops when you close the tab. You can end the conversation, or turn the microphone off,
-                    at any time. You can also type to Debo instead.
+                    Your device asks for microphone access when you start. Debo listens only during the call,
+                    and the mic status is always visible. What you say is saved as text in your journal, where
+                    Debo learns from it and you can delete it. Voice recordings aren't kept. Minimise the call
+                    to use the app, or mute/end anytime. Closing the web tab ends the call. You can type instead.
                   </Text>
                   <View style={[s.row, { gap: spacing[3] }]}>
                     <Button primary icon={Mic} onPress={() => void begin()}>

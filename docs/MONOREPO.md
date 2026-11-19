@@ -11,7 +11,7 @@ debo.life/   (the new app is in os/apps/mobile, served at my.debo.life)
   docs/
   apps/
     web/            @debo/web       Old web app, retired. Redirects to the new app and keeps /privacy and /api/*.
-    site/           @debo/site      Landing page at about.debo.life (Astryx)
+    site/           @debo/site      Landing page at about.debo.life (plain CSS, see DESIGN.md)
     pitch/          @debo/pitch     Investor data room at pitch.debo.life (Astryx only, noindex, not public)
     voice-agent/    @debo/voice-agent  LiveKit Agents worker
     mcp-server/     @debo/mcp-server   MCP server
