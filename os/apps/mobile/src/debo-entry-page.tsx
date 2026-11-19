@@ -27,7 +27,7 @@ import { deboMood } from "./debo-mood-store";
 import { EntryPlayer, type PlayerControl } from "./debo-player";
 import { downloadName } from "./debo-player-types";
 import { entryNameOf, pathFor, rememberEntryName, titleFor } from "./routes";
-import { avatarSize, Button, colors, Empty, ErrorNotice, Field, fontSize, Mascot, radius, s, screenGap, spacing } from "./ui";
+import { avatarSize, Button, colors, Empty, ErrorNotice, Field, fontSize, Mascot, radius, s, screenGap, Skeleton, spacing } from "./ui";
 import { useWorkspace } from "./workspace";
 
 type Kind = EntryView["kind"];
@@ -561,6 +561,8 @@ function LearnedFrom({ entry }: { entry: EntryView }) {
   const [off, setOff] = useState("");
   const [error, setError] = useState("");
   const [fixing, setFixing] = useState<string>();
+  /** The memory waiting for a second yes before it is forgotten, as on What Debo knows. */
+  const [forgetting, setForgetting] = useState<string>();
   const [busy, setBusy] = useState("");
   const load = useCallback(async () => {
     setError("");
@@ -582,9 +584,9 @@ function LearnedFrom({ entry }: { entry: EntryView }) {
   if (off) return null;
   return (
     <View style={{ gap: spacing[3] }}>
-      <Text style={s.heading}>{heading}</Text>
+      <Text accessibilityRole="header" style={s.heading}>{heading}</Text>
       <ErrorNotice error={error} onRetry={() => void load()} />
-      {!memories && !error && <View style={[s.card, { height: spacing[12] + spacing[4], backgroundColor: colors.subtle }]} />}
+      {!memories && !error && <Skeleton label={`Loading ${heading.toLowerCase()}`} rows={1} heading={false} />}
       {memories?.length === 0 && (
         <Text style={s.muted}>
           {entry.kind === "call"
@@ -616,28 +618,44 @@ function LearnedFrom({ entry }: { entry: EntryView }) {
         ) : (
           <View key={m.id} style={[s.card, { gap: spacing[3], padding: spacing[4], backgroundColor: colors.green }]}>
             <Text style={[s.text, { color: colors.success }]}>{m.text}</Text>
+            {forgetting === m.id && (
+              <Text style={[s.text, { color: colors.success }]}>Forget this for good? Debo won't use it in answers any more.</Text>
+            )}
             <View style={[s.row, { gap: spacing[2], flexWrap: "wrap" }]}>
-              <Button small icon={Pencil} onPress={() => setFixing(m.id)}>
-                Fix this
-              </Button>
+              {forgetting !== m.id && (
+                <Button small icon={Pencil} onPress={() => setFixing(m.id)}>
+                  Fix this
+                </Button>
+              )}
               <Button
                 small
+                danger
                 icon={Trash2}
                 busy={busy === m.id}
                 onPress={() => {
+                  if (forgetting !== m.id) {
+                    setForgetting(m.id);
+                    return;
+                  }
                   setBusy(m.id);
                   debo
                     .forgetMemory(m.id)
                     .then(() => {
                       notify("Forgotten.");
+                      setForgetting(undefined);
                       return load();
                     })
                     .catch((e) => setError(errorText(e)))
                     .finally(() => setBusy(""));
                 }}
               >
-                Forget this
+                {forgetting === m.id ? "Yes, forget it" : "Forget this"}
               </Button>
+              {forgetting === m.id && (
+                <Button small disabled={busy === m.id} onPress={() => setForgetting(undefined)}>
+                  Keep it
+                </Button>
+              )}
             </View>
           </View>
         ),

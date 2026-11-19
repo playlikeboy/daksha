@@ -205,6 +205,8 @@ export function VoiceRecordingsPanel({ personId, name }: { personId: string; nam
   const [busy, setBusy] = useState(false);
   const [note, setNote] = useState("");
   const [error, setError] = useState("");
+  /** Removing the copied voice asks once more: it may not be possible to make it again. */
+  const [sureRemove, setSureRemove] = useState(false);
 
   const load = useCallback(async () => {
     try {
@@ -320,9 +322,25 @@ export function VoiceRecordingsPanel({ personId, name }: { personId: string; nam
           <Text style={s.text}>
             Calls with {name} use a copied voice. Each call starts by saying it's an AI version of {name}.
           </Text>
-          <Button danger busy={busy} onPress={() => void removeVoice()}>
-            Remove voice copy
-          </Button>
+          {sureRemove ? (
+            <View accessibilityRole="alert" style={{ gap: spacing[2] }}>
+              <Text style={s.text}>
+                {`Remove ${name}'s copied voice? You would need a new recording to make it again.`}
+              </Text>
+              <View style={[s.row, { gap: spacing[2], flexWrap: "wrap" }]}>
+                <Button danger busy={busy} onPress={() => void removeVoice().then(() => setSureRemove(false))}>
+                  Yes, remove the voice copy
+                </Button>
+                <Button disabled={busy} onPress={() => setSureRemove(false)}>
+                  Keep it
+                </Button>
+              </View>
+            </View>
+          ) : (
+            <Button danger disabled={busy} onPress={() => setSureRemove(true)}>
+              Remove voice copy
+            </Button>
+          )}
         </View>
       ) : null}
     </Card>
