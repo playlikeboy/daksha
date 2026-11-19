@@ -14,7 +14,7 @@ import { Providers } from "./providers";
 const PITCH_TITLE = "Debo: investor pitch";
 const PITCH_DESCRIPTION = "The pitch, the numbers and the sources for Debo, a friendly assistant that remembers your life.";
 // Made by scripts/og/build-og.mjs. The ?v= changes when the picture changes, so chat apps fetch it again.
-const OG_IMAGE = "https://pitch.debo.life/og.png?v=2";
+const OG_IMAGE = "https://pitch.debo.life/og.png?v=3";
 const OG_ALT =
   "Debo, a small red tomato, next to a phone showing the app, with the words: a friendly assistant that remembers your life. Investor pitch.";
 
