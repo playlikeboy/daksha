@@ -130,7 +130,7 @@ for (const size of sizes)
         await page.waitForTimeout(2500);
         // The welcome shows until it is finished once; close it for every other screen.
         if (!screen.keepWelcome) {
-          const skip = page.getByRole("button", { name: /skip|not now|maybe later|close the welcome/i }).first();
+          const skip = page.getByRole("button", { name: /^skip the welcome$/i }).first();
           if (await skip.isVisible().catch(() => false)) {
             await skip.click();
             await page.waitForTimeout(600);

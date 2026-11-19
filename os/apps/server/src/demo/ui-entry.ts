@@ -7,7 +7,7 @@
 // and no model, Google, database or provider keys. Data lives in ignored artifacts/ui-demo/
 // and the journal is forgotten when it stops. Nothing here can reach a real account.
 import { spawn } from "node:child_process";
-import { mkdir, mkdtemp } from "node:fs/promises";
+import { mkdir, mkdtemp, rm } from "node:fs/promises";
 import { join } from "node:path";
 import { fileURLToPath } from "node:url";
 
@@ -17,6 +17,8 @@ if (!Number.isInteger(port) || port < 1 || port > 65535)
   throw new Error("UI_DEMO_PORT must be an integer from 1 to 65535");
 const dataDir = join(root, "artifacts", "ui-demo", "api");
 const runtimeDir = join(root, "artifacts", "ui-demo", "runtime");
+// Start fresh every time, so the welcome shows again and nothing from an earlier run is left.
+await rm(join(root, "artifacts", "ui-demo"), { recursive: true, force: true });
 await mkdir(runtimeDir, { recursive: true });
 // A fresh cwd stops config.ts from loading the project's private .env.
 const cwd = await mkdtemp(join(runtimeDir, "process-"));
