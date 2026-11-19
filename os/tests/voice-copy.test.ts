@@ -20,10 +20,11 @@ import {
   readDiarization,
   summariseSpeakers,
 } from "../apps/server/src/voice-clone/diarize.ts";
-import { recordsGlue } from "../apps/server/src/voice-clone/glue.ts";
+import { CustomPeopleService } from "../apps/server/src/custom-people/service.ts";
+import { customPeopleGlue } from "../apps/server/src/voice-clone/glue.ts";
 import { voiceCopyRoutes } from "../apps/server/src/voice-clone/routes.ts";
 import { keepLines, NEEDS_KEY, RAW_AUDIO_TTL_MS, VoiceCopyService } from "../apps/server/src/voice-clone/service.ts";
-import { isEmptyAfterScrub, scrubLine } from "../apps/server/src/voice-clone/scrub.ts";
+import { isEmptyAfterScrub, scrubLine } from "../apps/server/src/custom-people/scrub.ts";
 import { cutAndJoin, pickClipRanges, RangeCollector, readWav, writeWav } from "../apps/server/src/voice-clone/wav.ts";
 import { type AiLike, DIARIZE_MODEL, handleAi, keyFromPath } from "../infra/cloudflare/api/src/media.ts";
 
@@ -111,9 +112,9 @@ test("each voice gets a few sample lines and short sample times, the one who tal
 
 test("private details are taken out of spoken lines", () => {
   const cases: [string, RegExp, RegExp][] = [
-    ["Call me on +91 98765 43210 tonight", /\[phone\]/, /98765/],
+    ["Call me on +91 98765 43210 tonight", /\[(phone|number)\]/, /98765/],
     ["mail me at asha.k@example.com ok", /\[email\]/, /example\.com/],
-    ["your OTP is 482913 don't share", /OTP \[code\]/, /482913/],
+    ["your OTP is 482913 don't share", /OTP is \[code\]/, /482913/],
     ["card 4111 1111 1111 1111 expires soon", /\[number\]/, /4111/],
     ["account number 00123456789", /\[(number|phone)\]/, /00123456789/],
     ["I live at 42 MG Road near the park", /\[address\]/, /42 MG Road/],
@@ -140,7 +141,7 @@ test("kept lines are scrubbed, without repeats or empty ones, and say where they
   );
   assert.deepEqual(lines, [
     { text: "Khana kha liya?", source: "from a call recording" },
-    { text: "Call [phone] now", source: "from a call recording" },
+    { text: "Call [number] now", source: "from a call recording" },
   ]);
 });
 
@@ -241,7 +242,11 @@ test("the Worker sends speaker separation to Nova-3 with the audio as a stream a
   assert.equal(refused.status, 415);
   // Keys under the temporary folder are allowed; nothing else new is.
   assert.equal(keyFromPath(`/o/persona-uploads/${A}/abc.ogg`, "o"), `persona-uploads/${A}/abc.ogg`);
+  // A custom person's chat, photos and videos wait one folder deeper, per upload.
+  assert.equal(keyFromPath(`/o/persona-uploads/${A}/up-1/abc.zip`, "o"), `persona-uploads/${A}/up-1/abc.zip`);
   assert.equal(keyFromPath(`/o/other/${A}/abc.ogg`, "o"), null);
+  assert.equal(keyFromPath(`/o/persona-uploads/${A}/a/b/abc.ogg`, "o"), null);
+  assert.equal(keyFromPath(`/o/${A}/up-1/abc.ogg`, "o"), null, "only the temporary folder has upload folders");
 });
 
 // ---- The whole flow ----
@@ -302,8 +307,22 @@ async function fixture(
   const cartesia = fakeCartesia({ cloneStatus: options.cloneStatus });
   const ownKeys = new OwnKeysService(db, { encryptionKey: randomBytes(32).toString("base64"), fetcher: cartesia.fetcher, log: () => {} });
   if (options.ownKey) await ownKeys.save(A, "cartesia", { key: CARTESIA_KEY });
-  await db.put(A, "custom-people", { id: ASHA, name: "Asha" });
   const pending: Promise<void>[] = [];
+  // The real custom people service, with no model set up: kept lines become example lines as they are.
+  const people = new CustomPeopleService({ db, store: () => store, model: async () => undefined, later: (work) => void pending.push(work) });
+  await db.put(A, "custom-people", {
+    id: ASHA,
+    name: "Asha",
+    relation: "my grandmother",
+    description: "",
+    styleSummary: "",
+    examples: [],
+    nicknames: [],
+    languages: [],
+    facts: [],
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
+  });
   const logs: string[] = [];
   const diarizer = fakeDiarizer(options.diarize ?? (() => CALL));
   const service = new VoiceCopyService({
@@ -311,7 +330,7 @@ async function fixture(
     store: () => store,
     audio: options.audioFails ? fakeAudioTools({ fail: true }) : fakeAudioTools({ durationSeconds: 40 }),
     diarizer,
-    glue: recordsGlue(db),
+    glue: customPeopleGlue(people),
     ownCartesiaKey: (owner) => ownKeys.secret(owner, "cartesia"),
     deboCartesiaKey: options.deboKey,
     fetchImpl: cartesia.fetcher,
@@ -338,7 +357,7 @@ async function fixture(
   const settle = async () => {
     while (pending.length) await pending.shift();
   };
-  return { db, store, cartesia, ownKeys, service, api, call, settle, logs, diarizer, as: (id: string) => (owner = id) };
+  return { db, store, cartesia, ownKeys, service, people, api, call, settle, logs, diarizer, as: (id: string) => (owner = id) };
 }
 
 type Fixture = Awaited<ReturnType<typeof fixture>>;
@@ -359,8 +378,9 @@ async function upload(f: Fixture, bytes: Uint8Array, mimeType = "audio/wav") {
 
 const callWav = () => writeWav({ sampleRate: 8000, samples: tone(40) });
 
+/** The lines kept on the custom person's record, newest first. */
 const spoken = async (db: Store) =>
-  ((await db.get<{ lines: { text: string }[] }>(A, "custom-people-spoken", ASHA))?.lines ?? []).map((l) => l.text);
+  ((await db.get<{ spokenLines?: { text: string }[] }>(A, "custom-people", ASHA))?.spokenLines ?? []).map((l) => l.text);
 
 test("upload needs the consent tick, and the tick is saved with its words", async () => {
   const f = await fixture();
@@ -397,7 +417,7 @@ test("voices are separated, labelled, and only the chosen person's scrubbed line
   assert.equal(labelled.body.keptLines, 3);
   assert.equal(labelled.body.discardedVoices, 2);
   const lines = await spoken(f.db);
-  assert.deepEqual(lines, ["Beta, khana kha liya?", "Mera number hai [phone], yaad rakhna.", "Chalo, apna dhyan rakhna."]);
+  assert.deepEqual(lines, ["Beta, khana kha liya?", "Mera number hai [number], yaad rakhna.", "Chalo, apna dhyan rakhna."]);
   assert.ok(!lines.join(" ").includes("MY OWN WORDS") && !lines.join(" ").includes("SOMEONE ELSE"));
 
   // The recording and every voice's words are gone.

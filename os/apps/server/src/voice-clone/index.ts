@@ -4,7 +4,7 @@ import { bindingDiarizer, type Diarizer, restDiarizer } from "./diarize.ts";
 
 export { voiceCopyRoutes } from "./routes.ts";
 export { type CallVoice, VoiceCopyService, type VoiceCopyDeps } from "./service.ts";
-export { type CustomPeopleGlue, recordsGlue } from "./glue.ts";
+export { type CustomPeopleGlue, customPeopleGlue } from "./glue.ts";
 
 /**
  * Debo's speaker separation, from the same settings as speech (see debo/index.ts):

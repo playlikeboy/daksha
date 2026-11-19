@@ -56,11 +56,17 @@ export const WHISPER_MODEL = "@cf/openai/whisper-large-v3-turbo";
 export const IMAGE_MODEL = "@cf/black-forest-labs/flux-1-schnell";
 
 /**
- * `<owner id>/<random id>.<ext>`: the only shapes the API ever writes. Recordings of a custom
- * person wait under `persona-uploads/<owner id>/` for a short time (deleted after use or 24 hours).
+ * The only shapes the API ever writes, one version for every kind of file:
+ *   `<owner id>/<random id>.<ext>`                                    recordings, files, pictures
+ *   `persona-uploads/<owner id>/<random id>.<ext>`                    a custom person's voice notes and calls
+ *   `persona-uploads/<owner id>/<upload id>/<random id>.<ext>`        a custom person's chat, photos and videos
+ * Everything under `persona-uploads/` waits only a short time (deleted after reading, or after 24 hours).
+ * A folder to delete is an owner's folder, or one of those temporary folders.
  */
-const KEY = /^(?:persona-uploads\/)?[A-Za-z0-9_-]{1,64}\/[A-Za-z0-9_-]{1,64}\.[a-z0-9]{1,8}$/;
-const OWNER_PREFIX = /^(?:persona-uploads\/)?[A-Za-z0-9_-]{1,64}\/$/;
+const ID = "[A-Za-z0-9_-]{1,64}";
+const FOLDER = `(?:persona-uploads\\/${ID}\\/(?:${ID}\\/)?|${ID}\\/)`;
+const KEY = new RegExp(`^${FOLDER}${ID}\\.[a-z0-9]{1,8}$`);
+const OWNER_PREFIX = new RegExp(`^${FOLDER}$`);
 /** Speaker separation: who said what. https://developers.cloudflare.com/workers-ai/models/nova-3/ */
 export const DIARIZE_MODEL = "@cf/deepgram/nova-3";
 const AUDIO_TYPE = /^audio\/(mpeg|mp3|wav|x-wav|ogg|opus|flac|webm|mp4|aac)$/;

@@ -63,7 +63,7 @@ import { ffmpegTools } from "./debo/audio.ts";
 import {
   deboCartesiaKey,
   diarizerFromEnv,
-  recordsGlue,
+  customPeopleGlue,
   voiceCopyRoutes,
   VoiceCopyService,
 } from "./voice-clone/index.ts";
@@ -156,6 +156,10 @@ export async function createApp(
   agent.images = images;
   // Custom people: from a description or the person's own files, which are read once and deleted.
   // Their model calls use the person's own Anthropic key when set, otherwise Debo's.
+  // Custom people and their voice notes and calls (voice-clone/) point at each other: deleting a
+  // person first deletes their recordings and voice copy, the lines kept from a recording go to
+  // the person's profile, and one upkeep sweep clears every raw file under persona-uploads/.
+  const linked: { voiceCopy?: VoiceCopyService } = {};
   const customPeople =
     options.customPeople ??
     new CustomPeopleService({
@@ -164,10 +168,12 @@ export async function createApp(
       model: personModelFor(process.env, (owner) => ownKeys.secret(owner, "anthropic")),
       transcriber: () => debo.mediaTools?.transcriber,
       audio: () => debo.mediaTools?.audio,
+      later: (work) => void work.catch((error) => backgroundFailure("custom person", error)),
+      beforeRemove: async (owner, person) => linked.voiceCopy?.deleteForPerson(owner, person.id),
+      sweepAlso: async () => (await linked.voiceCopy?.sweep()) ?? 0,
     });
   agent.customPeople = customPeople;
   // Voice notes and call recordings of a custom person, kept in the same private bucket for a short time.
-  // MERGE NOTE: recordsGlue stands in for Workstream A's custom people; see voice-clone/glue.ts.
   const voiceCopy =
     options.voiceCopy ??
     new VoiceCopyService({
@@ -175,11 +181,12 @@ export async function createApp(
       store: () => debo.mediaStore,
       audio: ffmpegTools(),
       diarizer: diarizerFromEnv(process.env),
-      glue: recordsGlue(db),
+      glue: customPeopleGlue(customPeople),
       ownCartesiaKey: (owner) => ownKeys.secret(owner, "cartesia"),
       deboCartesiaKey: deboCartesiaKey(process.env),
       later: (work) => void work.catch((error) => backgroundFailure("voice recording", error)),
     });
+  linked.voiceCopy = voiceCopy;
   const threads = new ThreadStore(db);
   const timeZones = new TimeZoneStore(db);
   const runner = new DatabaseAgentRunner(threads);
@@ -361,12 +368,16 @@ export async function createApp(
       async (owner) => {
         const who = await voiceCharacterOf(db, owner);
         const chosen = voiceFor(await talkSettings.get(owner).catch(() => null), who.character, who.pronoun);
-        const custom = await activeCustomVoice(db, owner).catch(() => undefined);
+        const custom = (await activeCustomVoice(db, owner).catch(() => undefined))?.voice;
         return custom ? { ...chosen, voice: custom } : chosen;
       },
     ));
   app.route("/api/persona", personaRoutes(new PersonaStore(db)));
+  // /api/custom-people: the people themselves (custom-people/routes.ts) and, on the same prefix,
+  // their voice notes, calls and voice copy (voice-clone/routes.ts, only /:id/audio* and
+  // /:id/voice). The two sets of paths never overlap.
   app.route("/api/custom-people", customPeopleRoutes(customPeople));
+  app.route("/api/custom-people", voiceCopyRoutes(voiceCopy));
   app.route("/api/onboarding", onboardingRoutes(new OnboardingStore(db)));
   app.route("/api/people", peopleRoutes(new PeopleStore(db)));
   app.route("/api/checkin", checkinRoutes({ db, debo }));
@@ -381,7 +392,6 @@ export async function createApp(
   );
   app.route("/api/custom-avatars", customAvatarRoutes(new CustomAvatarStore(db)));
   app.route("/api/account", accountRoutes(db, files, debo, connectors, mcp, ownKeys, images, customPeople, voiceCopy));
-  app.route("/api/custom-people", voiceCopyRoutes(voiceCopy));
   app.route("/api/connectors", connectorRoutes(connectors));
   app.route("/api/mcp", mcpRoutes(mcp));
   app.route("/api/own-keys", ownKeyRoutes(ownKeys));

@@ -1,6 +1,7 @@
-// Taking private details out of chat text before any model reads it. A chat export holds other
-// people's phone numbers, addresses, one-time codes and bank details: none of that helps Debo
-// learn how someone talks, so it is replaced with a plain tag first.
+// Taking private details out of chat text, and out of lines said in voice notes and calls,
+// before any model reads them or they are kept. A chat export or a call holds other people's
+// phone numbers, addresses, one-time codes and bank details: none of that helps Debo learn how
+// someone talks, so it is replaced with a plain tag first. One scrubber for every source.
 //
 // This is a careful filter, not a promise: it removes the common shapes (Indian and international
 // phone numbers, emails, links, codes near words like "OTP", card and account numbers, IFSC and UPI
@@ -30,6 +31,12 @@ const RULES: [RegExp, string | ((match: string) => string)][] = [
   [/\b\d{6}\b/g, "[code]"],
 ];
 
+/**
+ * Last, after addresses: any other run of 4 to 11 digits, such as account numbers and codes
+ * said on their own. Years such as 1998 or 2023 stay.
+ */
+const LEFTOVER_DIGITS = /\b(?!(?:19|20)\d{2}\b)\d{4,11}\b/g;
+
 // Street words in English and in common Indian addresses.
 const STREET =
   /\b(?:flat|house|h\.?\s?no|apt|apartment|block|plot|sector|floor|tower|wing|road|rd|street|st|lane|marg|nagar|colony|layout|cross|main|avenue|ave|enclave|society|chs|phase|near|opp(?:osite)?)\b/i;
@@ -48,5 +55,19 @@ export function scrub(text: string): string {
   return out
     .split("\n")
     .map((line) => (looksLikeAddress(line) ? "[address]" : line))
-    .join("\n");
+    .join("\n")
+    .replace(LEFTOVER_DIGITS, "[number]");
+}
+
+/** Every tag `scrub` puts in. */
+export const SCRUB_TAG = /\[(?:phone|email|code|number|address|link|payment id|bank code)\]/g;
+
+/** One spoken line, scrubbed, on one line with single spaces. */
+export function scrubLine(text: string): string {
+  return scrub(text).replace(/\s+/g, " ").trim();
+}
+
+/** True when nothing but tags and punctuation is left: not worth keeping. */
+export function isEmptyAfterScrub(text: string): boolean {
+  return text.replace(SCRUB_TAG, "").replace(/[\s\p{P}]/gu, "") === "";
 }

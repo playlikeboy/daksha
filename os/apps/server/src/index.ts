@@ -10,17 +10,14 @@ const db = await createStore({
   schema: config.dbSchema,
 });
 await db.recoverInterruptedActions();
-const { app, agent, debo, voiceCopy } = await createApp(db, config);
+const { app, agent, debo } = await createApp(db, config);
 if (config.taskWorkerEnabled) agent.start();
 debo.startBackground();
-// Recordings of custom people left over for 24 hours are deleted.
-voiceCopy.startBackground();
 const server = serve({ fetch: app.fetch, port: config.port, hostname: config.host }, () =>
   console.log(`Debo ${config.mode} API ready at ${config.publicUrl}`),
 );
 const shutdown = () => {
   debo.stopBackground();
-  voiceCopy.stopBackground();
   server.close(() => {
     void agent
       .stop()

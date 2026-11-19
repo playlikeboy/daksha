@@ -22,7 +22,7 @@ import { mergePieces, planChunks, type Transcriber, type TranscriptPiece } from 
 import { AppError } from "../errors.ts";
 import { PersonaStore } from "../persona.ts";
 import { buildProfile, type PersonModel } from "./profile.ts";
-import { type CustomPerson, CustomPeopleStore } from "./store.ts";
+import { type CustomPerson, CustomPeopleStore, MAX_EXAMPLES, MAX_FACTS, MAX_SPOKEN_LINES, PEOPLE_KIND } from "./store.ts";
 import {
   deleteSessionFiles,
   ownerPrefix,
@@ -57,10 +57,21 @@ export interface CustomPeopleDeps {
   partBytes?: number;
   now?: () => Date;
   /**
-   * Called before a person is deleted, for anything kept elsewhere about them (a copied voice
-   * at the voice provider, Workstream D). A failure stops the delete, so nothing is left unseen.
+   * Called before one person is deleted, for anything kept elsewhere about them: their voice
+   * recordings and a copied voice at the voice provider (VoiceCopyService.deleteForPerson).
+   * A failure stops the delete, so nothing is left unseen. Account deletion does not call
+   * this: the account route asks the voice copy service to remove everything at once.
    */
   beforeRemove?: (owner: string, person: CustomPerson) => Promise<void>;
+  /** Other raw uploads under `persona-uploads/` (voice recordings), swept in the same upkeep run. */
+  sweepAlso?: () => Promise<number>;
+}
+
+/** One line a person really said, from a voice note or call recording. */
+export interface SpokenLine {
+  text: string;
+  /** "from a voice note" or "from a call recording". */
+  source: string;
 }
 
 const Sender = z.object({ sender: z.string().trim().min(1).max(80) });
@@ -118,11 +129,83 @@ export class CustomPeopleService {
     await this.people.remove(owner, id);
   }
 
-  /** Account deletion: every raw file under the person's upload folder, and every copied voice. */
+  /**
+   * Account deletion: every raw file under the person's upload folder. Copied voices are not
+   * deleted here: the account route has the voice copy service remove them all first, once.
+   * The profiles are records and go with the rest of the account's records.
+   */
   async removeAll(owner: string): Promise<number> {
     const store = this.deps.store();
-    for (const person of await this.people.list(owner)) await this.deps.beforeRemove?.(owner, person);
     return store ? store.deletePrefix(ownerPrefix(owner)) : 0;
+  }
+
+  // ---- Voice notes and call recordings (voice-clone/) ----
+
+  /**
+   * Keep lines this person really said (the voice copy service has thrown away every other
+   * voice and scrubbed them). They are saved on the person at once, then the profile is built
+   * again in the background with them as the person's own lines.
+   */
+  async addSpokenLines(owner: string, id: string, lines: SpokenLine[]): Promise<void> {
+    const person = await this.person(owner, id);
+    const seen = new Set<string>();
+    const merged = [...lines, ...(person.spokenLines ?? [])].filter((l) => {
+      const key = l.text.toLocaleLowerCase();
+      if (!l.text.trim() || seen.has(key)) return false;
+      seen.add(key);
+      return true;
+    });
+    await this.people.saveProfile(owner, id, { spokenLines: merged.slice(0, MAX_SPOKEN_LINES) });
+    this.later(this.rebuildWithSpoken(owner, id));
+  }
+
+  /** Their spoken lines are no longer wanted. The profile keeps what it already learned. */
+  async forgetSpokenLines(owner: string, id: string): Promise<void> {
+    const person = await this.people.get(owner, id).catch(() => null);
+    if (person?.spokenLines) await this.people.saveProfile(owner, id, { spokenLines: [] });
+  }
+
+  /** A voice copy was made (true) or removed (false). Only whether one exists is kept here. */
+  async markVoiceCopy(owner: string, id: string, copied: boolean): Promise<void> {
+    const person = await this.people.get(owner, id).catch(() => null);
+    if (!person) return;
+    if (copied) await this.people.saveProfile(owner, id, { voiceCloneId: id });
+    else if (person.voiceCloneId) {
+      const next: CustomPerson = { ...person, updatedAt: this.now().toISOString() };
+      delete next.voiceCloneId;
+      await this.db.put<CustomPerson>(owner, PEOPLE_KIND, next);
+    }
+  }
+
+  /**
+   * Build the profile again from the lines already known to be theirs: the example lines kept
+   * from earlier uploads and every spoken line. Facts from earlier uploads stay; facts from voice
+   * are replaced. With no model set up, the newest spoken lines become example lines as they are.
+   */
+  async rebuildWithSpoken(owner: string, id: string): Promise<void> {
+    const person = await this.people.get(owner, id);
+    if (!person?.spokenLines?.length) return;
+    const spoken = person.spokenLines.map((l) => l.text);
+    const model = await this.deps.model(owner).catch(() => undefined);
+    if (!model) {
+      const examples = [...new Set([...person.examples, ...spoken.filter((l) => l.length <= 240)])].slice(0, MAX_EXAMPLES);
+      await this.people.saveProfile(owner, id, { examples, builtFrom: builtFromWithVoice(person, this.now()) });
+      return;
+    }
+    const { profile } = await buildProfile(model, { person, spokenLines: [...person.examples, ...spoken] });
+    const kept = person.facts.filter((f) => f.source !== "voice");
+    const known = new Set(kept.map((f) => f.text.toLocaleLowerCase()));
+    const fromVoice = profile.facts
+      .filter((f) => !known.has(f.text.toLocaleLowerCase()))
+      .map((f) => ({ ...f, source: "voice" as const }));
+    await this.people.saveProfile(owner, id, {
+      styleSummary: profile.styleSummary || person.styleSummary,
+      examples: profile.examples.length ? profile.examples : person.examples,
+      nicknames: profile.nicknames.length ? profile.nicknames : person.nicknames,
+      languages: profile.languages.length ? profile.languages : person.languages,
+      facts: [...kept, ...fromVoice].slice(0, MAX_FACTS),
+      builtFrom: builtFromWithVoice(person, this.now()),
+    });
   }
 
   /** Make this custom person the one Debo talks as, in chat and on calls. */
@@ -359,6 +442,8 @@ export class CustomPeopleService {
         sender: session.sender,
         photoNotes,
         transcripts,
+        // Lines kept from their voice notes and calls are theirs too.
+        spokenLines: (person.spokenLines ?? []).map((l) => l.text),
       });
       if (request.personLines.length === 0 && photoNotes.length === 0 && transcripts.length === 0)
         throw fail("I couldn't find anything this person wrote or said in those files. Try another chat or pick a different name.");
@@ -375,7 +460,7 @@ export class CustomPeopleService {
           messages: request.personLines.length,
           photos: photoNotes.length,
           videos: transcripts.length,
-          voice: 0,
+          voice: person.spokenLines?.length ?? 0,
           at: this.now().toISOString(),
         },
       });
@@ -390,15 +475,26 @@ export class CustomPeopleService {
     }
   }
 
-  /** The upkeep loop: stuck sessions, raw files past 24 hours, old sessions. Never throws. */
+  /**
+   * The upkeep loop: stuck sessions, raw files past 24 hours, old sessions, and the voice
+   * recordings under the same `persona-uploads/` folder. Never throws.
+   */
   async sweep(now = this.now()) {
+    let removed = 0;
     try {
-      return await sweepUploads(this.deps.db, this.deps.store(), now);
+      removed += await sweepUploads(this.deps.db, this.deps.store(), now);
     } catch (error) {
       console.error("custom person sweep failed", { reason: error instanceof Error ? error.name : "unknown" });
-      return 0;
     }
+    removed += (await this.deps.sweepAlso?.().catch(() => 0)) ?? 0;
+    return removed;
   }
+}
+
+/** The counts of what the profile was built from, with the spoken lines counted. */
+function builtFromWithVoice(person: CustomPerson, now: Date): NonNullable<CustomPerson["builtFrom"]> {
+  const before = person.builtFrom ?? { chats: 0, messages: 0, photos: 0, videos: 0, voice: 0, at: now.toISOString() };
+  return { ...before, voice: person.spokenLines?.length ?? 0, at: now.toISOString() };
 }
 
 function readError(error: unknown): string {

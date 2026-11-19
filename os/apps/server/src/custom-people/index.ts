@@ -36,9 +36,21 @@ export async function rolePrompt(db: Store, owner: string, persona?: Persona | n
   return personaPrompt(current);
 }
 
-/** The voice the active custom person was given, if any. Calls use it over the person's setting. */
-export async function activeCustomVoice(db: Store, owner: string): Promise<string | undefined> {
+/**
+ * The voice of the custom person Debo is talking as, if any, for calls:
+ *  - `voice`: the voice from `VOICES` they were given. The signed call token carries it, so it
+ *    is used over the person's own setting, and it is the fallback if a voice copy can't be used.
+ *  - `voiceCopy`: a copy of their real voice was made (`voiceCloneId`). The voice agent then asks
+ *    `POST /api/voice/session`, which answers with the copy (VoiceCopyService.callVoice) only
+ *    when this says so.
+ */
+export async function activeCustomVoice(
+  db: Store,
+  owner: string,
+): Promise<{ personId: string; name: string; voice?: string; voiceCopy: boolean } | undefined> {
   const persona = await new PersonaStore(db).get(owner).catch(() => null);
   if (!persona?.customPersonId) return undefined;
-  return (await new CustomPeopleStore(db).get(owner, persona.customPersonId).catch(() => null))?.voice;
+  const person = await new CustomPeopleStore(db).get(owner, persona.customPersonId).catch(() => null);
+  if (!person) return undefined;
+  return { personId: person.id, name: person.name, ...(person.voice ? { voice: person.voice } : {}), voiceCopy: Boolean(person.voiceCloneId) };
 }

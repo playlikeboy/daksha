@@ -30,7 +30,7 @@ import { CartesiaError, CLONE_LANGUAGES, cloneVoice, deleteVoice } from "./carte
 import { CANT_CUT, cutClip, cutFormat } from "./decode.ts";
 import { type Diarizer, summariseSpeakers, type Utterance } from "./diarize.ts";
 import type { CustomPeopleGlue, SpokenLine } from "./glue.ts";
-import { isEmptyAfterScrub, scrubLine } from "./scrub.ts";
+import { isEmptyAfterScrub, scrubLine } from "../custom-people/scrub.ts";
 import { pickClipRanges, writeWav } from "./wav.ts";
 
 // ---- Words the person agrees to. Saved with each tick, so the record shows exactly what was said. ----
@@ -436,6 +436,7 @@ export class VoiceCopyService {
         consentId,
         createdAt,
       });
+      await this.deps.glue.markVoiceCopy(owner, personId, true);
       // The new copy replaces the old one: delete the old one at Cartesia.
       if (previous && previous.cartesiaVoiceId !== voiceId) await this.deleteAtCartesia(owner, previous).catch(() => false);
       return { status: "copied", createdAt };
@@ -490,6 +491,7 @@ export class VoiceCopyService {
     if (!clone) return { removed: false };
     const deleted = await this.deleteAtCartesia(owner, clone);
     await this.deps.db.remove(owner, CLONES, personId);
+    await this.deps.glue.markVoiceCopy(owner, personId, false);
     return deleted
       ? { removed: true }
       : {
@@ -502,7 +504,7 @@ export class VoiceCopyService {
   /**
    * Everything voice-related for one custom person: the voice copy (at Cartesia
    * too), their uploads, their kept lines and the consent ticks. For the custom
-   * person's delete path (Workstream A calls this).
+   * person's delete path (CustomPeopleService.remove calls this through `beforeRemove`).
    */
   async deleteForPerson(owner: string, personId: string): Promise<void> {
     const clone = await this.deps.db.get<VoiceClone>(owner, CLONES, personId);
@@ -554,22 +556,10 @@ export class VoiceCopyService {
 
   // ---- Keeping house ----
 
-  private sweeper?: ReturnType<typeof setInterval>;
-
-  /** Run the sweep now and every 15 minutes. */
-  startBackground(everyMs = 15 * 60_000) {
-    if (this.sweeper || !this.deps.store()) return;
-    void this.sweep();
-    this.sweeper = setInterval(() => void this.sweep(), everyMs);
-    this.sweeper.unref?.();
-  }
-
-  stopBackground() {
-    if (this.sweeper) clearInterval(this.sweeper);
-    this.sweeper = undefined;
-  }
-
-  /** Delete recordings older than 24 hours, and pick up separations a stopped server left. Never throws. */
+  /**
+   * Delete recordings older than 24 hours, and pick up separations a stopped server left. Never
+   * throws. Run by the server's upkeep loop, with the custom people sweep (CustomPeopleService.sweep).
+   */
   async sweep(): Promise<number> {
     let removed = 0;
     try {
