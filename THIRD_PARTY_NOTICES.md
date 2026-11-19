@@ -2,7 +2,7 @@
 
 ## OpenFuse (formerly OpenMuse)
 
-Debo's agent platform in `os/` started from CopilotKit/openfuse at commit 7771e2db03a4b25d8bc8ee32f7a5c0dddafe3bfc, under the MIT licence below. Its brand, name and mascot are not used by Debo.
+Daksha's agent platform in `os/` started from CopilotKit/openfuse at commit 7771e2db03a4b25d8bc8ee32f7a5c0dddafe3bfc, under the MIT licence below. Its brand, name and mascot are not used by Daksha.
 
 ```
 MIT License
@@ -34,7 +34,7 @@ SOFTWARE.
 
 ## Astryx (Meta)
 
-The Debo app in `os/apps/mobile` uses design tokens (colours, spacing, radii, type scale, shadows, motion) from Astryx and its default Neutral theme, `@astryxdesign/core` and `@astryxdesign/theme-neutral` 0.7.16, generated into `os/apps/mobile/src/astryx-tokens.ts` by `os/scripts/sync-astryx-tokens.mjs`. Source: https://github.com/meta/astryx. Used under the MIT licence below. Astryx's React components are not used in the app; the landing page uses them.
+The Daksha app in `os/apps/mobile` uses design tokens (colours, spacing, radii, type scale, shadows, motion) from Astryx and its default Neutral theme, `@astryxdesign/core` and `@astryxdesign/theme-neutral` 0.7.16, generated into `os/apps/mobile/src/astryx-tokens.ts` by `os/scripts/sync-astryx-tokens.mjs`. Source: https://github.com/meta/astryx. Used under the MIT licence below. Astryx's React components are not used in the app; the landing page uses them.
 
 ```
 MIT License

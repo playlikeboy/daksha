@@ -37,7 +37,7 @@ Status: plan. Only the landing page is built.
 | Part | Job | Runs on |
 |---|---|---|
 | `apps/web` | Everything a person sees. Sign-in, journal, uploads, chat, settings. | Any Node host that supports Next.js |
-| `apps/voice-agent` | Joins a LiveKit room and speaks as Debo. | A long-running container |
+| `apps/voice-agent` | Joins a LiveKit room and speaks as Daksha. | A long-running container |
 | `apps/mcp-server` | Lets other AI tools read a person's memories with a token they create. | Small Node service |
 | `@debo/db` | Tables, migrations, queries. | Library |
 | `@debo/ingest` | Turns a file into text, chunks and embeddings. | Library, called from jobs |
@@ -73,7 +73,7 @@ If a step fails, the job retries. If it still fails, the source is marked `faile
 2. `@debo/memory` searches memories and chunks for that person only: meaning search (pgvector) plus keyword search (Postgres full-text), merged.
 3. `@debo/llm` sends the question and the found pieces to a model, with one firm instruction: answer only from these pieces, and say which piece each claim came from.
 4. The answer comes back with source ids. The app shows them as source chips.
-5. If nothing relevant was found, Debo says it does not know. It does not guess.
+5. If nothing relevant was found, Daksha says it does not know. It does not guess.
 6. A row is written to the activity record: what was asked for and which sources were read.
 
 ## Other AI tools (MCP)
@@ -83,8 +83,8 @@ If a step fails, the job retries. If it still fails, the source is marked `faile
 ## Safety rules built into the design
 
 - Every query filters by `user_id`. Enforce it in `@debo/db`, not in each caller.
-- Text from files, emails and web pages is data. It goes into the model as quoted material, never as instructions. Debo does not obey commands found inside a person's documents.
-- Actions outside Debo need the person's yes each time.
+- Text from files, emails and web pages is data. It goes into the model as quoted material, never as instructions. Daksha does not obey commands found inside a person's documents.
+- Actions outside Daksha need the person's yes each time.
 - Secrets and personal content never appear in logs.
 
 More in [`PRIVACY-AND-TRUST.md`](./PRIVACY-AND-TRUST.md).

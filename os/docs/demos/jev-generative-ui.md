@@ -6,7 +6,7 @@ For a repeatable, TypeSafe-key-free walkthrough, run the scripted sample. Its ca
 
 ## Run
 
-From the repository root, install dependencies as described in [Quick start](../../README.md#quick-start). Conversations are saved in Debo's own database, so no CopilotKit Intelligence key is needed. The sample needs no TypeSafe key or general model provider key.
+From the repository root, install dependencies as described in [Quick start](../../README.md#quick-start). Conversations are saved in Daksha's own database, so no CopilotKit Intelligence key is needed. The sample needs no TypeSafe key or general model provider key.
 
 ```sh
 pnpm --dir apps/worker exec playwright install chromium

@@ -1,18 +1,18 @@
-# Debo Office Workbench: Future Product and Integration Roadmap
+# Daksha Office Workbench: Future Product and Integration Roadmap
 
 > **Status:** Future plan / architecture proposal  
 > **Scope:** Office workspace, document intelligence, spreadsheets, presentations, data analysis, background office execution, connected cloud office, review and delivery  
-> **Product:** Debo — the personal AI operating system  
-> **Repository:** [playlikeboy/debo.life](https://github.com/playlikeboy/debo.life)  
+> **Product:** Daksha — the personal AI operating system  
+> **Repository:** [playlikeboy/daksha](https://github.com/playlikeboy/daksha)  
 > **Last reviewed:** 14 November 2026
 
 ---
 
 ## 1. Executive summary
 
-Debo should grow beyond a conversational assistant into a personal AI workspace that can create, inspect, edit, analyze, organize and deliver professional office work in the background.
+Daksha should grow beyond a conversational assistant into a personal AI workspace that can create, inspect, edit, analyze, organize and deliver professional office work in the background.
 
-The central idea is to give Debo an actual office environment, rather than making it generate files in an isolated chat response. A user should be able to ask Debo to prepare a research report, spreadsheet, presentation, PDF packet, project tracker or business dashboard; Debo should carry out the work in a durable background task, preserve the source files, validate the result, and present a reviewable artifact.
+The central idea is to give Daksha an actual office environment, rather than making it generate files in an isolated chat response. A user should be able to ask Daksha to prepare a research report, spreadsheet, presentation, PDF packet, project tracker or business dashboard; Daksha should carry out the work in a durable background task, preserve the source files, validate the result, and present a reviewable artifact.
 
 The strongest starting point is the **Univer ecosystem**, especially:
 
@@ -22,25 +22,25 @@ The strongest starting point is the **Univer ecosystem**, especially:
 
 These projects should be evaluated as a connected product ecosystem, not as three unrelated dependencies.
 
-Debo should remain the primary assistant, identity provider, memory system, task orchestrator and permission authority. Univer should provide the office workspace and artifact capabilities that Debo operates.
+Daksha should remain the primary assistant, identity provider, memory system, task orchestrator and permission authority. Univer should provide the office workspace and artifact capabilities that Daksha operates.
 
 The desired user experience is:
 
-1. Ask Debo for an outcome through chat or voice.
-2. Debo creates a plan and identifies the required files, tools and permissions.
+1. Ask Daksha for an outcome through chat or voice.
+2. Daksha creates a plan and identifies the required files, tools and permissions.
 3. A durable background job performs the work.
 4. The user can inspect progress and open the actual working artifacts.
-5. Debo validates the output and reports problems or uncertainty.
+5. Daksha validates the output and reports problems or uncertainty.
 6. The user reviews a diff or preview and approves delivery.
-7. Final files are saved in the user's Debo workspace and can be exported or shared.
+7. Final files are saved in the user's Daksha workspace and can be exported or shared.
 
-**This document describes future work. It does not claim that these integrations are already implemented, configured, licensed for every feature, or deployed in Debo.**
+**This document describes future work. It does not claim that these integrations are already implemented, configured, licensed for every feature, or deployed in Daksha.**
 
 ---
 
 ## 2. Product vision
 
-### 2.1 Debo as an AI-operated office
+### 2.1 Daksha as an AI-operated office
 
 Build a unified office workbench with:
 
@@ -56,7 +56,7 @@ Build a unified office workbench with:
 - Background agent workspaces.
 - Review, versioning and delivery.
 
-The office should feel like a natural part of Debo, not an externally embedded tool with a separate identity.
+The office should feel like a natural part of Daksha, not an externally embedded tool with a separate identity.
 
 ### 2.2 Product roles
 
@@ -64,11 +64,11 @@ Keep clear boundaries between three layers:
 
 | Layer | Responsibility |
 |---|---|
-| **Debo Agent** | Understands the request, uses personal context, plans tasks, chooses tools, manages permissions and communicates with the user. |
+| **Daksha Agent** | Understands the request, uses personal context, plans tasks, chooses tools, manages permissions and communicates with the user. |
 | **Office Workspace** | Owns office documents, files, versions, collaboration, editing, rendering and review. |
 | **Processing Workers** | Parse files, run conversions, analyze data, generate artifacts and execute bounded background operations. |
 
-Debo is the agent that operates the office. The Office Workspace is the place where people and agents work on the same artifacts.
+Daksha is the agent that operates the office. The Office Workspace is the place where people and agents work on the same artifacts.
 
 ### 2.3 Product principles
 
@@ -78,7 +78,7 @@ Debo is the agent that operates the office. The Office Workspace is the place wh
 4. Existing files must never be silently overwritten.
 5. The original source and generated result must remain distinguishable.
 6. Important external actions require explicit approval.
-7. Office tools must use the same user identity and permissions as Debo.
+7. Office tools must use the same user identity and permissions as Daksha.
 8. Every integration must have an owner, a clear purpose and a documented failure mode.
 9. Accessibility and mobile usability are product requirements.
 10. Do not add frameworks merely to increase the dependency count.
@@ -97,9 +97,9 @@ Univer is an Office SDK for building office applications inside an existing prod
 
 The wider product family covers spreadsheets, documents, presentations, relational tables, canvases and PDFs, but **not every capability shown in demos is necessarily included in the open-source package set**.
 
-Potential Debo uses:
+Potential Daksha uses:
 
-- Embed spreadsheet editing inside Debo.
+- Embed spreadsheet editing inside Daksha.
 - Embed rich document editing.
 - Provide an extensible office plugin system.
 - Read and update workbook/document models programmatically.
@@ -134,15 +134,15 @@ Its documented concepts include:
 - Browser, CLI and MCP entry points.
 - A Workspace Server that owns documents and permissions.
 
-Why it matters to Debo:
+Why it matters to Daksha:
 
 - It provides an office environment instead of isolated document-generation scripts.
 - It has an agent-oriented review model.
 - It separates the human editing surface from agent execution.
 - Its Worktree approach can prevent an agent from silently changing the main document.
-- Its CLI and MCP interfaces make integration with Debo more practical.
+- Its CLI and MCP interfaces make integration with Daksha more practical.
 
-**Preferred integration direction:** use the Workspace Server and office capabilities as a service or deeply adapt the workspace into Debo. Keep Debo's own agent, authentication, memory, conversations and permission authority. Do not make two independent assistants compete for the user's attention.
+**Preferred integration direction:** use the Workspace Server and office capabilities as a service or deeply adapt the workspace into Daksha. Keep Daksha's own agent, authentication, memory, conversations and permission authority. Do not make two independent assistants compete for the user's attention.
 
 ### 3.3 Univer CLI
 
@@ -174,7 +174,7 @@ The documented workflow is valuable:
 9. Return a Viewer URL for human review.
 10. Merge, reopen or discard after the user reviews it.
 
-Potential Debo uses:
+Potential Daksha uses:
 
 - Generate a complete report in the background.
 - Edit a selected part of an existing spreadsheet.
@@ -185,7 +185,7 @@ Potential Debo uses:
 - Detect slide overflow and visual layout problems.
 - Return a reviewable draft instead of overwriting the original.
 
-**Runtime and safety note:** the CLI README documents Node.js 24 or later and describes its execute capability as trusted JavaScript, not a sandbox for untrusted code. Do not run arbitrary user-provided or model-generated code on the main Debo server. Run the CLI in a dedicated, isolated worker with bounded permissions.
+**Runtime and safety note:** the CLI README documents Node.js 24 or later and describes its execute capability as trusted JavaScript, not a sandbox for untrusted code. Do not run arbitrary user-provided or model-generated code on the main Daksha server. Run the CLI in a dedicated, isolated worker with bounded permissions.
 
 ### 3.4 Workspace integration decision
 
@@ -193,21 +193,21 @@ Evaluate three realistic paths:
 
 **Option A — Deploy Univer Workspace as a separate internal service**
 
-- Debo stays the main application.
+- Daksha stays the main application.
 - The Workspace service owns office documents and its native editing experience.
-- Debo authenticates users and obtains appropriately scoped Workspace access.
-- Debo launches office tasks through its backend or MCP interface.
-- Users open Workspace artifacts from Debo.
+- Daksha authenticates users and obtains appropriately scoped Workspace access.
+- Daksha launches office tasks through its backend or MCP interface.
+- Users open Workspace artifacts from Daksha.
 
 Advantages: strong separation and less invasive changes to the main app.
 
 Risks: multiple services, cross-service identity, authorization synchronization and UI integration.
 
-**Option B — Integrate Workspace UI into Debo**
+**Option B — Integrate Workspace UI into Daksha**
 
 - Reuse or adapt the workspace browser/editor experience.
-- Preserve Debo's navigation and global design system.
-- Share Debo identity and permissions.
+- Preserve Daksha's navigation and global design system.
+- Share Daksha identity and permissions.
 - Keep the workspace's document model and review logic.
 
 Advantages: more coherent user experience.
@@ -216,8 +216,8 @@ Risks: deeper maintenance burden, upstream changes and package/license compatibi
 
 **Option C — Use Univer SDK directly**
 
-- Build Debo's own office workspace using SDK components.
-- Implement Debo-native file management, sharing, collaboration and review.
+- Build Daksha's own office workspace using SDK components.
+- Implement Daksha-native file management, sharing, collaboration and review.
 
 Advantages: maximum product control.
 
@@ -229,7 +229,7 @@ Risks: much more engineering work and possible dependence on commercial capabili
 
 ## 4. Office processing and document intelligence
 
-The interactive office suite is only one part of the experience. Debo also needs robust processing workers that can understand incoming files and produce new artifacts.
+The interactive office suite is only one part of the experience. Daksha also needs robust processing workers that can understand incoming files and produce new artifacts.
 
 ### 4.1 Docling — document understanding
 
@@ -264,7 +264,7 @@ Document understanding capabilities include:
 - Local processing options.
 - MCP and API-server integration paths.
 
-Potential Debo workflows:
+Potential Daksha workflows:
 
 - Ingest a folder of documents.
 - Extract structured information from scanned PDFs.
@@ -305,7 +305,7 @@ Potential operations:
 - Compare.
 - Apply supported signing and security operations.
 
-Debo should expose common PDF actions in the Office Workbench and route them to the service.
+Daksha should expose common PDF actions in the Office Workbench and route them to the service.
 
 Safety requirements:
 
@@ -350,7 +350,7 @@ Do not create multiple competing generators for the same file type without a mea
 
 ## 5. Data analysis and business intelligence
 
-Debo should be able to turn raw data into useful analysis, not merely summarize CSV text.
+Daksha should be able to turn raw data into useful analysis, not merely summarize CSV text.
 
 ### 5.1 DuckDB
 
@@ -410,7 +410,7 @@ Notebooks must run in isolated environments with quotas and limited secrets. A s
 
 ## 6. Visual office alternatives and compatibility
 
-Univer should be the first candidate, but Debo should compare alternatives when a required capability is unavailable.
+Univer should be the first candidate, but Daksha should compare alternatives when a required capability is unavailable.
 
 ### 6.1 ONLYOFFICE DocumentServer
 
@@ -456,7 +456,7 @@ Do not integrate both ONLYOFFICE and Collabora unless a real compatibility or cu
 
 ## 7. Cloud office integrations
 
-Debo should support both native Debo artifacts and authorized files that already exist in cloud office accounts.
+Daksha should support both native Daksha artifacts and authorized files that already exist in cloud office accounts.
 
 ### 7.1 Google Workspace APIs
 
@@ -545,13 +545,13 @@ Start read-only where possible. Add write capabilities with specific, action-lev
 
 The office experience should be backed by a task engine that can run for longer than a single chat response.
 
-### 8.1 Existing Debo/OpenMuse task foundation
+### 8.1 Existing Daksha/OpenMuse task foundation
 
-Use the primary Debo agent and task architecture being developed around OpenMuse as the central orchestration layer.
+Use the primary Daksha agent and task architecture being developed around OpenMuse as the central orchestration layer.
 
 Do not embed another independent assistant runtime inside the office workspace.
 
-The office service should expose capabilities and durable artifacts to Debo. Debo should own:
+The office service should expose capabilities and durable artifacts to Daksha. Daksha should own:
 
 - User identity.
 - Agent conversations.
@@ -568,7 +568,7 @@ The office service should expose capabilities and durable artifacts to Debo. Deb
 Repository: [inngest/inngest](https://github.com/inngest/inngest)  
 Documentation: [inngest.com/docs](https://www.inngest.com/docs)
 
-Debo previously included Inngest dependencies. Check the current implementation before adding anything.
+Daksha previously included Inngest dependencies. Check the current implementation before adding anything.
 
 Potential uses:
 
@@ -591,7 +591,7 @@ Documentation: [docs.temporal.io](https://docs.temporal.io/)
 
 Evaluate when tasks require durable execution across very long periods, extensive retries, compensation and workflow recovery.
 
-Do not add Temporal automatically. Compare it with the current Debo/OpenMuse task architecture and Inngest. There must be one clearly defined source of truth for each kind of task state.
+Do not add Temporal automatically. Compare it with the current Daksha/OpenMuse task architecture and Inngest. There must be one clearly defined source of truth for each kind of task state.
 
 ### 8.4 Activepieces
 
@@ -608,7 +608,7 @@ Potential uses:
 - Synchronize selected records between services.
 - Generate reports from scheduled data sources.
 
-Do not allow visual automations to bypass Debo's permissions, task ledger or audit events.
+Do not allow visual automations to bypass Daksha's permissions, task ledger or audit events.
 
 Review open-source and commercial feature boundaries before embedding or redistributing its builder.
 
@@ -667,7 +667,7 @@ Do not treat a browser profile or a process boundary as a sufficient sandbox by 
 Repository: [modelcontextprotocol/typescript-sdk](https://github.com/modelcontextprotocol/typescript-sdk)  
 Documentation: [modelcontextprotocol.io](https://modelcontextprotocol.io/)
 
-Use MCP to expose selected office operations to Debo and compatible external AI clients.
+Use MCP to expose selected office operations to Daksha and compatible external AI clients.
 
 Potential office tool groups:
 
@@ -725,13 +725,13 @@ Use Composio as a major connector and external-tool layer where it provides reli
 
 Do not duplicate provider integrations without need.
 
-The office service should not call arbitrary tools directly. Tool execution must pass through Debo's centralized authorization layer.
+The office service should not call arbitrary tools directly. Tool execution must pass through Daksha's centralized authorization layer.
 
 ---
 
-## 11. Proposed Debo Office Workbench experience
+## 11. Proposed Daksha Office Workbench experience
 
-Make Office Workbench a first-class section in Debo's application.
+Make Office Workbench a first-class section in Daksha's application.
 
 Suggested navigation:
 
@@ -741,7 +741,7 @@ Suggested navigation:
 - **Slides** — presentations and templates.
 - **Bases** — structured tables, trackers, records and lightweight CRM.
 - **Boards** — whiteboards, diagrams, mind maps and project canvases.
-- **AI Workroom** — Debo's conversation and activity alongside an open artifact.
+- **AI Workroom** — Daksha's conversation and activity alongside an open artifact.
 - **Review Center** — drafts, diffs, approvals, version history and delivery.
 - **Automations** — scheduled work and workflows.
 - **Connectors** — Google, Microsoft and other authorized services.
@@ -764,7 +764,7 @@ Provide:
 
 ### 11.2 AI Workroom
 
-The user should be able to open an artifact and ask Debo to work on it without losing the document context.
+The user should be able to open an artifact and ask Daksha to work on it without losing the document context.
 
 Display:
 
@@ -806,7 +806,7 @@ These illustrate desired future capabilities. They are acceptance scenarios, not
 
 User: "Research this topic and prepare a professional report."
 
-Debo should:
+Daksha should:
 
 1. Understand the requested scope and audience.
 2. Research and collect sources.
@@ -823,7 +823,7 @@ Debo should:
 
 User: "Analyze these files and prepare a financial dashboard."
 
-Debo should:
+Daksha should:
 
 1. Inspect source files.
 2. Validate schemas and data types.
@@ -840,7 +840,7 @@ Debo should:
 
 User: "Turn this research into a presentation."
 
-Debo should:
+Daksha should:
 
 1. Extract the narrative and key findings.
 2. Create a slide outline.
@@ -856,7 +856,7 @@ Debo should:
 
 User: "Process these 100 PDFs and extract the information into a spreadsheet."
 
-Debo should:
+Daksha should:
 
 1. Validate all files.
 2. Keep originals unchanged.
@@ -873,7 +873,7 @@ Debo should:
 
 User: "Prepare meeting notes and update the project tracker."
 
-Debo should:
+Daksha should:
 
 1. Read authorized meeting materials.
 2. Generate minutes.
@@ -888,7 +888,7 @@ Debo should:
 
 User: "Create a dashboard from this data."
 
-Debo should:
+Daksha should:
 
 1. Inspect input data.
 2. Identify useful metrics.
@@ -903,13 +903,13 @@ Debo should:
 
 ## 13. Proposed architecture
 
-The following is a target architecture. Adapt it to the final OpenMuse/Debo architecture and actual deployment capabilities.
+The following is a target architecture. Adapt it to the final OpenMuse/Daksha architecture and actual deployment capabilities.
 
 ~~~mermaid
 flowchart TD
-    User[User: Web / Mobile / Voice] --> Debo[Debo Agent]
-    Debo --> Brain[Personal Brain and Memory]
-    Debo --> Planner[Task Planner and Durable Task Engine]
+    User[User: Web / Mobile / Voice] --> Daksha[Daksha Agent]
+    Daksha --> Brain[Personal Brain and Memory]
+    Daksha --> Planner[Task Planner and Durable Task Engine]
     Planner --> Policy[Permission and Approval Engine]
     Policy --> Tools[Office Tool Registry / MCP]
 
@@ -947,18 +947,18 @@ flowchart TD
 
 | Domain | Authoritative owner |
 |---|---|
-| User identity | Debo authentication |
-| Personal memory | Debo brain/memory |
-| User-visible conversations | Debo |
-| Task ownership and status | Debo task system |
+| User identity | Daksha authentication |
+| Personal memory | Daksha brain/memory |
+| User-visible conversations | Daksha |
+| Task ownership and status | Daksha task system |
 | Office artifact model | Univer Workspace or selected office foundation |
 | Office editing and rendering | Univer or selected office engine |
-| Original file storage | Debo-controlled storage or explicitly configured Workspace storage |
+| Original file storage | Daksha-controlled storage or explicitly configured Workspace storage |
 | External cloud files | Provider remains authoritative |
-| Tool permissions | Debo policy engine |
-| Approval records | Debo |
+| Tool permissions | Daksha policy engine |
+| Approval records | Daksha |
 | Background processing | Dedicated workers and selected durable job system |
-| Final deliverable and receipt | Debo artifact registry |
+| Final deliverable and receipt | Daksha artifact registry |
 
 Do not create two competing sources of truth for the same entity.
 
@@ -1071,11 +1071,11 @@ Maintain a generated third-party notices file or equivalent inventory. Do not co
 
 ## 16. Implementation priorities
 
-The following is the recommended future roadmap. It should be reconciled with the main Debo/OpenMuse implementation plan rather than executed as an independent application.
+The following is the recommended future roadmap. It should be reconciled with the main Daksha/OpenMuse implementation plan rather than executed as an independent application.
 
 ### P0 — Office foundation
 
-1. Inspect the current Debo/OpenMuse architecture and existing storage.
+1. Inspect the current Daksha/OpenMuse architecture and existing storage.
 2. Deeply evaluate Univer Workspace.
 3. Evaluate Univer CLI and its skills.
 4. Build a small technical spike proving:
@@ -1087,7 +1087,7 @@ The following is the recommended future roadmap. It should be reconciled with th
    - Render and inspect the output.
    - Review and merge or discard.
 5. Decide between Workspace service integration and UI integration.
-6. Define Debo artifact identity, storage and version contracts.
+6. Define Daksha artifact identity, storage and version contracts.
 7. Build the Office Workbench navigation and file library.
 8. Deploy an isolated Node-based office worker.
 9. Add secure task-to-artifact linkage.
@@ -1095,7 +1095,7 @@ The following is the recommended future roadmap. It should be reconciled with th
 11. Add a first usable Doc, Sheet and Slide flow.
 12. Integrate Docling for supported document ingestion.
 
-**P0 exit criteria:** A user can ask Debo to create or revise a document, spreadsheet or presentation, watch background progress, inspect the result, and approve or discard the draft without overwriting the original.
+**P0 exit criteria:** A user can ask Daksha to create or revise a document, spreadsheet or presentation, watch background progress, inspect the result, and approve or discard the draft without overwriting the original.
 
 ### P1 — Document intelligence and connected office
 
@@ -1110,7 +1110,7 @@ The following is the recommended future roadmap. It should be reconciled with th
 9. Add stronger document version comparison.
 10. Add team/project spaces if user needs justify the added sharing complexity.
 
-**P1 exit criteria:** Debo can transform authorized personal and cloud documents into reviewed, well-structured deliverables and repeat those workflows reliably.
+**P1 exit criteria:** Daksha can transform authorized personal and cloud documents into reviewed, well-structured deliverables and repeat those workflows reliably.
 
 ### P2 — Advanced workbench
 
@@ -1125,7 +1125,7 @@ The following is the recommended future roadmap. It should be reconciled with th
 9. Add specialized business analytics.
 10. Add optional local desktop companion for authorized local files.
 
-**P2 exit criteria:** Debo can serve as a broader personal and small-team office environment while maintaining clear data, permission and operational boundaries.
+**P2 exit criteria:** Daksha can serve as a broader personal and small-team office environment while maintaining clear data, permission and operational boundaries.
 
 ---
 
@@ -1135,7 +1135,7 @@ Do not consider any feature complete merely because the package is installed or 
 
 ### 17.1 Document creation and review
 
-- Ask Debo to create a formal report.
+- Ask Daksha to create a formal report.
 - Verify an editable document is created.
 - Verify the generated content is saved.
 - Verify a PDF preview renders.
@@ -1226,15 +1226,15 @@ Do not publish performance claims until they are measured against representative
 
 ## 19. Avoid these architectural mistakes
 
-1. Do not build a separate Univer-branded assistant that competes with Debo.
+1. Do not build a separate Univer-branded assistant that competes with Daksha.
 2. Do not duplicate OpenMuse's agent runtime without a specific capability gap.
-3. Do not make Workspace, Debo and cloud-provider storage competing authorities for the same file.
+3. Do not make Workspace, Daksha and cloud-provider storage competing authorities for the same file.
 4. Do not assume every commercial Univer demo is part of the free open-source core.
 5. Do not run the Univer CLI's trusted code execution on the public web server.
 6. Do not expose the Workspace MCP executor to arbitrary users without a proper isolation review.
 7. Do not run office conversion or OCR inside a latency-sensitive edge request handler.
 8. Do not silently overwrite original files.
-9. Do not let office tools bypass Debo's approval and audit system.
+9. Do not let office tools bypass Daksha's approval and audit system.
 10. Do not add multiple office engines unless there is a demonstrated compatibility requirement.
 11. Do not add both Temporal and Inngest just because both are capable.
 12. Do not add a visual automation system that creates an independent permission model.
@@ -1321,29 +1321,29 @@ Do not publish performance claims until they are measured against representative
 
 The next implementation sequence should be:
 
-1. Read the current Debo architecture and OpenMuse integration decisions.
+1. Read the current Daksha architecture and OpenMuse integration decisions.
 2. Inspect the latest Univer Workspace, SDK and CLI repositories and official documentation.
 3. Build a short feature/licensing/runtime comparison for Workspace, direct SDK integration and alternatives.
 4. Run the Univer CLI in a disposable local sandbox and prove one Doc, Sheet and Slide workflow.
 5. Deploy a disposable Univer Workspace instance and verify identity, permissions, storage, MCP and Worktree review.
-6. Define the Debo artifact registry and task-to-artifact contract.
-7. Integrate one end-to-end office task into Debo.
+6. Define the Daksha artifact registry and task-to-artifact contract.
+7. Integrate one end-to-end office task into Daksha.
 8. Add document parsing and background processing.
-9. Add connected cloud office operations behind Debo's permission engine.
+9. Add connected cloud office operations behind Daksha's permission engine.
 10. Expand the Office Workbench only after the first workflows are stable.
 
-The first milestone should be intentionally small but complete: **ask Debo to create a report, spreadsheet and presentation; inspect the drafts; see validation results; approve or discard them; and find the final artifacts in My Space.**
+The first milestone should be intentionally small but complete: **ask Daksha to create a report, spreadsheet and presentation; inspect the drafts; see validation results; approve or discard them; and find the final artifacts in My Space.**
 
 ---
 
 ## 22. Definition of success
 
-The Office Workbench is successful when Debo can reliably perform real office work rather than merely describe how to do it.
+The Office Workbench is successful when Daksha can reliably perform real office work rather than merely describe how to do it.
 
 A user should be able to say:
 
-> "Debo, review these files, analyze the data, prepare a professional report and presentation, put the supporting calculations in a spreadsheet, check the outputs, and show me everything for review."
+> "Daksha, review these files, analyze the data, prepare a professional report and presentation, put the supporting calculations in a spreadsheet, check the outputs, and show me everything for review."
 
-Debo should execute this as one coherent, durable task, with clear progress, real editable artifacts, source traceability, validation, permissions and human review.
+Daksha should execute this as one coherent, durable task, with clear progress, real editable artifacts, source traceability, validation, permissions and human review.
 
-**The long-term goal is a personal AI operating system with a real office built into it: Debo thinks, plans and coordinates; the Office Workbench gives it the tools and workspace to produce useful work.**
+**The long-term goal is a personal AI operating system with a real office built into it: Daksha thinks, plans and coordinates; the Office Workbench gives it the tools and workspace to produce useful work.**

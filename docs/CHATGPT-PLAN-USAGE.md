@@ -35,7 +35,7 @@ Daksha's centrally managed Cloudflare deployment is controlled by Daksha, not by
 
 - **Do not store SIWC access, refresh, or ID tokens in Daksha's Neon database, Cloudflare Worker secrets, Cloudflare storage, or any other Daksha-managed server.**
 - **Do not proxy plan-usage inference through Daksha's centrally managed API or workers.**
-- Do not enable this path on `my.debo.life` / the hosted Daksha service unless OpenAI has explicitly approved the commercial/hosted integration and confirmed the permitted token and runtime architecture in writing.
+- Do not enable this path on `my.daksha.life` / the hosted Daksha service unless OpenAI has explicitly approved the commercial/hosted integration and confirmed the permitted token and runtime architecture in writing.
 - OpenAI currently describes website/commercial SIWC access as a limited partner trial. Submit the [SIWC partner interest form](https://openai.com/form/sign-in-with-chatgpt-interest/) before planning a hosted-SaaS launch.
 
 The open-source plan-usage path is documented for open-source and locally hosted apps. A public GitHub repository alone is not proof that every deployment shape is eligible.

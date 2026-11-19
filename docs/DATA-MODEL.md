@@ -18,7 +18,7 @@ Database: Postgres with the `pgvector` extension. ORM: Drizzle.
 Created and managed by Better Auth. Add only: `display_name`, `timezone`, `plan`, `created_at`.
 
 ### sources
-One row per thing the person gave Debo. The original of every memory.
+One row per thing the person gave Daksha. The original of every memory.
 
 | Column | Type | Notes |
 |---|---|---|
@@ -35,7 +35,7 @@ One row per thing the person gave Debo. The original of every memory.
 | created_at | timestamptz | |
 | ingested_at | timestamptz | Built (migration `0006_voice_calls`, nullable). `voice_call` only: when the call was last read for search and memories. Null or older than the last turn means it still needs reading. |
 
-A `voice_call` source is one live conversation with Debo: its text is one line per turn, `[mm:ss] You: ...` / `[mm:ss] Debo: ...`. Its id is a hash of the person and the voice session. See `docs/VOICE.md`.
+A `voice_call` source is one live conversation with Daksha: its text is one line per turn, `[mm:ss] You: ...` / `[mm:ss] Daksha: ...`. Its id is a hash of the person and the voice session. See `docs/VOICE.md`.
 
 ### media (built)
 The recording behind a `voice` or `video` source. The file is in a private Cloudflare R2 bucket, never in the database; the words are in `sources.text`. Columns: `id`, `user_id`, `source_id` (empty until the upload ends), `kind`, `object_key`, `mime_type`, `size_bytes`, `duration_ms`, `recorded_at`, `device` (jsonb: origin, file name, last-changed time; never location), `upload_state`, `upload_id`, `transcript_status` (`waiting`, `working`, `ready`, `failed`), `transcript_error`, `transcript_attempts`, `transcript_started_at`, `language`, `segments` (jsonb), `content_hash`, `created_at`. See `os/docs/JOURNAL-MEDIA.md`.
@@ -56,14 +56,14 @@ Pieces of a source, for search.
 Indexes: a vector index on `embedding`, a GIN index on `search`.
 
 ### memories
-One lasting fact Debo knows. Shown on the "What Debo knows" page.
+One lasting fact Daksha knows. Shown on the "What Daksha knows" page.
 
 | Column | Type | Notes |
 |---|---|---|
 | id | uuid | |
 | user_id | uuid | |
 | text | text | One plain sentence |
-| source_id | uuid | Where Debo learned it. Never null. |
+| source_id | uuid | Where Daksha learned it. Never null. |
 | true_from | timestamptz | When it started being true, if known |
 | true_until | timestamptz | Set when a newer memory replaces it |
 | edited_by_user | boolean | True if the person fixed it. Never overwrite these automatically. |
@@ -98,7 +98,7 @@ Chat history for `/home/chat`. Built (migration `0003_chats`). Functions in `pac
 
 Index: `(user_id, updated_at)`.
 
-`messages`: the person's questions and Debo's replies.
+`messages`: the person's questions and Daksha's replies.
 
 | Column | Type | Notes |
 |---|---|---|
@@ -106,7 +106,7 @@ Index: `(user_id, updated_at)`.
 | user_id | uuid | FK to `neon_auth."user"`, on delete cascade |
 | conversation_id | uuid | FK to `conversations`, on delete cascade |
 | role | text | `person` or `debo` |
-| kind | text | `question` for the person. For Debo: `answer`, `unknown`, `limit`, `error`, `stopped` |
+| kind | text | `question` for the person. For Daksha: `answer`, `unknown`, `limit`, `error`, `stopped` |
 | text | text | The words, exactly as shown. A stopped answer keeps what was shown by then. |
 | source_ids | uuid[] | Entries an answer used. Not a foreign key: if an entry is deleted, the chat says so instead of losing the answer. |
 | created_at | timestamptz | The question gets the transaction time, the reply the clock time, so the reply always sorts after |
@@ -154,7 +154,7 @@ One row per model call or voice minute, for limits and billing.
 Never store the prompt or answer here.
 
 ### activity
-The record the person can read: what Debo read and did.
+The record the person can read: what Daksha read and did.
 
 | Column | Type | Notes |
 |---|---|---|

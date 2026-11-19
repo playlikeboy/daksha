@@ -2,13 +2,13 @@
 
 Status: plan, phase 5. Prices here are ideas, not decisions.
 
-## Two ways to use Debo
+## Two ways to use Daksha
 
 | | Your own key | Paid plan |
 |---|---|---|
-| Who pays the AI company | The person, directly | Debo |
+| Who pays the AI company | The person, directly | Daksha |
 | What the person does | Pastes a key from an AI provider | Pays monthly |
-| Plain name in the app | "Use your own key" | "Debo Plus" (working name) |
+| Plain name in the app | "Use your own key" | "Daksha Plus" (working name) |
 
 "BYOK" is a developer word. In the app, always say "your own key".
 
@@ -53,7 +53,7 @@ A person's AI key is as sensitive as a password.
 - Test it once when added, with a tiny call, and say plainly if it does not work.
 - Deleting it removes it for good.
 
-Tell the person plainly: "Your key is stored encrypted. Debo uses it only to answer you. You can remove it any time."
+Tell the person plainly: "Your key is stored encrypted. Daksha uses it only to answer you. You can remove it any time."
 
 What the key cannot cover: some features need a specific kind of model (embeddings, speech). Say clearly which features work with which provider's key, and do not silently fall back to our key and charge for it.
 
@@ -64,12 +64,12 @@ In the new app (`os/`), Settings has a folded "Advanced: use your own keys" sect
 | Feature | Anthropic key | OpenRouter key |
 |---|---|---|
 | Chat, calls (what she says), delegated tasks | Yes, first choice | Yes, if a chat model with tools is picked and there is no Anthropic key |
-| Journal answers (`ask_my_life`) | Yes. The daily token limit does not apply, and their tokens are not counted | No, Debo's key and limit |
-| Meaning search (embeddings) | No, Debo's gateway (no Anthropic embeddings) | No |
-| Pictures (`make_image`) | No | Yes, if a picture model is picked. Debo's 20 a day limit does not apply |
-| Hearing and speaking on calls | No, Debo's LiveKit project | No |
+| Journal answers (`ask_my_life`) | Yes. The daily token limit does not apply, and their tokens are not counted | No, Daksha's key and limit |
+| Meaning search (embeddings) | No, Daksha's gateway (no Anthropic embeddings) | No |
+| Pictures (`make_image`) | No | Yes, if a picture model is picked. Daksha's 20 a day limit does not apply |
+| Hearing and speaking on calls | No, Daksha's LiveKit project | No |
 
-A failing own key is not retried on Debo's key: the person sees the error. The chat model for the main conversation has no daily limit today in the new app; only journal answers and pictures do.
+A failing own key is not retried on Daksha's key: the person sees the error. The chat model for the main conversation has no daily limit today in the new app; only journal answers and pictures do.
 
 ## Limits
 
@@ -87,7 +87,7 @@ The founder is based in India, and not every payment company accepts new Indian 
 
 Rules whichever is chosen:
 
-- Use their hosted checkout. Debo never sees or stores card numbers.
+- Use their hosted checkout. Daksha never sees or stores card numbers.
 - Trust only verified webhooks to change a person's plan.
 - Cancelling takes one click and keeps access until the paid period ends.
 - Show the price, the renewal date and how to cancel before the person pays.

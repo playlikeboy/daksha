@@ -1,26 +1,26 @@
 # Memory
 
-Status: partly built. Built so far: meaning and keyword search over journal entries, merged (steps 1 to 3), and answers only from those pieces, with source ids, or "I don't have anything about that yet" (steps 4 to 6). Small talk such as "hi" gets a short reply with no sources and no facts about the person (decision 24). Memories come from the hosted Mem0 Platform through `@debo/memory` (decision 20), and the "What Debo knows" page shows them. Answers do not use memories yet; they still come from entry pieces only. This is the heart of Debo. If recall is poor, nothing else matters.
+Status: partly built. Built so far: meaning and keyword search over journal entries, merged (steps 1 to 3), and answers only from those pieces, with source ids, or "I don't have anything about that yet" (steps 4 to 6). Small talk such as "hi" gets a short reply with no sources and no facts about the person (decision 24). Memories come from the hosted Mem0 Platform through `@debo/memory` (decision 20), and the "What Daksha knows" page shows them. Answers do not use memories yet; they still come from entry pieces only. This is the heart of Daksha. If recall is poor, nothing else matters.
 
 ## How memory works today
 
-- After an entry is saved or edited (Next `after()`, in `apps/web/src/lib/after-entry.ts`), Debo forgets the memories from that entry's old text, except ones the person fixed, then sends the current text to Mem0. Mem0 picks out the lasting facts in the background, usually within seconds.
+- After an entry is saved or edited (Next `after()`, in `apps/web/src/lib/after-entry.ts`), Daksha forgets the memories from that entry's old text, except ones the person fixed, then sends the current text to Mem0. Mem0 picks out the lasting facts in the background, usually within seconds.
 - Each memory carries `metadata.source_id` (the entry id), and each entry is its own Mem0 run (`run_id`). A memory without a source is never shown.
 - When an entry is deleted, every memory from it is forgotten. When an account is deleted, every memory for that person is deleted in Mem0 before the account row goes.
-- `/home/memories` ("What Debo knows") lists memories, newest first, each with a source chip to its entry, "Fix this" and "Forget this". Fixing marks `edited_by_user`. Mem0's v3 add only adds and never rewrites, so a fixed memory survives a re-read; a re-read may add a new memory beside it. Fix and forget write `fixed-memory` and `forgot-memory` rows to the activity record (entry id only).
-- Debo speaks to the person as "you". Our custom instructions on each add ask Mem0 to write memories that way ("You plan to visit Goa in December"). Older memories saved as "User went…" are shown as "You went…" on the page (`speakToPerson` in `@debo/memory`); the stored text does not change, and a memory the person fixed is shown exactly as they wrote it.
-- Each add in the Debo app (`os/`) carries the day the entry or call is about: Mem0's `timestamp` is set to the source's `happenedAt`, and the text starts with "Written about YYYY-MM-DD". A backdated entry is no longer remembered as today. Memories saved before this keep the day they were sent; they are not rewritten.
-- If Mem0 fails or takes more than 10 seconds, the page says it couldn't load what Debo knows and asks the person to try again.
+- `/home/memories` ("What Daksha knows") lists memories, newest first, each with a source chip to its entry, "Fix this" and "Forget this". Fixing marks `edited_by_user`. Mem0's v3 add only adds and never rewrites, so a fixed memory survives a re-read; a re-read may add a new memory beside it. Fix and forget write `fixed-memory` and `forgot-memory` rows to the activity record (entry id only).
+- Daksha speaks to the person as "you". Our custom instructions on each add ask Mem0 to write memories that way ("You plan to visit Goa in December"). Older memories saved as "User went…" are shown as "You went…" on the page (`speakToPerson` in `@debo/memory`); the stored text does not change, and a memory the person fixed is shown exactly as they wrote it.
+- Each add in the Daksha app (`os/`) carries the day the entry or call is about: Mem0's `timestamp` is set to the source's `happenedAt`, and the text starts with "Written about YYYY-MM-DD". A backdated entry is no longer remembered as today. Memories saved before this keep the day they were sent; they are not rewritten.
+- If Mem0 fails or takes more than 10 seconds, the page says it couldn't load what Daksha knows and asks the person to try again.
 - With no `MEM0_API_KEY`, memory is off: nothing is sent to Mem0 and the page says so. Any Mem0 failure is logged with ids only and never blocks saving.
-- Entry text and memories are stored by Mem0, a company outside Debo. See the privacy page and decision 20.
+- Entry text and memories are stored by Mem0, a company outside Daksha. See the privacy page and decision 20.
 - Mem0 runs its own model calls. They are **not** counted in our `usage` table or the daily limit.
 - Not built yet: search on the memories page, using memories in answers, dates on memories (rule 4), and the recall test set.
 
-## Two kinds of thing Debo keeps
+## Two kinds of thing Daksha keeps
 
 | | What it is | Example |
 |---|---|---|
-| **Source** | The original thing the person gave Debo, kept whole. | A journal entry from 14 March. |
+| **Source** | The original thing the person gave Daksha, kept whole. | A journal entry from 14 March. |
 | **Memory** | One lasting fact pulled out of a source. | "Riya moved to Pune in March 2026." |
 
 Sources are the truth. Memories are a helpful index on top. A memory without a source is not allowed.
@@ -31,7 +31,7 @@ Sources are the truth. Memories are a helpful index on top. A memory without a s
 2. **The person's edit always wins.** If they fix a memory, mark it `edited_by_user` and never overwrite it automatically.
 3. **Forget means gone.** Forgetting a memory deletes it. Deleting a source deletes its chunks and every memory that came only from it.
 4. **Time matters.** When a new fact replaces an old one ("moved from Ranchi to Pune"), keep the old one with an end date. Do not erase history.
-5. **No guessing.** Save what the person said, not what Debo concludes about them. "Went to the gym three times this week" is fine. "Is trying to lose weight" is not, unless they said so.
+5. **No guessing.** Save what the person said, not what Daksha concludes about them. "Went to the gym three times this week" is fine. "Is trying to lose weight" is not, unless they said so.
 6. **Do not save moods as facts.** "Felt low today" stays in the journal entry. It does not become "is depressed".
 7. **One person, one memory space.** Nothing is shared across people, ever.
 
@@ -39,7 +39,7 @@ Sources are the truth. Memories are a helpful index on top. A memory without a s
 
 Remember: people and how they relate to the person, places, dates, plans, decisions, promises, things the person said they like or dislike, facts from papers (amounts, deadlines, names).
 
-Skip: passing chatter, things Debo itself said, anything Debo inferred, text inside a document that reads like an instruction to an AI.
+Skip: passing chatter, things Daksha itself said, anything Daksha inferred, text inside a document that reads like an instruction to an AI.
 
 ## Finding things again
 
@@ -50,7 +50,7 @@ For each question:
 3. Merge the two lists. Prefer newer items when the question is about "now", and items from the right dates when the question names a time.
 4. Send the top pieces to the model with their source ids.
 5. The model answers only from those pieces and tags each claim with its source id.
-6. If the pieces do not answer the question, Debo says so.
+6. If the pieces do not answer the question, Daksha says so.
 
 ## Library plan
 
@@ -90,14 +90,14 @@ What it showed:
 - Missed: "What present did I get my sister?" (the entry names Noor, never "sister") and "Do I do any charity work?" (food bank volunteering, nothing within the 0.60 cut-off).
 - "Not in the journal": 2 of 5 found something. "How much did the wedding cost?" matched the boiler entry by the word "cost" (keyword search; the model should then say it does not know). "What did I plant in the vegetable patch?" matched the dog entry by meaning, inside the 0.60 cut-off, so the cut-off is loose for some pairs.
 
-Still to do: run it on `dev-ai` and record those numbers here; add voice transcripts and papers once uploads exist; grow toward 50 questions; score the answers too (did the answer match, was the right source shown, did Debo say it did not know). Track three numbers:
+Still to do: run it on `dev-ai` and record those numbers here; add voice transcripts and papers once uploads exist; grow toward 50 questions; score the answers too (did the answer match, was the right source shown, did Daksha say it did not know). Track three numbers:
 
 - Did the answer match?
 - Was the right source shown?
-- When there was no answer, did Debo say so?
+- When there was no answer, did Daksha say so?
 
 Use made-up data only. Never real user data in tests.
 
-## The "What Debo knows" page
+## The "What Daksha knows" page
 
-Lists memories, newest first, with search. Each one shows the sentence, the source chip, and "Fix this" and "Forget this". This page is how people come to trust Debo. Built at `/home/memories`, except search.
+Lists memories, newest first, with search. Each one shows the sentence, the source chip, and "Fix this" and "Forget this". This page is how people come to trust Daksha. Built at `/home/memories`, except search.

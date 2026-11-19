@@ -1,6 +1,6 @@
 # Telemetry
 
-Telemetry is **off by default**. Debo sends nothing about its users or their usage to anyone unless the person running the server turns it on.
+Telemetry is **off by default**. Daksha sends nothing about its users or their usage to anyone unless the person running the server turns it on.
 
 ## How it is controlled
 
@@ -14,14 +14,14 @@ The old settings (`COPILOTKIT_TELEMETRY_DISABLED=false`, `COPILOTKIT_TELEMETRY_S
 
 ## What opting in sends
 
-The CopilotKit SDK posts two kinds of events to `https://telemetry.copilotkit.ai/ingest`, tagged `accessibility_title: "Debo"`:
+The CopilotKit SDK posts two kinds of events to `https://telemetry.copilotkit.ai/ingest`, tagged `accessibility_title: "Daksha"`:
 
 - `oss.runtime.instance_created`: the server started its runtime.
 - `oss.runtime.copilot_request_created`: a request reached the runtime (a count, not the request).
 
-Package name and version are included. Conversation text, journal content, file contents, keys and user ids are not part of these events. Sampling defaults to every event when opted in; set `COPILOTKIT_TELEMETRY_SAMPLE_RATE` (0 to 1) to lower it. Debo removes `CPK_TELEMETRY_ID` from the environment only while telemetry is off; if you opt in and set it, the SDK attaches that identity header, so leave it unset to stay anonymous.
+Package name and version are included. Conversation text, journal content, file contents, keys and user ids are not part of these events. Sampling defaults to every event when opted in; set `COPILOTKIT_TELEMETRY_SAMPLE_RATE` (0 to 1) to lower it. Daksha removes `CPK_TELEMETRY_ID` from the environment only while telemetry is off; if you opt in and set it, the SDK attaches that identity header, so leave it unset to stay anonymous.
 
-This is operator-level server telemetry. Debo does not ask individual users, so do not turn it on for a hosted service without telling them in your privacy notice.
+This is operator-level server telemetry. Daksha does not ask individual users, so do not turn it on for a hosted service without telling them in your privacy notice.
 
 ## Tests
 

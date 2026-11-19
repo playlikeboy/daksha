@@ -1,6 +1,6 @@
 # Security
 
-Debo will hold very personal data, so security reports matter a lot to us.
+Daksha will hold very personal data, so security reports matter a lot to us.
 
 ## Reporting a problem
 

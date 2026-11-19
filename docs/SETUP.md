@@ -5,8 +5,8 @@
 You need Node 22 or newer and pnpm 10.
 
 ```bash
-git clone https://github.com/playlikeboy/debo.life
-cd debo.life
+git clone https://github.com/playlikeboy/daksha
+cd daksha
 pnpm install
 pnpm dev
 ```
@@ -28,7 +28,7 @@ Create each one only when its phase starts. Names of the variables are in `.env.
 | 1 | A speech-to-text provider | Voice notes to text | add when chosen |
 | 1 | Inngest | Background jobs | add when chosen |
 | 3 | LiveKit | Live voice | `LIVEKIT_*` |
-| 3 | A text-to-speech provider | Debo's voice | add when chosen |
+| 3 | A text-to-speech provider | Daksha's voice | add when chosen |
 | 4 | Composio | Connected apps | `COMPOSIO_API_KEY` |
 | 4 | Google Cloud project | Calendar access | add when needed |
 | 5 | A payments provider | Plans | add when chosen |
@@ -73,18 +73,18 @@ pnpm dev
 
 - http://localhost:3000 is the landing page.
 - http://localhost:3000/auth/sign-up and `/auth/sign-in` are the sign-in pages.
-- `/home` needs you to be signed in. There you can write journal entries, ask Debo about them ("Ask Debo about your entries"), and delete entries or your whole account.
+- `/home` needs you to be signed in. There you can write journal entries, ask Daksha about them ("Ask Daksha about your entries"), and delete entries or your whole account.
 - http://localhost:3000/api/health checks the database, file storage and AI gateway. It only works in development; on the live site it does not exist.
 
 ## Sign-in emails
 
-Neon Auth does not send sign-in emails itself. It calls our webhook, which sends them from `mail.debo.life` through Cloudflare (decision 23).
+Neon Auth does not send sign-in emails itself. It calls our webhook, which sends them from `mail.daksha.life` through Cloudflare (decision 23).
 
 - Worker secrets: `CLOUDFLARE_ACCOUNT_ID` and `CLOUDFLARE_API_TOKEN` (a token that can use Email Sending).
 - Neon Auth settings, set once per branch with the Neon CLI:
 
 ```bash
-neon neon-auth config webhook update --enabled --url https://debo.life/api/neon-auth/webhook --enabled-events send.otp send.magic_link --timeout 5
+neon neon-auth config webhook update --enabled --url https://daksha.life/api/neon-auth/webhook --enabled-events send.otp send.magic_link --timeout 5
 neon neon-auth config email-password update --email-verification-method otp --require-email-verification --send-verification-email-on-sign-up --send-verification-email-on-sign-in --auto-sign-in-after-verification
 neon api /projects/sweet-dream-71477162/branches/<branch-id>/auth/plugins/magic-link -X PATCH -F enabled=true -F expires_in=10 -F disable_sign_up=true
 ```
@@ -104,14 +104,14 @@ The deploy workflow also runs migrations.
 
 ## End-to-end test
 
-The test below drives the old web screens, which now redirect to my.debo.life, so it no longer passes. Keep it only as a reference until it is replaced.
+The test below drives the old web screens, which now redirect to my.daksha.life, so it no longer passes. Keep it only as a reference until it is replaced.
 
 `apps/web/e2e/journal.spec.ts` walks through the whole loop in a real browser with a throwaway account: sign up, write an entry, ask about it (expects an answer with a source chip), ask something it cannot know (expects "I don't have anything about that yet"), delete the entry, delete the account.
 
 ```bash
 npx playwright install chromium        # once, in apps/web
 pnpm --filter @debo/web test:e2e        # starts `next dev` on port 3000
-BASE_URL=https://debo.life pnpm --filter @debo/web test:e2e   # against the live site
+BASE_URL=https://daksha.life pnpm --filter @debo/web test:e2e   # against the live site
 ```
 
 It uses made-up data and deletes its own account at the end.
@@ -130,7 +130,7 @@ pnpm --filter @debo/web run deploy
 
 That builds the app with OpenNext and runs `wrangler deploy`. Wrangler needs `CLOUDFLARE_ACCOUNT_ID` and `CLOUDFLARE_API_TOKEN` in your shell, or run `npx wrangler login` first.
 
-- The Worker is called `debo-web` and serves `debo.life` and `www.debo.life`, set in `apps/web/wrangler.jsonc`. Since the new app and landing page exist, `apps/web/src/proxy.ts` redirects `/` to https://about.debo.life and the old `/home/*` and `/auth/*` screens to https://my.debo.life. `/privacy` and every `/api/*` route (sign-in email webhook, voice, export, delete account) are outside that redirect and work as before. The landing page itself is the separate Worker `debo-site` (`apps/site`, workflow `deploy-site.yml`) at about.debo.life.
+- The Worker is called `debo-web` and serves `daksha.life` and `www.daksha.life`, set in `apps/web/wrangler.jsonc`. Since the new app and landing page exist, `apps/web/src/proxy.ts` redirects `/` to https://about.daksha.life and the old `/home/*` and `/auth/*` screens to https://my.daksha.life. `/privacy` and every `/api/*` route (sign-in email webhook, voice, export, delete account) are outside that redirect and work as before. The landing page itself is the separate Worker `debo-site` (`apps/site`, workflow `deploy-site.yml`) at about.daksha.life.
 - The database is reached through a Cloudflare Hyperdrive binding called `HYPERDRIVE` (config `debo-db`). **Query caching is off** on that config (`npx wrangler hyperdrive update <id> --caching-disabled true`). With caching on, a person's new entry did not show up for up to a minute, and their journal query results would be cached at the edge. Keep it off. This is a Cloudflare setting, not a file in the repo.
 - Secrets are set once per value with `npx wrangler secret put <NAME>` in `apps/web`. Use the names in `.env.example`. Never put them in `wrangler.jsonc`. The Worker needs: `NEON_AUTH_BASE_URL`, `NEON_AUTH_COOKIE_SECRET`, `AWS_ENDPOINT_URL_S3`, `AWS_REGION`, `AWS_ACCESS_KEY_ID`, `AWS_SECRET_ACCESS_KEY`, `NEON_AI_GATEWAY_BASE_URL`, `NEON_AI_GATEWAY_TOKEN` and `ANTHROPIC_API_KEY`. Optional: `DAILY_TOKEN_LIMIT` (tokens per person per day on our key, default 40,000).
 
@@ -138,16 +138,16 @@ That builds the app with OpenNext and runs `wrangler deploy`. Wrangler needs `CL
 
 Set once on GitHub:
 
-- Description: "Debo: a friendly assistant that remembers your life."
-- Website: https://debo.life
+- Description: "Daksha: a friendly assistant that remembers your life."
+- Website: https://daksha.life
 - Topics: `ai-assistant`, `personal-memory`, `journaling`, `nextjs`, `typescript`, `mcp`, `voice-assistant`, `pgvector`
 - Turn on private vulnerability reporting and dependency alerts.
 
 With the GitHub CLI:
 
 ```bash
-gh repo edit playlikeboy/debo.life \
-  --description "Debo: a friendly assistant that remembers your life." \
-  --homepage "https://debo.life" \
+gh repo edit playlikeboy/daksha \
+  --description "Daksha: a friendly assistant that remembers your life." \
+  --homepage "https://daksha.life" \
   --add-topic ai-assistant,personal-memory,journaling,nextjs,typescript,mcp,voice-assistant,pgvector
 ```

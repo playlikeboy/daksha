@@ -2,15 +2,15 @@
 
 OpenFuse uses `@copilotkit/react-native/headless` for its custom native and web interface. Chat messages, tool cards and task-linked documents render through CopilotKit's AG-UI agent and tool hooks.
 
-## Rich Threads (saved in Debo's own database)
+## Rich Threads (saved in Daksha's own database)
 
-Conversations are stored by Debo, in the same Postgres (or embedded PGlite) as everything else. No CopilotKit Intelligence account, project key or outside service is used, and no chat content leaves the server just to be stored. If `CPK_INTELLIGENCE_API_KEY` is still set in the environment it is ignored, and the server logs a note at startup.
+Conversations are stored by Daksha, in the same Postgres (or embedded PGlite) as everything else. No CopilotKit Intelligence account, project key or outside service is used, and no chat content leaves the server just to be stored. If `CPK_INTELLIGENCE_API_KEY` is still set in the environment it is ignored, and the server logs a note at startup.
 
 ### What the runtime supports (`@copilotkit/runtime` 1.70.1)
 
 - Passing `intelligence` to `CopilotRuntime` switches to `CopilotIntelligenceRuntime`. It forbids a custom `runner`, talks to the hosted service over WebSocket, and every thread route (`/threads`, rename, archive, messages, subscribe) calls that service. There is no storage adapter for it.
 - Without `intelligence` it is `CopilotSseRuntime`, which accepts a custom `runner` (the exported `AgentRunner` class: `run`, `connect`, `isRunning`, `stop`). The default `InMemoryAgentRunner` loses everything on restart, is one process-wide store not scoped by owner, and offers only an unscoped read-only list. Rename and archive are not available in this mode (mutations are reported as unsupported by `/info`).
-- So Debo supplies its own `AgentRunner` and its own thread routes.
+- So Daksha supplies its own `AgentRunner` and its own thread routes.
 
 ### Design
 
@@ -34,4 +34,4 @@ Run the browser worker using the `BROWSER_WORKER_URL` and `WORKER_TOKEN` setup i
 
 ## Validation scope
 
-`tests/threads.test.ts` drives the real CopilotKit runtime (`run` and `connect`) and Debo's thread routes in-process. It covers creation, listing and paging, owner isolation, rename, archive, restore, replay, history surviving a store restart, and a fetch spy showing no outside call. It does not cover the native or web screens on a device.
+`tests/threads.test.ts` drives the real CopilotKit runtime (`run` and `connect`) and Daksha's thread routes in-process. It covers creation, listing and paging, owner isolation, rename, archive, restore, replay, history surviving a store restart, and a fetch spy showing no outside call. It does not cover the native or web screens on a device.

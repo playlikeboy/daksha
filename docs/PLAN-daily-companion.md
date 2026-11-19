@@ -1,8 +1,8 @@
-# Plan: Debo as a warm daily companion
+# Plan: Daksha as a warm daily companion
 
-Written 15 November 2026. The owner asked: make Debo "more nicer and daily personal, family like assistant and everything for a human".
+Written 15 November 2026. The owner asked: make Daksha "more nicer and daily personal, family like assistant and everything for a human".
 
-This is a plan. The "Built" column says what is in the code today; everything else is not built yet. Check the code before you say Debo does any of it.
+This is a plan. The "Built" column says what is in the code today; everything else is not built yet. Check the code before you say Daksha does any of it.
 
 ## What "a daily, family-like companion" means here
 
@@ -15,7 +15,7 @@ A good friend or a caring family member:
 - keeps track of the little things (the shopping list, the call you promised);
 - never nags, never guilt-trips, never pretends to be human, and drops everything to help if you are in trouble.
 
-Debo already has the pieces: the journal, memories (Mem0), tasks and goals, the person's notes about themselves, chat and voice through one `ConversationAgent`. The work is to join them up and give her the habit of using them warmly.
+Daksha already has the pieces: the journal, memories (Mem0), tasks and goals, the person's notes about themselves, chat and voice through one `ConversationAgent`. The work is to join them up and give her the habit of using them warmly.
 
 ## Rules that do not bend
 
@@ -24,17 +24,17 @@ Debo already has the pieces: the journal, memories (Mem0), tasks and goals, the 
 - **Every fact has a source.** Follow-ups quote the entry they came from (source label such as "Journal, 12 November"). People facts come from the person's own words.
 - **The person owns it.** Anything new that is stored can be seen, fixed, exported and deleted, with the delete path built with the write path.
 - **No nagging.** One gentle mention, then let it go. Never a guilt line. Never a list of everything she knows.
-- **Inside Debo is done at once; outside Debo and deleting need a tap** (decision 28).
+- **Inside Daksha is done at once; outside Daksha and deleting need a tap** (decision 28).
 
 ## Ideas, ranked
 
-Value: how much it makes Debo feel like a companion. Effort and risk: S, M, L. "Consent / privacy page" says whether the privacy page must change or the person must agree first.
+Value: how much it makes Daksha feel like a companion. Effort and risk: S, M, L. "Consent / privacy page" says whether the privacy page must change or the person must agree first.
 
 | # | Idea | Value | Effort | Risk | Consent / privacy page | Built |
 |---|---|---|---|---|---|---|
 | 1 | Warmer character: follows up once, uses names, notices mood kindly, celebrates small wins, never nags; crisis line that always applies | High | S | Low | No new data | **Yes** (`engine/personality.ts`) |
-| 2 | People in your life: name, relation, birthday, special days (anniversaries), short notes; saved from chat or voice with `note_person`, listed with `list_people`, shown to the model so she uses names | High | M | Low: own data, inside Debo | Privacy page: yes (new stored data) | **Yes** (`people.ts`, `companion.ts`, app card) |
-| 3 | Daily check-in brief (`daily_checkin` tool and `GET /api/checkin`): birthdays and special days this week, tasks waiting for the person, active goals and their next step, entries from the last week worth asking about | High | M | Low: reads only what Debo holds | Privacy page: yes (says what it reads); nothing stored | **Yes** (`companion.ts`) |
+| 2 | People in your life: name, relation, birthday, special days (anniversaries), short notes; saved from chat or voice with `note_person`, listed with `list_people`, shown to the model so she uses names | High | M | Low: own data, inside Daksha | Privacy page: yes (new stored data) | **Yes** (`people.ts`, `companion.ts`, app card) |
+| 3 | Daily check-in brief (`daily_checkin` tool and `GET /api/checkin`): birthdays and special days this week, tasks waiting for the person, active goals and their next step, entries from the last week worth asking about | High | M | Low: reads only what Daksha holds | Privacy page: yes (says what it reads); nothing stored | **Yes** (`companion.ts`) |
 | 4 | Follow-ups from the journal ("how did the interview go?") | High | S on top of 3 | Low | Covered by 3 | **Partly**: the check-in returns recent entries with sources and she may ask about one. No smarter picking yet. |
 | 5 | Birthday and promise reminders that arrive on their own (a notification on the day, or the day before) | High | M | Medium: a nudge can feel pushy; needs a quiet hours rule | Yes: the person turns reminders on; privacy page | **Yes** (decision 31): in-app updates the day before at 18:00 and the morning of at 08:00, on unless turned off; push only on devices where the person turns it on; quiet hours 22:00 to 07:00 |
 | 6 | Promises found in the journal ("I told Mum I'd call Sunday") turned into a suggested reminder the person accepts | High | M | Medium: the model can misread; must be a suggestion, never automatic | Yes: suggestion card, person accepts; privacy page | **Yes** (decision 31): typed entries only, Ideas of kind `promise`, "Remind me" or "Dismiss" |
@@ -44,7 +44,7 @@ Value: how much it makes Debo feel like a companion. Effort and risk: S, M, L. "
 | 10 | Habits and routines (drink water, walk, medicine) with gentle streaks | Medium | M | Medium: streaks can turn into guilt; medicine needs care | Opt-in; privacy page | No |
 | 11 | Warm, plain words in every tool result and error (no "Request failed", always what to do next) | Medium | S each | Low | No | **Partly**: the new tools use plain words. An audit of older tools is still to do. |
 | 12 | Time zone from the app, so "today" and "good morning" are right without asking | Medium | S | Low | No (a time zone is not personal content), but say it on the privacy page if stored | No: the check-in takes a time zone if she knows it, otherwise UTC |
-| 13 | Family space: a parent and child, or partners, each with their own Debo, sharing selected people and lists | High | L | High: consent of two people, minors | Yes: full design and privacy review first | No |
+| 13 | Family space: a parent and child, or partners, each with their own Daksha, sharing selected people and lists | High | L | High: consent of two people, minors | Yes: full design and privacy review first | No |
 
 ## Suggested order
 
@@ -55,12 +55,12 @@ Value: how much it makes Debo feel like a companion. Effort and risk: S, M, L. "
 
 ## What was built in this change, in plain words
 
-- Debo's character text asks her to be a steady daily companion: use names, follow up once, notice how the person feels, never nag. The crisis line now applies all the time.
-- "People in your life": Debo keeps a short card for each person the person tells her about (name, who they are, birthday, special days, a few notes). She saves it at once when told, and says so. The person sees, fixes, adds and removes people in the app ("People in your life", on the Apps screen and in "How she talks and what she knows"). Chat cannot remove a person; the app can.
+- Daksha's character text asks her to be a steady daily companion: use names, follow up once, notice how the person feels, never nag. The crisis line now applies all the time.
+- "People in your life": Daksha keeps a short card for each person the person tells her about (name, who they are, birthday, special days, a few notes). She saves it at once when told, and says so. The person sees, fixes, adds and removes people in the app ("People in your life", on the Apps screen and in "How she talks and what she knows"). Chat cannot remove a person; the app can.
 - Up to 40 people (name, relation and the first 200 characters of notes) and the birthdays in the next week are sent with each chat or call to the assistant model, as the person's own data, the same way as "Things she should always know".
-- Daily check-in: when the person says good morning (or asks how the day looks) she calls `daily_checkin` and gives a short brief of at most three things. It reads only what Debo already holds and stores nothing.
+- Daily check-in: when the person says good morning (or asks how the day looks) she calls `daily_checkin` and gives a short brief of at most three things. It reads only what Daksha already holds and stores nothing.
 
-Storage: people are rows of kind `people` in the existing records table that holds all the new app's own rows (`os.records` when it shares the Debo database), so no migration was needed. They are part of "Download my data" and deleted with "Delete my data", like every other row of that table.
+Storage: people are rows of kind `people` in the existing records table that holds all the new app's own rows (`os.records` when it shares the Daksha database), so no migration was needed. They are part of "Download my data" and deleted with "Delete my data", like every other row of that table.
 
 ## Not checked yet
 

@@ -1,10 +1,10 @@
-# Contracts between parts of Debo
+# Contracts between parts of Daksha
 
-These are the agreements that let several people (or agents) build different parts of Debo at the same time without breaking each other. Change one only together with every part that uses it.
+These are the agreements that let several people (or agents) build different parts of Daksha at the same time without breaking each other. Change one only together with every part that uses it.
 
 ## One brain
 
-Every way of talking to Debo (the ask box, chat, voice, tasks, MCP) answers through `askStream()` in `apps/web/src/lib/ask.ts`. Nothing else calls a model to answer a question about the person's life.
+Every way of talking to Daksha (the ask box, chat, voice, tasks, MCP) answers through `askStream()` in `apps/web/src/lib/ask.ts`. Nothing else calls a model to answer a question about the person's life.
 
 ```ts
 askStream(userId: string, question: string, options?: {
@@ -32,14 +32,14 @@ Signed-in pages live under `/home`. The shell (sidebar on wide screens, bottom b
 |---|---|
 | `/home` | Today |
 | `/home/chat` | Chat |
-| `/home/voice` | Talk to Debo |
+| `/home/voice` | Talk to Daksha |
 | `/home/tasks` | Tasks and approvals |
 | `/home/journal` | Journal |
 | `/home/documents` | Documents (uploads) |
-| `/home/memories` | What Debo knows |
-| `/home/computer` | Debo's browser and computer |
+| `/home/memories` | What Daksha knows |
+| `/home/computer` | Daksha's browser and computer |
 | `/home/connectors` | Connected apps |
-| `/home/activity` | What Debo did |
+| `/home/activity` | What Daksha did |
 | `/home/settings` | Settings |
 
 ## Cloudflare bindings

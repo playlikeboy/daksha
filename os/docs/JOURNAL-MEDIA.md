@@ -25,7 +25,7 @@ Built 15 November 2026 (`debo-entry-page.tsx`, `routes.ts`).
 - **What Whisper stores, and tap-to-seek.** The speech service returns segments with start and end times in seconds; they are kept in `media.segments` (`[{start, end, text}]`) and returned by `GET /entries/:id/transcript`. When there are segments and they still match the words, each one is a row with its time: pressing it plays from there, and the one playing is marked. Once the person fixes the words by hand the times no longer line up, so the fixed words show as plain text.
 - **Video:** a large player (the browser's own controls), speed and Download under it, and the words beside it on wide screens or under it on phones, with the same jumping. On the phone it plays in a web view with a few lines of our own script, so the words can move it.
 - **Voice call:** read from the call's text (one line per turn): your turns on the right, the assistant's on the left with its face once per run of turns, the time of each, how many turns and how long. "Saved from this call" lists the memories made from it.
-- **Under every entry:** "What Debo learned from this" (each memory with Fix this and Forget this), and "Similar entries".
+- **Under every entry:** "What Daksha learned from this" (each memory with Fix this and Forget this), and "Similar entries".
 - **Download (phone):** the file is downloaded to the app's cache, then the phone's share sheet saves or sends it.
 - Loading shows grey blocks in the shape of the page; a failure says what happened and has Try again; a deleted or someone else's entry says "That entry is gone".
 
@@ -53,10 +53,10 @@ Built 15 November 2026 (`debo-recorder.tsx`, opened by "Record voice" and "Recor
 Chosen: React Native's `TextInput`, multiline, growing with its content, with type size and spacing from the design tokens.
 Why: the rich-text editors that work on both web and phone either need a custom native build (for example `react-native-enriched`) or run inside a web view (Lexical, TenTap). A web view is fragile for typing on a phone, and a custom native build is a heavy step for light bold and bullets. A plain box is the same everywhere and never loses a word. Light formatting can come later if it proves its worth.
 
-### Speaking: short clips to Debo's own endpoint
+### Speaking: short clips to Daksha's own endpoint
 
 Chosen: record clips of about 8 seconds with the browser's `MediaRecorder`, send each to `POST /api/debo/transcribe`, put the words in the text at the cursor.
-Why not the browser's built-in speech recognition: it differs by browser (Chrome sends audio to Google, Safari to Apple, Firefox has none), and it handles Hindi and mixed speech unevenly. One path through Debo's endpoint behaves the same on every browser, uses the same company as recordings (Cloudflare), and the privacy page can say so in one place.
+Why not the browser's built-in speech recognition: it differs by browser (Chrome sends audio to Google, Safari to Apple, Firefox has none), and it handles Hindi and mixed speech unevenly. One path through Daksha's endpoint behaves the same on every browser, uses the same company as recordings (Cloudflare), and the privacy page can say so in one place.
 Cost of this choice: words appear a few seconds after you speak, not as you speak, and there is a gap of a few milliseconds between clips.
 Limits: 30 clips a minute and 600 a day per person (about 100 minutes), in server memory, so a restart resets them. Dictation does not count against the daily AI token limit, because it uses a different service with its own cost. Clips are not stored.
 On the phone: not built. Use the microphone on the keyboard to dictate. In-app dictation would record short clips with `expo-audio` (now in the app for recordings) and send them the same way; it is not written yet.
@@ -65,7 +65,7 @@ On the phone: not built. Use the microphone on the keyboard to dictate. In-app d
 
 Chosen: the API Worker binds the private bucket (`MEDIA`) and Workers AI (`AI`). The API runs in a container, and the container reaches them through two made-up private hosts that the Worker answers (outbound interception, the same trick used for `browser.internal`): `http://media.internal` (the bucket) and `http://ai.internal` (Whisper). Code: `os/infra/cloudflare/api/src/media.ts` (the handlers), `apps/server/src/debo/binding-store.ts` (the server side).
 Why: nobody has to make R2 keys or an AI token, so there is no secret to leak or rotate. R2 binding calls need no signatures.
-There are no presigned links in this mode, so the app sends the file to Debo's API and plays from it. The "links" the API hands out look the same as before, but point at `https://api.debo.life/api/media-blob/<token>`:
+There are no presigned links in this mode, so the app sends the file to Daksha's API and plays from it. The "links" the API hands out look the same as before, but point at `https://api.daksha.life/api/media-blob/<token>`:
 - A token names one action on one object (put, one part, or get), the exact size for uploads, and an expiry (2 hours to upload, 1 hour to play, 24 hours for the data download). It is signed with a key derived from `SESSION_SIGNING_KEY`, so it survives a container restart and nobody can make one. It works as a plain link, so `<audio>`, `<video>` and the phone player need no sign-in header.
 - The API only issues a token after checking the recording's owner, exactly as before. Someone else's id gets "I couldn't find that recording".
 - Bodies are streamed: browser to API to Worker to R2, never held whole in memory. An upload without a declared length is refused (411), as is a length different from the signed size.
@@ -156,12 +156,12 @@ Examples: one hour of speech costs about $0.03 to write out. A person at the dai
 Nothing to create by hand, apart from the bucket, which already exists (`debo-journal-media`, private, location apac).
 
 1. **Deploy.** Push to main. `deploy.yml` applies the migration; `deploy-os.yml` builds the API image (with ffmpeg), and `wrangler deploy` attaches the two bindings declared in `api/wrangler.jsonc` (`r2_buckets` to `debo-journal-media`, `ai`). The Worker then passes `MEDIA_BACKEND=binding` and `AI_BACKEND=binding` to the container, and the Journal shows Speak, Record and Add. The deploy token (`CLOUDFLARE_API_TOKEN`) must be allowed to attach R2 buckets and Workers AI to a Worker; if the deploy fails with a permission error, add those to the token.
-2. **Check by hand** (see "Not checked yet"): add a short voice note at https://my.debo.life, see the words appear, play it and seek, delete it, and look in the bucket to see the object is gone.
-3. **Bucket CORS** is only needed in presigned mode (the browser then talks to R2 directly). The existing rule for `https://my.debo.life` stays. Dashboard: R2, the bucket, Settings, CORS Policy, JSON tab:
+2. **Check by hand** (see "Not checked yet"): add a short voice note at https://my.daksha.life, see the words appear, play it and seek, delete it, and look in the bucket to see the object is gone.
+3. **Bucket CORS** is only needed in presigned mode (the browser then talks to R2 directly). The existing rule for `https://my.daksha.life` stays. Dashboard: R2, the bucket, Settings, CORS Policy, JSON tab:
    ```json
    [
      {
-       "AllowedOrigins": ["https://my.debo.life"],
+       "AllowedOrigins": ["https://my.daksha.life"],
        "AllowedMethods": ["GET", "HEAD", "PUT"],
        "AllowedHeaders": ["Content-Type", "Content-Length"],
        "ExposeHeaders": ["ETag"],
@@ -180,7 +180,7 @@ Built (15 November 2026), in `debo-capture.native.ts` and `debo-player.native.ts
 - **Pick a file** (`expo-document-picker`), as before.
 - **Upload** through the same path as the web: `POST /api/debo/media/uploads`, then one PUT (single link, `expo-file-system`'s upload task) or 8 MiB parts (bytes read with `File.open()`), then `complete`. Nothing is sent before "Save recording".
 - **Listen or watch first, and play saved ones:** a voice note plays in the app (`expo-audio`: Play, Pause, Back 15 seconds, and the time). A video plays in a small web view with the phone's own video controls and no scripts. A saved recording asks for its one-hour link when Play is pressed, as on the web.
-- **On the phone itself:** a recording made in the app is written to Debo's cache folder (only this app can read it). One that is cancelled is deleted at once. One that is kept stays there until the phone clears the cache: it is not deleted straight after saving, because the upload may still be running if the screen was closed.
+- **On the phone itself:** a recording made in the app is written to Daksha's cache folder (only this app can read it). One that is cancelled is deleted at once. One that is kept stays there until the phone clears the cache: it is not deleted straight after saving, because the upload may still be running if the screen was closed.
 - The permission texts in `app.json` (the WebRTC, `expo-audio` and `expo-camera` plugins) say the microphone is used only for a call or a note, the sound of a call is never kept, and a note is kept until it is deleted.
 Not built: dictation (the keyboard's microphone is used instead), and a way to pause a recording.
 Not run on a device or simulator. Checked: `tsc`, `expo export` for Android and web, and `expo prebuild` for Android (the camera and microphone permissions). The Android APK from `.github/workflows/release-mobile.yml` (see `apps/mobile/README.md`) includes recording from the first build after this change. Not checked: that recording, the camera preview, playback of a local video in the web view on Android, and seeking work on real phones; iPhone at all (no signed build exists).
@@ -188,7 +188,7 @@ Not run on a device or simulator. Checked: `tsc`, `expo export` for Android and 
 ## Not checked yet
 
 - **Binding mode on real Cloudflare.** Tested only against fakes of `media.internal`, `ai.internal`, R2 and Workers AI. Not confirmed on the real platform: that a request body streams through outbound interception without being buffered or cut; that R2's `put` and `uploadPart` take the forwarded stream (they need a known length, so the API sets `Content-Length`; a body without one is buffered up to 16 MB in the Worker); that 8 MiB parts and 32 MB single uploads pass every hop; that range reads work for seeking; the AI binding's accepted audio size (5 minute mp3 pieces are about 1.2 MB, about 1.6 MB as base64); and that the deploy token may attach the bindings. If streaming through interception fails, lower `singleMaxBytes` and `partBytes` for the binding (in `mediaFromEnv`) so bodies stay small, or fall back to presigned mode.
-- Presigned mode, if used: that presigned PUT links with a signed `Content-Length` and `Content-Type` are accepted, that presigned multipart `UploadPart` links work (R2's S3 page lists the operations but does not mention presigned part links), and that CORS and the exposed ETag work from `my.debo.life`. If R2 refuses a signed `Content-Length`, remove it from `beginUpload` in `object-store.ts`.
+- Presigned mode, if used: that presigned PUT links with a signed `Content-Length` and `Content-Type` are accepted, that presigned multipart `UploadPart` links work (R2's S3 page lists the operations but does not mention presigned part links), and that CORS and the exposed ETag work from `my.daksha.life`. If R2 refuses a signed `Content-Length`, remove it from `beginUpload` in `object-store.ts`.
 - Real Workers AI quality and the shape of the binding's answer (read the same way as the REST answer, inside a `{ success, result }` wrapper made by the Worker).
 - ffmpeg inside the container (the Docker image was not built here), and CPU time for an hour of audio on the small instance.
 - Whisper quality on Hindi and mixed speech.

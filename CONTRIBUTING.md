@@ -1,6 +1,6 @@
 # Contributing
 
-Thanks for wanting to help. Debo is early: a landing page and a plan.
+Thanks for wanting to help. Daksha is early: a landing page and a plan.
 
 ## Before you start
 
