@@ -3,7 +3,7 @@
 //
 //   update_talk_settings  write  Voice, speed, mood, length, language, and adding a line to the
 //                                person's notes. Uses the talk settings store and its checks.
-//   update_identity       write  The assistant's name, tone and character (the "About Debo" row),
+//   update_identity       write  The assistant's name, tone and character (the "About Daksha" row),
 //                                including a face the person made (character "custom" with one of
 //                                their own saved faces, checked like POST /api/agent/identity).
 //                                Choosing a character ends talking as a custom person; talk_as
@@ -13,7 +13,7 @@
 //   open_screen           read   Returns a card that opens a screen or sheet in the app, for things
 //                                only the app can do (build a face, add files, connect an app).
 //
-// All of these change only the person's own settings inside Debo, so they save at once with
+// All of these change only the person's own settings inside Daksha, so they save at once with
 // no review (decision 28). None of them deletes anything: wiping the notes, removing people or
 // reminders, and deleting data stay in the app, behind a tap.
 import { defineTool } from "@copilotkit/runtime/v2";
@@ -22,6 +22,7 @@ import { type AgentIdentity, agentCharacters } from "../../../packages/domain/sr
 import { appScreenInfo, appScreens } from "../../../packages/domain/src/screens.ts";
 import { CustomAvatarStore } from "./custom-avatars.ts";
 import type { Store } from "./db.ts";
+import { assistantNameOf, OLD_DEFAULT_NAME } from "./engine/brand.ts";
 import { AppError } from "./errors.ts";
 import { PersonaStore } from "./persona.ts";
 import { CompanionSettingsStore } from "./reminders.ts";
@@ -43,7 +44,7 @@ export const settingsInstructions =
 
 /** The name each built-in character offers. Any other character keeps the person's name. */
 const characterNames: Partial<Record<string, string>> = {
-  debo: "Debo",
+  debo: "Daksha",
   diya: "Diya",
   anaya: "Anaya",
   mishti: "Mishti",
@@ -141,12 +142,12 @@ export async function changeIdentity(db: Store, owner: string, input: unknown) {
     const current = before?.name?.trim() ?? "";
     const offered = character === "custom" ? face?.name : characterNames[character];
     const faceNames = character === "custom" || before?.character === "custom" ? (await faces.list(owner)).map((f) => f.name) : [];
-    const isCharacterName = [...Object.values(characterNames), ...faceNames].includes(current);
+    const isCharacterName = [...Object.values(characterNames), OLD_DEFAULT_NAME, ...faceNames].includes(current);
     if (offered && (!current || isCharacterName)) name = offered;
     else if (offered && current !== offered) keptName = current;
   }
   // Written only once the ask is known to be good.
-  await db.insertIfAbsent(owner, "agent-settings", { id: "identity", name: "Debo", tone: "warm" });
+  await db.insertIfAbsent(owner, "agent-settings", { id: "identity", name: "Daksha", tone: "warm" });
   const patch = defined({ name, tone: ask.tone, character, customAvatar: face?.id });
   const identity = await db.compareAndSwap<AgentIdentity>(owner, "agent-settings", "identity", {}, patch);
   if (!identity) throw new AppError("I couldn't save that just now. Try again in a moment.", 409);
@@ -233,7 +234,7 @@ export function settingsTools(
             kind: "identity",
             changed,
             identity: {
-              name: identity.name,
+              name: assistantNameOf(identity.name),
               tone: identity.tone,
               character: identity.character ?? "debo",
               ...(identity.character === "custom" && identity.customAvatar ? { customAvatar: identity.customAvatar } : {}),
@@ -254,7 +255,7 @@ export function settingsTools(
     defineTool({
       name: "update_reminders",
       description:
-        "Change what Debo sends the person on her own, at once. specialDays: birthday and special-day reminders from People in your life, on or off. checkin: the morning check-in, on or off. checkinAt: its time as HH:MM in 24 hours, between 07:00 and 22:00 (nothing is sent at night). Adding or removing a single reminder is not done here.",
+        "Change what Daksha sends the person on her own, at once. specialDays: birthday and special-day reminders from People in your life, on or off. checkin: the morning check-in, on or off. checkinAt: its time as HH:MM in 24 hours, between 07:00 and 22:00 (nothing is sent at night). Adding or removing a single reminder is not done here.",
       parameters: remindersChangeInput,
       execute: async (args) => {
         signal?.throwIfAborted();

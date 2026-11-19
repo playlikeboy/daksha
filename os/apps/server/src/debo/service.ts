@@ -1,8 +1,8 @@
 // What the routes, the agent tools and the review flow call. It adds the rules
-// that belong to Debo, on top of a DeboBackend:
-// - everything is scoped to one owner, and only a Debo account (a UUID) has a journal;
+// that belong to Daksha, on top of a DeboBackend:
+// - everything is scoped to one owner, and only a Daksha account (a UUID) has a journal;
 // - input is checked with Zod, in plain words;
-// - without a Debo database the features say "not set up" instead of failing;
+// - without a Daksha database the features say "not set up" instead of failing;
 // - every change leaves a line in the activity record (ids only).
 import { type AskOutcome, UNKNOWN_MESSAGE } from "@debo/brain";
 import { speakToPerson } from "@debo/memory";
@@ -14,14 +14,14 @@ import { MEDIA_LIMITS, type MediaLimits } from "./media-limits.ts";
 import { type MediaDeps, MediaService, type MediaView } from "./media-service.ts";
 
 export const NOT_SET_UP =
-  "Your journal is not set up yet. Whoever runs this Debo needs to turn it on. Until then, nothing can be saved here.";
+  "Your journal is not set up yet. Whoever runs this Daksha needs to turn it on. Until then, nothing can be saved here.";
 export const NOT_A_DEBO_ACCOUNT =
-  "You are using a test sign-in. Sign in with your Debo account to use your journal.";
+  "You are using a test sign-in. Sign in with your Daksha account to use your journal.";
 export const MEMORY_OFF =
-  "Debo is not keeping memories right now. Your entries are safe, and you can still ask about them.";
+  "Daksha is not keeping memories right now. Your entries are safe, and you can still ask about them.";
 const MEMORY_GONE = "I couldn't find that memory. It may already be forgotten.";
 const ENTRY_GONE = "I couldn't find that entry. It may have been deleted.";
-export const ASK_OFF = "Answers are not set up yet. Whoever runs this Debo needs to turn them on. Your entries are still safe.";
+export const ASK_OFF = "Answers are not set up yet. Whoever runs this Daksha needs to turn them on. Your entries are still safe.";
 
 const Uuid = z.string().uuid();
 export const EntryText = z
@@ -40,7 +40,7 @@ export const FindText = z.string().trim().max(200, "Keep what you search for und
 export const MemoryText = z
   .string()
   .trim()
-  .min(1, "Write what Debo should remember.")
+  .min(1, "Write what Daksha should remember.")
   .max(1000, "Keep it under 1,000 characters.");
 
 export type EntryView = {
@@ -73,7 +73,7 @@ export const SIMILAR_LIMIT = 5;
 /** A short, flat preview. Call lines lose their "[00:07] You:" marks. */
 export function snippetOf(text: string, max = 180): string {
   const flat = text
-    .replace(/^\[\d+:\d{2}\] (?:You|Debo): /gm, "")
+    .replace(/^\[\d+:\d{2}\] (?:You|Daksha|Debo): /gm, "") // old calls say "Debo:". brand-check: keep
     .replace(/\s+/g, " ")
     .trim();
   return flat.length > max ? `${flat.slice(0, max - 1).trimEnd()}…` : flat;
@@ -120,7 +120,7 @@ export const chipLabel = (date: Date, kind: SourceKind = "journal") =>
 
 /** A call that got no turn for this long is over, whether or not the app said so. */
 export const CALL_IDLE_MS = 10 * 60_000;
-/** The app says a call ended. Wait this long for Debo's last words to be saved first. */
+/** The app says a call ended. Wait this long for Daksha's last words to be saved first. */
 const CALL_END_GRACE_MS = 2_000;
 
 /** What the server hears about a typed entry: saved (with its words) or deleted. */
@@ -149,14 +149,14 @@ export class DeboService {
   devStore?: import("hono").Hono;
   /** Binding mode only: uploads to and playback from the private bucket, through this server. Served at /api/media-blob. */
   blobRoutes?: import("hono").Hono;
-  /** The private bucket recordings use. Pictures Debo makes are kept here too, under the owner's folder. */
+  /** The private bucket recordings use. Pictures Daksha makes are kept here too, under the owner's folder. */
   readonly mediaStore?: import("./object-store.ts").ObjectStore;
   /** The speech engine and audio tools recordings use. Custom people read their videos with them too. */
   readonly mediaTools?: Pick<MediaDeps, "transcriber" | "audio">;
 
   /**
-   * `backend` is null when there is no Debo database. `localOwners` are extra
-   * owner names allowed without being a Debo account; only the dev-only
+   * `backend` is null when there is no Daksha database. `localOwners` are extra
+   * owner names allowed without being a Daksha account; only the dev-only
    * in-memory journal passes any.
    */
   constructor(
@@ -198,7 +198,7 @@ export class DeboService {
   private recordingsFor(owner: string): MediaService {
     this.ready(owner);
     if (!this.recordings)
-      throw new AppError("Voice notes and videos are not set up yet. Whoever runs this Debo needs to turn them on. You can still write entries.", 503);
+      throw new AppError("Voice notes and videos are not set up yet. Whoever runs this Daksha needs to turn them on. You can still write entries.", 503);
     return this.recordings;
   }
 
@@ -231,7 +231,7 @@ export class DeboService {
     this.ready(owner);
   }
 
-  /** Runs a journal proposal the person approved. The entry is saved as Debo's doing, with their OK. */
+  /** Runs a journal proposal the person approved. The entry is saved as Daksha's doing, with their OK. */
   async executeProposal(owner: string, text: string): Promise<string> {
     const entry = await this.createEntry(owner, { text }, "debo");
     return `Saved to your journal · ${entry.id}`;
@@ -291,7 +291,7 @@ export class DeboService {
     return { entries, memories, recordings };
   }
 
-  /** Deletes every entry this person wrote, and what Debo learned from each. Returns how many entries went. */
+  /** Deletes every entry this person wrote, and what Daksha learned from each. Returns how many entries went. */
   async deleteMine(owner: string): Promise<number> {
     const backend = this.journalOf(owner);
     if (!backend) return 0;
@@ -306,7 +306,7 @@ export class DeboService {
     }
     // Unfinished uploads and anything else under this person's folder.
     await this.recordings?.deleteAllFor(owner);
-    // Anything Debo still remembers that no longer has an entry goes too.
+    // Anything Daksha still remembers that no longer has an entry goes too.
     if (backend.memories)
       for (const memory of await backend.memories.list(owner)) await backend.memories.forget(owner, memory.id);
     return entries.length;
@@ -565,7 +565,7 @@ export class DeboService {
     const q = Question.parse(question);
     const ownKey = this.ownAnthropicKey;
     if (!ownKey) return backend.ask(owner, q, signal);
-    // With their own Anthropic key, the answer is made on it, and Debo's daily limit does not apply.
+    // With their own Anthropic key, the answer is made on it, and Daksha's daily limit does not apply.
     return (async function* () {
       const anthropicKey = await ownKey(owner).catch(() => undefined);
       yield* backend.ask(owner, q, signal, anthropicKey ? { anthropicKey } : undefined);
@@ -583,7 +583,7 @@ export class DeboService {
     throw new Error("The answer stream ended without a result.");
   }
 
-  // ---- What Debo knows ----
+  // ---- What Daksha knows ----
 
   async listMemories(owner: string): Promise<MemoryView[]> {
     const backend = this.ready(owner);

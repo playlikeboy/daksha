@@ -265,7 +265,7 @@ test("an edit takes away a promise it no longer holds; a dismissed one never com
 test("web push: off without keys, only real push services, title only, a gone device is forgotten", async () => {
   assert.equal(pushKeysFromEnv({}), undefined);
   assert.equal(pushKeysFromEnv({ DEBO_OS_VAPID_PUBLIC_KEY: "a" }), undefined);
-  assert.equal(pushKeysFromEnv({ DEBO_OS_VAPID_PUBLIC_KEY: "a", DEBO_OS_VAPID_PRIVATE_KEY: "b" })?.subject, "https://debo.life");
+  assert.equal(pushKeysFromEnv({ DEBO_OS_VAPID_PUBLIC_KEY: "a", DEBO_OS_VAPID_PRIVATE_KEY: "b" })?.subject, "https://daksha.life");
   assert.equal(new PushService(db).configured, false);
   assert.equal(await new PushService(db).send("x", "Hi"), 0);
 
@@ -278,7 +278,7 @@ test("web push: off without keys, only real push services, title only, a gone de
   assert.equal(allowedPushEndpoint("https://fcm.googleapis.com:8443/x"), false);
 
   const sent: { endpoint: string; payload: string }[] = [];
-  const push = new PushService(db, { publicKey: "pub", privateKey: "priv", subject: "https://debo.life" }, async (sub, payload) => {
+  const push = new PushService(db, { publicKey: "pub", privateKey: "priv", subject: "https://daksha.life" }, async (sub, payload) => {
     sent.push({ endpoint: sub.endpoint, payload });
     if (sub.endpoint.endsWith("gone")) throw Object.assign(new Error("gone"), { statusCode: 410 });
     return { statusCode: 201 };
@@ -299,7 +299,7 @@ test("web push: off without keys, only real push services, title only, a gone de
 
 test("export lists push devices without their keys; deleting the account removes them and reminders", async () => {
   const owner = "export-1";
-  const push = new PushService(db, { publicKey: "pub", privateKey: "priv", subject: "https://debo.life" }, async () => ({ statusCode: 201 }));
+  const push = new PushService(db, { publicKey: "pub", privateKey: "priv", subject: "https://daksha.life" }, async () => ({ statusCode: 201 }));
   await push.subscribe(owner, { endpoint: "https://fcm.googleapis.com/fcm/send/dev", keys: { p256dh: "B".repeat(87), auth: "A".repeat(22) } });
   await new ReminderStore(db).add(owner, { title: "Call Mum", at: new Date() }, "export:1");
   await new CompanionSettingsStore(db).set(owner, { checkin: true });

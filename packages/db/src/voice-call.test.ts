@@ -21,6 +21,12 @@ test("turns keep order, speaker and time", () => {
   expect(turns[1]).toMatchObject({ at: "00:07", text: "You went hiking with Arun." });
 });
 
+test("new turns say Daksha, and calls saved before the rename still parse", () => {
+  expect(formatTurn("debo", "Hi.", 7)).toBe("[00:07] Daksha: Hi.");
+  const old = "[00:00] You: hello\n[00:07] Debo: Hi."; // brand-check: keep
+  expect(parseCall(old).map((t) => t.who)).toEqual(["person", "debo"]);
+});
+
 test("only the person's words are counted", () => {
   expect(personWords(call)).toBe(6 + 7);
   expect(personWords(formatTurn("debo", "Hello there friend", 0))).toBe(0);

@@ -2,7 +2,7 @@
 //
 // The call is one source (kind voice_call). Its text is one line per turn:
 //   [00:00] You: what did I do last weekend
-//   [00:07] Debo: You went hiking with Arun.
+//   [00:07] Daksha: You went hiking with Arun.
 // "[mm:ss]" is how far into the call the turn was said. The same text is what
 // the person reads, what search finds and what is exported. Never log it.
 import { createHash } from "node:crypto";
@@ -10,7 +10,7 @@ import { createHash } from "node:crypto";
 export type CallSpeaker = "person" | "debo";
 export type CallTurn = { who: CallSpeaker; text: string; at: string };
 
-const LABEL: Record<CallSpeaker, string> = { person: "You", debo: "Debo" };
+const LABEL: Record<CallSpeaker, string> = { person: "You", debo: "Daksha" };
 /** One turn is cut here, so a runaway reply cannot fill the database. */
 export const MAX_TURN_CHARS = 4000;
 /** A call stops growing here (about an hour of fast talk). */
@@ -43,7 +43,8 @@ export function formatTurn(who: CallSpeaker, text: string, offsetSeconds: number
   return `[${offsetLabel(offsetSeconds)}] ${LABEL[who]}: ${cleanTurn(text)}`;
 }
 
-const LINE = /^\[(\d+):(\d{2})\] (You|Debo): (.*)$/;
+// Calls saved before the rename say "Debo:" instead of "Daksha:". brand-check: keep
+const LINE = /^\[(\d+):(\d{2})\] (You|Daksha|Debo): (.*)$/; // brand-check: keep
 
 /** The turns of a call, in order. `at` is the "mm:ss" mark. Lines that do not fit are skipped. */
 export function parseCall(text: string): (CallTurn & { seconds: number })[] {
@@ -61,7 +62,7 @@ export function wordCount(text: string): number {
   return text.split(/\s+/).filter(Boolean).length;
 }
 
-/** How many words the person said, not counting Debo. */
+/** How many words the person said, not counting Daksha. */
 export function personWords(text: string): number {
   return parseCall(text)
     .filter((t) => t.who === "person")

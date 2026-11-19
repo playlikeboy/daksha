@@ -1,4 +1,4 @@
-// The plain-TypeScript side of Debo's journal screens: what the server sends,
+// The plain-TypeScript side of Daksha's journal screens: what the server sends,
 // how to read it safely, the words we show, and where a draft is kept.
 // No React in here, so node:test can run it.
 import { z } from "zod";
@@ -118,10 +118,11 @@ export function segmentAt(segments: TranscriptSegment[], seconds: number): numbe
 export const timeMark = (seconds: number) => formatDuration(seconds * 1000);
 
 // ---- A voice call, as its text stores it ----
-// One line per turn: "[00:07] Debo: You went hiking with Arun." (see packages/db/src/voice-call.ts).
+// One line per turn: "[00:07] Daksha: You went hiking with Arun." (see packages/db/src/voice-call.ts).
 
 export type CallTurn = { who: "person" | "debo"; text: string; seconds: number };
-const CALL_LINE = /^\[(\d+):(\d{2})\] (You|Debo): (.*)$/;
+// Calls saved before the rename say "Debo:" instead of "Daksha:". brand-check: keep
+const CALL_LINE = /^\[(\d+):(\d{2})\] (You|Daksha|Debo): (.*)$/; // brand-check: keep
 
 /** The turns of a call, in order. Lines that do not fit are skipped. */
 export function parseCallTurns(text: string): CallTurn[] {
@@ -179,7 +180,7 @@ export type DeboToolView =
   | { kind: "review"; actionId: string; preview: string }
   | { kind: "unreadable" };
 
-/** Turn what a Debo tool returned into something a card can draw. Never throws. */
+/** Turn what a Daksha tool returned into something a card can draw. Never throws. */
 export function readDeboTool(name: string, raw: unknown): DeboToolView {
   const value = parseToolResult(raw);
   const error = errorResult.safeParse(value);
@@ -226,15 +227,15 @@ export function describeActivity(item: Pick<ActivityView, "action" | "sourceIds"
     case "deleted":
       return "You deleted an entry.";
     case "answered":
-      return count > 0 ? `Debo answered a question using ${entries}.` : "Debo answered a question.";
+      return count > 0 ? `Daksha answered a question using ${entries}.` : "Daksha answered a question.";
     case "did-not-know":
-      return "Debo had nothing about a question, so it said so.";
+      return "Daksha had nothing about a question, so it said so.";
     case "exported":
       return "You downloaded a copy of everything.";
     case "fixed-memory":
       return "You fixed a memory.";
     case "forgot-memory":
-      return "You asked Debo to forget a memory.";
+      return "You asked Daksha to forget a memory.";
     default:
       return "Something changed.";
   }

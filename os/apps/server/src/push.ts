@@ -1,5 +1,5 @@
 // Web push: reminders and the morning check-in reach a browser or installed web app even
-// when Debo is closed. Uses the `web-push` library (VAPID signing and payload encryption).
+// when Daksha is closed. Uses the `web-push` library (VAPID signing and payload encryption).
 //
 // It is off unless the server has both keys (DEBO_OS_VAPID_PUBLIC_KEY, DEBO_OS_VAPID_PRIVATE_KEY);
 // then the app hides the switch. Each device the person turns it on for is one row of kind
@@ -17,7 +17,7 @@ import { backgroundFailure } from "./log.ts";
 export const PUSH_KIND = "push-subscriptions";
 const DEVICES_MAX = 10;
 /** The subject push services may use to reach whoever runs the server. Not a person's address. */
-export const DEFAULT_VAPID_SUBJECT = "https://debo.life";
+export const DEFAULT_VAPID_SUBJECT = "https://daksha.life";
 
 /**
  * The push services browsers use. A subscription to any other address is refused, so this
@@ -46,7 +46,7 @@ export const subscriptionInput = z.object({
     .string()
     .trim()
     .max(1000)
-    .refine(allowedPushEndpoint, "This browser's push service is not one Debo knows. Reminders still show in the app."),
+    .refine(allowedPushEndpoint, "This browser's push service is not one Daksha knows. Reminders still show in the app."),
   keys: z.object({ p256dh: base64url, auth: base64url }),
 });
 
@@ -70,10 +70,11 @@ export interface PushKeys {
 
 /** The VAPID keys from the environment, or undefined when push is off. Never logs the values. */
 export function pushKeysFromEnv(env: Record<string, string | undefined> = process.env): PushKeys | undefined {
-  const publicKey = env.DEBO_OS_VAPID_PUBLIC_KEY?.trim();
-  const privateKey = env.DEBO_OS_VAPID_PRIVATE_KEY?.trim();
+  // The DAKSHA_ names are optional new names for the same settings (docs/RENAME.md).
+  const publicKey = (env.DAKSHA_OS_VAPID_PUBLIC_KEY || env.DEBO_OS_VAPID_PUBLIC_KEY)?.trim();
+  const privateKey = (env.DAKSHA_OS_VAPID_PRIVATE_KEY || env.DEBO_OS_VAPID_PRIVATE_KEY)?.trim();
   if (!publicKey || !privateKey) return undefined;
-  const subject = env.DEBO_OS_VAPID_SUBJECT?.trim() || DEFAULT_VAPID_SUBJECT;
+  const subject = (env.DAKSHA_OS_VAPID_SUBJECT || env.DEBO_OS_VAPID_SUBJECT)?.trim() || DEFAULT_VAPID_SUBJECT;
   return { publicKey, privateKey, subject };
 }
 

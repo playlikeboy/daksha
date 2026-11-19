@@ -26,7 +26,7 @@ function rig() {
   };
   const brain: VoiceBrain = {
     async *answer(q): AsyncGenerator<VoiceBrainEvent> {
-      yield { type: "text", delta: `Debo answers: ${q.question.split(" ")[0]}` };
+      yield { type: "text", delta: `Daksha answers: ${q.question.split(" ")[0]}` };
       yield { type: "done", status: "answered" };
     },
   };
@@ -72,7 +72,7 @@ test("each turn is saved in order with both sides, as one source per call", asyn
   const lines = call?.text.split("\n") ?? [];
   assert.equal(lines.length, 4);
   assert.match(lines[0] ?? "", /^\[00:00\] You: what did I do last weekend$/);
-  assert.match(lines[1] ?? "", /^\[\d\d:\d\d\] Debo: Debo answers: what$/);
+  assert.match(lines[1] ?? "", /^\[\d\d:\d\d\] Daksha: Daksha answers: what$/);
   assert.match(lines[2] ?? "", /You: and who came with me$/);
   assert.equal(call?.id, callSourceId(ALICE, "s1"));
   // A second call is its own source.
@@ -144,7 +144,7 @@ test("a turn after the call was read makes it due again, and it is read again wi
   assert.equal((await r.backend.memories?.list(ALICE))?.length, 2, "one memory per thing the person said, none doubled");
 });
 
-test("memories come only from what the person said, never from Debo's lines", async () => {
+test("memories come only from what the person said, never from Daksha's lines", async () => {
   const r = rig();
   const brain: VoiceBrain = {
     async *answer(): AsyncGenerator<VoiceBrainEvent> {
@@ -165,8 +165,8 @@ test("memories come only from what the person said, never from Debo's lines", as
   const texts = (await r.backend.memories?.list(ALICE))?.map((m) => m.text) ?? [];
   assert.ok(texts.length > 0);
   assert.ok(texts.every((t) => !/Riya|love you/.test(t)));
-  // The words Debo said are still in the readable call.
-  assert.match((await calls(r))[0]?.text ?? "", /Debo: I am your girlfriend Riya/);
+  // The words Daksha said are still in the readable call.
+  assert.match((await calls(r))[0]?.text ?? "", /Daksha: I am your girlfriend Riya/);
 });
 
 test("a call where the person said almost nothing is not kept", async () => {
@@ -178,7 +178,7 @@ test("a call where the person said almost nothing is not kept", async () => {
   assert.equal((await r.backend.memories?.list(ALICE))?.length, 0);
 });
 
-test("deleting a call removes it, what Debo learned from it and its chat copy", async () => {
+test("deleting a call removes it, what Daksha learned from it and its chat copy", async () => {
   const r = rig();
   await say(r, ALICE, "s1", "I am moving to Goa in December");
   await ended(r);

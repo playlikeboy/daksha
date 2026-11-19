@@ -39,6 +39,7 @@ import type { CustomPeopleService } from "../custom-people/index.ts";
 import type { OwnKeysService } from "../own-keys/service.ts";
 import type { DeboService } from "../debo/service.ts";
 import type { WorkspaceService } from "../workspace.ts";
+import { assistantNameOf, BRAND } from "./brand.ts";
 import { analyzeSpending } from "./finance.ts";
 import { executeModelTask, taskAnswers } from "./model.ts";
 import {
@@ -56,7 +57,7 @@ type MonitorPage = { id: string; hash?: string; timelessHash?: string; lines: st
 const date = () => new Date().toISOString();
 const terminal = new Set(["succeeded", "failed", "cancelled"]);
 export class AgentService {
-  /** Debo's personal brain (journal, answers, memories). Set by createApp; unset in bare test fixtures. */
+  /** Daksha's personal brain (journal, answers, memories). Set by createApp; unset in bare test fixtures. */
   debo?: DeboService;
   /** Connected apps (Composio). Set by createApp; unset in bare test fixtures. */
   connectors?: ConnectorService;
@@ -68,7 +69,7 @@ export class AgentService {
   promises?: { accept(owner: string, idea: Idea): Promise<Idea | null> };
   /** The person's own AI keys. With one set, their chats and tasks run on it. */
   ownKeys?: OwnKeysService;
-  /** Pictures Debo makes (make_image). */
+  /** Pictures Daksha makes (make_image). */
   images?: ImageService;
   /** Custom people the person made, and the upkeep that deletes leftover uploads. Set by createApp. */
   customPeople?: CustomPeopleService;
@@ -155,7 +156,7 @@ export class AgentService {
   async ensure(owner: string) {
     await this.db.insertIfAbsent(owner, "agent-settings", {
       id: "identity",
-      name: "Debo",
+      name: "Daksha",
       tone: "warm",
     });
   }
@@ -181,7 +182,7 @@ export class AgentService {
       memories,
       artifacts,
       notifications,
-      identity: identity ?? { name: "Debo", tone: "warm" },
+      identity: identity ? { ...identity, name: assistantNameOf(identity.name) } : { name: BRAND, tone: "warm" },
       worker: {
         running:
           this.worker.running ||
