@@ -40,6 +40,7 @@ import {
 import { DesktopToolCard } from "./desktop-tool-card";
 import { confirmedJevSelection, displayJevUserMessage, latestJevPanelId } from "./jev-actions";
 import { ImageToolCard } from "./image-tool-card";
+import { CustomPersonToolCard } from "./custom-person-tool-card";
 import { JevInteractionContext, JevToolCard } from "./jev-tool-card";
 import { listState } from "./loading-state";
 import { MailToolCard } from "./mail-tool-card";
@@ -146,6 +147,14 @@ export function WorkspaceTools() {
     parameters: displayParameters,
     render: ({ result, status }) => <ImageToolCard result={result} loading={status !== "complete"} />,
   });
+  // Custom people: what changed, and a button that opens the upload sheet.
+  for (const name of ["open_custom_person_upload", "create_custom_person", "update_custom_person", "talk_as"] as const)
+    useRenderTool({
+      name,
+      description: "Show a custom person Debo made, changed or is talking as",
+      parameters: displayParameters,
+      render: ({ result, status }) => <CustomPersonToolCard name={name} result={result} loading={status !== "complete"} />,
+    });
   useRenderTool({
     name: "present_choices",
     description: "Show prepared choices for the conversation",

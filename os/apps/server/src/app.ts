@@ -34,6 +34,7 @@ import { ownKeyRoutes } from "./own-keys/routes.ts";
 import { OwnKeysService } from "./own-keys/service.ts";
 import type { Store } from "./db.ts";
 import { createDebo, type DeboService, deboRoutes } from "./debo/index.ts";
+import { activeCustomVoice, CustomPeopleService, customPeopleRoutes, personModelFor } from "./custom-people/index.ts";
 import { agentRoutes } from "./engine/routes.ts";
 import { AgentService } from "./engine/service.ts";
 import { AppError } from "./errors.ts";
@@ -84,6 +85,8 @@ export async function createApp(
     ownKeys?: OwnKeysService;
     /** Pictures. Tests pass one with a fake picture service. */
     images?: ImageService;
+    /** Custom people. Tests pass one with a fake model and bucket. */
+    customPeople?: CustomPeopleService;
   } = {},
 ) {
   await resolveComputerDeployment(config);
@@ -141,6 +144,18 @@ export async function createApp(
     options.images ??
     new ImageService(db, { store: () => debo.mediaStore, maker: imageMakerFromEnv(process.env), ownKeys });
   agent.images = images;
+  // Custom people: from a description or the person's own files, which are read once and deleted.
+  // Their model calls use the person's own Anthropic key when set, otherwise Debo's.
+  const customPeople =
+    options.customPeople ??
+    new CustomPeopleService({
+      db,
+      store: () => debo.mediaStore,
+      model: personModelFor(process.env, (owner) => ownKeys.secret(owner, "anthropic")),
+      transcriber: () => debo.mediaTools?.transcriber,
+      audio: () => debo.mediaTools?.audio,
+    });
+  agent.customPeople = customPeople;
   const threads = new ThreadStore(db);
   const timeZones = new TimeZoneStore(db);
   const runner = new DatabaseAgentRunner(threads);
@@ -318,12 +333,16 @@ export async function createApp(
       options.voiceEnv,
       (owner) => debo.callEnded(owner),
       // The voice and speed this person chose, sent to the agent inside the signed token.
+      // A custom person Debo is talking as can have their own voice.
       async (owner) => {
         const who = await voiceCharacterOf(db, owner);
-        return voiceFor(await talkSettings.get(owner).catch(() => null), who.character, who.pronoun);
+        const chosen = voiceFor(await talkSettings.get(owner).catch(() => null), who.character, who.pronoun);
+        const custom = await activeCustomVoice(db, owner).catch(() => undefined);
+        return custom ? { ...chosen, voice: custom } : chosen;
       },
     ));
   app.route("/api/persona", personaRoutes(new PersonaStore(db)));
+  app.route("/api/custom-people", customPeopleRoutes(customPeople));
   app.route("/api/onboarding", onboardingRoutes(new OnboardingStore(db)));
   app.route("/api/people", peopleRoutes(new PeopleStore(db)));
   app.route("/api/checkin", checkinRoutes({ db, debo }));
@@ -337,7 +356,7 @@ export async function createApp(
     talkSettingsRoutes(talkSettings, characterOf, async (owner) => (await voiceCharacterOf(db, owner)).pronoun),
   );
   app.route("/api/custom-avatars", customAvatarRoutes(new CustomAvatarStore(db)));
-  app.route("/api/account", accountRoutes(db, files, debo, connectors, mcp, ownKeys, images));
+  app.route("/api/account", accountRoutes(db, files, debo, connectors, mcp, ownKeys, images, customPeople));
   app.route("/api/connectors", connectorRoutes(connectors));
   app.route("/api/mcp", mcpRoutes(mcp));
   app.route("/api/own-keys", ownKeyRoutes(ownKeys));

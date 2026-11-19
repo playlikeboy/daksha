@@ -14,6 +14,11 @@ export interface Persona {
   role: string;
   /** Optional extra detail the person gave: tone, name, how to talk. */
   notes: string;
+  /**
+   * Set when the role is one of the person's custom people (custom-people/store.ts). The prompt
+   * is then built from that person's profile. Missing on every row written before custom people.
+   */
+  customPersonId?: string;
   updatedAt: string;
 }
 
@@ -39,6 +44,17 @@ export class PersonaStore {
       id: "current",
       role,
       notes,
+      updatedAt: new Date().toISOString(),
+    });
+  }
+
+  /** Talk as one of the person's custom people. The role names them; the profile does the rest. */
+  async setCustom(owner: string, person: { id: string; name: string; relation: string }): Promise<Persona> {
+    return this.db.put<Persona>(owner, KIND, {
+      id: "current",
+      role: `${person.name}${person.relation ? ` (${person.relation})` : ""}`.slice(0, PERSONA_ROLE_MAX),
+      notes: "",
+      customPersonId: person.id,
       updatedAt: new Date().toISOString(),
     });
   }

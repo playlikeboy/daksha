@@ -35,6 +35,7 @@ import { SearchService } from "../search.ts";
 import type { ConnectorService } from "../connectors/service.ts";
 import type { McpService } from "../mcp/service.ts";
 import type { ImageService } from "../images/service.ts";
+import type { CustomPeopleService } from "../custom-people/index.ts";
 import type { OwnKeysService } from "../own-keys/service.ts";
 import type { DeboService } from "../debo/service.ts";
 import type { WorkspaceService } from "../workspace.ts";
@@ -69,6 +70,8 @@ export class AgentService {
   ownKeys?: OwnKeysService;
   /** Pictures Debo makes (make_image). */
   images?: ImageService;
+  /** Custom people the person made, and the upkeep that deletes leftover uploads. Set by createApp. */
+  customPeople?: CustomPeopleService;
   readonly worker: TaskWorker;
   readonly search: SearchService;
   private maintenance?: ReturnType<typeof setInterval>;
@@ -107,6 +110,8 @@ export class AgentService {
     try {
       // Birthdays, the morning check-in and reminders. Its own failures never stop the rest.
       await this.companion?.tick().catch((error) => backgroundFailure("companion upkeep", error));
+      // Custom people: raw uploads never stay past 24 hours, and stuck readings are ended.
+      await this.customPeople?.sweep().catch((error) => backgroundFailure("custom people upkeep", error));
       // Recover publications if the process exited after committing an outcome.
       for (const { owner, value } of await this.db.scan<AgentTask>("tasks"))
         await this.publishOutcome(owner, value);

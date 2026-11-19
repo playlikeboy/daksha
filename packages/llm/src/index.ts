@@ -9,6 +9,9 @@ import { createAnthropic } from "@ai-sdk/anthropic";
 import { createNeon } from "@neon/ai-sdk-provider";
 import { embedMany, generateText, Output, streamText, type LanguageModel } from "ai";
 import { z } from "zod";
+import { PersonProfile, type PersonProfileInput, PHOTO_RULES, PROFILE_RULES, personProfilePrompt } from "./person";
+
+export type { PersonProfileInput } from "./person";
 
 const LlmEnv = z.object({
   ANTHROPIC_API_KEY: z.string().min(1).optional(),
@@ -212,6 +215,51 @@ export function createLlm(env: Record<string, string | undefined>) {
           .map((p) => ({ text: p.text.trim().slice(0, 160), quote: unquote(p.quote).trim().slice(0, 300), due: p.due && /^\d{4}-\d{2}-\d{2}$/.test(p.due) ? p.due : null }))
           .filter((p) => p.text && p.quote && plain.includes(p.quote.replace(/\s+/g, " ").toLowerCase()));
         return { promises, tokens: result.usage.totalTokens ?? Math.ceil(prompt.length / 4) };
+      });
+    },
+
+    /**
+     * One or two sentences about one photo, for a custom person's profile. Never names or
+     * identifies anyone. The photo is sent once and not kept by Debo.
+     */
+    async describePhoto(image: Uint8Array, mediaType: string, options: { signal?: AbortSignal } = {}) {
+      return withFallback(providers, async (model) => {
+        const result = await generateText({
+          model,
+          system: PHOTO_RULES,
+          messages: [
+            {
+              role: "user",
+              content: [
+                { type: "image", image, mediaType },
+                { type: "text", text: "Describe this photo in at most two short sentences." },
+              ],
+            },
+          ],
+          maxOutputTokens: 120,
+          abortSignal: options.signal,
+        });
+        return { text: result.text.trim().slice(0, 400), tokens: result.usage.totalTokens ?? 0 };
+      });
+    },
+
+    /** One structured profile of a custom person, from their own lines, photo notes and videos. */
+    async buildPersonProfile(input: PersonProfileInput, options: { signal?: AbortSignal } = {}) {
+      const prompt = personProfilePrompt(input);
+      return withFallback(providers, async (model) => {
+        const result = await generateText({
+          model,
+          system: PROFILE_RULES,
+          prompt,
+          output: Output.object({ schema: PersonProfile }),
+          maxOutputTokens: 4000,
+          abortSignal: options.signal,
+        });
+        const profile = result.output;
+        return {
+          profile: { ...profile, examples: profile.examples.map((line) => unquote(line)) },
+          tokens: result.usage.totalTokens ?? Math.ceil(prompt.length / 4),
+        };
       });
     },
 

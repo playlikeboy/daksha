@@ -371,6 +371,51 @@ export default function PrivacyPage() {
             <>You can delete a picture, which removes the file too. &ldquo;Delete my data&rdquo; removes them all.</>,
           ]}
         />
+        <h3 className="mt-6 font-semibold">People you make</h3>
+        <p>
+          In the new app you can make your own people to talk to, such as a friend, a family member, someone who has died,
+          or a made-up character. You can describe them in words, or add a WhatsApp chat export, photos and videos so Debo
+          learns how they talk. This is an early version. If you never make anyone, none of this applies.
+        </p>
+        <List
+          items={[
+            <>
+              A chat export holds other people&rsquo;s messages, not only yours. Before you add files you tick a box saying
+              you&rsquo;re allowed to use them and it&rsquo;s for your own private use. Debo keeps when you ticked it and
+              the words you agreed to.
+            </>,
+            <>
+              The files go to the same private Cloudflare R2 bucket as recordings, in a separate temporary folder. Debo reads
+              them once, then deletes them, whether reading worked or not. If anything is left behind, it is deleted within
+              24 hours.
+            </>,
+            <>
+              Debo reads only the last 5,000 messages of a chat, and uses only the messages of the person you pick. Before
+              any AI reads them, Debo takes out phone numbers, emails, one-time codes, card and account numbers, links and
+              addresses. This is a careful filter, not a guarantee: unusual formats can slip through.
+            </>,
+            <>
+              The cleaned messages and the photos go to Anthropic (Claude), which describes each photo in a sentence or
+              two (it never says who anyone is, and does no face recognition) and writes a short profile. If you set your
+              own Anthropic key, they go on your key instead; otherwise, if Anthropic fails, they go to the Neon AI Gateway, as
+              for answers. The sound of each video goes to Cloudflare Workers AI
+              (Whisper) to be written out, as for recordings. Anthropic&rsquo;s business terms say it may not train its
+              AI on what we send it, and Cloudflare says it does not use content processed by Workers AI to train AI
+              models.
+            </>,
+            <>
+              Debo keeps only the profile: a short summary of how they talk, up to 40 lines they really wrote, nicknames,
+              languages and short facts, each with where it came from. You can see it, remove any line or fact, change
+              the person or delete them in the app, under &ldquo;People you made&rdquo;. Profiles are kept until you
+              delete them, are in &ldquo;Download my data&rdquo;, and are deleted with your account.
+            </>,
+            <>
+              When you talk to one of them, their profile is sent to the AI with your messages, like a role. They are
+              always honest that they are an AI if you sincerely ask, never sexual, drop the role if you seem to be in
+              crisis, and never send messages or act outside Debo as that person.
+            </>,
+          ]}
+        />
         <h3 className="mt-6 font-semibold">Using your own AI keys</h3>
         <p>In the new app&rsquo;s settings, a folded section called &ldquo;Advanced: use your own keys&rdquo; lets you add your own Anthropic or OpenRouter key. Most people never use it. If you don&rsquo;t, none of this applies.</p>
         <List

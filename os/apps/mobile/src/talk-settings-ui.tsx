@@ -10,6 +10,7 @@ import { useAssistantName } from "./debo-character-store";
 import { PeopleSetting } from "./debo-people-setting";
 import { RemindersSetting } from "./debo-reminders-setting";
 import { PersonaSetting } from "./debo-persona-setting";
+import { CustomPeopleSetting } from "./custom-people-ui";
 import { capital, usePronouns, useTalkSettingsName } from "./debo-pronouns";
 import { Button, Card, colors, ErrorNotice, Field, LinkRow, radius, s, SectionHeading, Sheet, Skeleton, spacing } from "./ui";
 import { OwnKeysSetting } from "./own-keys-ui";
@@ -254,6 +255,8 @@ export function TalkSettingsSheet() {
         </Card>
 
         <PersonaSetting />
+
+        <CustomPeopleSetting />
 
         <PeopleSetting />
 
