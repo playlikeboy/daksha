@@ -189,7 +189,7 @@ export function WorkspaceTools() {
     description: "Display saved agent progress",
     parameters: displayParameters,
     render: ({ result, status }) => (
-      <ServerToolCard name="Agent progress" result={result} loading={status !== "complete"} />
+      <ServerToolCard name="Task progress" result={result} loading={status !== "complete"} />
     ),
   });
   useRenderTool({
@@ -249,13 +249,13 @@ function ServerToolCard({
     : undefined;
   if (task) return <TaskThreadCard task={task} />;
   return (
-    <Card style={{ padding: 16, gap: 10 }}>
+    <Card style={{ padding: spacing[4], gap: spacing[3] }}>
       <Text style={s.heading}>{loading ? `Saving ${name.toLowerCase()}…` : name}</Text>
       {parsed.success && parsed.data.error ? (
         <ErrorNotice error={parsed.data.error} />
       ) : (
         <Text style={s.muted}>
-          {loading ? "Waiting for the server." : "Open the workspace to see the saved result."}
+          {loading ? "Saving it now…" : "Saved. Open it to see the details."}
         </Text>
       )}
       <Button
