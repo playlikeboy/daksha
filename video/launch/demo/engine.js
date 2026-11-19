@@ -1,22 +1,30 @@
 // Draws the demo walkthrough as a pure function of time, like ../src/engine.js.
-// The phone shows real frames from the recording (/cap/000001.jpg is the first frame, 24 fps).
+// The phone shows frames recorded from the app in demo mode: /cap/clips/<clip>/0001.jpg and on,
+// with /cap/clips.json saying how long each frame stays on screen.
 const clamp = (x, a = 0, b = 1) => Math.min(b, Math.max(a, x));
 const eo3 = (x) => 1 - Math.pow(1 - x, 3);
 const eio3 = (x) => (x < 0.5 ? 4 * x * x * x : 1 - Math.pow(-2 * x + 2, 3) / 2);
 const eoBack = (x) => { const c1 = 1.9, c3 = c1 + 1; return 1 + c3 * Math.pow(x - 1, 3) + c1 * Math.pow(x - 1, 2); };
 const tr = (t, a, b, f = eio3) => f(clamp((t - a) / (b - a)));
 const el = (tag, cls, parent, html) => { const e = document.createElement(tag); if (cls) e.className = cls; if (html != null) e.innerHTML = html; if (parent) parent.appendChild(e); return e; };
-const SRC_FPS = 24, LAST_FRAME = 2546;
-const frameUrl = (s) => `/cap/${String(clamp(Math.floor(s * SRC_FPS + 1e-6) + 1, 1, LAST_FRAME)).padStart(6, "0")}.jpg`;
+let CLIPS = {};
+// The frame of `clip` on screen `tc` seconds into it; the last frame stays.
+const frameUrl = (clip, tc) => {
+  const durs = CLIPS[clip];
+  if (!durs) throw new Error("No clip " + clip + " in clips.json");
+  let i = 0, acc = 0;
+  while (i < durs.length - 1 && acc + durs[i] <= tc + 1e-6) acc += durs[i++];
+  return `/cap/clips/${clip}/${String(i + 1).padStart(4, "0")}.jpg`;
+};
 const words = (parent, text) => text.split(" ").map((word, i, arr) => {
   const w = el("span", "w", parent); const wi = el("span", "wi", w, word);
   if (i < arr.length - 1) parent.appendChild(document.createTextNode(" "));
   return wi;
 });
-const speedText = (s) => (s === 1 ? "Real speed" : s === 0.5 ? "Half speed" : `${s}x speed`);
 
 async function init() {
   const TL = buildDemo();
+  CLIPS = await (await fetch("/cap/clips.json")).json();
   const stage = document.getElementById("stage");
   await document.fonts.ready;
   await Promise.all(["500", "700", "800"].map((w) => document.fonts.load(`${w} 40px Figtree`)));
@@ -52,8 +60,8 @@ async function init() {
 
   // Intro and end cards, on red.
   const intro = el("div", "card", stage);
-  const ih = el("h1", "", intro); ih.style.fontSize = "120px"; const iws = words(ih, "Debo, start to finish");
-  const ip = el("p", "", intro, "A real recording of the app. The waiting is sped up."); ip.style.fontSize = "50px"; ip.style.marginTop = "30px";
+  const ih = el("h1", "", intro); ih.style.fontSize = "120px"; const iws = words(ih, "Debo, a quick look");
+  const ip = el("p", "", intro, "Recorded from the app, with made-up sample entries. Typing is sped up."); ip.style.fontSize = "50px"; ip.style.marginTop = "30px";
   const endRed = el("div", "wipe", stage);
   const big = el("div", "tomato", stage); big.innerHTML = TOMATO;
   Object.assign(big.style, { width: "360px", height: "360px", left: (1920 - 360) / 2 + "px", top: "120px" });
@@ -64,7 +72,6 @@ async function init() {
   const eu = el("div", "", end); eu.style.marginTop = "56px"; const url = el("span", "url", eu, "my.debo.life");
 
   const segAt = (t) => { const s = TL.segs; if (t < s[0].t0) return 0; for (let i = 0; i < s.length; i++) if (t < s[i].t1) return i; return s.length - 1; };
-  const srcAt = (g, t) => g.src[0] + clamp(t - g.t0, 0, g.t1 - g.t0) * g.speed;
   const setSrc = (im, u, jobs) => { if (im.dataset.u !== u) { im.dataset.u = u; im.src = u; jobs.push(im.decode().catch(() => {})); } };
   const F = TL.footEnd;
 
@@ -72,11 +79,11 @@ async function init() {
     const jobs = [];
     // Footage, with a short dissolve where the edit skips part of the recording.
     const i = segAt(t), g = TL.segs[i];
-    setSrc(over, frameUrl(srcAt(g, Math.min(t, F - 0.001))), jobs);
+    setSrc(over, frameUrl(g.clip, clamp(Math.min(t, F - 0.001) - g.t0, 0, g.dur)), jobs);
     const XF = 0.3;
     if (i > 0 && g.jump && t < g.t0 + XF) {
       const pg = TL.segs[i - 1];
-      setSrc(under, frameUrl(pg.src[1] - 0.05), jobs);
+      setSrc(under, frameUrl(pg.clip, pg.dur), jobs);
       under.style.visibility = "visible"; over.style.opacity = tr(t, g.t0, g.t0 + XF, (x) => x);
     } else { under.style.visibility = "hidden"; over.style.opacity = 1; }
 
@@ -85,11 +92,11 @@ async function init() {
     phone.style.transform = `translate(${PX - 390 * S}px, ${PY - 844 * S + rise}px) scale(${S})`;
     phone.style.display = t < 2.85 || t > F + 1.0 ? "none" : "block";
 
-    // Speed chip next to the phone.
+    // A chip next to the phone: everything in it is made up.
     const chipOn = t >= TL.intro + 0.4 && t < F - 0.3;
     speed.style.display = chipOn ? "block" : "none";
     if (chipOn) {
-      speed.textContent = speedText(g.speed);
+      speed.textContent = "Sample entries";
       speed.style.left = PX + 390 * S + 48 + "px"; speed.style.top = "110px";
       speed.style.opacity = Math.min(tr(t, TL.intro + 0.4, TL.intro + 0.8, (x) => x), 1 - tr(t, F - 0.6, F - 0.3, (x) => x));
     }

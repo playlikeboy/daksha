@@ -405,7 +405,8 @@ def demo_audio(path):
     D, F = T["D"], T["footEnd"]
     origin, end_hit = T["intro"], F + 0.76  # footage starts; the tomato pops on the end card
     bar = (end_hit - origin) / round((end_hit - origin) / (4 * 60 / 105.0))
-    talk = next(s["t0"] for s in T["steps"] if s["title"].startswith("Talk"))
+    # The beat rests on the step marked calm in the timeline.
+    talk = next(s["t0"] for s in T["steps"] if s.get("calm"))
     br0 = origin + np.ceil((talk - origin) / bar) * bar
     last = end_hit - bar
     plan = {

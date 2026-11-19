@@ -1,6 +1,6 @@
 # Debo launch video
 
-The site shows the second launch film (`film2/`, 72 seconds, 1920x1080 plus a 1080x1920 cut): an animation with no screen recordings. There is also the first launch film (`src/`, 69 seconds, cut from screen recordings) and a 66 second demo walkthrough (`demo/`, 1920x1080). All have music and sound effects, and no speech.
+The site shows the second launch film (`film2/`, 72 seconds, 1920x1080 plus a 1080x1920 cut): an animation with no screen recordings. There is also the first launch film (`src/`, 69 seconds, cut from screen recordings) and a 58 second app walkthrough (`demo/`, 1920x1080). All have music and sound effects, and no speech.
 
 ## The second launch film (film2)
 
@@ -99,21 +99,12 @@ Both cuts of the film share one edit, so they share one sound track.
 
 ## The demo walkthrough
 
-The walkthrough is one real screen recording of the app (the demo account), shown on a phone on the right with a caption for each step on the left. Waits are sped up and long pauses are cut; a label by the phone always says the speed. The recording is 390x844 at 24 fps (it was stored in the top-left corner of a 780x1688 frame, so crop it first):
-
-```
-ffmpeg -i recording.mp4 -vf "crop=390:844:0:0,scale=780:1688:flags=lanczos" -q:v 2 build/demo-frames/%06d.jpg
-node video/launch/render.mjs --edit demo --web apps/web --cap video/launch/build/demo-frames --out video/launch/build/out --workers 8
-ffmpeg -framerate 30 -i build/out/frames-demo/%05d.jpg -i build/audio/demo.wav -map 0:v -map 1:a -vf "scale=in_range=pc:out_range=tv,format=yuv420p" -c:v libx264 -preset slow -crf 20 -maxrate 6M -bufsize 12M -color_range tv -c:a aac -b:a 160k -movflags +faststart -shortest apps/site/public/debo-demo.mp4
-ffmpeg -i apps/site/public/debo-demo.mp4 -c:v libvpx-vp9 -crf 35 -b:v 0 -row-mt 1 -pix_fmt yuv420p -c:a libopus -b:a 128k apps/site/public/debo-demo.webm
-ffmpeg -ss 27.5 -i apps/site/public/debo-demo.mp4 -frames:v 1 -vf scale=1280:-1 -c:v libwebp -quality 85 apps/site/public/debo-demo-poster.webp
-```
-
-If the recording changes, change the `src` times in `demo/timeline.js`, and the tap times in `tapsSrc`.
+The walkthrough plays short clips recorded from the app in demo mode, with made-up sample entries, in a phone on the right, with a caption for each step on the left and a chip that says "Sample entries". The clips are stop-motion: `os/scripts/site-media.mjs` takes a 780x1688 screenshot after each small step (a few letters typed, a little scroll) and notes how long each frame stays on screen. `demo/timeline.js` lists the clips and how long each is shown; the last frame of a clip stays if it is shown longer. How to record the clips and make the published files is in `docs/MEDIA.md`.
 
 ## Rules the edit keeps
 
 - The footage is 780 px wide and is never shown larger than 1:1 (camera scale is 1.0 or less).
+- The walkthrough shows only what the demo mode really shows. Nothing is drawn over the app's screens.
 - No speech at all, no numbers, no quotes from users. Hindi voice is not shown, because it is not verified with real speech.
 - If the recording changes, adjust the cut points in `src/timeline.js`. They follow the `marks.json` names where possible.
 - The fonts in `assets/` are Figtree (SIL Open Font License).
