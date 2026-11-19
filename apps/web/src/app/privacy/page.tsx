@@ -234,6 +234,9 @@ export default function PrivacyPage() {
         <p>
           A new version of Debo is being tried at my.debo.life. You sign in with the same account, and it reads and
           writes the same journal entries and memories described on this page, with the same companies involved.
+          The same app also opens at my.daksha.life. It is the same Debo with the same data; your browser just keeps a
+          separate sign-in and unsaved draft for each address. This website and the landing page also open at
+          daksha.life and about.daksha.life.
         </p>
         <List
           items={[
