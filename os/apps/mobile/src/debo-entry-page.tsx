@@ -180,6 +180,13 @@ export function EntryPage({ id }: { id: string }) {
 // ---- Written entry ----
 
 /** Paragraphs split at blank lines, as the person wrote them. */
+/** The page already shows the title as its heading, so the text below starts after it. */
+function bodyAfterTitle(text: string, title: string): string {
+  const [first = "", ...rest] = text.split("\n");
+  const body = rest.join("\n").trim();
+  return body && first.trim() === title.trim() ? body : text;
+}
+
 function Reading({ text }: { text: string }) {
   const paragraphs = text.split(/\n\s*\n/).map((p) => p.trim()).filter(Boolean);
   return (
@@ -287,7 +294,7 @@ function WrittenBody({ entry, onChanged, onDeleted }: { entry: EntryView; onChan
         />
       ) : (
         <View style={[s.card, { padding: spacing[6] }]}>
-          <Reading text={entry.text} />
+          <Reading text={bodyAfterTitle(entry.text, entry.title)} />
         </View>
       )}
       <ErrorNotice error={actions.error} />
