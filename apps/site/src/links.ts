@@ -3,6 +3,9 @@
 export const START_URL = "https://my.debo.life";
 export const PRIVACY_URL = "https://debo.life/privacy";
 // The phone app. The newest GitHub release always carries a file named debo.apk,
-// so this address keeps working. Debo also works in the phone browser (START_URL).
-export const ANDROID_APK_URL = "https://github.com/playlikeboy/debo.life/releases/latest/download/debo.apk";
-export const RELEASES_URL = "https://github.com/playlikeboy/debo.life/releases";
+// so this address keeps working. The repository now lives at playlikeboy/daksha
+// (GitHub redirects the old debo.life address). Debo also works in the phone browser (START_URL).
+export const ANDROID_APK_URL = "https://github.com/playlikeboy/daksha/releases/latest/download/debo.apk";
+export const RELEASES_URL = "https://github.com/playlikeboy/daksha/releases";
+// The films live in public/. The README links to the launch film by this address, so keep it.
+export const LAUNCH_FILM_URL = "/debo-launch.mp4";
