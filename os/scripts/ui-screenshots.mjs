@@ -56,7 +56,8 @@ const schemes = ["light", "dark"];
 /** Press the first visible control whose accessible name matches. */
 async function press(page, name) {
   const target = page.getByRole("button", { name }).or(page.getByRole("link", { name })).first();
-  await target.click({ timeout: 8000 });
+  // A see-through bar can sit over the control; press it anyway if the normal click waits too long.
+  await target.click({ timeout: 4000 }).catch(() => target.click({ force: true, timeout: 4000 }));
   await page.waitForTimeout(700);
 }
 
@@ -97,6 +98,17 @@ const browser = await chromium.launch(
   process.env.UI_SHOTS_CHROMIUM ? { executablePath: process.env.UI_SHOTS_CHROMIUM } : {},
 );
 const failures = [];
+// The API allows 120 requests a minute from one address. Keep well under it, or a screen
+// shows "Too many requests" instead of itself.
+const apiCalls = [];
+async function pace() {
+  for (;;) {
+    const recent = apiCalls.filter((t) => t > Date.now() - 60_000);
+    apiCalls.splice(0, apiCalls.length, ...recent);
+    if (recent.length < 70) return;
+    await new Promise((done) => setTimeout(done, 2000));
+  }
+}
 for (const size of sizes)
   for (const scheme of schemes) {
     const context = await browser.newContext({
@@ -108,7 +120,11 @@ for (const size of sizes)
     });
     for (const screen of screens) {
       if (only && !only.includes(screen.name)) continue;
+      await pace();
       const page = await context.newPage();
+      page.on("request", (request) => {
+        if (request.url().includes("/api/")) apiCalls.push(Date.now());
+      });
       try {
         await page.goto(`http://127.0.0.1:${port}${screen.path}`, { waitUntil: "networkidle" });
         await page.waitForTimeout(2500);
