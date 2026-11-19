@@ -186,7 +186,7 @@ export class StoredOAuthProvider implements OAuthClientProvider {
 
   clientInformation() {
     const client = this.record.client;
-    // A client registered for another callback address (api.debo.life, before the rename to
+    // A client registered for another callback address (the API's old address, before the rename to
     // Daksha) would be refused when the person signs in again. Only then is it left out, so the
     // SDK registers again and the new registration replaces it. Refreshing a token never uses
     // the callback, so without a sign-in the old client keeps its tokens working.

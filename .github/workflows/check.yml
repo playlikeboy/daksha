@@ -1,7 +1,8 @@
 # Run every check on a branch before it reaches main.
 #
 # The deploy workflows only typecheck the part they deploy. This one runs the whole set:
-# the root typecheck, and the os/ workspace's typecheck and tests. Push a branch
+# the brand check (no old brand name left, see docs/RENAME.md), the root typecheck, and the os/
+# workspace's typecheck and tests. Push a branch
 # (for example debo-os) and wait for this to pass before fast-forwarding main.
 name: Check
 
@@ -19,6 +20,17 @@ permissions:
   contents: read
 
 jobs:
+  brand:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 22
+      # Fails if the old brand name or an old address is outside the allowlist in docs/RENAME.md.
+      - run: node scripts/check-brand.mjs
+
   root:
     runs-on: ubuntu-latest
     timeout-minutes: 30
