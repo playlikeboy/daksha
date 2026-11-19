@@ -63,6 +63,7 @@ import { AccountCard, NeonGate, useAuthInfo } from "./src/neon-gate";
 import { ThreadsProvider, ThreadsSheet, useFuseThread } from "./src/threads";
 import {
   avatarSize,
+  bodyText,
   Button,
   Card,
   colors,
@@ -721,7 +722,8 @@ function WorkspaceShell({
             pointerEvents="box-none"
             style={{
               position: "absolute",
-              bottom: insets.bottom + tabHeight + spacing[3],
+              // Above the tabs, and above the composer on Chat, so it never covers the message box.
+              bottom: insets.bottom + tabHeight + (section === "chat" ? composerHeight : 0) + spacing[3],
               left: spacing[5],
               // Leave the floating call bubble's corner free.
               right: talkBarShown ? spacing[12] + spacing[12] : spacing[5],
@@ -729,11 +731,15 @@ function WorkspaceShell({
             }}
           >
             <View
+              accessibilityRole="alert"
+              accessibilityLiveRegion="polite"
               style={[
                 s.row,
                 {
                   gap: spacing[2],
-                  padding: spacing[4],
+                  paddingVertical: spacing[1],
+                  paddingLeft: spacing[4],
+                  paddingRight: spacing[1],
                   backgroundColor: colors.ink,
                   borderRadius: radius.page,
                   maxWidth: 560,
@@ -741,13 +747,14 @@ function WorkspaceShell({
               ]}
             >
               <Check size={16} color={colors.blue} />
-              <Text style={{ color: colors.onInk, fontSize: fontSize.base, flexShrink: 1 }}>
+              <Text style={{ fontFamily, color: colors.onInk, ...bodyText, flexShrink: 1, paddingVertical: spacing[2] }}>
                 {toast}
               </Text>
               <Pressable
                 accessibilityRole="button"
-                accessibilityLabel="Dismiss notification"
+                accessibilityLabel="Close this message"
                 onPress={clearToast}
+                style={{ width: spacing[11], height: spacing[11], alignItems: "center", justifyContent: "center" }}
               >
                 <X size={16} color={colors.onInk} />
               </Pressable>
