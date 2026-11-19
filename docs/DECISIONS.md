@@ -286,3 +286,11 @@ Safety, always on for custom people: she says she is an AI, and that this is a p
 Why: talking with someone familiar can help a person relax, feel close, or share good news, and the owner asked for it. Keeping only the profile, deleting raw files, and keeping only the chosen person's words limit what Debo holds about other people. Speaker separation on Workers AI stays inside Cloudflare, which already hosts Debo, so no new company sees the audio for that step (pyannote was rejected because it needs a GPU server). Cartesia already speaks every Debo call. Open-source voice copying was rejected: Chatterbox needs a GPU server, and the XTTS-v2 and F5-TTS licences do not allow commercial use. Changing settings by asking removes a trip through menus during a call, and every change can be seen and undone in the same settings screen.
 
 Check before relying on it: nothing here was run against a real model, real WhatsApp exports from real people, real photos, real Workers AI diarization or a real Cartesia account. No Cartesia key exists yet, so copied voices are not tried at all. The settings tools were tested against the store, not a live model; check that she changes only what was asked. The phone UI was not run on a device. The privacy page names Cartesia, Workers AI and Anthropic for these flows.
+
+## 34. daksha.life as a twin of debo.life, each app on its own API address
+
+2026-11-19 · decided (the owner's request: make debo.life and daksha.life both work and show the same thing, without renaming the brand)
+
+Choice: every debo.life host gets a daksha.life twin on the same Worker (`daksha.life`, `www.`, `about.`, `my.`, `api.`, `pitch.`). debo.life stays the main site: links, canonical addresses and callbacks stay on it. The app on `my.daksha.life` talks to `api.daksha.life`, and the API hands out sign-in on the address it was called on, from a fixed list (`PUBLIC_API_URL_ALIASES`).
+
+Why: sign-in keeps its cookie on the API address, and browsers refuse it as a third-party cookie when the API is a different site from the page. Neon Auth accepts several trusted origins, so each site can sign in on its own API host. A redirect from `my.daksha.life` to `my.debo.life` was the fallback and was not needed. Details and the owner's steps: `docs/DOMAINS.md`.

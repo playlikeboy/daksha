@@ -5,7 +5,7 @@ Rules for every AI agent and human working in this repo. Read this file first, e
 ## What this project is
 
 - **Name:** Debo
-- **Website:** https://about.debo.life (landing page, `apps/site`). The app is https://my.debo.life (`os/apps/mobile`). https://debo.life only redirects to those two, and still serves `/privacy` and the `/api/*` routes from `apps/web`.
+- **Website:** https://about.debo.life (landing page, `apps/site`). The app is https://my.debo.life (`os/apps/mobile`). https://debo.life only redirects to those two, and still serves `/privacy` and the `/api/*` routes from `apps/web`. Each host has a daksha.life twin that shows the same thing; debo.life stays the main one (see `docs/DOMAINS.md`).
 - **Repo:** https://github.com/playlikeboy/debo.life
 - **One line:** Debo is a friendly assistant that remembers your life, so you can ask it anything about your own past and plans.
 - **Who it is for:** ordinary people, not developers. Assume the reader has never heard the words "vector", "token" or "MCP".
