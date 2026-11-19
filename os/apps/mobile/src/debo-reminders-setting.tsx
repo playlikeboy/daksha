@@ -151,6 +151,7 @@ export function RemindersSetting() {
               <Button
                 small
                 disabled={busy}
+                accessibilityLabel={`Delete the reminder: ${r.title}`}
                 onPress={() => void run(() => api.request(`/api/companion/reminders/${r.id}`, undefined, "DELETE"), "Reminder deleted.")}
               >
                 Delete

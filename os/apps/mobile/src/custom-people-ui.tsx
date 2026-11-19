@@ -282,10 +282,10 @@ function PersonRow({
           {person.styleSummary ? <Text style={s.text}>{person.styleSummary}</Text> : <Text style={s.muted}>Nothing learned from files yet.</Text>}
           {person.facts.map((f, i) => (
             <View key={`f-${i}`} style={[s.row, { gap: spacing[2] }]}>
-              <Text style={[s.small, { flex: 1 }]}>
+              <Text style={[s.text, { flex: 1 }]}>
                 {f.text} <Text style={s.muted}>({factSources[f.source] ?? f.source})</Text>
               </Text>
-              <Button small onPress={() => onRemoveLine("facts", i)}>
+              <Button small accessibilityLabel={`Remove: ${f.text}`} onPress={() => onRemoveLine("facts", i)}>
                 Remove
               </Button>
             </View>
@@ -293,8 +293,8 @@ function PersonRow({
           {person.examples.length > 0 && <Text style={s.muted}>Lines they really wrote or said</Text>}
           {person.examples.map((line, i) => (
             <View key={`e-${i}`} style={[s.row, { gap: spacing[2] }]}>
-              <Text style={[s.small, { flex: 1 }]}>"{line}"</Text>
-              <Button small onPress={() => onRemoveLine("examples", i)}>
+              <Text style={[s.text, { flex: 1 }]}>"{line}"</Text>
+              <Button small accessibilityLabel={`Remove the line: ${line}`} onPress={() => onRemoveLine("examples", i)}>
                 Remove
               </Button>
             </View>
