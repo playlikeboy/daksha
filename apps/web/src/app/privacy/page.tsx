@@ -343,6 +343,55 @@ export default function PrivacyPage() {
             <>A recording can be up to 200 MB and 60 minutes. You can add up to 4 hours and 40 recordings a day.</>,
           ]}
         />
+        <h3 className="mt-6 font-semibold">Voice notes and call recordings of a custom person, and voice copies</h3>
+        <p>In the new app you can add voice notes or call recordings of a custom person you made, so Debo learns how they talk, and you can choose to copy their voice for your calls with them. If you never add one, none of this applies.</p>
+        <List
+          items={[
+            <>
+              These recordings have other people in them: the person, you, and maybe others. You must tick a box saying
+              you are allowed to use them and that it is for your own private use. Debo saves that you ticked it, with the
+              exact words and the time.
+            </>,
+            <>
+              The recording waits in the same private Cloudflare R2 bucket as your voice notes. Debo makes a small copy of
+              the sound and sends it to Cloudflare Workers AI (a model called Deepgram Nova-3, run by Cloudflare) to tell
+              the voices apart and write out who said what. Cloudflare says it does not use content processed by Workers
+              AI to train AI models.
+            </>,
+            <>
+              You say which voice is the person. Debo keeps only their lines, with phone numbers, email addresses, codes,
+              card and account numbers, links and street addresses taken out. Everything the other voices said is thrown
+              away.
+            </>,
+            <>
+              The recording is deleted from the bucket as soon as you have said who is who, or at once if Debo could not
+              read it. Anything left over is deleted after 24 hours.
+            </>,
+            <>
+              A voice copy is only made if you ask for it and tick a second box: you have the person&rsquo;s permission, or
+              you are close family and they have died, and they are not a public figure, actor or character. Debo then
+              cuts 10 to 30 seconds of only that person&rsquo;s voice and sends it to Cartesia, the company whose voices
+              Debo&rsquo;s calls use. Cartesia keeps a private voice model made from it until it is deleted. Debo does not
+              send Cartesia the person&rsquo;s name. We have not yet checked Cartesia&rsquo;s terms on training AI.
+            </>,
+            <>
+              The voice copy is made on your own Cartesia account if you added your Cartesia key (below), otherwise on
+              Debo&rsquo;s, if Debo has one. If neither exists, Debo says a voice copy needs a Cartesia key, and still uses
+              the person&rsquo;s words.
+            </>,
+            <>
+              The copied voice is only used to speak Debo&rsquo;s replies on your own calls while Debo is talking as that
+              person, and every such call starts by saying it is Debo&rsquo;s AI version of them. It is never used for
+              anything sent outside Debo.
+            </>,
+            <>
+              &ldquo;Remove voice copy&rdquo;, deleting the custom person, and deleting your account all delete the voice
+              copy at Cartesia, then in Debo. If the key that made it is gone, Debo removes it on its side and tells you
+              to delete it in your Cartesia account. The person&rsquo;s kept lines and the consent ticks are in
+              &ldquo;Download my data&rdquo; and are deleted with the custom person or your account.
+            </>,
+          ]}
+        />
         <h3 className="mt-6 font-semibold">Pictures Debo makes</h3>
         <p>In the new app you can ask Debo to make a picture, in chat or on a call. If pictures are not switched on, Debo says so and none of the below applies.</p>
         <List
@@ -365,7 +414,7 @@ export default function PrivacyPage() {
           ]}
         />
         <h3 className="mt-6 font-semibold">Using your own AI keys</h3>
-        <p>In the new app&rsquo;s settings, a folded section called &ldquo;Advanced: use your own keys&rdquo; lets you add your own Anthropic or OpenRouter key. Most people never use it. If you don&rsquo;t, none of this applies.</p>
+        <p>In the new app&rsquo;s settings, a folded section called &ldquo;Advanced: use your own keys&rdquo; lets you add your own Anthropic, OpenRouter or Cartesia key. Most people never use it. If you don&rsquo;t, none of this applies.</p>
         <List
           items={[
             <>
@@ -382,6 +431,10 @@ export default function PrivacyPage() {
             <>
               On calls, your key is used for what Debo says. Hearing you and speaking out loud still go through
               Debo&rsquo;s voice service, as described above.
+            </>,
+            <>
+              You can also add your own Cartesia key. It is used only to make a voice copy of a custom person and to speak
+              in that voice on your calls with them, on your Cartesia account.
             </>,
             <>Removing a key deletes it. &ldquo;Delete my data&rdquo; deletes every key.</>,
           ]}
