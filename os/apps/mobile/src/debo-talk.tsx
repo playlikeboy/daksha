@@ -227,7 +227,8 @@ export function TalkPopup({ onClose }: { onClose: () => void }) {
 
   // Sizes work from 320px up. On desktop the column stays centred.
   const column = Math.min(width, 560);
-  const orb = Math.max(110, Math.min(250, column - 120, height * 0.3) * (typing ? 0.62 : 1));
+  // Before a call starts the promise and the buttons need room too, so the orb is smaller then.
+  const orb = Math.max(110, Math.min(250, column - 120, height * 0.3) * (typing ? 0.62 : status === "idle" ? 0.72 : 1));
   const face = orb * 0.82;
 
   const haloScale = Animated.add(
