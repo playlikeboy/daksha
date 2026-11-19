@@ -566,7 +566,7 @@ async function init() {
   const eLogo = el("div", "abs", E.r); css(eLogo, { width: lay(250, 260) + "px", height: lay(250, 260) + "px" }); img(eLogo, "/art/debo.svg").style.cssText = "width:100%;height:100%";
   const eName = el("div", "abs", E.r, "Daksha"); eName.style.cssText += `font-weight:800;font-size:${lay(150, 150)}px;letter-spacing:-0.03em`;
   const eSub = el("div", "abs", E.r, "A friendly assistant that remembers your life."); eSub.style.cssText += `font-weight:500;font-size:${lay(44, 40)}px;color:#4a5872;white-space:nowrap`;
-  const eUrl = el("div", "abs pill", E.r, "my.daksha.life"); eUrl.style.cssText += `background:#111a2b;color:#fff;font-weight:700;font-size:${lay(46, 46)}px;padding:20px 46px 22px;box-shadow:var(--shadow-s)`;
+  const eUrl = el("div", "abs pill", E.r, "www.daksha.life"); eUrl.style.cssText += `background:#111a2b;color:#fff;font-weight:700;font-size:${lay(46, 46)}px;padding:20px 46px 22px;box-shadow:var(--shadow-s)`;
   function drawEnd(t) {
     const sc = E, u = showScene(sc, t); if (u == null) return;
     const l = spr(u - sc.logo, 1.6, 5.5);
