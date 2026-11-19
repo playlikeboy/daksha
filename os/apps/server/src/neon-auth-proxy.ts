@@ -7,7 +7,7 @@ import { Hono } from "hono";
  * Auth directly, that cookie belonged to Neon's own address, which browsers treat as
  * a third-party cookie and often refuse to send. Each time that happened Neon Auth
  * answered "no session" and the person was signed out. Going through this server
- * makes the cookie belong to the Debo API's address, which is the same site as the
+ * makes the cookie belong to the Daksha API's address, which is the same site as the
  * app, so the browser keeps sending it.
  *
  * Phones: a native app sends no Origin header, and Neon Auth (Better Auth) can refuse

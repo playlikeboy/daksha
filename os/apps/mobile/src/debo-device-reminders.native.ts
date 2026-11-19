@@ -1,5 +1,5 @@
 // Phone: "Send me reminders" on this phone means the phone holds the next reminders itself,
-// as local notifications (debo-reminder-alerts.native.ts), so they show even when Debo is
+// as local notifications (debo-reminder-alerts.native.ts), so they show even when Daksha is
 // closed. No push server is involved. The phone asks for permission only when the person
 // turns this on. The list is refreshed when the setting opens, when it is turned on, and
 // when the person accepts a promise; a reminder made elsewhere shows once the app opens.

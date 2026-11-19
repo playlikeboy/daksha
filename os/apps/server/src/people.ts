@@ -6,7 +6,7 @@ import { AppError } from "./errors.ts";
 
 /**
  * The people in someone's life: family, friends, colleagues. One record per person in
- * the `people` kind, saved by the person in the app or by Debo in chat when they mention
+ * the `people` kind, saved by the person in the app or by Daksha in chat when they mention
  * someone ("my sister Riya's birthday is 3 March"). It is the person's own data: they
  * can see, fix and delete every one in the app, and it is exported and deleted with the
  * account like every other kind in the records table. No new table and no new service.
@@ -62,7 +62,7 @@ export const personInput = z.object({
   notes: notes.default(""),
 });
 
-/** What Debo may add in chat. Only adds or sets: it never removes anything. */
+/** What Daksha may add in chat. Only adds or sets: it never removes anything. */
 export const notePersonInput = z.object({
   name,
   relation: relation.optional(),
@@ -124,7 +124,7 @@ export class PeopleStore {
   }
 
   /**
-   * Debo's chat tool: add someone, or add to someone already saved under the same name.
+   * Daksha's chat tool: add someone, or add to someone already saved under the same name.
    * A repeated call changes nothing the second time, so a retry never doubles a note.
    */
   async note(owner: string, input: unknown): Promise<{ person: Person; created: boolean }> {

@@ -10,7 +10,7 @@ import type { CallVoice } from "../voice-clone/service.ts";
 /** The first thing said on every call in a copied voice, before anything else. */
 export function copiedVoiceOpening(name: string): string {
   const clean = name.replace(/[\p{C}<>{}]/gu, "").trim().slice(0, 60) || "this person";
-  return `Hi, it's Debo. I'm speaking as an AI version of ${clean}, in a copied voice. I'm not really ${clean}.`;
+  return `Hi, it's Daksha. I'm speaking as an AI version of ${clean}, in a copied voice. I'm not really ${clean}.`;
 }
 
 type Env = Record<string, string | undefined>;
@@ -51,10 +51,10 @@ export function voiceAgentRoutes(
   const app = new Hono();
   /**
    * POST /api/voice/session { userId }. Asked once when a call starts: which
-   * voice to speak in. When Debo is talking as a custom person who has a voice
+   * voice to speak in. When Daksha is talking as a custom person who has a voice
    * copy, the answer carries its Cartesia voice id and the key to speak it, so
    * the key travels only over this secret channel, never to the app. Otherwise
-   * `voiceCopy` is null and the call uses Debo's usual voices.
+   * `voiceCopy` is null and the call uses Daksha's usual voices.
    */
   app.post("/session", async (c) => {
     const config = readVoiceConfig(env());
@@ -64,7 +64,7 @@ export function voiceAgentRoutes(
     const parsed = z.object({ userId: z.string().trim().min(1).max(200) }).safeParse(await c.req.json().catch(() => null));
     if (!parsed.success) throw new AppError("Bad request.", 400);
     const voice = await callVoice?.(parsed.data.userId).catch((error) => {
-      console.error(`[Debo] voice session lookup failed: ${error instanceof Error ? error.name : "error"}`);
+      console.error(`[Daksha] voice session lookup failed: ${error instanceof Error ? error.name : "error"}`);
       return null;
     });
     return c.json({ voiceCopy: voice ? { ...voice, opening: copiedVoiceOpening(voice.personName) } : null });
@@ -79,7 +79,7 @@ export function voiceAgentRoutes(
 
     const signal = c.req.raw.signal;
     const { userId, sessionId, question } = parsed.data;
-    // Every turn of the call is saved as text with a plain database write: the person's now, Debo's when she is done.
+    // Every turn of the call is saved as text with a plain database write: the person's now, Daksha's when she is done.
     calls?.sweep(userId);
     await calls?.turn(userId, sessionId, "person", question);
     let said = "";
@@ -101,13 +101,13 @@ export function voiceAgentRoutes(
             send(event);
           }
         } catch (error) {
-          console.error(`[Debo] voice brain failed: ${error instanceof Error ? error.name : "error"}`);
+          console.error(`[Daksha] voice brain failed: ${error instanceof Error ? error.name : "error"}`);
           if (!spoke) send({ type: "say", text: VOICE_ERROR_MESSAGE });
           if (!finished) send({ type: "done", status: "error" });
           finished = true;
         }
         if (!finished) send({ type: "done", status: "error" });
-        // What Debo said, even if the person talked over her: that is what they heard.
+        // What Daksha said, even if the person talked over her: that is what they heard.
         await calls?.turn(userId, sessionId, "debo", said);
         controller.close();
       },
@@ -136,7 +136,7 @@ export function voiceTokenRoutes(
     const chosen = await voiceOf?.(owner).catch(() => undefined);
     return c.json(await mintVoiceSession(config, owner, chosen));
   });
-  // The app says the call ended. Debo then reads the call once: search pieces and memories.
+  // The app says the call ended. Daksha then reads the call once: search pieces and memories.
   // The agent keeps no session with the app, so this covers all of this person's open calls.
   app.post("/ended", (c) => {
     onEnded?.(c.get("owner"));

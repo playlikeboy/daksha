@@ -183,7 +183,7 @@ export class ConversationAgent extends AbstractAgent {
           new PeopleStore(this.service.db).list(this.owner).catch((): Person[] => []),
           // Their time zone (from the app, or the last one it sent), so "today" is their today.
           new TimeZoneStore(this.service.db).current(this.owner),
-          // The person's own AI key, if they set one: their chat runs on it. A broken lookup means Debo's own.
+          // The person's own AI key, if they set one: their chat runs on it. A broken lookup means Daksha's own.
           this.service.ownKeys?.chatChoice(this.owner, this.config.model).catch(() => undefined) ??
             Promise.resolve(undefined),
           this.service.images?.canMake(this.owner).catch(() => false) ?? Promise.resolve(false),
@@ -191,7 +191,7 @@ export class ConversationAgent extends AbstractAgent {
       ),
     ).pipe(
       mergeMap(([role, legacyGoogle, apps, servers, talk, people, timeZone, ownModel, pictures]) =>
-        // The assistant answers to the name the person gave it in "About Debo".
+        // The assistant answers to the name the person gave it in "About Daksha".
         from(this.assistantName()).pipe(
           mergeMap((name) =>
             this.liveRun(
@@ -256,7 +256,7 @@ export class ConversationAgent extends AbstractAgent {
           before: async () => browserAbort.signal.throwIfAborted(),
         },
       ),
-      // Debo's personal brain: search the journal, ask about the person's life, and prepare
+      // Daksha's personal brain: search the journal, ask about the person's life, and prepare
       // a journal entry for review. Only when this server has the brain wired in.
       ...(this.service.debo
         ? deboTools(this.service.debo, this.service.actions, this.owner, {
@@ -264,11 +264,11 @@ export class ConversationAgent extends AbstractAgent {
             key,
           })
         : []),
-      // Pictures: made and kept inside Debo, so no review is needed (decision 28).
+      // Pictures: made and kept inside Daksha, so no review is needed (decision 28).
       ...(ctx.pictures && this.service.images
         ? imageTools(this.service.images, this.owner, this.channel, browserAbort.signal)
         : []),
-      // The people in their life and the daily check-in: the person's own data inside Debo.
+      // The people in their life and the daily check-in: the person's own data inside Daksha.
       ...companionTools(
         { db: this.service.db, ...(this.service.debo ? { debo: this.service.debo } : {}) },
         this.owner,
@@ -414,7 +414,7 @@ export class ConversationAgent extends AbstractAgent {
       defineTool({
         name: "clear_persona",
         description:
-          "Stop playing the current role and go back to being Debo. Use when the person says stop, or asks you to be yourself.",
+          "Stop playing the current role and go back to being Daksha. Use when the person says stop, or asks you to be yourself.",
         parameters: z.object({}),
         execute: async () => {
           await new PersonaStore(this.service.db).clear(this.owner);
@@ -422,10 +422,10 @@ export class ConversationAgent extends AbstractAgent {
         },
       }),
       // Custom people the person made (custom-people/tools.ts): create, change, list, talk as,
-      // and a card that opens the upload screen. Inside Debo, so no review. Deleting is app-only.
+      // and a card that opens the upload screen. Inside Daksha, so no review. Deleting is app-only.
       ...(this.service.customPeople ? customPeopleTools(this.service.customPeople, this.owner, this.channel) : []),
       // Changing the app by asking: voice, name, reminders, and a card that opens a screen.
-      // All inside Debo, so they save at once (decision 28).
+      // All inside Daksha, so they save at once (decision 28).
       ...settingsTools(this.service.db, this.owner, {
         channel: this.channel,
         signal: browserAbort.signal,
@@ -658,7 +658,7 @@ export class ConversationAgent extends AbstractAgent {
     if (/what can|help|hello|^hi[!. ]*$/i.test(prompt) && prompt.length < 70)
       return {
         content:
-          "Hi, I'm Debo. In this practice workspace my answers are examples only. Tasks and watches still work. Open-ended questions need my AI helper, which whoever runs this Debo can turn on.",
+          "Hi, I'm Daksha. In this practice workspace my answers are examples only. Tasks and watches still work. Open-ended questions need my AI helper, which whoever runs this Daksha can turn on.",
       };
     if (/permission|pdf|form/i.test(prompt)) {
       const w = await this.service.workspace.snapshot(this.owner);

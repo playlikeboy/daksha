@@ -1,6 +1,6 @@
 // A face the person made in the avatar builder (decision 33): a blob, a round human, a cat
 // or a tomato-like fruit, in their own colours, with hair, ears or leaves and a few
-// accessories. Drawn in the same simple flat style as Debo: flat shapes, no outlines, one
+// accessories. Drawn in the same simple flat style as Daksha: flat shapes, no outlines, one
 // soft shine.
 //
 // It is one drawing for every made face. The parts come from debo-custom-shape.ts (plain

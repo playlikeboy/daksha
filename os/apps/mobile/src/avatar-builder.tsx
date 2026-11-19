@@ -209,7 +209,7 @@ export function AvatarBuilderSheet({
     setError("");
     try {
       await deleteAvatar(api, avatarId);
-      // The server moves the person back to Debo if this was the face in use.
+      // The server moves the person back to Daksha if this was the face in use.
       if (inUse) deboCharacter.set("debo");
       notify(`${config.name} is deleted.`);
       close();

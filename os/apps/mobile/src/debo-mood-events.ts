@@ -22,7 +22,7 @@ export function latestAnswer(messages: ChatMessageLike[]): { text: string; hasSo
 }
 
 /**
- * Compares task statuses with the last time we looked, and says what Debo's face should do.
+ * Compares task statuses with the last time we looked, and says what Daksha's face should do.
  * A finished task makes her proud. A task waiting for a yes makes her curious and attentive.
  */
 export function taskMoodEvents(

@@ -49,13 +49,13 @@ test("unknown addresses give nothing", () => {
 test("native deep links turn into addresses", () => {
   assert.equal(pathFromUrl("debo://journal/abc"), "/journal/abc");
   assert.equal(pathFromUrl("debo:///talk"), "/talk");
-  assert.equal(pathFromUrl("https://my.debo.life/ideas?x=1"), "/ideas");
+  assert.equal(pathFromUrl("https://my.daksha.life/ideas?x=1"), "/ideas");
   assert.equal(pathFromUrl("/mail"), "/mail");
 });
 test("each screen has a page title", () => {
-  assert.equal(titleFor({ section: "journal" }), "Journal · Debo");
-  assert.equal(titleFor({ section: "activity" }), "Tasks · Debo");
-  assert.equal(titleFor(null), "That page isn't here · Debo");
+  assert.equal(titleFor({ section: "journal" }), "Journal · Daksha");
+  assert.equal(titleFor({ section: "activity" }), "Tasks · Daksha");
+  assert.equal(titleFor(null), "That page isn't here · Daksha");
 });
 test("Talk is not a tab in the bottom bar, but /talk still opens it", async () => {
   const { readFileSync } = await import("node:fs");
@@ -81,7 +81,7 @@ test("a chat address shows a readable name, the id after it is the truth, and ol
   assert.deepEqual(parsePath(`/chat/${id}`), { section: "chat", threadId: id });
   // A wrong or missing slug still opens the same chat.
   assert.deepEqual(parsePath(`/chat/anything-else-${id}`), { section: "chat", threadId: id });
-  assert.equal(titleFor({ section: "chat", threadId: id }), "Trip to Goa \u00b7 Debo");
+  assert.equal(titleFor({ section: "chat", threadId: id }), "Trip to Goa \u00b7 Daksha");
   // A voice call's chat has a readable address too.
   const call = `voice-${"ab12".repeat(16)}`;
   rememberChatName(call, "Voice call, 14 November");
@@ -104,8 +104,8 @@ test("a journal entry address shows its title, the id after it is the truth, and
   assert.equal(entryIdFrom(`x-${id.toUpperCase()}`), id.toUpperCase());
   // The phone's deep link reads the same way.
   assert.deepEqual(parsePath(pathFromUrl(`debo://journal/dinner-${id}`)), { section: "journal", entryId: id });
-  assert.deepEqual(parsePath(pathFromUrl(`https://my.debo.life/journal/dinner-${id}`)), { section: "journal", entryId: id });
-  assert.equal(titleFor({ section: "journal", entryId: id }), "Dinner with Meera, at last! · Debo");
+  assert.deepEqual(parsePath(pathFromUrl(`https://my.daksha.life/journal/dinner-${id}`)), { section: "journal", entryId: id });
+  assert.equal(titleFor({ section: "journal", entryId: id }), "Dinner with Meera, at last! · Daksha");
   // A title in another script has no slug: the address is the plain id.
   const other = "8d9e6679-7425-40de-944b-e07fc1f90ae8";
   rememberEntryName(other, "आज का दिन");

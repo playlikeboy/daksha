@@ -2,7 +2,7 @@
 // debo-talk-session.tsx). The bubble floats at the bottom right, above the tabs.
 //
 // - Tap it to open the call full screen again.
-// - A soft ring moves while someone speaks, and holds still while Debo listens.
+// - A soft ring moves while someone speaks, and holds still while Daksha listens.
 //   With reduce motion on, the ring never moves; the words in the label still say it all.
 // - A small badge shows when the microphone is off, and a number when something waits
 //   for a yes on screen (voice can never say yes to those).

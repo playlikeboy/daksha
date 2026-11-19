@@ -136,7 +136,7 @@ export function DeboFaceGallery() {
         <Text style={s.heading}>Shared face: {shared.mood} (reactions: {shared.reactions})</Text>
         <DeboFace size={180} interactive />
         <TextInput
-          accessibilityLabel="Say something to Debo"
+          accessibilityLabel="Say something to Daksha"
           value={text}
           onChangeText={setText}
           placeholder="Say something, then press Send"

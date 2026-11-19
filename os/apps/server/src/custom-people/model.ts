@@ -1,10 +1,10 @@
 // The real model calls for custom people, through @debo/llm (the one door for model calls).
 // With the person's own Anthropic key, both calls go to Anthropic on their key only. Otherwise
-// Debo's own setup is used (ANTHROPIC_API_KEY, then the Neon AI Gateway).
+// Daksha's own setup is used (ANTHROPIC_API_KEY, then the Neon AI Gateway).
 import { createLlm } from "@debo/llm";
 import type { PersonModel } from "./profile.ts";
 
-/** True when Debo itself can make these calls. */
+/** True when Daksha itself can make these calls. */
 export function personModelConfigured(env: Record<string, string | undefined>): boolean {
   return Boolean(env.ANTHROPIC_API_KEY?.trim() || (env.NEON_AI_GATEWAY_BASE_URL?.trim() && env.NEON_AI_GATEWAY_TOKEN?.trim()));
 }
@@ -22,7 +22,7 @@ export function llmPersonModel(env: Record<string, string | undefined>): PersonM
 }
 
 /**
- * Which model a person's upload uses: their own Anthropic key if they set one, else Debo's.
+ * Which model a person's upload uses: their own Anthropic key if they set one, else Daksha's.
  * Undefined when neither is set up.
  */
 export function personModelFor(

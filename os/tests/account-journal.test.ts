@@ -25,7 +25,7 @@ test("the journal service exports and deletes only the caller's entries", async 
 test("with no journal set up, export is empty and delete removes nothing", async () => {
   assert.equal(await new DeboService(null).exportMine(ALICE), null);
   assert.equal(await new DeboService(null).deleteMine(ALICE), 0);
-  // A name that is not a Debo account has no journal either.
+  // A name that is not a Daksha account has no journal either.
   const service = new DeboService(fakeBackend());
   assert.equal(await service.exportMine("local-user"), null);
   assert.equal(await service.deleteMine("local-user"), 0);

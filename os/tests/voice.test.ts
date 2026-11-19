@@ -135,7 +135,7 @@ test("token route says 503 in plain words when voice is not set up", async () =>
       env = { ...LIVEKIT, [missing]: undefined };
       const response = await app.request("/api/voice/token", { method: "POST", headers: owner() });
       assert.equal(response.status, 503, missing);
-      assert.equal((await response.json()).error, "Talking to Debo is not set up yet.");
+      assert.equal((await response.json()).error, "Talking to Daksha is not set up yet.");
     }
     env = { ...LIVEKIT, VOICE_AGENT_SECRET: "too-short" };
     assert.equal(
@@ -240,7 +240,7 @@ test("brain route says 503 when voice is not set up", async () => {
   }
 });
 
-test("the default brain answers through Debo's conversation engine", async () => {
+test("the default brain answers through Daksha's conversation engine", async () => {
   const { app: plain } = await createApp(db, {
     mode: "sample",
     port: 8787,

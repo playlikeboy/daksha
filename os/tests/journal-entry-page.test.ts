@@ -98,7 +98,7 @@ test("an entry with no embeddings yet has no similar entries", async () => {
 });
 
 test("snippets are short and lose the call's time marks", () => {
-  assert.equal(snippetOf("[00:00] You: what did I do\n[00:07] Debo: You went hiking."), "what did I do You went hiking.");
+  assert.equal(snippetOf("[00:00] You: what did I do\n[00:07] Daksha: You went hiking."), "what did I do You went hiking.");
   const long = snippetOf("word ".repeat(100));
   assert.ok(long.length <= 180 && long.endsWith("…"));
 });

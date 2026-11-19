@@ -17,7 +17,7 @@ import { AppError } from "./errors.ts";
  * real. The person can see, change and delete every one, and they are part of the
  * account export and account deletion like every other kind in the records table.
  *
- * Other parts of Debo (custom people) link to a face by its record id and read it with
+ * Other parts of Daksha (custom people) link to a face by its record id and read it with
  * `CustomAvatarStore.get`, which only ever returns the owner's own faces.
  */
 export const AVATARS_KIND = "custom-avatars";
@@ -56,7 +56,7 @@ export class CustomAvatarStore {
   }
 
   /**
-   * Deletes a face. If the person was talking to it, they go back to Debo, so the app
+   * Deletes a face. If the person was talking to it, they go back to Daksha, so the app
    * never points at a face that is gone.
    */
   async remove(owner: string, id: string): Promise<void> {

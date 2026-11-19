@@ -624,7 +624,7 @@ export function LinkRow({
     </Pressable>
   );
 }
-/** Debo, the mascot, shared by every assistant surface. */
+/** Daksha, the mascot, shared by every assistant surface. */
 /** The picture is the fallback if the drawn face cannot start. */
 class MascotFallback extends Component<{ size: number; children: ReactNode }, { failed: boolean }> {
   state = { failed: false };
@@ -652,7 +652,7 @@ export const mascotTint = {
 } as const;
 
 /**
- * The character the person talks to (Debo by default), drawn in code so its face can move
+ * The character the person talks to (Daksha by default), drawn in code so its face can move
  * (see debo-face.tsx). It follows the shared mood, so the header, chat and voice popup
  * always agree.
  */

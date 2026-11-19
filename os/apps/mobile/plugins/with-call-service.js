@@ -1,11 +1,11 @@
-// Expo config plugin: lets a Talk call keep going on Android while Debo is in
-// the background. It sets up @supersami/rn-foreground-service the way Debo
+// Expo config plugin: lets a Talk call keep going on Android while Daksha is in
+// the background. It sets up @supersami/rn-foreground-service the way Daksha
 // uses it (see src/debo-call-service.native.ts):
 //
 // - declares its service with foregroundServiceType "microphone", which
 //   Android 14 and later require for a service that uses the microphone, and
-//   stopWithTask, so swiping Debo away from the recent apps ends the call;
-// - names the notification channel in plain words ("Talking with Debo");
+//   stopWithTask, so swiping Daksha away from the recent apps ends the call;
+// - names the notification channel in plain words ("Talking with Daksha");
 // - removes a stray example activity the library's own manifest adds;
 // - makes the app's MainActivity pass a press of the notification's End button
 //   to the app (the library expects its own MainActivity to do this).
@@ -17,11 +17,11 @@ const { AndroidConfig, withAndroidManifest, withMainActivity } = require("expo/c
 const SERVICE = "com.supersami.foregroundservice.ForegroundService";
 const STRAY_ACTIVITY = "com.supersami.foregroundservice.MainActivity";
 const META = {
-  "com.supersami.foregroundservice.notification_channel_name": "Talking with Debo",
+  "com.supersami.foregroundservice.notification_channel_name": "Talking with Daksha",
   "com.supersami.foregroundservice.notification_channel_description":
-    "Shows while you are talking with Debo, with a button to end the call.",
+    "Shows while you are talking with Daksha, with a button to end the call.",
 };
-const MARKER = "// Debo: the End button on the call notification.";
+const MARKER = "// Daksha: the End button on the call notification.";
 
 /** Add the service, the channel names and the activity removal to a parsed AndroidManifest. */
 function addCallService(manifest) {

@@ -108,7 +108,7 @@ test("make_image draws on Workers AI, keeps the picture in the bucket, and the a
   assert.equal((await f.api.request(`/api/images/${id}`)).status, 404);
 });
 
-test("the daily limit counts pictures on Debo's service, and deleting one does not reset it", async () => {
+test("the daily limit counts pictures on Daksha's service, and deleting one does not reset it", async () => {
   const f = await fixture({ perDay: 2 });
   const first = await runTool(f.images, A, { prompt: "a cat" });
   await runTool(f.images, A, { prompt: "a dog" });
@@ -120,13 +120,13 @@ test("the daily limit counts pictures on Debo's service, and deleting one does n
   assert.equal((await runTool(f.images, B, { prompt: "a bird" })).status, "made", "the limit is per person");
 });
 
-test("a person's own OpenRouter picture model is used instead, on their key, with no Debo limit", async () => {
+test("a person's own OpenRouter picture model is used instead, on their key, with no Daksha limit", async () => {
   const f = await fixture({ perDay: 0 });
   await f.ownKeys.save(A, "openrouter", { key: OPENROUTER_KEY, imageModel: "google/gemini-3.1-flash-image" });
   const result = await runTool(f.images, A, { prompt: "a lighthouse at dawn", shape: "wide" });
   assert.equal(result.status, "made", JSON.stringify(result));
   assert.equal(result.shape, "wide");
-  assert.equal(f.ai.runs.length, 0, "Debo's service was not used");
+  assert.equal(f.ai.runs.length, 0, "Daksha's service was not used");
   assert.equal(f.openRouterCalls.length, 1);
   assert.equal(f.openRouterCalls[0]?.auth, `Bearer ${OPENROUTER_KEY}`);
   assert.match(f.openRouterCalls[0]?.body ?? "", /"model":"google\/gemini-3.1-flash-image"/);

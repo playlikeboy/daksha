@@ -1,11 +1,11 @@
-// Pictures Debo makes in chat or on a call (the make_image tool).
+// Pictures Daksha makes in chat or on a call (the make_image tool).
 //
 // - The picture is kept in the private media bucket, under the owner's folder, like a recording.
 //   The app shows it with a short-lived signed link, made only for its owner.
 // - A record of it (the words it was made from, when, by which service) is kept in the
 //   person's records, so it shows again in the thread, is in "Download my data" and is deleted
 //   with the account. Deleting one picture deletes the file too.
-// - Debo's own picture service has a daily limit per person. A person who picked their own
+// - Daksha's own picture service has a daily limit per person. A person who picked their own
 //   OpenRouter picture model pays for it themselves, so that limit does not apply.
 // - A short check refuses the worst requests before any service is asked (see guard.ts), and
 //   the picture service has its own safety filter on top.
@@ -19,12 +19,12 @@ import type { OwnKeysService } from "../own-keys/service.ts";
 import { imagePromptProblem } from "./guard.ts";
 import { type ImageMaker, ImageMakerError, openRouterImages, type Shape } from "./makers.ts";
 
-/** Pictures one person may make on Debo's own service per UTC day. */
+/** Pictures one person may make on Daksha's own service per UTC day. */
 export const IMAGES_PER_DAY = 20;
 const MAX_BYTES = 12 * 1024 * 1024;
 const LINK_SECONDS = 3600;
 const KIND = "images";
-/** One row per UTC day: how many pictures Debo's own service made for this person. */
+/** One row per UTC day: how many pictures Daksha's own service made for this person. */
 const USAGE = "image_usage";
 const EXT: Record<string, string> = { "image/jpeg": "jpg", "image/png": "png", "image/webp": "webp" };
 
@@ -36,7 +36,7 @@ export const makeImageInput = z.object({
   shape: z
     .enum(["square", "wide", "tall"])
     .optional()
-    .describe("Optional. Debo's own picture service makes only squares; wide and tall need the person's own OpenRouter picture model."),
+    .describe("Optional. Daksha's own picture service makes only squares; wide and tall need the person's own OpenRouter picture model."),
 });
 
 export const makeImageDescription =
@@ -61,7 +61,7 @@ export interface ImageRecord {
 export interface ImageOptions {
   /** The bucket. A function, because it is known only once the journal is set up. */
   store: () => ObjectStore | undefined;
-  /** Debo's own picture service. Missing: only a person's own OpenRouter model can draw. */
+  /** Daksha's own picture service. Missing: only a person's own OpenRouter model can draw. */
   maker?: ImageMaker;
   ownKeys?: OwnKeysService;
   fetcher?: typeof fetch;
@@ -95,16 +95,16 @@ export class ImageService {
     if (problem) throw new AppError(problem, 422);
     const store = this.options.store();
     if (!store || !SAFE_OWNER.test(owner))
-      throw new AppError("Pictures are not set up on this Debo yet. Whoever runs it needs to turn them on.", 503);
+      throw new AppError("Pictures are not set up on this Daksha yet. Whoever runs it needs to turn them on.", 503);
     const own = await this.options.ownKeys?.imageChoice(owner);
     const maker = own ? openRouterImages(own.apiKey, own.model, this.options.fetcher) : this.options.maker;
     if (!maker)
-      throw new AppError("Pictures are not set up on this Debo yet. Whoever runs it needs to turn them on.", 503);
+      throw new AppError("Pictures are not set up on this Daksha yet. Whoever runs it needs to turn them on.", 503);
     if (!own) {
       const today = await this.countToday(owner);
       if (today >= (this.options.perDay ?? IMAGES_PER_DAY))
         throw new AppError(
-          "You have made a lot of pictures today, and Debo has reached its daily limit for you. You can make more after midnight UTC, or add your own OpenRouter picture model in Settings.",
+          "You have made a lot of pictures today, and Daksha has reached its daily limit for you. You can make more after midnight UTC, or add your own OpenRouter picture model in Settings.",
           429,
         );
     }
@@ -159,7 +159,7 @@ export class ImageService {
   async link(owner: string, id: string) {
     const record = await this.find(owner, id);
     const store = this.options.store();
-    if (!store) throw new AppError("Pictures are not set up on this Debo right now.", 503);
+    if (!store) throw new AppError("Pictures are not set up on this Daksha right now.", 503);
     return {
       id: record.id,
       url: await store.signedGet(record.objectKey, record.mimeType, LINK_SECONDS),
@@ -202,7 +202,7 @@ export class ImageService {
     return record;
   }
 
-  /** Pictures made on Debo's own service since midnight UTC. Kept apart, so deleting one does not reset it. */
+  /** Pictures made on Daksha's own service since midnight UTC. Kept apart, so deleting one does not reset it. */
   private async countToday(owner: string) {
     const day = this.now().toISOString().slice(0, 10);
     return (await this.db.get<{ count: number }>(owner, USAGE, day))?.count ?? 0;
@@ -218,6 +218,6 @@ export class ImageService {
   }
 
   private log(event: string, fields: Record<string, unknown>) {
-    (this.options.log ?? ((entry) => console.info("[Debo]", JSON.stringify(entry))))({ event, ...fields });
+    (this.options.log ?? ((entry) => console.info("[Daksha]", JSON.stringify(entry))))({ event, ...fields });
   }
 }

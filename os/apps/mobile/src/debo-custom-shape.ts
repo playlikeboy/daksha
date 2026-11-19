@@ -56,7 +56,7 @@ export interface BaseGeometry {
 }
 
 export const geometry: Record<AvatarBase, BaseGeometry> = {
-  // Debo's shape.
+  // Daksha's shape.
   blob: {
     cx: 120, top: 56, half: 94, bottom: 218, eyeL: 84, eyeR: 156, eyeY: 138, eyeRx: 15, eyeRy: 18,
     browDy: -28, browHalf: 12, mouthY: 164, mouthScale: 0.85, cheekDx: 62, cheekY: 164, turn: 0.5,

@@ -3,7 +3,7 @@
 //
 // 1. Hello, from the character.        4. A first entry (optional).
 // 2. Who you talk to, and a name.      5. Optional: reminders and apps.
-// 3. The three things Debo does.       6. The privacy promise, then a first question.
+// 3. The three things Daksha does.       6. The privacy promise, then a first question.
 //
 // Nothing here asks the device for a permission on its own. Reminders ask only when
 // the person presses "Allow reminders"; the microphone asks on their first call.
@@ -44,7 +44,7 @@ import {
 } from "./ui";
 import { useWorkspace } from "./workspace";
 
-const PRIVACY_URL = "https://debo.life/privacy";
+const PRIVACY_URL = "https://daksha.life/privacy";
 const STEPS = ["hello", "who", "what", "entry", "extras", "promise"] as const;
 type Step = (typeof STEPS)[number];
 
@@ -64,7 +64,7 @@ export function Onboarding() {
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
 
-  // The journal step only shows when the journal is set up on this Debo.
+  // The journal step only shows when the journal is set up on this Daksha.
   useEffect(() => {
     void debo
       .status()
@@ -213,7 +213,7 @@ export function Onboarding() {
                 <View style={{ alignItems: "center" }}>
                   <Mascot size={avatarSize.xl} variant={data?.identity.avatar} />
                 </View>
-                <Heading refFor={heading} title={`Hi, I'm ${data?.identity.name || "Debo"}.`} />
+                <Heading refFor={heading} title={`Hi, I'm ${data?.identity.name || "Daksha"}.`} />
                 <Text style={[s.muted, { fontSize: fontSize.lg, lineHeight: spacing[7] }]}>
                   I keep your days safe and help you remember them. Tell me about your day, then ask me
                   anything about it later. This takes about a minute.
@@ -356,7 +356,7 @@ export function Onboarding() {
                     "Every answer shows where it came from.",
                     "You can see, fix, download or delete anything I keep.",
                     "We do not sell your data, show ads, or train AI on it ourselves.",
-                    "Anything that sends, posts or changes something outside Debo waits for your yes.",
+                    "Anything that sends, posts or changes something outside Daksha waits for your yes.",
                   ].map((line) => (
                     <View key={line} style={[s.row, { gap: spacing[3], alignItems: "flex-start" }]}>
                       <View
@@ -378,7 +378,7 @@ export function Onboarding() {
                   style={{ minHeight: spacing[11], justifyContent: "center", alignSelf: "flex-start" }}
                 >
                   <Text style={[s.text, { textDecorationLine: "underline", fontWeight: "600" }]}>
-                    Read the full privacy page, including which companies help run Debo
+                    Read the full privacy page, including which companies help run Daksha
                   </Text>
                 </Pressable>
                 <Text style={[s.heading, { marginTop: spacing[2] }]}>Try a first question</Text>

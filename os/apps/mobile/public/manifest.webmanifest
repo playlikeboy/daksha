@@ -1,7 +1,7 @@
 {
   "id": "/",
-  "name": "Debo",
-  "short_name": "Debo",
+  "name": "Daksha",
+  "short_name": "Daksha",
   "description": "A friendly assistant that remembers your life. Ask about your own life and see where every answer came from.",
   "lang": "en",
   "dir": "ltr",
@@ -19,9 +19,9 @@
     { "src": "/icons/maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
   ],
   "screenshots": [
-    { "src": "/screenshots/narrow-chat-light.webp", "sizes": "780x1688", "type": "image/webp", "form_factor": "narrow", "label": "Ask Debo about your own life" },
+    { "src": "/screenshots/narrow-chat-light.webp", "sizes": "780x1688", "type": "image/webp", "form_factor": "narrow", "label": "Ask Daksha about your own life" },
     { "src": "/screenshots/narrow-journal-light.webp", "sizes": "780x1688", "type": "image/webp", "form_factor": "narrow", "label": "Write or say what happened today" },
-    { "src": "/screenshots/narrow-knows-light.webp", "sizes": "780x1688", "type": "image/webp", "form_factor": "narrow", "label": "See, fix or forget what Debo knows" },
-    { "src": "/screenshots/wide.png", "sizes": "1280x720", "type": "image/png", "form_factor": "wide", "label": "Debo on a bigger screen" }
+    { "src": "/screenshots/narrow-knows-light.webp", "sizes": "780x1688", "type": "image/webp", "form_factor": "narrow", "label": "See, fix or forget what Daksha knows" },
+    { "src": "/screenshots/wide.png", "sizes": "1280x720", "type": "image/png", "form_factor": "wide", "label": "Daksha on a bigger screen" }
   ]
 }

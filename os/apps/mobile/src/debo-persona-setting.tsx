@@ -1,4 +1,4 @@
-// Settings card: the role Debo is playing, if any. She takes a role when you ask her to
+// Settings card: the role Daksha is playing, if any. She takes a role when you ask her to
 // ("act as my girlfriend") in chat or on a call, and keeps it until you stop it here or tell her.
 import { useCallback, useEffect, useState } from "react";
 import { Text, View } from "react-native";

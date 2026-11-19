@@ -87,12 +87,12 @@ import { type Detail, useWorkspace, WorkspaceContext } from "./src/workspace";
 const nav: { id: Section; label: string; short: string; icon: LucideIcon }[] = [
   { id: "chat", label: "Chat", short: "Chat", icon: MessageCircle },
   { id: "journal", label: "Journal", short: "Journal", icon: BookOpen },
-  { id: "knows", label: "What Debo knows", short: "Memories", icon: Brain },
+  { id: "knows", label: "What Daksha knows", short: "Memories", icon: Brain },
   { id: "activity", label: "Tasks", short: "Tasks", icon: PanelsTopLeft },
   { id: "apps", label: "Apps", short: "Apps", icon: Shapes },
 ];
 const titles: Partial<Record<Section, { title: string; subtitle: string }>> = {
-  talk: { title: "Talk to Debo", subtitle: "Say it out loud. Debo answers and shows where it came from." },
+  talk: { title: "Talk to Daksha", subtitle: "Say it out loud. Daksha answers and shows where it came from." },
   activity: { title: "Tasks", subtitle: "Plans, progress, decisions and results." },
   ideas: { title: "Ideas", subtitle: "Useful next steps, grounded in your world." },
   goals: {
@@ -109,7 +109,7 @@ const titles: Partial<Record<Section, { title: string; subtitle: string }>> = {
   browser: { title: "Browser", subtitle: "Your connected browsing sessions." },
   files: { title: "Files", subtitle: "Documents, forms and filled copies." },
   journal: { title: "Your journal", subtitle: "Write about your day. Only you can read it." },
-  knows: { title: "What Debo knows", subtitle: "Memories, each with its source." },
+  knows: { title: "What Daksha knows", subtitle: "Memories, each with its source." },
 };
 /** Shown when the address matches no screen. */
 function NotFound() {
@@ -136,7 +136,7 @@ export default function App() {
     return (
       <SafeAreaProvider>
         <View style={{ flex: 1, backgroundColor: colors.canvas, justifyContent: "center" }}>
-          <ActivityIndicator color={colors.blueDark} accessibilityLabel="Opening Debo" />
+          <ActivityIndicator color={colors.blueDark} accessibilityLabel="Opening Daksha" />
         </View>
       </SafeAreaProvider>
     );
@@ -160,7 +160,7 @@ export default function App() {
   return <AccessKeyApp />;
 }
 function AccessKeyApp() {
-  // A developer gallery of Debo's face, on a local sample install only: /?face=gallery
+  // A developer gallery of Daksha's face, on a local sample install only: /?face=gallery
   const gallery = Platform.OS === "web" && globalThis.location?.search.includes("face=gallery");
   const [token, setToken] = useState("");
   const [accessKey, setAccessKey] = useState("");
@@ -218,7 +218,7 @@ function AccessKeyApp() {
                 fontWeight: "500",
               }}
             >
-              Welcome to Debo.
+              Welcome to Daksha.
             </Text>
             <Text style={[s.muted, { textAlign: "center" }]}>A little room for your day.</Text>
             {busy ? (
@@ -237,7 +237,7 @@ function AccessKeyApp() {
                   Open workspace
                 </Button>
                 <Text style={[s.small, { marginTop: spacing[4] }]}>
-                  Local workspaces open without a key. Make sure your Debo server is running at{" "}
+                  Local workspaces open without a key. Make sure your Daksha server is running at{" "}
                   {API_URL}.
                 </Text>
               </Card>
@@ -443,7 +443,7 @@ function WorkspaceShell({
     data?.tasks.find(
       (task) => task.status === "waiting_approval" || task.status === "waiting_input",
     ) || data?.tasks.find((task) => task.status === "running");
-  const agentName = data?.identity.name || "Debo";
+  const agentName = data?.identity.name || "Daksha";
   // Every face in the app follows the character saved in the account.
   const savedCharacter = data?.identity.character;
   useEffect(() => {

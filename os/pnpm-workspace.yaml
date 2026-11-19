@@ -1,7 +1,7 @@
 packages:
   - apps/mobile
   - apps/worker
-  # Debo's personal brain, shared with the web app in ../apps/web.
+  # Daksha's personal brain, shared with the web app in ../apps/web.
   - ../packages/brain
   - ../packages/db
   - ../packages/llm

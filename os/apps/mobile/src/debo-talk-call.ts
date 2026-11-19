@@ -1,6 +1,6 @@
 // The live call as a plain object, with no screens in it.
 //
-// It owns the voice connection (microphone, LiveKit room, Debo's audio) and what
+// It owns the voice connection (microphone, LiveKit room, Daksha's audio) and what
 // the call shows (state, captions, sources). The app creates one of these above
 // every screen (see debo-talk-session.tsx). The full-screen popup and the small
 // bar shown while the call is minimised both read it, so collapsing the popup, or
@@ -29,7 +29,7 @@ export interface TalkState {
   reconnecting: boolean;
   lines: TalkLine[];
   problem: string;
-  /** The person is making sound right now. For the ring around Debo. */
+  /** The person is making sound right now. For the ring around Daksha. */
   youActive: boolean;
 }
 
@@ -42,16 +42,16 @@ export interface TalkDeps {
   describeError(error: unknown): string;
   /** A short message on screen ("The conversation ended. Microphone off."). */
   notify(text: string): void;
-  /** Audio levels, for Debo's face and the halo. */
+  /** Audio levels, for Daksha's face and the halo. */
   onLevels?(levels: VoiceLevels): void;
 }
 
-const MIC_BLOCKED = "Debo can't use your microphone. Allow it in your settings, or type to Debo below.";
+const MIC_BLOCKED = "Daksha can't use your microphone. Allow it in your settings, or type to Daksha below.";
 
-/** The words under Debo. Short, and always true to what is happening. */
+/** The words under Daksha. Short, and always true to what is happening. */
 export function stateWords(input: Pick<TalkState, "status" | "micOn" | "agentState" | "reconnecting"> & { name?: string },
 ): string {
-  const { status, micOn, agentState, reconnecting, name = "Debo" } = input;
+  const { status, micOn, agentState, reconnecting, name = "Daksha" } = input;
   if (status === "idle") return "Tap to start";
   if (status === "connecting") return "Connecting…";
   if (status === "ended") return "Conversation ended";
@@ -67,7 +67,7 @@ export function stateWords(input: Pick<TalkState, "status" | "micOn" | "agentSta
 /** What a screen reader hears. It says the microphone state every time. */
 export function spokenStatus(input: Pick<TalkState, "status" | "micOn" | "agentState" | "reconnecting"> & { name?: string },
 ): string {
-  const { status, micOn, agentState, reconnecting, name = "Debo" } = input;
+  const { status, micOn, agentState, reconnecting, name = "Daksha" } = input;
   const agentWords: Record<string, string> = {
     listening: "Listening",
     thinking: "Thinking",
@@ -91,10 +91,10 @@ export function spokenStatus(input: Pick<TalkState, "status" | "micOn" | "agentS
 
 /** The label of the minimised bar: always whether the microphone is on, and how to open it. */
 export function pillLabel(state: Pick<TalkState, "status" | "micOn" | "agentState" | "reconnecting">): string {
-  return `Talking with Debo. ${spokenStatus(state)} Tap to open the conversation.`;
+  return `Talking with Daksha. ${spokenStatus(state)} Tap to open the conversation.`;
 }
 
-/** Reviews Debo prepared that wait for a tap on screen. Voice can never give that yes. */
+/** Reviews Daksha prepared that wait for a tap on screen. Voice can never give that yes. */
 export function reviewsWaiting<T extends { status: string }>(actions: readonly T[]): T[] {
   return actions.filter((a) => a.status === "awaiting_review");
 }
@@ -171,7 +171,7 @@ export class TalkCall {
     }
   }
 
-  /** The connection closed by itself: Debo hung up, or the network is gone. */
+  /** The connection closed by itself: Daksha hung up, or the network is gone. */
   private remoteEnded() {
     if (this.ending) return;
     this.connection = undefined;
@@ -260,7 +260,7 @@ export class TalkCall {
     });
   }
 
-  // Sources belong to Debo's answer to the latest question. Show them right under it.
+  // Sources belong to Daksha's answer to the latest question. Show them right under it.
   private attachSources(chips: VoiceChip[]) {
     const all = this.state.lines;
     const lastYou = all.map((line) => line.who).lastIndexOf("you");

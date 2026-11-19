@@ -43,11 +43,11 @@ export function connectorRoutes(service: ConnectorService) {
 const PAGES = {
   success: {
     title: "Your app is connected",
-    text: "You can close this tab and go back to Debo. Your new app will be there.",
+    text: "You can close this tab and go back to Daksha. Your new app will be there.",
   },
   failed: {
     title: "That did not finish",
-    text: "Nothing was connected. Go back to Debo and try again. If the link ran out, start a new one.",
+    text: "Nothing was connected. Go back to Daksha and try again. If the link ran out, start a new one.",
   },
 } as const;
 
@@ -70,7 +70,7 @@ export function connectorCallbackRoute(options: {
       return c.redirect(`debo://connectors?status=${ok ? "success" : "failed"}`, 302);
     c.header("Content-Security-Policy", "default-src 'none'; style-src 'unsafe-inline'");
     return c.html(
-      `<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>${page.title}</title><style>body{font:16px/1.5 system-ui,sans-serif;max-width:30rem;margin:12vh auto;padding:0 1.25rem;color:#1c1b1f}a{display:inline-block;margin-top:1rem;padding:.75rem 1.25rem;border-radius:.75rem;background:#1c1b1f;color:#fff;text-decoration:none}</style></head><body><h1>${page.title}</h1><p>${page.text}</p><a href="${options.appUrl}">Back to Debo</a></body></html>`,
+      `<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>${page.title}</title><style>body{font:16px/1.5 system-ui,sans-serif;max-width:30rem;margin:12vh auto;padding:0 1.25rem;color:#1c1b1f}a{display:inline-block;margin-top:1rem;padding:.75rem 1.25rem;border-radius:.75rem;background:#1c1b1f;color:#fff;text-decoration:none}</style></head><body><h1>${page.title}</h1><p>${page.text}</p><a href="${options.appUrl}">Back to Daksha</a></body></html>`,
       ok ? 200 : 400,
     );
   });

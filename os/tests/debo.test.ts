@@ -32,7 +32,7 @@ function setup(options?: Parameters<typeof fakeBackend>[0]) {
   return { backend, debo, app: appFor(debo) };
 }
 
-test("without a Debo database every feature says it is not set up", async () => {
+test("without a Daksha database every feature says it is not set up", async () => {
   const debo = createDebo({ mode: "sample" }, {});
   const app = appFor(debo);
   const status = await (await call(app, "GET", "/status", ALICE)).json();
@@ -59,7 +59,7 @@ test("a demo workspace ignores DATABASE_URL, a live one falls back to it", () =>
   assert.equal(createDebo({ mode: "live" }, {}).configured, false);
 });
 
-test("only a Debo account (a UUID) has a journal", async () => {
+test("only a Daksha account (a UUID) has a journal", async () => {
   const { app } = setup();
   const response = await call(app, "GET", "/entries", "local-user");
   assert.equal(response.status, 403);
@@ -203,7 +203,7 @@ test("memories show their entry, and can be fixed or forgotten", async () => {
   assert.deepEqual((await (await call(app, "GET", "/memories", ALICE)).json()).memories, []);
 });
 
-test("without hosted memory, What Debo knows says so", async () => {
+test("without hosted memory, What Daksha knows says so", async () => {
   const { app } = setup({ memories: false });
   const response = await call(app, "GET", "/memories", ALICE);
   assert.equal(response.status, 503);

@@ -26,7 +26,7 @@ export interface Pose {
   eyeShut: number; // 1 = eyes closed as two short lines (a deliberate "not looking")
   pout: number; // small pursed mouth
   bodyX: number; // turn away: slide sideways
-  talk: number; // 1 = the open mouth follows Debo's voice
+  talk: number; // 1 = the open mouth follows Daksha's voice
   blush: number;
   blushScale: number;
   puff: number; // puffed cheeks

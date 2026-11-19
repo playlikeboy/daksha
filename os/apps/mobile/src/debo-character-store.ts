@@ -35,7 +35,7 @@ class CharacterStore {
   getName = () => this.assistantName;
   getCustom = () => this.custom;
 
-  /** The assistant's own name, as typed in "About Debo". Labels use it, not a fixed word. */
+  /** The assistant's own name, as typed in "About Daksha". Labels use it, not a fixed word. */
   setName = (value: string | undefined) => {
     const next = value?.trim() || characters[defaultCharacter].name;
     if (next === this.assistantName) return;

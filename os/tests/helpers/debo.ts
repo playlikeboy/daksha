@@ -1,4 +1,4 @@
-// A fake Debo brain and database for tests: in memory, one list per owner, so
+// A fake Daksha brain and database for tests: in memory, one list per owner, so
 // tests can prove that one person never sees another person's journal.
 import { randomUUID } from "node:crypto";
 import { UNKNOWN_MESSAGE } from "@debo/brain";

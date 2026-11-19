@@ -1,7 +1,7 @@
 // Phone: reminders as notifications made on this phone (expo-notifications).
 //
 // These are local notifications: the phone itself shows them at the time set,
-// even if Debo is closed, and nothing goes through a push server. Remote push
+// even if Daksha is closed, and nothing goes through a push server. Remote push
 // (a reminder made on another device reaching this phone) needs Firebase and
 // Apple push credentials the project does not have yet.
 //
@@ -16,7 +16,7 @@ import { Platform } from "react-native";
 const CHANNEL = "reminders";
 let handlerSet = false;
 
-/** Show a reminder that is due while Debo is open, too (by default the phone hides it then). */
+/** Show a reminder that is due while Daksha is open, too (by default the phone hides it then). */
 function showWhileOpen() {
   if (handlerSet) return;
   handlerSet = true;
@@ -45,7 +45,7 @@ export async function allowReminders(): Promise<boolean> {
     // Android 13 and later need a channel before the permission question can show.
     await Notifications.setNotificationChannelAsync(CHANNEL, {
       name: "Reminders",
-      description: "Reminders you asked Debo for.",
+      description: "Reminders you asked Daksha for.",
       importance: Notifications.AndroidImportance.DEFAULT,
     });
   }

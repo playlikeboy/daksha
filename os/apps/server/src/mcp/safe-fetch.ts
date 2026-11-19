@@ -1,4 +1,4 @@
-// Debo fetches an address a person typed. That is the classic way to reach things the person
+// Daksha fetches an address a person typed. That is the classic way to reach things the person
 // should never reach (this server's own network, cloud metadata, other private services).
 // Everything about a custom tool server goes through this file:
 //
@@ -19,7 +19,7 @@ export interface ResolvedAddress {
 export type Resolver = (host: string) => Promise<ResolvedAddress[]>;
 
 export const BLOCKED_PLACE =
-  "Debo can't connect to that address. It must be a public https address on the internet.";
+  "Daksha can't connect to that address. It must be a public https address on the internet.";
 
 /** Names that never point at the public internet, including this deployment's own internal hosts. */
 function blockedName(host: string) {
@@ -188,7 +188,7 @@ export function requestBody(body: RequestInit["body"], headers: Record<string, s
     headers["content-type"] ??= "application/x-www-form-urlencoded;charset=UTF-8";
   }
   if (body !== undefined && body !== null && text === undefined)
-    throw new AppError("Debo sent a request in a form it does not support.", 500);
+    throw new AppError("Daksha sent a request in a form it does not support.", 500);
   if (text !== undefined) headers["content-length"] = String(Buffer.byteLength(text));
   return text;
 }
@@ -234,7 +234,7 @@ export function createSafeFetch(options: SafeFetchOptions = {}): typeof fetch {
           const status = res.statusCode ?? 502;
           if (status >= 300 && status < 400) {
             res.destroy();
-            fail(new AppError("That server tried to send Debo somewhere else, which is not allowed.", 502));
+            fail(new AppError("That server tried to send Daksha somewhere else, which is not allowed.", 502));
             return;
           }
           let total = 0;

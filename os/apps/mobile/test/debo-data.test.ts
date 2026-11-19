@@ -68,8 +68,8 @@ test("garbage never throws", () => {
 
 test("activity lines are plain and never carry content", () => {
   assert.equal(describeActivity({ action: "saved", sourceIds: ["a"] }), "You saved an entry.");
-  assert.equal(describeActivity({ action: "answered", sourceIds: ["a", "b"] }), "Debo answered a question using 2 entries.");
-  assert.equal(describeActivity({ action: "forgot-memory", sourceIds: [] }), "You asked Debo to forget a memory.");
+  assert.equal(describeActivity({ action: "answered", sourceIds: ["a", "b"] }), "Daksha answered a question using 2 entries.");
+  assert.equal(describeActivity({ action: "forgot-memory", sourceIds: [] }), "You asked Daksha to forget a memory.");
 });
 
 test("dates read the same as the source chips (UTC, day first)", () => {

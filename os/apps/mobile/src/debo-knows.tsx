@@ -14,7 +14,7 @@ const lastSeen = new WeakMap<object, { status: DeboStatus; memories: MemoryView[
 /** Long lists show this many at first, then more on request, so a big memory stays quick. */
 const PAGE = 40;
 
-/** What Debo knows: each memory, the entry it came from, and a way to fix or forget it. */
+/** What Daksha knows: each memory, the entry it came from, and a way to fix or forget it. */
 export function KnowsScreen() {
   const { api } = useWorkspace();
   const debo = useMemo(() => deboApi(api), [api]);
@@ -44,15 +44,15 @@ export function KnowsScreen() {
     void load();
   }, [load]);
 
-  if (loading) return <Skeleton label="Loading what Debo knows" rows={3} />;
-  if (status && !status.configured) return <NotSetUp status={status} what="What Debo knows" />;
+  if (loading) return <Skeleton label="Loading what Daksha knows" rows={3} />;
+  if (status && !status.configured) return <NotSetUp status={status} what="What Daksha knows" />;
 
   return (
     <View style={{ gap: screenGap }}>
       <Text style={s.muted}>
-        After you save an entry, Debo picks out the lasting facts in it, like people, places and
+        After you save an entry, Daksha picks out the lasting facts in it, like people, places and
         plans. Each memory shows the entry it came from. Fix anything that is wrong, or forget
-        anything you don&apos;t want Debo to keep.
+        anything you don&apos;t want Daksha to keep.
       </Text>
       <ErrorNotice
         error={error}
@@ -64,14 +64,14 @@ export function KnowsScreen() {
       {status && !status.memories ? (
         <Empty
           icon={Brain}
-          title="Debo is not keeping memories right now"
+          title="Daksha is not keeping memories right now"
           detail="Your entries are safe, and you can still ask about them."
         />
       ) : memories.length === 0 && !error ? (
         <Empty
           icon={Brain}
           title="Nothing yet"
-          detail="Write an entry about the people, places and plans in your life, and Debo will remember them here within a minute or so."
+          detail="Write an entry about the people, places and plans in your life, and Daksha will remember them here within a minute or so."
         >
           <Button onPress={() => void load()}>Check again</Button>
         </Empty>
@@ -173,7 +173,7 @@ function MemoryCard({ memory, onChanged }: { memory: MemoryView; onChanged: () =
       {confirming && (
         <View accessibilityRole="alert" style={{ gap: spacing[2] }}>
           <Text style={s.text}>
-            Forget this memory for good? Your entry stays. Debo will not remember this fact from it.
+            Forget this memory for good? Your entry stays. Daksha will not remember this fact from it.
           </Text>
           <View style={[s.row, { gap: spacing[2], flexWrap: "wrap" }]}>
             <Button

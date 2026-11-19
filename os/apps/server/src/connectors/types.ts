@@ -90,7 +90,7 @@ export interface Connection {
 export interface CatalogueItem {
   slug: string;
   name: string;
-  /** One honest line about what Debo can do with this app. */
+  /** One honest line about what Daksha can do with this app. */
   blurb: string;
   logo?: string;
   connectable: boolean;

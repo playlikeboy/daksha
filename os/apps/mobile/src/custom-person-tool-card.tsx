@@ -52,7 +52,7 @@ export function CustomPersonToolCard({ name, result, loading }: { name: string; 
       {r?.error ? <Text style={s.muted}>{r.error}</Text> : null}
       {name === "open_custom_person_upload" && r?.person && (
         <>
-          <Text style={s.small}>Debo reads them once, builds a short profile, then deletes the files.</Text>
+          <Text style={s.small}>Daksha reads them once, builds a short profile, then deletes the files.</Text>
           <View style={s.row}>
             <Button small primary icon={FileUp} onPress={() => setOpen(true)}>
               Add their files

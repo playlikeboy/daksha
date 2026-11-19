@@ -177,7 +177,7 @@ export function NeonGate({
   return (
     <Frame>
       {phase === "loading" ? (
-        <ActivityIndicator color={colors.blueDark} accessibilityLabel="Opening Debo" />
+        <ActivityIndicator color={colors.blueDark} accessibilityLabel="Opening Daksha" />
       ) : phase === "offline" ? (
         <Card style={{ width: "100%" }}>
           <ErrorNotice error={notice} />
@@ -211,14 +211,14 @@ function Frame({ children }: { children: ReactNode }) {
             accessibilityRole="header"
             style={{ fontSize: fontSize["2xl"], color: colors.text, letterSpacing: -1, fontWeight: "500" }}
           >
-            Welcome to Debo.
+            Welcome to Daksha.
           </Text>
           <Text style={[s.muted, { textAlign: "center", marginTop: -8 }]}>
             A friendly place to keep your days and ask about them.
           </Text>
           {children}
           <Text style={[s.small, { textAlign: "center", maxWidth: 340 }]}>
-            What you give Debo is yours. You can download it or delete it all at any time.
+            What you give Daksha is yours. You can download it or delete it all at any time.
           </Text>
         </View>
       </ScrollView>
@@ -423,10 +423,10 @@ export function AccountCard() {
         const url = URL.createObjectURL(new Blob([json], { type: "application/json" }));
         const link = document.createElement("a");
         link.href = url;
-        link.download = "debo-data.json";
+        link.download = "daksha-data.json";
         link.click();
         URL.revokeObjectURL(url);
-      } else await Share.share({ message: json, title: "My Debo data" });
+      } else await Share.share({ message: json, title: "My Daksha data" });
     } catch (e) {
       setError(e instanceof Error ? e.message : "I couldn't get your data. Try again.");
     } finally {
@@ -438,7 +438,7 @@ export function AccountCard() {
     setError("");
     try {
       await api.request("/api/account", { confirm: true }, "DELETE");
-      setDone("Everything Debo stored for you is deleted.");
+      setDone("Everything Daksha stored for you is deleted.");
       setConfirming(false);
       await account.signOut();
     } catch (e) {
@@ -466,7 +466,7 @@ export function AccountCard() {
       {confirming ? (
         <View style={{ marginTop: 14 }}>
           <Text style={[s.text, { marginBottom: 10 }]}>
-            This deletes everything Debo stored for you, including your journal entries and files. It can't be undone. Your
+            This deletes everything Daksha stored for you, including your journal entries and files. It can't be undone. Your
             sign-in stays, so you can start fresh.
           </Text>
           <Button danger busy={busy} onPress={() => void wipe()}>

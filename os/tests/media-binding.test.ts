@@ -134,7 +134,7 @@ function workerFetch(bucket: R2BucketLike, ai: AiLike): typeof fetch {
 }
 
 const SECRET = "test-signing-key-test-signing-key";
-const PUBLIC = "https://api.debo.life";
+const PUBLIC = "https://api.daksha.life";
 
 function rig(options: { singleMaxBytes?: number; partBytes?: number } = {}) {
   const bucketRig = fakeBucket();

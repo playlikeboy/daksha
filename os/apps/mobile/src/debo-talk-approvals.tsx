@@ -1,10 +1,10 @@
 // Things waiting for a yes, shown inside the Talk popup itself.
 //
-// The popup covers the whole screen, so a review that Debo prepared during a call
-// (anything that leaves Debo: a connected app, email, calendar, or deleting) would
+// The popup covers the whole screen, so a review that Daksha prepared during a call
+// (anything that leaves Daksha: a connected app, email, calendar, or deleting) would
 // otherwise be invisible until the call was minimised. Each card says plainly what
 // will happen and has two buttons: Approve and Not now. The yes is always a tap here;
-// saying "yes" out loud never counts. Saving inside Debo (the journal, memories, tasks)
+// saying "yes" out loud never counts. Saving inside Daksha (the journal, memories, tasks)
 // needs no review any more, so it never shows here.
 import { Check, X } from "lucide-react-native";
 import { useState } from "react";
@@ -19,15 +19,15 @@ export function approvalSummary(action: Pick<ActionProposal, "kind" | "title" | 
   const where = action.account ? ` in ${action.account}` : "";
   switch (action.kind) {
     case "email.send":
-      return `Debo will send this email${where}.`;
+      return `Daksha will send this email${where}.`;
     case "calendar.create":
     case "calendar.update":
     case "calendar.delete":
-      return `Debo will change your calendar${where}.`;
+      return `Daksha will change your calendar${where}.`;
     case "connector.call":
-      return `Debo will do this${where}.`;
+      return `Daksha will do this${where}.`;
     default:
-      return "Debo will do this only if you say yes.";
+      return "Daksha will do this only if you say yes.";
   }
 }
 

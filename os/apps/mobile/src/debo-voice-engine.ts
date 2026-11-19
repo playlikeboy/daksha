@@ -1,10 +1,10 @@
 // The live voice connection, the same on the web and on phones.
 //
-// It joins a LiveKit room with a token from POST /api/voice/token. Debo's
+// It joins a LiveKit room with a token from POST /api/voice/token. Daksha's
 // voice agent joins the same room. Captions arrive on LiveKit's
 // "lk.transcription" text stream, source chips on "debo.sources", typed
-// messages go out on "lk.chat", and "Stop Debo" calls the agent's
-// "debo.interrupt" RPC. Audio is never recorded by Debo.
+// messages go out on "lk.chat", and "Stop Daksha" calls the agent's
+// "debo.interrupt" RPC. Audio is never recorded by Daksha.
 //
 // livekit-client is loaded only when a conversation starts, so the rest of
 // the app does not pay for it.
@@ -34,7 +34,7 @@ export interface VoiceHandlers {
   onAgentState(state: AgentState): void;
   /** The connection closed, for any reason. */
   onEnded(): void;
-  /** Audio levels for Debo's face and the halo, about 15 times a second. Optional. */
+  /** Audio levels for Daksha's face and the halo, about 15 times a second. Optional. */
   onLevels?(levels: VoiceLevels): void;
   /** The network dropped and LiveKit is trying again, or it is back. Optional. */
   onConnection?(state: "connected" | "reconnecting"): void;
@@ -161,7 +161,7 @@ export async function startVoice(api: FuseApi, handlers: VoiceHandlers): Promise
     try {
       await connected.localParticipant.setMicrophoneEnabled(true);
     } catch {
-      // Keep the conversation open so the person can still type to Debo.
+      // Keep the conversation open so the person can still type to Daksha.
       microphoneBlocked = true;
     }
 
@@ -197,7 +197,7 @@ export async function startVoice(api: FuseApi, handlers: VoiceHandlers): Promise
 export function startProblem(error: unknown): string {
   if (error instanceof Error) {
     if (error.name === "NotAllowedError" || error.name === "PermissionDeniedError")
-      return "Debo can't use your microphone. Allow it in your settings, or type to Debo instead.";
+      return "Daksha can't use your microphone. Allow it in your settings, or type to Daksha instead.";
     if (error.message) return error.message;
   }
   return START_FAILED;

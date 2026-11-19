@@ -72,7 +72,7 @@ export interface CustomAvatar extends AvatarConfig {
   updatedAt: string;
 }
 
-/** The face anyone starts from: a soft blob in Debo's colours. */
+/** The face anyone starts from: a soft blob in Daksha's colours. */
 export const defaultAvatarConfig: AvatarConfig = {
   name: "Buddy",
   pronoun: "they",

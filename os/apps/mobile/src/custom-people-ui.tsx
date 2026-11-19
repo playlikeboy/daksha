@@ -1,7 +1,7 @@
 // Settings card "People you made": custom people to talk to, built from a description or from
 // the person's own WhatsApp chats, photos, videos, voice notes and calls. See, make, change,
 // give a face to, talk to, add files for, and delete them (deleting is only here, never by
-// chat). Debo is always honest that each one is an AI portrait. The server checks everything
+// chat). Daksha is always honest that each one is an AI portrait. The server checks everything
 // again (apps/server/src/custom-people, apps/server/src/voice-clone).
 import { FileUp, MessageCircle, Pencil, Smile, Trash2, UserRoundPlus } from "lucide-react-native";
 import { useCallback, useEffect, useState } from "react";
@@ -197,7 +197,7 @@ function PersonEditor({
         <CheckRow label="They have died" checked={d.passedAway} onPress={() => setD({ ...d, passedAway: !d.passedAway })} />
         {d.passedAway && (
           <Text style={s.small}>
-            Debo will speak gently, the way they did, and will never pretend to really be them.
+            Daksha will speak gently, the way they did, and will never pretend to really be them.
           </Text>
         )}
         <ErrorNotice error={error} />
@@ -274,7 +274,7 @@ function PersonRow({
           </Button>
         )}
         <Button small onPress={() => setOpen((v) => !v)}>
-          {open ? "Hide what Debo learned" : "What Debo learned"}
+          {open ? "Hide what Daksha learned" : "What Daksha learned"}
         </Button>
       </View>
       {open && (
@@ -305,7 +305,7 @@ function PersonRow({
       )}
       {confirm ? (
         <View style={{ gap: spacing[2] }}>
-          <Text style={s.text}>Delete {person.name} and everything Debo learned about them? This can't be undone.</Text>
+          <Text style={s.text}>Delete {person.name} and everything Daksha learned about them? This can't be undone.</Text>
           <View style={[s.row, { gap: spacing[2] }]}>
             <Button small danger icon={Trash2} onPress={onDelete}>
               Delete {person.name}
@@ -394,7 +394,7 @@ export function CustomPeopleSetting() {
       <SectionHeading title="People you made" />
       <Text style={s.muted}>
         Make someone to talk to in chat and on calls: a friend, family, a partner, someone you miss, or a made-up character.
-        Describe them, or add your WhatsApp chats, photos and videos so Debo learns how they talk. It's always an AI, and it
+        Describe them, or add your WhatsApp chats, photos and videos so Daksha learns how they talk. It's always an AI, and it
         says so if you ask. Only you can see them.
       </Text>
       <ErrorNotice error={error} onRetry={data ? undefined : () => void load()} />

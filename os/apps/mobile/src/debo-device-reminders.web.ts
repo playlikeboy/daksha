@@ -1,6 +1,6 @@
 // Web: "Send me reminders" on this browser is web push, so reminders and the morning
-// check-in arrive even when Debo's tab is closed. Works in Chrome, Edge and Firefox, and on
-// an iPhone only once Debo is added to the Home Screen.
+// check-in arrive even when Daksha's tab is closed. Works in Chrome, Edge and Firefox, and on
+// an iPhone only once Daksha is added to the Home Screen.
 //
 // The service worker (/sw.js) is registered only when the person turns this on, and the
 // browser asks for permission only then. A push carries a short title, never journal text.
@@ -33,7 +33,7 @@ async function subscription(): Promise<PushSubscription | null> {
   return (await reg?.pushManager.getSubscription().catch(() => null)) ?? null;
 }
 
-/** True when this browser is already sending Debo's reminders. */
+/** True when this browser is already sending Daksha's reminders. */
 export async function deviceRemindersOn(): Promise<boolean> {
   return Boolean(await subscription());
 }

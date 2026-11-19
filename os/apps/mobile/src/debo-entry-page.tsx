@@ -3,7 +3,7 @@
 // A written entry reads like a page. A voice note has its player, waveform and the
 // words, each timed piece of which jumps the player there. A video shows large, with
 // the words beside it (wide screens) or under it (phones). A voice call reads as a
-// conversation. Under each: what Debo learned from it, and similar entries.
+// conversation. Under each: what Daksha learned from it, and similar entries.
 import { ArrowLeft, AudioLines, BookOpen, FileText, Pencil, Phone, RotateCw, Trash2, Video } from "lucide-react-native";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { ActivityIndicator, Platform, Pressable, ScrollView, Text, View } from "react-native";
@@ -304,7 +304,7 @@ function WrittenBody({ entry, onChanged, onDeleted }: { entry: EntryView; onChan
       {confirming && (
         <DeleteConfirm
           what="entry"
-          detail="Delete this entry for good? Debo will also forget what it learned from it. This can't be undone."
+          detail="Delete this entry for good? Daksha will also forget what it learned from it. This can't be undone."
           busy={actions.busy}
           onYes={() => void actions.remove()}
           onNo={() => setConfirming(false)}
@@ -425,7 +425,7 @@ function RecordingBody({ entry, wide, onChanged, onDeleted }: { entry: EntryView
       {confirming && (
         <DeleteConfirm
           what="recording"
-          detail="Delete this recording and its words for good? The file is removed from storage and Debo forgets what it learned from it. This can't be undone."
+          detail="Delete this recording and its words for good? The file is removed from storage and Daksha forgets what it learned from it. This can't be undone."
           busy={actions.busy}
           onYes={() => void actions.remove()}
           onNo={() => setConfirming(false)}
@@ -538,7 +538,7 @@ function CallBody({ entry, onDeleted }: { entry: EntryView; onDeleted: () => voi
       {confirming ? (
         <DeleteConfirm
           what="call"
-          detail="Delete this call for good? Debo forgets what it learned from it, and the copy in Chat is deleted too. This can't be undone."
+          detail="Delete this call for good? Daksha forgets what it learned from it, and the copy in Chat is deleted too. This can't be undone."
           busy={actions.busy}
           onYes={() => void actions.remove()}
           onNo={() => setConfirming(false)}
@@ -552,7 +552,7 @@ function CallBody({ entry, onDeleted }: { entry: EntryView; onDeleted: () => voi
   );
 }
 
-// ---- What Debo learned, and similar entries ----
+// ---- What Daksha learned, and similar entries ----
 
 function LearnedFrom({ entry }: { entry: EntryView }) {
   const { api, notify } = useWorkspace();
@@ -570,7 +570,7 @@ function LearnedFrom({ entry }: { entry: EntryView }) {
     } catch (e) {
       const message = errorText(e);
       if (/not keeping memories/i.test(message)) setOff(message);
-      else setError("What Debo learned from this did not load.");
+      else setError("What Daksha learned from this did not load.");
     }
   }, [debo, entry.id]);
   // biome-ignore lint/correctness/useExhaustiveDependencies: the words changing means new memories
@@ -578,7 +578,7 @@ function LearnedFrom({ entry }: { entry: EntryView }) {
     void load();
   }, [load, entry.text]);
 
-  const heading = entry.kind === "call" ? "Saved from this call" : "What Debo learned from this";
+  const heading = entry.kind === "call" ? "Saved from this call" : "What Daksha learned from this";
   if (off) return null;
   return (
     <View style={{ gap: spacing[3] }}>
@@ -589,7 +589,7 @@ function LearnedFrom({ entry }: { entry: EntryView }) {
         <Text style={s.muted}>
           {entry.kind === "call"
             ? "Nothing from this call has been kept as a memory yet."
-            : "Nothing yet. Debo reads new entries in the background, so this can take a minute."}
+            : "Nothing yet. Daksha reads new entries in the background, so this can take a minute."}
         </Text>
       )}
       {memories?.map((m) =>

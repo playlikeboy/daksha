@@ -75,7 +75,7 @@ export async function createApp(
   options: {
     docker?: DockerRunner;
     jwks?: JWTVerifyGetKey;
-    /** Answers voice questions. Swap this one line to change Debo's voice brain. */
+    /** Answers voice questions. Swap this one line to change Daksha's voice brain. */
     voiceBrain?: VoiceBrain;
     /** Where voice settings are read from. Tests pass their own. */
     voiceEnv?: () => Record<string, string | undefined>;
@@ -146,7 +146,7 @@ export async function createApp(
   const promises = new PromiseFinder(db, debo);
   agent.promises = promises;
   debo.onEntryChange = (owner, change) => promises.onEntryChange(owner, change);
-  // A person's own AI keys, and the pictures Debo makes (kept in the recordings bucket).
+  // A person's own AI keys, and the pictures Daksha makes (kept in the recordings bucket).
   const ownKeys = options.ownKeys ?? new OwnKeysService(db, { encryptionKey: config.encryptionKey });
   agent.ownKeys = ownKeys;
   debo.ownAnthropicKey = (owner) => ownKeys.secret(owner, "anthropic");
@@ -155,7 +155,7 @@ export async function createApp(
     new ImageService(db, { store: () => debo.mediaStore, maker: imageMakerFromEnv(process.env), ownKeys });
   agent.images = images;
   // Custom people: from a description or the person's own files, which are read once and deleted.
-  // Their model calls use the person's own Anthropic key when set, otherwise Debo's.
+  // Their model calls use the person's own Anthropic key when set, otherwise Daksha's.
   // Custom people and their voice notes and calls (voice-clone/) point at each other: deleting a
   // person first deletes their recordings and voice copy, the lines kept from a recording go to
   // the person's profile, and one upkeep sweep clears every raw file under persona-uploads/.
@@ -231,7 +231,7 @@ export async function createApp(
       return c.json({ error: error.message }, 422);
     if (error instanceof SyntaxError) return c.json({ error: "Invalid request data" }, 400);
     // Provider and document errors are useful, but raw stack traces and token-bearing responses are not.
-    console.error(`[Debo] ${error.name}`);
+    console.error(`[Daksha] ${error.name}`);
     return c.json(
       {
         error:
@@ -282,13 +282,13 @@ export async function createApp(
   });
   app.get("/api/google/callback", async (c) => {
     if (c.req.query("error"))
-      return c.html("<h1>Google connection cancelled</h1><p>You can return to Debo.</p>", 400);
+      return c.html("<h1>Google connection cancelled</h1><p>You can return to Daksha.</p>", 400);
     const state = c.req.query("state"),
       code = c.req.query("code");
     if (!state || !code) throw new AppError("Google callback is incomplete");
     await google.callback(state, code);
     return c.html(
-      "<h1>Google is connected</h1><p>Return to Debo and refresh your workspace.</p>",
+      "<h1>Google is connected</h1><p>Return to Daksha and refresh your workspace.</p>",
     );
   });
   // Where the connector provider sends people after they sign in to an app. Public, fixed words.
@@ -364,7 +364,7 @@ export async function createApp(
       options.voiceEnv,
       (owner) => debo.callEnded(owner),
       // The voice and speed this person chose, sent to the agent inside the signed token.
-      // A custom person Debo is talking as can have their own voice.
+      // A custom person Daksha is talking as can have their own voice.
       async (owner) => {
         const who = await voiceCharacterOf(db, owner);
         const chosen = voiceFor(await talkSettings.get(owner).catch(() => null), who.character, who.pronoun);
@@ -599,7 +599,7 @@ export async function createApp(
     return new Response(body, { status: response.status, headers: response.headers });
   });
   app.get("/", (c) =>
-    c.json({ name: "Debo", app: "http://localhost:8081", health: "/api/health" }),
+    c.json({ name: "Daksha", app: "http://localhost:8081", health: "/api/health" }),
   );
   return { app, auth, files, actions, workspace, agent, computer, debo, connectors, mcp, voiceCopy };
 }

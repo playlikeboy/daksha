@@ -16,7 +16,7 @@ import { useWorkspace } from "./workspace";
 export type { TalkLine, TalkState, TalkStatus } from "./debo-talk-call";
 export { pillLabel, spokenStatus, stateWords } from "./debo-talk-call";
 
-/** How often the workspace is refreshed during a call, so a review Debo prepared shows up. */
+/** How often the workspace is refreshed during a call, so a review Daksha prepared shows up. */
 const REVIEW_REFRESH_MS = 6000;
 
 const Context = createContext<TalkCall | undefined>(undefined);
@@ -59,7 +59,7 @@ export function TalkSessionProvider({
     deboMood.emit({ type: "voice", state: live && !state.reconnecting && agent ? agent : "idle" });
   }, [state.agentState, live, state.reconnecting]);
 
-  // A review Debo prepares during the call (anything that sends, posts or changes) needs a tap on
+  // A review Daksha prepares during the call (anything that sends, posts or changes) needs a tap on
   // screen. Keep the workspace fresh so the minimised bar can show it.
   useEffect(() => {
     if (!state.active) return;
@@ -76,7 +76,7 @@ export function TalkSessionProvider({
       .MediaMetadata;
     if (!session || !Metadata) return;
     try {
-      session.metadata = new Metadata({ title: "Talking with Debo", artist: "Microphone on" });
+      session.metadata = new Metadata({ title: "Talking with Daksha", artist: "Microphone on" });
       session.playbackState = "playing";
     } catch {
       // Not every browser allows it. The call does not depend on it.
@@ -91,7 +91,7 @@ export function TalkSessionProvider({
     };
   }, [state.active]);
 
-  // Android: while the call is live, a notification ("Debo is listening", with End) keeps it going
+  // Android: while the call is live, a notification ("Daksha is listening", with End) keeps it going
   // in the background. It goes away when the call ends, however it ends.
   useEffect(() => {
     if (!live) return;

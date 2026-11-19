@@ -1,4 +1,4 @@
-// Debo's personal brain, as the platform sees it: one small interface over the
+// Daksha's personal brain, as the platform sees it: one small interface over the
 // shared packages (@debo/db, @debo/llm, @debo/memory, @debo/brain).
 //
 // The routes and agent tools only ever talk to DeboBackend, so tests give them
@@ -131,7 +131,7 @@ export interface DeboBackend {
   similar(owner: string, id: string, limit: number): Promise<SimilarSource[]>;
   /**
    * The one brain: the same pipeline the web app uses. With `anthropicKey` (the person's own),
-   * the answer is made on their key and Debo's daily limit does not apply.
+   * the answer is made on their key and Daksha's daily limit does not apply.
    */
   ask(
     owner: string,
@@ -157,7 +157,7 @@ export interface DeboBackend {
   };
   /**
    * Work after an entry is saved, edited or deleted: make it searchable by
-   * meaning, then let Debo remember what is in it (or forget it). Must not
+   * meaning, then let Daksha remember what is in it (or forget it). Must not
    * throw: the person's entry is already safe.
    */
   afterChange(owner: string, entryId: string, change: "saved" | "deleted"): Promise<void>;
@@ -172,7 +172,7 @@ export interface DeboBackend {
 
 type Env = Record<string, string | undefined>;
 
-/** Where the Debo tables live. DEBO_DATABASE_URL first, then DATABASE_URL. */
+/** Where the Daksha tables live. DEBO_DATABASE_URL first, then DATABASE_URL. */
 export function deboDatabaseUrl(env: Env = process.env): string | undefined {
   return env.DEBO_DATABASE_URL?.trim() || env.DATABASE_URL?.trim() || undefined;
 }
@@ -191,9 +191,9 @@ const reason = (error: unknown) => (error instanceof Error ? error.name : "unkno
 
 /**
  * The brain on a person's own Anthropic key. Answers go to Anthropic on their key only: there is
- * no fallback to Debo's gateway, so Debo never pays for them. Meaning search still uses Debo's
+ * no fallback to Daksha's gateway, so Daksha never pays for them. Meaning search still uses Daksha's
  * gateway (it is tiny, and Anthropic makes no embeddings). Their answer tokens are not counted
- * against Debo's daily limit, and the limit does not stop them.
+ * against Daksha's daily limit, and the limit does not stop them.
  */
 export function ownKeyBrain(url: string, env: Env, anthropicKey: string) {
   const theirs = createLlm({ ANTHROPIC_API_KEY: anthropicKey });
@@ -294,7 +294,7 @@ export function realBackend(url: string, env: Env): DeboBackend {
         await embedSource(owner, id);
         if (memory) {
           try {
-            // Only the person's turns can become memories; Debo's go along as context.
+            // Only the person's turns can become memories; Daksha's go along as context.
             const forgotten = await memory.forgetSource(owner, id, { keepEditedByUser: true });
             const [source] = await getSources(url, owner, [id]);
             const eventId = await memory.rememberFromConversation({

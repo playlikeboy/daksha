@@ -99,7 +99,7 @@ test("update_identity: a character's own name follows the new character", async 
   const run = toolsFor("id-c");
   await run("update_identity", { character: "diya" });
   const saved = await db.get<{ name: string; character: string }>("id-c", "agent-settings", "identity");
-  assert.equal(saved?.name, "Diya", "the default name Debo is a character name, so it follows");
+  assert.equal(saved?.name, "Diya", "the default name Daksha is a character name, so it follows");
   assert.equal(saved?.character, "diya");
 });
 

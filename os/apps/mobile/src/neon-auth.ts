@@ -4,7 +4,7 @@
  * tests can run it with a fake `fetch`.
  *
  * How a session works:
- * 1. Sign-in starts a session. Debo's Neon Auth keeps it in a cookie
+ * 1. Sign-in starts a session. Daksha's Neon Auth keeps it in a cookie
  *    (HttpOnly, Secure, SameSite=None) that the browser or the phone's network
  *    layer holds; the app never sees its value. Every request here is sent with
  *    `credentials: "include"` so that cookie travels. The app stores only the
@@ -13,7 +13,7 @@
  *    with a `set-auth-token` header; then that token is stored and sent as a Bearer.
  * 2. `GET /get-session` answers with a short-lived JWT in the `set-auth-jwt`
  *    header (the JWT plugin). `GET /token` returns the same JWT.
- * 3. The Debo API takes the JWT as its Bearer token and checks it against Neon Auth's
+ * 3. The Daksha API takes the JWT as its Bearer token and checks it against Neon Auth's
  *    public keys. It lasts 15 minutes, so the app asks for a fresh one before then.
  */
 

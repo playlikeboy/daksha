@@ -160,11 +160,11 @@ test("an OpenRouter chat model must support tools; a picture model must exist", 
   assert.equal(await f.keys.imageChoice(A), undefined, "the picture model was cleared");
 });
 
-test("which model a chat uses: Anthropic key first, OpenRouter with a chat model next, else Debo's", async () => {
+test("which model a chat uses: Anthropic key first, OpenRouter with a chat model next, else Daksha's", async () => {
   const f = await fixture();
   assert.equal(await f.keys.chatChoice(A, "anthropic/claude-haiku-5-5"), undefined);
   await f.keys.save(A, "openrouter", { key: OPENROUTER_KEY, imageModel: "google/gemini-3.1-flash-image" });
-  assert.equal(await f.keys.chatChoice(A), undefined, "a pictures-only OpenRouter key leaves chat on Debo's");
+  assert.equal(await f.keys.chatChoice(A), undefined, "a pictures-only OpenRouter key leaves chat on Daksha's");
   await f.keys.save(A, "openrouter", { model: "google/gemini-3.8-flash", imageModel: "google/gemini-3.1-flash-image" });
   assert.deepEqual(await f.keys.chatChoice(A), {
     provider: "openrouter",
@@ -256,7 +256,7 @@ test("an OpenRouter chat runs through Chat Completions on the person's key, with
   assert.ok(requests.length >= 2);
   for (const request of requests) {
     assert.equal(request.path, "/v1/chat/completions");
-    assert.equal(request.authorization, `Bearer ${OPENROUTER_KEY}`, "the person's key, not Debo's");
+    assert.equal(request.authorization, `Bearer ${OPENROUTER_KEY}`, "the person's key, not Daksha's");
     assert.match(request.body, /"model":"google\/gemini-3.8-flash"/);
   }
 });

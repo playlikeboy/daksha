@@ -497,7 +497,7 @@ test("with no Cartesia key, the voice copy says so plainly and their words are s
   assert.equal(f.cartesia.calls.length, 0, "Cartesia is never asked");
   assert.ok(!f.store.objects.has(key));
 
-  // Debo's own key (CARTESIA_API_KEY) is used when the person has none.
+  // Daksha's own key (CARTESIA_API_KEY) is used when the person has none.
   const withDebo = await fixture({ deboKey: DEBO_KEY });
   const second = await upload(withDebo, callWav());
   await withDebo.call(`/api/custom-people/${ASHA}/audio/${second.id}/labels`, { labels: { "0": "them" }, copyVoice: { consent: true } });

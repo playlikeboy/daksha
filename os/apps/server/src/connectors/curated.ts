@@ -1,12 +1,12 @@
 // The first list of apps people see. The slugs were checked against the provider's
-// catalogue. Each line says only what Debo does for real: it can look things up, and
+// catalogue. Each line says only what Daksha does for real: it can look things up, and
 // anything that changes something waits for the person's yes.
 
 export interface Curated {
   slug: string;
   name: string;
   blurb: string;
-  /** Debo's built-in Google connection already reaches this app. */
+  /** Daksha's built-in Google connection already reaches this app. */
   google?: boolean;
 }
 
@@ -99,5 +99,5 @@ export const CURATED: Curated[] = [
 
 /** The line for an app that is not in the first list. */
 export function genericBlurb(name: string) {
-  return `Debo can look things up in ${name} for you. ${ASK}`;
+  return `Daksha can look things up in ${name} for you. ${ASK}`;
 }

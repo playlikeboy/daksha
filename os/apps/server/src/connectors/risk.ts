@@ -63,7 +63,7 @@ export function classifyRisk(tool: Pick<ToolMeta, "slug" | "tags">): Risk {
   return "write";
 }
 
-/** Meta tools of the provider (code runners, shells) are never reachable from Debo. */
+/** Meta tools of the provider (code runners, shells) are never reachable from Daksha. */
 export function isMetaTool(slug: string) {
   return slug.toUpperCase().startsWith("COMPOSIO_");
 }

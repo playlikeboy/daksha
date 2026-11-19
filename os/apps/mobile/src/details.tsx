@@ -278,7 +278,7 @@ function EmailEditor({ draft }: { draft?: Partial<EmailDraft> & { id?: string } 
           ...(draft?.id ? { id: draft.id } : {}),
         });
         await refresh();
-        notify("Draft saved in Debo.");
+        notify("Draft saved in Daksha.");
         close();
       }
     } catch (e) {
@@ -290,7 +290,7 @@ function EmailEditor({ draft }: { draft?: Partial<EmailDraft> & { id?: string } 
   return (
     <Sheet
       title={draft?.threadId ? "Write a reply" : "A new message"}
-      subtitle={`From ${w.profile.email} · saved privately in Debo`}
+      subtitle={`From ${w.profile.email} · saved privately in Daksha`}
       onClose={close}
     >
       <Field
@@ -618,9 +618,9 @@ function ReviewDetail({ initial }: { initial: ActionProposal }) {
       title={pending ? "One last look" : action.title}
       subtitle={
         journal
-          ? "Debo only saves this to your journal if you say yes."
+          ? "Daksha only saves this to your journal if you say yes."
           : connector
-            ? `Debo only does this in ${appName} if you say yes.`
+            ? `Daksha only does this in ${appName} if you say yes.`
             : w.mode === "sample"
             ? "This action stays in your local workspace."
             : "Review this exact action before it changes your connected account."
@@ -654,7 +654,7 @@ function ReviewDetail({ initial }: { initial: ActionProposal }) {
             )}
             <Text style={s.small}>
               {String(d.toolkit).startsWith("mcp:")
-                ? `${appName} is a tool server you added. It receives exactly the values above, and Debo does not control what it does with them.`
+                ? `${appName} is a tool server you added. It receives exactly the values above, and Daksha does not control what it does with them.`
                 : d.risk === "destructive"
                   ? `This can delete something in ${appName}, and it may not be possible to undo.`
                   : `This changes something in ${appName}.`}

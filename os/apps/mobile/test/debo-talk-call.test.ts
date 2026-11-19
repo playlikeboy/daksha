@@ -85,7 +85,7 @@ test("End from the bar ends the call and turns the microphone off", async () => 
   assert.equal(call.getSnapshot().status, "idle");
 });
 
-test("when Debo hangs up behind a collapsed popup, the person is told and the call is cleared", async () => {
+test("when Daksha hangs up behind a collapsed popup, the person is told and the call is cleared", async () => {
   const { call, log } = rig();
   await call.start();
   call.popupOpen(false);
@@ -162,7 +162,7 @@ test("the minimised bar always says whether the microphone is on", () => {
   const off = pillLabel({ status: "live", micOn: false, agentState: "listening", reconnecting: false });
   assert.match(on, /Microphone on/);
   assert.match(off, /Microphone off/);
-  assert.match(on, /Talking with Debo/);
+  assert.match(on, /Talking with Daksha/);
 });
 
 test("reviews that need a tap on screen can be found while minimised", () => {

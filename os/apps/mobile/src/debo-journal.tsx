@@ -19,7 +19,7 @@ import { rememberEntryName } from "./routes";
 import { Button, Card, colors, Empty, ErrorNotice, Field, s, screenGap, Skeleton, spacing } from "./ui";
 import { useWorkspace } from "./workspace";
 
-/** Shown when there is no Debo database, a plain "not set up" instead of a failure. */
+/** Shown when there is no Daksha database, a plain "not set up" instead of a failure. */
 export function NotSetUp({ status, what }: { status?: DeboStatus; what: string }) {
   return (
     <Empty
@@ -27,7 +27,7 @@ export function NotSetUp({ status, what }: { status?: DeboStatus; what: string }
       title={`${what} is not set up yet`}
       detail={
         status?.message ??
-        "Your journal is not set up yet. Whoever runs this Debo needs to turn it on. Until then, nothing can be saved here."
+        "Your journal is not set up yet. Whoever runs this Daksha needs to turn it on. Until then, nothing can be saved here."
       }
     />
   );
@@ -96,7 +96,7 @@ function JournalList() {
   return (
     <View style={{ gap: screenGap }}>
       <Text style={s.muted}>
-        Write, speak or record. Only you can read your entries. Debo uses them to answer your questions, and shows which
+        Write, speak or record. Only you can read your entries. Daksha uses them to answer your questions, and shows which
         entry each answer came from.
       </Text>
       <ErrorNotice error={error} onRetry={retry} />
@@ -144,7 +144,7 @@ function JournalList() {
         <Empty
           icon={BookOpen}
           title="Nothing here yet"
-          detail="Start small: write one line about today, like who you saw or what you ate, or record a short voice note. Then you can ask Debo about it."
+          detail="Start small: write one line about today, like who you saw or what you ate, or record a short voice note. Then you can ask Daksha about it."
         />
       ) : (
         <View accessibilityRole="list" style={{ gap: spacing[3] }}>
@@ -350,10 +350,10 @@ function EntryCard({
         <View accessibilityRole="alert" style={{ gap: spacing[2] }}>
           <Text style={s.text}>
             {call
-              ? "Delete this call for good? Debo forgets what it learned from it, and the copy in Chat is deleted too. This can't be undone."
+              ? "Delete this call for good? Daksha forgets what it learned from it, and the copy in Chat is deleted too. This can't be undone."
               : recording
-              ? "Delete this recording and its words for good? The file is removed from storage and Debo forgets what it learned from it. This can't be undone."
-              : "Delete this entry for good? Debo will also forget what it learned from it. This can't be undone."}
+              ? "Delete this recording and its words for good? The file is removed from storage and Daksha forgets what it learned from it. This can't be undone."
+              : "Delete this entry for good? Daksha will also forget what it learned from it. This can't be undone."}
           </Text>
           <View style={[s.row, { gap: spacing[2], flexWrap: "wrap" }]}>
             <Button

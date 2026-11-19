@@ -8,7 +8,7 @@
 //   5. each video's sound is written out by Whisper;
 //   6. one model call builds the profile; only the chosen sender's own lines become examples;
 //   7. the raw files are deleted from the bucket, on success and on failure.
-// Model calls use the person's own Anthropic key if they set one, otherwise Debo's.
+// Model calls use the person's own Anthropic key if they set one, otherwise Daksha's.
 // Never log names, messages, transcripts or photo descriptions. Ids and counts only.
 import { mkdtemp, readFile, rm } from "node:fs/promises";
 import { tmpdir } from "node:os";
@@ -46,7 +46,7 @@ export interface CustomPeopleDeps {
   db: Store;
   /** The private media bucket. A function: it is known only once the journal is set up. */
   store: () => ObjectStore | undefined;
-  /** The model for one person (their own key, or Debo's). Undefined when none is set up. */
+  /** The model for one person (their own key, or Daksha's). Undefined when none is set up. */
   model: (owner: string) => Promise<PersonModel | undefined>;
   transcriber?: () => Transcriber | undefined;
   audio?: () => AudioTools | undefined;
@@ -75,7 +75,7 @@ export interface SpokenLine {
 }
 
 const Sender = z.object({ sender: z.string().trim().min(1).max(80) });
-const NOT_SET_UP = "Building people from your files is not set up on this Debo yet. You can still describe them in words.";
+const NOT_SET_UP = "Building people from your files is not set up on this Daksha yet. You can still describe them in words.";
 const GONE = "I couldn't find that person. They may have been deleted.";
 
 const fail = (message: string) => Object.assign(new Error(message), { name: "ReadError" });
@@ -123,7 +123,7 @@ export class CustomPeopleService {
       await this.deps.db.remove(owner, UPLOADS_KIND, session.id);
     }
     await this.deps.beforeRemove?.(owner, person);
-    // If they were the one Debo was talking as, Debo goes back to being herself.
+    // If they were the one Daksha was talking as, Daksha goes back to being herself.
     const personas = new PersonaStore(this.deps.db);
     if ((await personas.get(owner))?.customPersonId === id) await personas.clear(owner);
     await this.people.remove(owner, id);
@@ -208,7 +208,7 @@ export class CustomPeopleService {
     });
   }
 
-  /** Make this custom person the one Debo talks as, in chat and on calls. */
+  /** Make this custom person the one Daksha talks as, in chat and on calls. */
   async talkAs(owner: string, id: string) {
     const person = await this.person(owner, id);
     await new PersonaStore(this.deps.db).setCustom(owner, person);
@@ -431,7 +431,7 @@ export class CustomPeopleService {
           }
           session = await this.save(owner, session, { videos: "done" });
         } else {
-          session = await this.save(owner, session, { videos: "skipped" }, { id: "videos", text: "Writing out speech is not set up on this Debo" });
+          session = await this.save(owner, session, { videos: "skipped" }, { id: "videos", text: "Writing out speech is not set up on this Daksha" });
         }
       }
 

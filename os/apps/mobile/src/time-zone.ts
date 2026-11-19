@@ -1,5 +1,5 @@
 /**
- * The device's time zone, sent with every request so Debo's "today" is the person's
+ * The device's time zone, sent with every request so Daksha's "today" is the person's
  * today. The server keeps the last one for reminders (see apps/server/src/time-zone.ts).
  */
 export const TIME_ZONE_HEADER = "X-Time-Zone";

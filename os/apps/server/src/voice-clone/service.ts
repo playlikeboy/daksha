@@ -36,9 +36,9 @@ import { pickClipRanges, writeWav } from "./wav.ts";
 // ---- Words the person agrees to. Saved with each tick, so the record shows exactly what was said. ----
 
 export const AUDIO_CONSENT =
-  "I'm allowed to use these recordings, and it's for my own private use. I understand Debo will separate the voices, keep only this person's words, and delete the recordings.";
+  "I'm allowed to use these recordings, and it's for my own private use. I understand Daksha will separate the voices, keep only this person's words, and delete the recordings.";
 export const VOICE_COPY_CONSENT =
-  "I have this person's permission to copy their voice, or I'm close family and they have died. They are not a public figure, actor or character. The copied voice is only for my own calls in Debo.";
+  "I have this person's permission to copy their voice, or I'm close family and they have died. They are not a public figure, actor or character. The copied voice is only for my own calls in Daksha.";
 
 // ---- Limits ----
 
@@ -58,7 +58,7 @@ const CLONES = "voice-clones";
 const CONSENTS = "voice-consents";
 
 export const NOT_SET_UP =
-  "Adding voice notes and calls is not set up yet. Whoever runs this Debo needs to turn on recordings and speaker separation.";
+  "Adding voice notes and calls is not set up yet. Whoever runs this Daksha needs to turn on recordings and speaker separation.";
 export const NEEDS_KEY =
   "A voice copy needs a Cartesia key. Add your own in Settings, under Advanced: use your own keys. Their words from these recordings are still used.";
 const GONE = "I couldn't find that recording. It may have been finished or deleted already.";
@@ -99,7 +99,7 @@ export interface VoiceClone {
   id: string;
   personId: string;
   cartesiaVoiceId: string;
-  /** Whose Cartesia account holds it: the person's own key, or Debo's. */
+  /** Whose Cartesia account holds it: the person's own key, or Daksha's. */
   keySource: "own" | "debo";
   language: (typeof CLONE_LANGUAGES)[number];
   consentId: string;
@@ -135,7 +135,7 @@ export interface VoiceCopyDeps {
   glue: CustomPeopleGlue;
   /** The person's own Cartesia key (own-keys), if set. Server only. */
   ownCartesiaKey: (owner: string) => Promise<string | undefined>;
-  /** CARTESIA_API_KEY, if the owner of this Debo set one. */
+  /** CARTESIA_API_KEY, if the owner of this Daksha set one. */
   deboCartesiaKey?: string;
   fetchImpl?: typeof fetch;
   /** Run work after the answer is sent. */
@@ -421,7 +421,7 @@ export class VoiceCopyService {
         apiKey: key.apiKey,
         clip,
         // A made-up label: the person's name never goes to Cartesia.
-        name: `Debo voice ${personId.slice(0, 8)}`,
+        name: `Daksha voice ${personId.slice(0, 8)}`,
         language: lang,
         fetchImpl: this.deps.fetchImpl,
       });
@@ -497,7 +497,7 @@ export class VoiceCopyService {
       : {
           removed: true,
           message:
-            "I removed the voice copy from Debo, but couldn't reach Cartesia to delete it there, because its key is gone. If you used your own key, delete the voice in your Cartesia account.",
+            "I removed the voice copy from Daksha, but couldn't reach Cartesia to delete it there, because its key is gone. If you used your own key, delete the voice in your Cartesia account.",
         };
   }
 
@@ -539,7 +539,7 @@ export class VoiceCopyService {
 
   /**
    * For the voice agent only (over its secret channel): the copied voice of the
-   * custom person Debo is talking as, with the key to speak it. Null otherwise.
+   * custom person Daksha is talking as, with the key to speak it. Null otherwise.
    * Never sent to the app.
    */
   async callVoice(owner: string): Promise<CallVoice | null> {
@@ -617,7 +617,7 @@ export class VoiceCopyService {
     await store.delete(record.objectKey);
   }
 
-  /** Which key makes a new voice copy: the person's own first, else Debo's. */
+  /** Which key makes a new voice copy: the person's own first, else Daksha's. */
   private async keyToMake(owner: string): Promise<{ apiKey: string; source: VoiceClone["keySource"] } | undefined> {
     const own = await this.deps.ownCartesiaKey(owner);
     if (own) return { apiKey: own, source: "own" };
@@ -652,7 +652,7 @@ export class VoiceCopyService {
   }
 
   private log(event: string, fields: Record<string, unknown>) {
-    (this.deps.log ?? ((entry) => console.info("[Debo]", JSON.stringify(entry))))({ event, ...fields });
+    (this.deps.log ?? ((entry) => console.info("[Daksha]", JSON.stringify(entry))))({ event, ...fields });
   }
 }
 

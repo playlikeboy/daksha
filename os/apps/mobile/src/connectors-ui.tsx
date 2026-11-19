@@ -1,6 +1,6 @@
 // "Connect your apps" on the Apps screen, and the chat cards for connected-app tool calls.
-// Debo reaches these apps through Composio. The person signs in on the app's own page, and
-// Debo never sees the password. Colours and sizes come from ui.tsx tokens only.
+// Daksha reaches these apps through Composio. The person signs in on the app's own page, and
+// Daksha never sees the password. Colours and sizes come from ui.tsx tokens only.
 import { Link2, Search, ShieldCheck } from "lucide-react-native";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { ActivityIndicator, AppState, Image, Platform, Text, View } from "react-native";
@@ -87,7 +87,7 @@ export function ConnectAppsSection({ query }: { query: string }) {
   }, [watching, refresh]);
 
   // One search box for the whole screen. Words narrow the first list at once, and also look
-  // through every app Debo can reach, a page at a time.
+  // through every app Daksha can reach, a page at a time.
   const text = query.trim();
   const searching = text.length >= 2;
   const key = `${searching ? text : ""}|${category ?? ""}`;
@@ -187,7 +187,7 @@ export function ConnectAppsSection({ query }: { query: string }) {
         <Text style={s.heading}>Connect your apps</Text>
         <Card style={{ backgroundColor: colors.subtle, gap: spacing[2] }}>
           <Text style={s.text}>{overview.message ?? "Connecting apps is not set up yet."}</Text>
-          <Text style={s.small}>Whoever runs this Debo needs to turn it on. Nothing else is affected.</Text>
+          <Text style={s.small}>Whoever runs this Daksha needs to turn it on. Nothing else is affected.</Text>
         </Card>
       </View>
     );
@@ -227,7 +227,7 @@ export function ConnectAppsSection({ query }: { query: string }) {
     <View style={{ gap: spacing[3] }} accessibilityLabel="Connect your apps">
       <Text style={s.heading}>Connect your apps</Text>
       <Text style={s.muted}>
-        Debo can use these apps for you. You sign in on the app’s own page, so Debo never sees your
+        Daksha can use these apps for you. You sign in on the app’s own page, so Daksha never sees your
         password. Looking things up is free. Anything that sends, posts or changes something waits
         for your yes.
       </Text>
@@ -237,7 +237,7 @@ export function ConnectAppsSection({ query }: { query: string }) {
           row({
             slug: c.toolkit,
             name: c.name,
-            blurb: "Connected. Debo can look things up here.",
+            blurb: "Connected. Daksha can look things up here.",
             connectable: true,
           }),
         )}
@@ -391,8 +391,8 @@ function AppRow({
           )}
           {!item.connectable && !connection && (
             <Text style={s.small}>
-              Can’t be connected from Debo yet. This app needs its own sign-in set up first by
-              whoever runs this Debo, so there is nothing to tap.
+              Can’t be connected from Daksha yet. This app needs its own sign-in set up first by
+              whoever runs this Daksha, so there is nothing to tap.
             </Text>
           )}
         </View>
@@ -400,7 +400,7 @@ function AppRow({
       {confirming && connection ? (
         <View accessibilityRole="alert" style={{ gap: spacing[2] }}>
           <Text style={s.text}>
-            Disconnect {connection.name}? Debo will stop using it, and the sign-in held for Debo is
+            Disconnect {connection.name}? Daksha will stop using it, and the sign-in held for Daksha is
             deleted. You can connect it again any time.
           </Text>
           <View style={[s.row, { gap: spacing[2], flexWrap: "wrap" }]}>

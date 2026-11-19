@@ -122,7 +122,7 @@ function ProviderKey({
     setNote("");
     try {
       await api.request(`/api/own-keys/${provider}`, undefined, "DELETE");
-      setNote("Key removed. Debo's own account is used again.");
+      setNote("Key removed. Daksha's own account is used again.");
       await onChanged();
     } catch (e) {
       setError(errorText(e));
@@ -162,7 +162,7 @@ function ProviderKey({
             choices={reply.choices.openrouterImages}
             value={imageModel}
             onChange={setImageModel}
-            noneLabel="Debo's own"
+            noneLabel="Daksha's own"
           />
         </>
       )}
@@ -221,16 +221,16 @@ export function OwnKeysSetting() {
         <View style={{ gap: spacing[3] }}>
           <Text style={s.muted}>
             Most people never need this. If you have your own AI account, paste its key here. Then your chats, calls
-            and pictures use your account, under that company's terms, and you pay them for it. Debo's daily limits
+            and pictures use your account, under that company's terms, and you pay them for it. Daksha's daily limits
             don't apply to what runs on your key. Keys are checked before they are saved, stored encrypted, and never shown again.
             Removing a key deletes it.
           </Text>
           <Text style={s.small}>
-            On calls, your key is used for what she says. Hearing you and speaking out loud stay on Debo's voice
+            On calls, your key is used for what she says. Hearing you and speaking out loud stay on Daksha's voice
             service, except a copied voice of one of your custom people, which uses your Cartesia key.
           </Text>
           {reply && !reply.available ? (
-            <Text style={s.small}>This Debo can't store keys safely yet, so keys can't be saved here.</Text>
+            <Text style={s.small}>This Daksha can't store keys safely yet, so keys can't be saved here.</Text>
           ) : null}
           {reply ? (
             <>

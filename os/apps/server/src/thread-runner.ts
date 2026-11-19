@@ -71,7 +71,7 @@ export function replayEvents(events: readonly BaseEvent[]): BaseEvent[] {
 }
 
 /**
- * Runs the agent and saves every finished run to Debo's own database, so a conversation
+ * Runs the agent and saves every finished run to Daksha's own database, so a conversation
  * can be replayed after a restart. Live state (a reply still streaming) stays in memory.
  * Keys include the owner, so one person can never replay or stop another person's thread.
  */

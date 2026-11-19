@@ -1,4 +1,4 @@
-// What Debo sends on her own, checked once a minute by the server's upkeep loop:
+// What Daksha sends on her own, checked once a minute by the server's upkeep loop:
 //
 //   Birthdays and special days  From People in your life: the day before at 18:00 and the
 //                               morning of at 08:00, in the person's own time zone. On unless

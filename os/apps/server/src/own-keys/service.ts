@@ -1,5 +1,5 @@
 // A person's own AI keys ("Advanced: use your own keys" in Settings). With one set, their chats,
-// calls and pictures go to that provider on their account, instead of on Debo's.
+// calls and pictures go to that provider on their account, instead of on Daksha's.
 //
 // The rules, in order of importance:
 //   1. A key is stored encrypted (TOKEN_ENCRYPTION_KEY), in the same `credentials` records as
@@ -114,7 +114,7 @@ export class OwnKeysService {
     this.fetcher = options.fetcher ?? fetch;
   }
 
-  /** Whether this Debo can keep keys at all. */
+  /** Whether this Daksha can keep keys at all. */
   get available() {
     return Boolean(this.options.encryptionKey);
   }
@@ -131,7 +131,7 @@ export class OwnKeysService {
 
   async save(owner: string, provider: KeyProvider, input: SaveInput) {
     if (!this.options.encryptionKey)
-      throw new AppError("This Debo can't store keys safely yet, so it can't save one.", 503);
+      throw new AppError("This Daksha can't store keys safely yet, so it can't save one.", 503);
     if (!this.saves.take(owner, Date.now()))
       throw new AppError("You have tried a lot of keys just now. Wait a few minutes, then try again.", 429);
     const existing = await this.db.get<OwnKeyRow>(owner, KIND, provider);
@@ -204,7 +204,7 @@ export class OwnKeysService {
 
   /**
    * Which model this person's chat and calls use. An Anthropic key comes first. An OpenRouter
-   * key is used for chat only when a chat model was picked for it. Undefined: Debo's own.
+   * key is used for chat only when a chat model was picked for it. Undefined: Daksha's own.
    */
   async chatChoice(owner: string, debosModel?: string): Promise<ChatChoice | undefined> {
     const rows = new Map((await this.list(owner)).map((row) => [row.id, row]));
@@ -264,7 +264,7 @@ export class OwnKeysService {
       const tools = body?.data?.endpoints?.some((e) => e.supported_parameters?.includes("tools"));
       if (!tools)
         throw new AppError(
-          `"${model}" can't use tools. Debo needs tools to read your journal, save things and make pictures, so pick a model that supports them.`,
+          `"${model}" can't use tools. Daksha needs tools to read your journal, save things and make pictures, so pick a model that supports them.`,
           400,
         );
     }
@@ -288,6 +288,6 @@ export class OwnKeysService {
   }
 
   private log(event: string, fields: Record<string, unknown>) {
-    (this.options.log ?? ((entry) => console.info("[Debo]", JSON.stringify(entry))))({ event, ...fields });
+    (this.options.log ?? ((entry) => console.info("[Daksha]", JSON.stringify(entry))))({ event, ...fields });
   }
 }

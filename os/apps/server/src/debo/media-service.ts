@@ -110,7 +110,7 @@ export class MediaService {
     private readonly media: DeboMediaDb,
     private readonly deps: MediaDeps,
     private readonly hooks: {
-      /** The transcript is saved: make it searchable and let Debo remember it. */
+      /** The transcript is saved: make it searchable and let Daksha remember it. */
       afterTranscript(owner: string, sourceId: string): Promise<void>;
       later(work: Promise<void>): void;
     },

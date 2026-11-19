@@ -160,9 +160,9 @@ test("talking to a face: the identity must point at one of the person's own face
     const { avatar } = await made.json();
 
     // No face, or someone else's id: refused, nothing changes.
-    assert.equal((await call("/api/agent/identity", "POST", { name: "Debo", tone: "warm", character: "custom" })).status, 422);
+    assert.equal((await call("/api/agent/identity", "POST", { name: "Daksha", tone: "warm", character: "custom" })).status, 422);
     assert.equal(
-      (await call("/api/agent/identity", "POST", { name: "Debo", tone: "warm", character: "custom", customAvatar: "not-mine" })).status,
+      (await call("/api/agent/identity", "POST", { name: "Daksha", tone: "warm", character: "custom", customAvatar: "not-mine" })).status,
       422,
     );
     const ok = await call("/api/agent/identity", "POST", { name: "Bittu", tone: "warm", character: "custom", customAvatar: avatar.id });
@@ -177,7 +177,7 @@ test("talking to a face: the identity must point at one of the person's own face
     const talk = await (await call("/api/talk-settings")).json();
     assert.equal(talk.voice.voice, CUSTOM_VOICES.he);
 
-    // Deleting the face in use goes back to Debo.
+    // Deleting the face in use goes back to Daksha.
     await call(`/api/custom-avatars/${avatar.id}`, "DELETE");
     const after = ((await (await call("/api/agent")).json()) as AgentWorkspace).identity;
     assert.equal(after.character, "debo");

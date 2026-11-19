@@ -1,12 +1,12 @@
-// Debo as a daily companion: the people in someone's life, and a short check-in for the day.
+// Daksha as a daily companion: the people in someone's life, and a short check-in for the day.
 //
-//   note_person     write  Inside Debo only, so it saves at once (decision 28). Adds a person,
+//   note_person     write  Inside Daksha only, so it saves at once (decision 28). Adds a person,
 //                          or adds to one already saved. Never removes anything.
 //   list_people     read   Everyone saved, with birthdays and special days coming up.
-//   daily_checkin   read   Today's brief from what Debo already holds: days coming up, tasks
+//   daily_checkin   read   Today's brief from what Daksha already holds: days coming up, tasks
 //                          that wait for the person, goals, and recent entries worth asking about.
 //
-// Everything here reads only the person's own data in Debo. Nothing is sent anywhere new:
+// Everything here reads only the person's own data in Daksha. Nothing is sent anywhere new:
 // the results go to the same assistant model as every other chat tool result.
 // Removing a person is done by the person in the app, never by a chat tool.
 import { defineTool } from "@copilotkit/runtime/v2";
@@ -61,7 +61,7 @@ function partOfDay(hour: number): Checkin["partOfDay"] {
 }
 
 /**
- * Builds the brief from data Debo already holds. Reads only this owner's rows.
+ * Builds the brief from data Daksha already holds. Reads only this owner's rows.
  * A part that fails is left out and named in `gaps`, never reported as empty.
  */
 export async function buildCheckin(
@@ -93,7 +93,7 @@ export async function buildCheckin(
       const since = now.getTime() - FOLLOW_UP_DAYS * 86_400_000;
       const entries = await deps.debo.listEntries(owner, { limit: 20 });
       followUps = entries
-        // A call mixes Debo's lines with the person's; only their own entries are followed up.
+        // A call mixes Daksha's lines with the person's; only their own entries are followed up.
         .filter((e) => e.kind !== "call" && Date.parse(e.happenedAt) >= since && e.text.trim())
         .slice(0, FOLLOW_UP_MAX)
         .map((e) => ({
@@ -103,7 +103,7 @@ export async function buildCheckin(
           excerpt: e.text.length > EXCERPT ? `${e.text.slice(0, EXCERPT - 1)}…` : e.text,
         }));
     } catch (error) {
-      // Not a Debo account: there is simply no journal to follow up on.
+      // Not a Daksha account: there is simply no journal to follow up on.
       if (!(error instanceof AppError)) gaps.push("journal");
     }
   }
@@ -147,7 +147,7 @@ export function companionTools(
     defineTool({
       name: "note_person",
       description:
-        "Save someone in the person's life, or add to someone already saved under the same name. Use only what the person said. Fields: name; relation ('Mum', 'best friend'); birthday as MM-DD or YYYY-MM-DD; addDate {label, date} for another special day such as an anniversary; addNote for one short thing worth remembering (likes, what is going on for them). Saves at once inside Debo; never removes anything.",
+        "Save someone in the person's life, or add to someone already saved under the same name. Use only what the person said. Fields: name; relation ('Mum', 'best friend'); birthday as MM-DD or YYYY-MM-DD; addDate {label, date} for another special day such as an anniversary; addNote for one short thing worth remembering (likes, what is going on for them). Saves at once inside Daksha; never removes anything.",
       parameters: notePersonInput,
       execute: async (args) => {
         signal?.throwIfAborted();
@@ -189,7 +189,7 @@ export function companionTools(
     defineTool({
       name: "daily_checkin",
       description:
-        "Read-only. A short brief for the person's day from what Debo already holds: birthdays and special days this week, tasks that wait for them, active goals, and entries from the last week worth asking about (with source labels). The time zone the person's app sends is used; timeZone (IANA, for example Asia/Kolkata) is only a fallback when the app has not sent one, and UTC after that.",
+        "Read-only. A short brief for the person's day from what Daksha already holds: birthdays and special days this week, tasks that wait for them, active goals, and entries from the last week worth asking about (with source labels). The time zone the person's app sends is used; timeZone (IANA, for example Asia/Kolkata) is only a fallback when the app has not sent one, and UTC after that.",
       parameters: checkinInput,
       execute: async (args) => {
         signal?.throwIfAborted();

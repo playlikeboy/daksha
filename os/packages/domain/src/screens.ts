@@ -42,13 +42,13 @@ export const appScreenInfo: Record<AppScreen, { title: string; where: string }> 
     where: "Menu, then Voice, personality and notes, then Your own keys",
   },
   apps: { title: "Apps and settings", where: "Menu, then Apps & settings" },
-  knows: { title: "What Debo knows", where: "Menu, then Voice, personality and notes, then What Debo knows" },
+  knows: { title: "What Daksha knows", where: "Menu, then Voice, personality and notes, then What Daksha knows" },
   journal: { title: "Journal", where: "The Journal tab" },
   activity: { title: "Activity", where: "The Activity screen" },
   goals: { title: "Goals", where: "The Goals screen" },
   files: { title: "Files", where: "Menu, then Files" },
   calendar: { title: "Calendar", where: "Menu, then Calendar" },
-  computer: { title: "Debo's computer", where: "Menu, then Debo's computer" },
+  computer: { title: "Daksha's computer", where: "Menu, then Daksha's computer" },
   "avatar-builder": {
     title: "Make your own face",
     where: "Apps & settings, then Name, voice and notes, then Make your own",
@@ -60,6 +60,6 @@ export const appScreenInfo: Record<AppScreen, { title: string; where: string }> 
   "custom-person-upload": {
     title: "Add chats, photos and recordings",
     where:
-      "Menu, then Voice, personality and notes, then People you made: Add chats and photos, or What Debo learned for voice notes and calls",
+      "Menu, then Voice, personality and notes, then People you made: Add chats and photos, or What Daksha learned for voice notes and calls",
   },
 };

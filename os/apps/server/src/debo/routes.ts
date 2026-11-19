@@ -1,4 +1,4 @@
-// REST routes for Debo's personal brain, mounted at /api/debo.
+// REST routes for Daksha's personal brain, mounted at /api/debo.
 // Every route works on the signed-in owner only (c.get("owner")), checks input
 // with Zod, and never logs entry text, questions, answers or memories.
 import { UNKNOWN_MESSAGE } from "@debo/brain";
@@ -19,11 +19,11 @@ export function deboRoutes(debo: DeboService) {
       return c.json(ErrorBody(error.issues.map((i) => i.message).join("; ")), 422);
     if (error instanceof AppError) return c.json(ErrorBody(error.message), error.status);
     if (error instanceof SyntaxError) return c.json(ErrorBody("Invalid request data"), 400);
-    console.error(`[Debo] ${error.name}`);
+    console.error(`[Daksha] ${error.name}`);
     return c.json(ErrorBody("I couldn't do that just now. Try again in a moment."), 502);
   });
 
-  /** What is set up. Safe to call without a Debo database. */
+  /** What is set up. Safe to call without a Daksha database. */
   app.get("/status", (c) => c.json(debo.status()));
 
   // ---- Journal ----
@@ -106,7 +106,7 @@ export function deboRoutes(debo: DeboService) {
     });
   });
 
-  // ---- What Debo knows ----
+  // ---- What Daksha knows ----
   app.get("/memories", async (c) => c.json({ memories: await debo.listMemories(c.get("owner")) }));
   app.put("/memories/:id", async (c) => {
     await debo.fixMemory(c.get("owner"), c.req.param("id"), await c.req.json());
@@ -117,7 +117,7 @@ export function deboRoutes(debo: DeboService) {
     return c.json({ ok: true });
   });
 
-  // ---- What Debo did ----
+  // ---- What Daksha did ----
   app.get("/activity", async (c) => c.json({ activity: await debo.listActivity(c.get("owner")) }));
 
   return app;

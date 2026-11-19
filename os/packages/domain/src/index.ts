@@ -134,12 +134,12 @@ export const eventDraftSchema = z
   });
 export const proposalSchema = z.discriminatedUnion("kind", [
   z.object({ kind: z.literal("email.send"), data: emailDraftSchema }),
-  // Saving to the person's Debo journal. Lives inside Debo, so it needs no Google account.
+  // Saving to the person's Daksha journal. Lives inside Daksha, so it needs no Google account.
   z.object({
     kind: z.literal("journal.add"),
     data: z.object({ text: z.string().trim().min(1).max(20000) }),
   }),
-  // One change in an app the person connected through Debo's connectors (Slack, Notion...).
+  // One change in an app the person connected through Daksha's connectors (Slack, Notion...).
   // The server fills `headline` and `lines` from the exact arguments, so the review shows
   // what will happen, and the arguments are part of the proposal hash.
   z.object({

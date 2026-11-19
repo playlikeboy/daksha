@@ -2,7 +2,7 @@
 // only line: the tool description tells the model to say no first, and the picture service
 // has its own safety filter. This catches the clearest cases in plain words.
 //
-// It refuses: anything sexual (Debo makes no sexual pictures at all, so nothing sexual can ever
+// It refuses: anything sexual (Daksha makes no sexual pictures at all, so nothing sexual can ever
 // involve a child), and pictures meant to deceive (fake documents, fake news photos, deepfakes).
 
 const SEXUAL =

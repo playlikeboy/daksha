@@ -1,4 +1,4 @@
-// How Debo's face feels about what is happening.
+// How Daksha's face feels about what is happening.
 //
 // This file is only a decision: given an event and the current state, which
 // pose should the face show? It never touches an answer. Moods are animation,
@@ -6,7 +6,7 @@
 //
 // Rules of the road:
 //  - No network and no extra AI call. Tone is read with the small table
-//    below, so anyone can see exactly what makes Debo smile or pout.
+//    below, so anyone can see exactly what makes Daksha smile or pout.
 //  - Serious moments are always calm: an error the person must act on,
 //    deleting data, the privacy text, and anything that sounds sad or scared.
 //  - Playful sulking stays light. It never blames, never guilts, and melts
@@ -61,7 +61,7 @@ export type Tone =
 // ---------------------------------------------------------------------------
 export const toneRules: { tone: Tone; cues: string[] }[] = [
   {
-    // Sad or scared words. Debo stays calm and gentle. This row wins over every other row.
+    // Sad or scared words. Daksha stays calm and gentle. This row wins over every other row.
     tone: "distress",
     cues: [
       "sad", "depressed", "depression", "hopeless", "worthless", "lonely", "alone", "grief",
@@ -75,7 +75,7 @@ export const toneRules: { tone: Tone; cues: string[] }[] = [
     ],
   },
   {
-    // Heavy words. Louder than "rude": repeated use makes Debo cross for a moment.
+    // Heavy words. Louder than "rude": repeated use makes Daksha cross for a moment.
     tone: "abuse",
     cues: [
       "fuck", "fucking", "shit", "bitch", "asshole", "bastard", "dumbass", "piece of shit",
@@ -102,7 +102,7 @@ export const toneRules: { tone: Tone; cues: string[] }[] = [
     ],
   },
   {
-    // Praise and love. Debo goes shy.
+    // Praise and love. Daksha goes shy.
     tone: "praise",
     cues: [
       "good job", "well done", "great job", "nice work", "you're the best", "youre the best",
@@ -199,12 +199,12 @@ export interface MoodState {
   pending?: Mood;
   /** The mood that follows when this one ends. Used so "angry" melts into "pouty". */
   then?: { mood: Mood; hold: number };
-  /** How cross the person has made Debo lately. Any kind or neutral message resets it. */
+  /** How cross the person has made Daksha lately. Any kind or neutral message resets it. */
   strikes: number;
-  /** True while Debo must stay calm: errors to act on, deleting, privacy, sad messages. */
+  /** True while Daksha must stay calm: errors to act on, deleting, privacy, sad messages. */
   serious: boolean;
   reactions: Reactions;
-  /** A question Debo asked is waiting for an answer. */
+  /** A question Daksha asked is waiting for an answer. */
   asked: boolean;
 }
 
@@ -319,7 +319,7 @@ function reactToMessage(state: MoodState, text: string, at: number): Transition 
 
 const noMemory = /(don'?t|do not|did not|didn'?t|can'?t|cannot|no)\b.{0,24}\b(have|find|found|anything|record)\b.{0,30}\b(about|on) that/i;
 
-/** True when the answer says Debo has nothing yet about the question. */
+/** True when the answer says Daksha has nothing yet about the question. */
 export function isNoMemoryAnswer(text: string): boolean {
   return noMemory.test(text.replace(/[’]/g, "'"));
 }

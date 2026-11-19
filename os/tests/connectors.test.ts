@@ -453,7 +453,7 @@ test("connecting hands back the hosted link with a callback, refuses repeats, an
   const url = new URL(first.url);
   assert.equal(url.origin + url.pathname, "http://localhost:8787/api/connectors/callback");
   assert.equal(url.searchParams.get("toolkit"), "slack");
-  await assert.rejects(f.service.connect(A, "telegram"), /can't be connected from Debo yet/);
+  await assert.rejects(f.service.connect(A, "telegram"), /can't be connected from Daksha yet/);
   await assert.rejects(f.service.connect(A, "gmail"), /I don't know that app/);
   await assert.rejects(f.service.connect(A, "nope"), /I don't know that app/);
   // Trying again replaces the unfinished attempt.
@@ -474,10 +474,10 @@ test("connecting hands back the hosted link with a callback, refuses repeats, an
 
 test("the callback page says what happened in plain words and changes nothing for real providers", async () => {
   const app = new Hono();
-  app.route("/cb", connectorCallbackRoute({ appUrl: "https://my.debo.life" }));
+  app.route("/cb", connectorCallbackRoute({ appUrl: "https://my.daksha.life" }));
   const ok = await app.request("/cb?status=success&toolkit=slack&connected_account_id=ca_1");
   assert.equal(ok.status, 200);
-  assert.match(await ok.text(), /Your app is connected[\s\S]*Back to Debo/);
+  assert.match(await ok.text(), /Your app is connected[\s\S]*Back to Daksha/);
   const failed = await app.request("/cb?status=failed");
   assert.equal(failed.status, 400);
   assert.match(await failed.text(), /Nothing was connected/);

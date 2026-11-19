@@ -3,7 +3,7 @@ import { z } from "zod";
 import type { Store } from "./db.ts";
 
 /**
- * The role the person asked Debo to play ("act as my girlfriend", "be my study
+ * The role the person asked Daksha to play ("act as my girlfriend", "be my study
  * buddy"). One record per person in the `persona` kind. It is kept until the person
  * says stop or clears it in Settings, so chat and voice stay in the role across
  * sessions. It is the person's own data: it is exported and deleted with the account.
@@ -27,7 +27,7 @@ export const PERSONA_ROLE_MAX = 160;
 export const PERSONA_NOTES_MAX = 600;
 
 export const personaInput = z.object({
-  role: z.string().trim().min(1, "Say what role Debo should play.").max(PERSONA_ROLE_MAX),
+  role: z.string().trim().min(1, "Say what role Daksha should play.").max(PERSONA_ROLE_MAX),
   notes: z.string().trim().max(PERSONA_NOTES_MAX).default(""),
 });
 

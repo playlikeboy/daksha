@@ -1,4 +1,4 @@
-// Who draws a picture. Debo's own: Cloudflare Workers AI (FLUX.1 schnell), through the Worker's AI
+// Who draws a picture. Daksha's own: Cloudflare Workers AI (FLUX.1 schnell), through the Worker's AI
 // binding (ai.internal, see os/infra/cloudflare/api/src/media.ts) or the REST API with a token.
 // The person's own: an OpenRouter picture model, on their key and their account.
 //
@@ -10,7 +10,7 @@ export type Shape = "square" | "wide" | "tall";
 export interface Picture {
   bytes: Uint8Array;
   mimeType: string;
-  /** What the picture really is; Debo's model only makes squares. */
+  /** What the picture really is; Daksha's model only makes squares. */
   shape: Shape;
 }
 
@@ -102,7 +102,7 @@ export function restImages(config: { accountId: string; apiToken: string }, fetc
 }
 
 /**
- * Debo's own picture service, from the same settings as speech (see debo/index.ts, mediaFromEnv):
+ * Daksha's own picture service, from the same settings as speech (see debo/index.ts, mediaFromEnv):
  * AI_BACKEND=binding with AI_BINDING_URL (the Worker's AI binding), else CF_AI_API_TOKEN with
  * R2_ACCOUNT_ID (the REST API). Neither: only a person's own OpenRouter picture model can draw.
  */

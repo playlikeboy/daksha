@@ -26,7 +26,7 @@ const REACTIONS_KEY = "debo.reactions";
 
 /** Live audio levels, 0..1. The voice popup writes them; the face and halo read them natively. */
 export const deboLevels = {
-  /** Debo's voice. */
+  /** Daksha's voice. */
   debo: new Animated.Value(0),
   /** The person's microphone. */
   you: new Animated.Value(0),

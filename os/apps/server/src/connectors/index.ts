@@ -56,7 +56,7 @@ export function createConnectors(
       throw new Error(
         "DEBO_SAMPLE_CONNECTORS is for sample workspaces only. Remove it from a live workspace.",
       );
-    console.warn("[Debo] Practice connectors are on: no real app is reached.");
+    console.warn("[Daksha] Practice connectors are on: no real app is reached.");
     backend = new FakeConnectorBackend();
   }
   const key = env.COMPOSIO_API_KEY?.trim();

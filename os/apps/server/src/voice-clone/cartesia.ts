@@ -1,4 +1,4 @@
-// Cartesia, the voice service Debo's calls already speak with (Sonic-3). A voice
+// Cartesia, the voice service Daksha's calls already speak with (Sonic-3). A voice
 // copy is made with one call and deleted with one call:
 //   POST   https://api.cartesia.ai/voices/clone   (multipart: clip, name, language)
 //   DELETE https://api.cartesia.ai/voices/{id}
@@ -10,7 +10,7 @@ export const CARTESIA_URL = "https://api.cartesia.ai";
 export const CARTESIA_VERSION = "2026-08-14";
 /** Cartesia takes clips up to 16 MB. */
 export const CLIP_MAX_BYTES = 16 * 1024 * 1024;
-/** Languages Debo offers for a voice copy. Cartesia supports more. */
+/** Languages Daksha offers for a voice copy. Cartesia supports more. */
 export const CLONE_LANGUAGES = ["en", "hi"] as const;
 
 export class CartesiaError extends Error {
@@ -37,7 +37,7 @@ function failure(status: number, what: string): CartesiaError {
 export async function cloneVoice(input: {
   apiKey: string;
   clip: Uint8Array;
-  /** The voice's name at Cartesia. Debo uses a made-up label, never the person's name. */
+  /** The voice's name at Cartesia. Daksha uses a made-up label, never the person's name. */
   name: string;
   language: (typeof CLONE_LANGUAGES)[number];
   fetchImpl?: typeof fetch;
@@ -48,7 +48,7 @@ export async function cloneVoice(input: {
   form.set("name", input.name);
   form.set("language", input.language);
   form.set("access", "private");
-  form.set("description", "Made in Debo for one person's private calls.");
+  form.set("description", "Made in Daksha for one person's private calls.");
   let response: Response;
   try {
     response = await (input.fetchImpl ?? fetch)(`${CARTESIA_URL}/voices/clone`, {

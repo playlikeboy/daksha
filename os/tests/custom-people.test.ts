@@ -84,7 +84,7 @@ test("prompt: the profile is fenced as data, kept under the budget, and the rule
   assert.match(customPersonPrompt(sample({ passedAway: true })), /THIS PERSON HAS DIED/);
 });
 
-test("guardrails: honesty, never sexual, no romance with a minor, crisis, nothing outside Debo", () => {
+test("guardrails: honesty, never sexual, no romance with a minor, crisis, nothing outside Daksha", () => {
   assert.match(CUSTOM_PERSON_RULES, /sincerely asks whether you are real/);
   assert.match(CUSTOM_PERSON_RULES, /Never sexual/);
   assert.match(CUSTOM_PERSON_RULES, /minor, there is no romance/);

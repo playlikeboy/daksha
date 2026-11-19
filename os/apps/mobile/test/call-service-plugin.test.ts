@@ -29,7 +29,7 @@ test("the call service is declared as a microphone service that stops with the a
   const channel = app?.["meta-data"]?.find(
     (m) => m.$["android:name"] === "com.supersami.foregroundservice.notification_channel_name",
   );
-  assert.equal(channel?.$["android:value"], "Talking with Debo");
+  assert.equal(channel?.$["android:value"], "Talking with Daksha");
 });
 
 test("the library's example activity is removed, and the app's own activity stays", () => {

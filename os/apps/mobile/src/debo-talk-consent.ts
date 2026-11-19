@@ -2,7 +2,7 @@
 //
 // The microphone must never start without the person knowing. The first time on a
 // device the popup shows the plain-words text and waits for "Start talking". Once they
-// have pressed it, pressing Debo's face at the top of the app can start the call
+// have pressed it, pressing Daksha's face at the top of the app can start the call
 // straight away. The choice is kept on this device only (browser storage or the phone's
 // secure store), never sent anywhere.
 import { Platform } from "react-native";

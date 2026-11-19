@@ -1,4 +1,4 @@
-// iOS and Android: voice needs the Debo app build (an Expo development build
+// iOS and Android: voice needs the Daksha app build (an Expo development build
 // or a store build), because WebRTC is native code that Expo Go does not
 // include. In that build, @livekit/react-native sets up the WebRTC globals and
 // the phone's audio session, and the same livekit-client code as the web runs
@@ -20,7 +20,7 @@ export function createLevelMeter(_track: MediaStreamTrack): LevelMeter | undefin
 }
 
 export interface VoiceAudio {
-  /** Debo's voice plays through the phone's audio session; nothing to attach. */
+  /** Daksha's voice plays through the phone's audio session; nothing to attach. */
   attach(track: RemoteTrack): void;
   /** Stop the audio session. */
   release(): Promise<void>;
@@ -51,7 +51,7 @@ export async function prepareVoiceAudio(): Promise<VoiceAudio> {
 
 export class VoiceNeedsAppBuild extends Error {
   constructor() {
-    super("Voice needs the Debo app build. It does not work in Expo Go. You can still type to Debo.");
+    super("Voice needs the Daksha app build. It does not work in Expo Go. You can still type to Daksha.");
     this.name = "VoiceNeedsAppBuild";
   }
 }

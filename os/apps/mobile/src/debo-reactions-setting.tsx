@@ -1,4 +1,4 @@
-// Settings card: how much Debo's face reacts. Saved on this device only.
+// Settings card: how much Daksha's face reacts. Saved on this device only.
 import { Text, View } from "react-native";
 import type { Reactions } from "./debo-mood";
 import { deboMood, useDeboMood } from "./debo-mood-store";

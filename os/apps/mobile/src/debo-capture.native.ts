@@ -56,9 +56,9 @@ export async function openPreview(kind: "voice" | "video", options: RecordOption
 const VIDEO_MAX_BYTES = 200 * 1024 * 1024;
 
 const MIC_DENIED =
-  "I can't use your microphone. Allow it for Debo in your phone's settings, then try again. You can still add a recording you already have.";
+  "I can't use your microphone. Allow it for Daksha in your phone's settings, then try again. You can still add a recording you already have.";
 const CAMERA_DENIED =
-  "I can't use your camera and microphone. Allow them for Debo in your phone's settings, then try again. You can still add a recording you already have.";
+  "I can't use your camera and microphone. Allow them for Daksha in your phone's settings, then try again. You can still add a recording you already have.";
 
 /** Mono AAC in an m4a file: clear for speech, and about 30 MB for an hour. */
 function voiceOptions() {

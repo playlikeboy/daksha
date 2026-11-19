@@ -92,7 +92,7 @@ test("an old opt-out-style setting cannot turn telemetry on", async () => {
   );
 });
 
-test("DEBO_TELEMETRY=on opts in: the SDK usage event is tagged Debo and carries no key", async () => {
+test("DEBO_TELEMETRY=on opts in: the SDK usage event is tagged Daksha and carries no key", async () => {
   const events = await captureRuntime({
     DEBO_TELEMETRY: "on",
     CPK_TELEMETRY_ID: "test-project-identity",
@@ -102,7 +102,7 @@ test("DEBO_TELEMETRY=on opts in: the SDK usage event is tagged Debo and carries 
   const event = events[0];
   assert.equal(event.url, "https://telemetry.copilotkit.ai/ingest");
   assert.equal(event.body.event, "oss.runtime.instance_created");
-  assert.equal(event.body.global_properties.accessibility_title, "Debo");
+  assert.equal(event.body.global_properties.accessibility_title, "Daksha");
   assert.equal(JSON.stringify(events).includes("test-project-key-never-sent"), false);
 });
 

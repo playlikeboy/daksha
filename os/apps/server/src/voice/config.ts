@@ -1,5 +1,5 @@
 // Voice settings come from the environment. They are read on each request (not
-// at startup) so the rest of Debo still runs when voice is not set up.
+// at startup) so the rest of Daksha still runs when voice is not set up.
 
 export interface VoiceConfig {
   /** wss:// address of the LiveKit project the app and the voice agent join. */
@@ -31,4 +31,4 @@ export function readVoiceConfig(
   return { livekitUrl, apiKey, apiSecret, agentSecret };
 }
 
-export const VOICE_NOT_SET_UP = "Talking to Debo is not set up yet.";
+export const VOICE_NOT_SET_UP = "Talking to Daksha is not set up yet.";

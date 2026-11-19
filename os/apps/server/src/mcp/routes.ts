@@ -84,17 +84,17 @@ export function mcpRoutes(service: McpService) {
 const PAGES = {
   success: {
     title: "You are signed in",
-    text: "You can close this tab and go back to Debo. Your tool server is ready to use.",
+    text: "You can close this tab and go back to Daksha. Your tool server is ready to use.",
   },
   failed: {
     title: "That did not finish",
-    text: "Debo is not signed in to that server. Go back to Debo and choose Sign in again. If the link ran out, start a new one.",
+    text: "Daksha is not signed in to that server. Go back to Daksha and choose Sign in again. If the link ran out, start a new one.",
   },
 } as const;
 
 /**
  * Where a tool server's sign-in page sends the person back. It is public (the browser arrives
- * without Debo's session), so the only thing it trusts is the signed, single-use state. It shows
+ * without Daksha's session), so the only thing it trusts is the signed, single-use state. It shows
  * only fixed words and never repeats anything from the request.
  */
 export function mcpOAuthCallbackRoute(service: McpService, appUrl: string) {
@@ -112,7 +112,7 @@ export function mcpOAuthCallbackRoute(service: McpService, appUrl: string) {
     const page = PAGES[result.ok ? "success" : "failed"];
     c.header("Content-Security-Policy", "default-src 'none'; style-src 'unsafe-inline'");
     return c.html(
-      `<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>${page.title}</title><style>body{font:16px/1.5 system-ui,sans-serif;max-width:30rem;margin:12vh auto;padding:0 1.25rem;color:#1c1b1f}a{display:inline-block;margin-top:1rem;padding:.75rem 1.25rem;border-radius:.75rem;background:#1c1b1f;color:#fff;text-decoration:none}</style></head><body><h1>${page.title}</h1><p>${page.text}</p><a href="${appUrl}">Back to Debo</a></body></html>`,
+      `<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>${page.title}</title><style>body{font:16px/1.5 system-ui,sans-serif;max-width:30rem;margin:12vh auto;padding:0 1.25rem;color:#1c1b1f}a{display:inline-block;margin-top:1rem;padding:.75rem 1.25rem;border-radius:.75rem;background:#1c1b1f;color:#fff;text-decoration:none}</style></head><body><h1>${page.title}</h1><p>${page.text}</p><a href="${appUrl}">Back to Daksha</a></body></html>`,
       result.ok ? 200 : 400,
     );
   });

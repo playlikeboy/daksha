@@ -1,7 +1,7 @@
-// Reminders and the companion settings that decide what Debo sends on her own.
+// Reminders and the companion settings that decide what Daksha sends on her own.
 //
 //   reminders            One row per reminder the person asked for (today: by accepting a promise
-//                        Debo found in an entry). Sent once at its time as an in-app update, and
+//                        Daksha found in an entry). Sent once at its time as an in-app update, and
 //                        as a push to devices where the person turned that on.
 //   companion-settings   One row per person: birthday and special-day reminders (on unless the
 //                        person turns them off), the morning check-in (off unless turned on) and

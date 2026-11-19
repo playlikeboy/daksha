@@ -1,5 +1,5 @@
-// A person's OWN Composio account, added as a tool server. This is not Debo's Composio (that one
-// lives in ../connectors and uses Debo's key). Here the person brings their key, or signs in.
+// A person's OWN Composio account, added as a tool server. This is not Daksha's Composio (that one
+// lives in ../connectors and uses Daksha's key). Here the person brings their key, or signs in.
 //
 //   - Composio Connect, https://connect.composio.dev/mcp: one server for every app the person
 //     connected in their Composio account. It takes a sign-in (OAuth), or a key in the

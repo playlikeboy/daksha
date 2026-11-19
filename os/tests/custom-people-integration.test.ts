@@ -231,7 +231,7 @@ test("a person with a face, voice lines labelled, profile built from them, then 
   assert.equal(await t.db.get(OWNER, "voice-clones", id), null);
   assert.deepEqual(await t.db.list(OWNER, "voice-uploads"), []);
   assert.deepEqual(await t.db.list(OWNER, "voice-consents"), []);
-  assert.equal(await activeCustomVoice(t.db, OWNER), undefined, "Debo is herself again");
+  assert.equal(await activeCustomVoice(t.db, OWNER), undefined, "Daksha is herself again");
   assert.equal(await t.voiceCopy.callVoice(OWNER), null);
   // The face stays: it is the owner's, and can be used again.
   assert.ok(await faces.get(OWNER, face.id));

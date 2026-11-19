@@ -305,7 +305,7 @@ export async function sweepUploads(db: Store, store: ObjectStore | undefined, no
           error:
             age > RAW_FILE_MAX_AGE_MS
               ? "These files waited too long, so I deleted them. Add them again when you're ready."
-              : "Debo stopped while reading these files, so I deleted them. Try adding them again.",
+              : "Daksha stopped while reading these files, so I deleted them. Try adding them again.",
           steps: next.steps.map((s) => (s.state === "working" || s.state === "waiting" ? { ...s, state: "failed" as const } : s)),
         };
       const mustDelete = !next.filesDeleted && (next.status === "failed" || next.status === "done" || age > RAW_FILE_MAX_AGE_MS);

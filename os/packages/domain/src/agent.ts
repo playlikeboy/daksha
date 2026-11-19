@@ -129,7 +129,7 @@ export interface AgentIdentity {
   tone: "warm" | "concise" | "thoughtful";
   /** The colour behind the face. */
   avatar?: "sky" | "sand" | "lilac";
-  /** Who the person talks to. Missing means the default, Debo. */
+  /** Who the person talks to. Missing means the default, Daksha. */
   character?: AgentCharacter;
   /** With character "custom": the id of the saved avatar (records kind `custom-avatars`). */
   customAvatar?: string;

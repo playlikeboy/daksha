@@ -150,7 +150,7 @@ export function ThreadsSheet({ onClose }: { onClose: () => void }) {
   }
   return (
     <Sheet
-      title="Debo"
+      title="Daksha"
       subtitle={workspace.mode === "sample" ? "Your conversations" : workspace.profile.name}
       onClose={onClose}
     >
@@ -296,7 +296,7 @@ export function ThreadsSheet({ onClose }: { onClose: () => void }) {
               </Button>
             )}
             <Text style={s.small}>
-              Each side chat keeps its own thread of talk. What Debo knows about you is shared by all of them.
+              Each side chat keeps its own thread of talk. What Daksha knows about you is shared by all of them.
             </Text>
           </>
         ) : (
@@ -304,21 +304,21 @@ export function ThreadsSheet({ onClose }: { onClose: () => void }) {
             <LinkRow
               icon={MessageCircle}
               title="Main chat"
-              detail="Saved in your Debo account"
+              detail="Saved in your Daksha account"
               onPress={() => {
                 navigate("chat");
                 onClose();
               }}
             />
             <Text style={s.muted}>
-              Your conversation is saved in your Debo account. You can manage connections in Apps.
+              Your conversation is saved in your Daksha account. You can manage connections in Apps.
             </Text>
           </>
         )}
         <View style={s.divider} />
         <LinkRow
           icon={Plus}
-          title="Ask Debo to do a task"
+          title="Ask Daksha to do a task"
           detail="A plan, a document or a spending summary"
           onPress={() => {
             onClose();
@@ -327,8 +327,8 @@ export function ThreadsSheet({ onClose }: { onClose: () => void }) {
         />
         <LinkRow
           icon={Monitor}
-          title="Debo's computer"
-          detail="A browser and files Debo can use"
+          title="Daksha's computer"
+          detail="A browser and files Daksha can use"
           onPress={() => {
             onClose();
             open({ type: "computer" });

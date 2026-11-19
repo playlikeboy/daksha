@@ -1,4 +1,4 @@
-// The face of whoever the person talks to: Debo, Diya, Anaya, Mishti, Kabir, or a face
+// The face of whoever the person talks to: Daksha, Diya, Anaya, Mishti, Kabir, or a face
 // the person made themselves.
 //
 // This is the one component every screen uses. It reads the chosen character

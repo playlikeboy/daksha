@@ -2,7 +2,7 @@
 // to its upload link. The phone version is custom-people-pick.native.ts; both export the same names.
 import { kindOf, type PickedFile, type RangeSender } from "./custom-people-data";
 
-/** Open the browser's file picker for several files. Files Debo can't use are left out and counted. */
+/** Open the browser's file picker for several files. Files Daksha can't use are left out and counted. */
 export function pickPersonFiles(): Promise<{ files: PickedFile[]; skipped: number }> {
   return new Promise((resolve) => {
     const input = document.createElement("input");

@@ -42,7 +42,7 @@ export function ComputerEntry({ compact }: { compact?: boolean } = {}) {
     return (
       <Pressable
         accessibilityRole="button"
-        accessibilityLabel={`Debo's computer — ${status}`}
+        accessibilityLabel={`Daksha's computer — ${status}`}
         onPress={() => open({ type: "computer" })}
         style={({ pressed }) => ({
           width: spacing[11],
@@ -72,7 +72,7 @@ export function ComputerEntry({ compact }: { compact?: boolean } = {}) {
   return (
     <Pressable
       accessibilityRole="button"
-      accessibilityLabel={`Debo's computer — ${status}`}
+      accessibilityLabel={`Daksha's computer — ${status}`}
       onPress={() => open({ type: "computer" })}
       style={[
         s.row,
@@ -219,8 +219,8 @@ export function ComputerSheet() {
   }
   return (
     <Sheet
-      title="Debo's computer"
-      subtitle="Debo works here. Step in whenever you like."
+      title="Daksha's computer"
+      subtitle="Daksha works here. Step in whenever you like."
       onClose={close}
     >
       <View style={{ gap: 20 }}>
@@ -236,8 +236,8 @@ export function ComputerSheet() {
               <Text style={s.heading}>{available ? "Browser connected" : "Browser offline"}</Text>
               <Text style={s.muted}>
                 {available
-                  ? "Debo's browser and documents, in one place."
-                  : "This computer is not turned on here yet. Whoever runs this Debo can turn it on."}
+                  ? "Daksha's browser and documents, in one place."
+                  : "This computer is not turned on here yet. Whoever runs this Daksha can turn it on."}
               </Text>
             </View>
           </View>
@@ -287,7 +287,7 @@ export function ComputerSheet() {
               ))}
             {!workspace.browsers.length && (
               <Text style={s.muted}>
-                Open a page here or ask Debo to research something. Its browsing sessions will
+                Open a page here or ask Daksha to research something. Its browsing sessions will
                 appear here.
               </Text>
             )}

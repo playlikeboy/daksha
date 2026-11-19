@@ -1,8 +1,8 @@
-// "Talk to Debo": a full-screen voice popup that opens over any screen, like a
-// modern voice assistant. Debo's tomato face is the orb in the middle. A soft halo
+// "Talk to Daksha": a full-screen voice popup that opens over any screen, like a
+// modern voice assistant. Daksha's tomato face is the orb in the middle. A soft halo
 // swells with her voice and a ring answers the person's microphone. Under her, the
 // state is written in words, so the face is never the only signal. The controls sit
-// in one row: microphone, Stop Debo, keyboard and a clear red End. Voice is never
+// in one row: microphone, Stop Daksha, keyboard and a clear red End. Voice is never
 // the only way: the keyboard button slides up a text box.
 //
 // The call itself is not in this file. It lives above every screen (see
@@ -61,7 +61,7 @@ export function TalkPopup({ onClose }: { onClose: () => void }) {
   }, [talk]);
 
   // Pressing Start talking is the person's yes to the text under it. It is remembered on this device,
-  // so pressing Debo's face at the top of the app can start straight away next time.
+  // so pressing Daksha's face at the top of the app can start straight away next time.
   const begin = useCallback(async () => {
     await rememberAgreedToTalk();
     await talk.start();
@@ -249,8 +249,8 @@ export function TalkPopup({ onClose }: { onClose: () => void }) {
           accessibilityViewIsModal
           role={Platform.OS === "web" ? "dialog" : undefined}
           aria-modal={Platform.OS === "web" ? true : undefined}
-          aria-label="Talk to Debo"
-          accessibilityLabel="Talk to Debo"
+          aria-label="Talk to Daksha"
+          accessibilityLabel="Talk to Daksha"
           {...pan.panHandlers}
           style={{
             flex: 1,
@@ -303,7 +303,7 @@ export function TalkPopup({ onClose }: { onClose: () => void }) {
               )}
             </View>
 
-            {/* The orb: Debo, a halo that follows her voice, and a ring that follows yours. */}
+            {/* The orb: Daksha, a halo that follows her voice, and a ring that follows yours. */}
             <ScrollView
               style={{ flex: 1 }}
               contentContainerStyle={{ flexGrow: 1, alignItems: "center", justifyContent: "center", gap: spacing[3] }}
@@ -369,9 +369,9 @@ export function TalkPopup({ onClose }: { onClose: () => void }) {
               {status === "idle" && (
                 <View style={{ gap: spacing[3], alignItems: "center" }}>
                   <Text style={[s.muted, { textAlign: "center", fontSize: fontSize.base }]}>
-                    Your device asks for microphone access when you start. Debo listens only during the call,
+                    Your device asks for microphone access when you start. Daksha listens only during the call,
                     and the mic status is always visible. What you say is saved as text in your journal, where
-                    Debo learns from it and you can delete it. Voice recordings aren't kept. Minimise the call
+                    Daksha learns from it and you can delete it. Voice recordings aren't kept. Minimise the call
                     to use the app, or mute/end anytime. Closing the web tab ends the call. You can type instead.
                   </Text>
                   <View style={[s.row, { gap: spacing[3] }]}>
@@ -438,7 +438,7 @@ export function TalkPopup({ onClose }: { onClose: () => void }) {
                 }}
               >
                 <Field
-                  label="Type to Debo instead"
+                  label="Type to Daksha instead"
                   value={typed}
                   onChangeText={setTyped}
                   maxLength={500}
@@ -453,7 +453,7 @@ export function TalkPopup({ onClose }: { onClose: () => void }) {
               </Animated.View>
             )}
 
-            {/* Controls: microphone, Stop Debo, keyboard, End. */}
+            {/* Controls: microphone, Stop Daksha, keyboard, End. */}
             {(live || status === "connecting") && (
               <View style={{ flexDirection: "row", justifyContent: "space-between", paddingBottom: spacing[2] }}>
                 <RoundButton
@@ -465,14 +465,14 @@ export function TalkPopup({ onClose }: { onClose: () => void }) {
                   icon={micOn ? Mic : MicOff}
                 />
                 <RoundButton
-                  label="Stop Debo"
-                  caption="Stop Debo"
+                  label="Stop Daksha"
+                  caption="Stop Daksha"
                   disabled={!live || agentState !== "speaking"}
                   onPress={() => void talk.stopDebo()}
                   icon={Square}
                 />
                 <RoundButton
-                  label="Type to Debo"
+                  label="Type to Daksha"
                   caption="Type"
                   expanded={typing}
                   disabled={!live}

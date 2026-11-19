@@ -5,7 +5,7 @@ import type { RemoteTrack } from "livekit-client";
 import { rmsLevel } from "./audio-level";
 
 export interface VoiceAudio {
-  /** Play Debo's voice. */
+  /** Play Daksha's voice. */
   attach(track: RemoteTrack): void;
   /** Stop the audio session and remove what was added. */
   release(): Promise<void>;
@@ -19,7 +19,7 @@ export interface LevelMeter {
 
 /**
  * Web: an AnalyserNode on the live audio track gives a real loudness reading, so
- * Debo's mouth and the halo follow the actual voice. The audio is only measured,
+ * Daksha's mouth and the halo follow the actual voice. The audio is only measured,
  * never recorded or sent anywhere.
  */
 export function createLevelMeter(track: MediaStreamTrack): LevelMeter | undefined {

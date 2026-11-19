@@ -2,18 +2,26 @@
 <html lang="%LANG_ISO_CODE%">
   <head>
     <meta charset="utf-8" />
+    <!-- my.debo.life is the address from before the rename to Daksha (docs/RENAME.md). This app
+         talks to api.daksha.life, whose sign-in cookie a debo.life page cannot keep, so the old
+         address sends people on to the same place at my.daksha.life before anything loads. -->
+    <script>
+      if (/(^|\.)debo\.life$/.test(location.hostname)) {
+        location.replace("https://my.daksha.life" + location.pathname + location.search + location.hash);
+      }
+    </script>
     <meta httpEquiv="X-UA-Compatible" content="IE=edge" />
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
     <title>%WEB_TITLE%</title>
     <meta name="description" content="A friendly assistant that remembers your life. Ask about your own life and see where every answer came from." />
 
-    <!-- Install as an app. The manifest makes Chrome open Debo in its own window, with no address bar. -->
+    <!-- Install as an app. The manifest makes Chrome open Daksha in its own window, with no address bar. -->
     <link rel="manifest" href="/manifest.webmanifest" />
     <meta name="theme-color" content="#F1F1F1" />
-    <meta name="application-name" content="Debo" />
+    <meta name="application-name" content="Daksha" />
     <meta name="mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
-    <meta name="apple-mobile-web-app-title" content="Debo" />
+    <meta name="apple-mobile-web-app-title" content="Daksha" />
     <meta name="apple-mobile-web-app-status-bar-style" content="default" />
     <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
     <link rel="icon" href="/favicon-32.png" type="image/png" sizes="32x32" />
@@ -22,21 +30,21 @@
 
     <!-- Share picture. -->
     <meta property="og:type" content="website" />
-    <meta property="og:site_name" content="Debo" />
-    <meta property="og:url" content="https://my.debo.life" />
-    <meta property="og:title" content="Debo: a friendly assistant that remembers your life" />
+    <meta property="og:site_name" content="Daksha" />
+    <meta property="og:url" content="https://my.daksha.life" />
+    <meta property="og:title" content="Daksha: a friendly assistant that remembers your life" />
     <meta property="og:description" content="Ask about your own life. Every answer shows where it came from." />
-    <meta property="og:image" content="https://my.debo.life/og.png?v=2" />
+    <meta property="og:image" content="https://my.daksha.life/og.png?v=2" />
     <meta property="og:image:width" content="1200" />
     <meta property="og:image:height" content="630" />
-    <meta property="og:image:alt" content="Debo, a small red tomato, next to a phone showing the app, and the words: a friendly assistant that remembers your life" />
+    <meta property="og:image:alt" content="Daksha, a small red tomato, next to a phone showing the app, and the words: a friendly assistant that remembers your life" />
     <meta name="twitter:card" content="summary_large_image" />
-    <meta name="twitter:title" content="Debo: a friendly assistant that remembers your life" />
+    <meta name="twitter:title" content="Daksha: a friendly assistant that remembers your life" />
     <meta name="twitter:description" content="Ask about your own life. Every answer shows where it came from." />
-    <meta name="twitter:image" content="https://my.debo.life/og.png?v=2" />
-    <meta name="twitter:image:alt" content="Debo, a small red tomato, next to a phone showing the app, and the words: a friendly assistant that remembers your life" />
+    <meta name="twitter:image" content="https://my.daksha.life/og.png?v=2" />
+    <meta name="twitter:image:alt" content="Daksha, a small red tomato, next to a phone showing the app, and the words: a friendly assistant that remembers your life" />
 
-    <!-- Debo does not nag people to install it. Chrome would show its own small install bar; this keeps it away.
+    <!-- Daksha does not nag people to install it. Chrome would show its own small install bar; this keeps it away.
          Installing still works from the browser menu. The app's menu has a quiet "Get the app" link instead. -->
     <script>
       window.addEventListener("beforeinstallprompt", function (event) {
@@ -62,7 +70,7 @@
         flex: 1;
       }
     </style>
-    <!-- Debo's own browser details (DESIGN.md, accessibility floor). Colours are the Astryx
+    <!-- Daksha's own browser details (DESIGN.md, accessibility floor). Colours are the Astryx
          Neutral tokens in src/astryx-tokens.ts: accent #1B1B1B, soft blue #B9D7FF. -->
     <style id="debo-base">
       /* A clear ring on whatever the keyboard is on, and none for mouse or touch. */

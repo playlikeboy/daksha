@@ -37,7 +37,7 @@ export async function openSignInPage(
 ) {
   if (Platform.OS === "web") {
     if (reserved && !reserved.closed) reserved.location.href = url;
-    // A blocked tab: fall back to this tab. The page sends people back to Debo.
+    // A blocked tab: fall back to this tab. The page sends people back to Daksha.
     else window.location.assign(url);
     return;
   }

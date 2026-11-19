@@ -27,7 +27,7 @@ export function imageRoutes(images: ImageService) {
 }
 
 /**
- * The make_image tool. It only changes the person's own data inside Debo, so it needs no
+ * The make_image tool. It only changes the person's own data inside Daksha, so it needs no
  * review (decision 28). The result names the picture; the app fetches a link to show it.
  */
 export function imageTools(images: ImageService, owner: string, channel: "chat" | "voice", signal?: AbortSignal) {
@@ -44,7 +44,7 @@ export function imageTools(images: ImageService, owner: string, channel: "chat" 
             imageId: made.id,
             shape: made.shape,
             ...(args.shape && args.shape !== made.shape
-              ? { note: "Only square pictures are possible with Debo's own picture service." }
+              ? { note: "Only square pictures are possible with Daksha's own picture service." }
               : {}),
             shown: channel === "voice" ? "The picture is waiting in Chat." : "The picture is shown in the chat.",
           };

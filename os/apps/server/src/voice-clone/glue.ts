@@ -13,7 +13,7 @@ export interface CustomPeopleGlue {
   person(owner: string, personId: string): Promise<{ id: string; name: string } | null>;
   /** Lines the chosen person really said, for their profile. */
   addSpokenLines(owner: string, personId: string, lines: SpokenLine[]): Promise<void>;
-  /** The custom person Debo is talking as right now, if their record says a voice copy was made. */
+  /** The custom person Daksha is talking as right now, if their record says a voice copy was made. */
   activePersonId(owner: string): Promise<string | null>;
   /** Their spoken lines are no longer wanted. */
   forgetSpokenLines(owner: string, personId: string): Promise<void>;

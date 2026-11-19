@@ -14,7 +14,7 @@ const { app, agent, debo } = await createApp(db, config);
 if (config.taskWorkerEnabled) agent.start();
 debo.startBackground();
 const server = serve({ fetch: app.fetch, port: config.port, hostname: config.host }, () =>
-  console.log(`Debo ${config.mode} API ready at ${config.publicUrl}`),
+  console.log(`Daksha ${config.mode} API ready at ${config.publicUrl}`),
 );
 const shutdown = () => {
   debo.stopBackground();

@@ -323,7 +323,7 @@ export function Recorder({
               </View>
             )}
             <Text style={s.small}>
-              Kept privately; only you can play it. Debo writes out the words with Cloudflare's speech service. Up to{" "}
+              Kept privately; only you can play it. Daksha writes out the words with Cloudflare's speech service. Up to{" "}
               {Math.round(status.limits.maxBytes / (1024 * 1024))} MB and {status.limits.maxMinutes} minutes each.
             </Text>
           </ScrollView>

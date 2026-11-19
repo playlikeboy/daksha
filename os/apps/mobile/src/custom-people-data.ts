@@ -65,7 +65,7 @@ type UploadPlan =
 /** A file the person picked. `data` is a Blob on the web, a file address on the phone. */
 export type PickedFile = { name: string; mimeType: string; sizeBytes: number; kind: SourceKind; data: unknown };
 
-/** Which kind a picked file is, from its type and name. Null when Debo can't use it. */
+/** Which kind a picked file is, from its type and name. Null when Daksha can't use it. */
 export function kindOf(mimeType: string, name: string): { kind: SourceKind; mimeType: string } | null {
   const ext = name.split(".").pop()?.toLowerCase() ?? "";
   const mime = mimeType.toLowerCase();

@@ -1,5 +1,5 @@
 // Kabir: a friendly young man of about twenty-one, drawn in the same simple flat style
-// as Debo. Head and shoulders, a big round head, short dark hair with a soft side-swept
+// as Daksha. Head and shoulders, a big round head, short dark hair with a soft side-swept
 // fringe, and a mustard hoodie. Flat shapes only: no outlines, no shading lines, one soft
 // shine on the hair. Big glossy eyes with one shine each, so he still reads at 24 px.
 //
@@ -12,7 +12,7 @@ import { FaceFeatures, type FeatureSpec } from "./debo-face-features";
 import { type ArtProps, bodyStyle, Layer, lo, scale } from "./debo-face-rig";
 import { kabirPaint as c } from "./debo-paint-kabir";
 
-/** Big glossy eyes with one shine each, like Debo's. */
+/** Big glossy eyes with one shine each, like Daksha's. */
 const eye = (cx: number, cy: number) => (
   <>
     <Ellipse cx={cx} cy={cy} rx={13} ry={16} fill={c.ink} />

@@ -1,4 +1,4 @@
-// A promise Debo found in a journal entry ("I told Mum I'd call on Sunday"), shown as a
+// A promise Daksha found in a journal entry ("I told Mum I'd call on Sunday"), shown as a
 // suggestion with the entry it came from. Nothing happens until the person taps:
 // "Remind me" makes a reminder, "Dismiss" puts it away for good.
 import { useState } from "react";

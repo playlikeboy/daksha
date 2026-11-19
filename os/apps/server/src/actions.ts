@@ -51,7 +51,7 @@ export class ActionService {
       if (existing) return existing;
     }
     const parsed = proposalSchema.parse(raw);
-    // Debo's own actions (the journal) and connected apps (Composio) need no Google account.
+    // Daksha's own actions (the journal) and connected apps (Composio) need no Google account.
     const own = parsed.kind === "journal.add" || parsed.kind === "connector.call";
     const connection = own ? null : await this.options.connection?.(owner);
     if (this.options.connection && !connection && !own)
@@ -79,7 +79,7 @@ export class ActionService {
         input.kind === "connector.call"
           ? input.data.toolkitName
           : own
-            ? "Your Debo journal"
+            ? "Your Daksha journal"
             : connection?.account,
       connectionId: connection?.id,
       target: prepared?.target,

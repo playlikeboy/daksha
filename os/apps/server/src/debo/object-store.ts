@@ -34,7 +34,7 @@ export interface ObjectStore {
   abortUpload(key: string, uploadId: string): Promise<void>;
   /** Size in bytes, or null when there is no such object. */
   head(key: string): Promise<{ size: number } | null>;
-  /** Store a small file made on the server (a picture Debo made). The server writes it, not the app. */
+  /** Store a small file made on the server (a picture Daksha made). The server writes it, not the app. */
   putBytes(key: string, bytes: Uint8Array, mimeType: string): Promise<void>;
   /** A link that plays the object for a short time. */
   signedGet(key: string, mimeType: string, expiresSeconds: number): Promise<string>;

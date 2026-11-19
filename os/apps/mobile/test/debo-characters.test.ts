@@ -43,7 +43,7 @@ test("every character defines every mood", () => {
 
 test("characters have different names, and none clashes with the sample people", () => {
   const names = builtInCharacterIds.map((id) => characters[id].name);
-  assert.deepEqual(names, ["Debo", "Diya", "Anaya", "Mishti", "Kabir"]);
+  assert.deepEqual(names, ["Daksha", "Diya", "Anaya", "Mishti", "Kabir"]);
   assert.equal(new Set(names).size, names.length);
   for (const taken of ["Neha", "Aarav", "Meera"]) assert.ok(!names.includes(taken));
 });
@@ -56,7 +56,7 @@ test("labels say he for Kabir, she for the other characters, and they for a made
   assert.equal(pronounsFor("custom").subject, "they");
 });
 
-test("a missing or unknown character means the default, so old accounts get Debo", () => {
+test("a missing or unknown character means the default, so old accounts get Daksha", () => {
   assert.equal(characterOrDefault(undefined), "debo");
   assert.equal(characterOrDefault(null), "debo");
   assert.equal(characterOrDefault("tomato"), "debo");
@@ -70,24 +70,24 @@ test("a name the person typed is never replaced without asking", () => {
   assert.deepEqual(suggestedName("Nova", "diya"), { rename: false, ask: true });
   assert.deepEqual(suggestedName("  Sunny ", "mishti"), { rename: false, ask: true });
   // The factory name or another character's name just follows the pick.
-  assert.deepEqual(suggestedName("Debo", "diya"), { rename: true, ask: false });
+  assert.deepEqual(suggestedName("Daksha", "diya"), { rename: true, ask: false });
   assert.deepEqual(suggestedName("Diya", "anaya"), { rename: true, ask: false });
   assert.deepEqual(suggestedName("", "mishti"), { rename: true, ask: false });
   // Already the right name: nothing to do.
   assert.deepEqual(suggestedName("Anaya", "anaya"), { rename: false, ask: false });
   // A made face offers the name the person gave it.
-  assert.deepEqual(suggestedName("Debo", "custom", "Rani"), { rename: true, ask: false });
+  assert.deepEqual(suggestedName("Daksha", "custom", "Rani"), { rename: true, ask: false });
   assert.deepEqual(suggestedName("Nova", "custom", "Rani"), { rename: false, ask: true });
 });
 
-const saved: AgentIdentity = { name: "Debo", tone: "warm" };
+const saved: AgentIdentity = { name: "Daksha", tone: "warm" };
 
 test("picking a character builds the save, and keeps old fields", () => {
   const plan = planPick(saved, "diya");
   assert.deepEqual(plan.save, { name: "Diya", tone: "warm", avatar: "sky", character: "diya", showChatUpdates: true });
   assert.equal(plan.offer, undefined);
 
-  const old = planPick({ name: "Debo", tone: "concise", avatar: "lilac", showChatUpdates: false }, "anaya");
+  const old = planPick({ name: "Daksha", tone: "concise", avatar: "lilac", showChatUpdates: false }, "anaya");
   assert.equal(old.save.tone, "concise");
   assert.equal(old.save.avatar, "lilac");
   assert.equal(old.save.showChatUpdates, false);

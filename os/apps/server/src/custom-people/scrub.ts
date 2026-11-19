@@ -1,6 +1,6 @@
 // Taking private details out of chat text, and out of lines said in voice notes and calls,
 // before any model reads them or they are kept. A chat export or a call holds other people's
-// phone numbers, addresses, one-time codes and bank details: none of that helps Debo learn how
+// phone numbers, addresses, one-time codes and bank details: none of that helps Daksha learn how
 // someone talks, so it is replaced with a plain tag first. One scrubber for every source.
 //
 // This is a careful filter, not a promise: it removes the common shapes (Indian and international

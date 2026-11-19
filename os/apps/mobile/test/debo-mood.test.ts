@@ -123,7 +123,7 @@ test("negation: 'you are not useless' is not rude", () => {
   assert.equal(say("tum bekar nahi ho").mood, "listening");
 });
 
-test("shouting at Debo is a pout; shouting for help is not", () => {
+test("shouting at Daksha is a pout; shouting for help is not", () => {
   assert.equal(detectTone("WHY DON'T YOU WORK!!!"), "rude");
   assert.equal(say("WHY DON'T YOU WORK!!!").mood, "pouty");
   assert.equal(detectTone("HELP I NEED THIS NOW!!!"), "neutral", "a call for help is not a scolding");

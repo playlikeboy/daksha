@@ -1,4 +1,4 @@
-// Settings card: the people in your life. Debo saves someone when you tell her about them in
+// Settings card: the people in your life. Daksha saves someone when you tell her about them in
 // chat or on a call ("my sister Riya's birthday is 3 March"). Here you can see everyone she
 // keeps, fix any detail, add someone yourself, or remove them.
 import { useCallback, useEffect, useState } from "react";

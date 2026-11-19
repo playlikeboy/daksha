@@ -60,7 +60,7 @@ const sign = (secret: string, body: string) =>
 export type BindingStoreOptions = {
   /** http://media.internal: the Worker answers it. */
   mediaUrl: string;
-  /** This server's public address, e.g. https://api.debo.life. */
+  /** This server's public address, e.g. https://api.daksha.life. */
   publicUrl: string;
   /** Signs the links. SESSION_SIGNING_KEY. */
   secret: string;

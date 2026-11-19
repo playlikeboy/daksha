@@ -1,5 +1,5 @@
 // The real connector provider: Composio (https://composio.dev). It holds each person's
-// sign-in to their apps and carries each request. Debo never sees an app password or token.
+// sign-in to their apps and carries each request. Daksha never sees an app password or token.
 //
 // Used the way the current docs describe (checked November 2026):
 //   - catalogue:  GET /api/v3/toolkits (the SDK list call stops at 1000 rows and drops the cursor)
@@ -37,7 +37,7 @@ function plainProviderError(error: unknown): string {
   const text = error instanceof Error ? error.message : "";
   if (/no active connection|not connected/i.test(text))
     return "That app is not connected, or its sign-in has expired. Connect it again in Apps.";
-  if (/429|rate limit/i.test(text)) return "That app asked Debo to slow down. Try again in a minute.";
+  if (/429|rate limit/i.test(text)) return "That app asked Daksha to slow down. Try again in a minute.";
   if (/401|403|unauthori[sz]ed|forbidden|permission/i.test(text))
     return "That app did not allow it. Its sign-in may have expired or lack permission.";
   if (/404|not found/i.test(text)) return "That app could not find what was asked for.";

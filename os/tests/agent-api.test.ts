@@ -80,7 +80,7 @@ test("agent API requires a session and reports the actual worker state", async (
   );
   const workspace = await read<AgentWorkspace>("");
   assert.equal(workspace.worker.running, false);
-  assert.equal(workspace.identity.name, "Debo");
+  assert.equal(workspace.identity.name, "Daksha");
   assert.equal(workspace.identity.tone, "warm");
 });
 
@@ -160,7 +160,7 @@ test("agent request validation rejects malformed input with useful JSON errors",
     ["/monitors/missing/control", { action: "delete" }],
     ["/ideas/missing", { action: "accept", prompt: " " }],
     ["/memories", { text: " " }],
-    ["/identity", { name: "Debo", tone: "angry" }],
+    ["/identity", { name: "Daksha", tone: "angry" }],
     ["/sample-page", { text: "a".repeat(100001) }],
   ] satisfies [string, unknown][]) {
     const response = await request(path, body);

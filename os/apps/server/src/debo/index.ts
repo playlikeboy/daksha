@@ -62,7 +62,7 @@ export function mediaFromEnv(env: Record<string, string | undefined>, publicUrl 
 /**
  * The personal brain for this server.
  *
- * It needs the Debo database: DEBO_DATABASE_URL, or DATABASE_URL in a live
+ * It needs the Daksha database: DEBO_DATABASE_URL, or DATABASE_URL in a live
  * workspace. In a sample (demo) workspace DATABASE_URL belongs to the demo
  * store, so only an explicit DEBO_DATABASE_URL counts. Without one, the
  * service reports "not set up" and every feature says so plainly.
@@ -78,7 +78,7 @@ export function createDebo(
     // Never in a live workspace: it would look like a real journal and forget everything.
     if (config.mode !== "sample")
       throw new Error("DEBO_DEV_MEMORY is for sample workspaces only. Remove it from a live workspace.");
-    console.warn("[Debo] DEV ONLY: the journal is in memory and is forgotten when the server stops.");
+    console.warn("[Daksha] DEV ONLY: the journal is in memory and is forgotten when the server stops.");
     // Recordings work too: an in-memory bucket (served under /api/dev-r2) and a fake speech engine.
     // DEBO_DEV_FAIL_FIRST=1: the first transcript fails, so the "Try again" screen can be seen.
     let failedOnce = !["1", "true"].includes(env.DEBO_DEV_FAIL_FIRST?.trim().toLowerCase() ?? "");

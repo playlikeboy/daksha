@@ -1,16 +1,16 @@
-// Android: keep a Talk call going while Debo is in the background.
+// Android: keep a Talk call going while Daksha is in the background.
 //
 // Android stops an app from using the microphone once it is out of sight,
 // unless the app runs a "foreground service" of type microphone, which must
 // show a notification the whole time. So while a call is live, this shows
-// "Debo is listening" with an End button, and the call keeps going when the
+// "Daksha is listening" with an End button, and the call keeps going when the
 // person switches apps or turns the screen off. It stops the moment the call
 // ends. iPhone needs none of this: the "audio" background mode in app.json
 // keeps the call going there.
 //
 // The service comes from @supersami/rn-foreground-service. Its native module is
 // called directly: the library's JavaScript wrapper also runs a background task
-// loop Debo does not need. The service declaration and the End button wiring
+// loop Daksha does not need. The service declaration and the End button wiring
 // are made by plugins/with-call-service.js.
 //
 // Not run on a device yet: typechecked, and the Android build is made by CI.
@@ -59,8 +59,8 @@ export async function keepCallRunning(onEnd: () => void): Promise<() => Promise<
   try {
     await service.startService({
       id: NOTIFICATION_ID,
-      title: "Debo is listening",
-      message: "You are in a call with Debo. Press End to hang up.",
+      title: "Daksha is listening",
+      message: "You are in a call with Daksha. Press End to hang up.",
       ServiceType: "microphone",
       ongoing: true,
       importance: "low",
@@ -74,7 +74,7 @@ export async function keepCallRunning(onEnd: () => void): Promise<() => Promise<
       mainOnPress: "open",
     });
   } catch {
-    // The call still works while Debo is on screen.
+    // The call still works while Daksha is on screen.
   }
   return async () => {
     subscription.remove();

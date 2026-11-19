@@ -17,7 +17,7 @@ if (existsSync(".env")) {
   process.loadEnvFile(".env");
   if (shadowed.length)
     console.warn(
-      `[Debo] Using ${shadowed.join(", ")} from the environment instead of .env. ` +
+      `[Daksha] Using ${shadowed.join(", ")} from the environment instead of .env. ` +
         (shadowed.length === 1
           ? "Unset it to use the .env value."
           : "Unset them to use the .env values."),
@@ -33,7 +33,7 @@ if (telemetryOptedIn()) {
   process.env.COPILOTKIT_TELEMETRY_SAMPLE_RATE ??= "1";
   // The operator opted in explicitly, so a stale opt-out variable must not silently win.
   if (process.env.DO_NOT_TRACK === "1" || process.env.DO_NOT_TRACK === "true") {
-    console.warn("[Debo] DO_NOT_TRACK is set, so telemetry stays off even though DEBO_TELEMETRY=on.");
+    console.warn("[Daksha] DO_NOT_TRACK is set, so telemetry stays off even though DEBO_TELEMETRY=on.");
     process.env.COPILOTKIT_TELEMETRY_DISABLED = "true";
   }
 } else {
@@ -43,7 +43,7 @@ if (telemetryOptedIn()) {
 }
 if (process.env.CPK_INTELLIGENCE_API_KEY?.trim())
   console.warn(
-    "[Debo] CPK_INTELLIGENCE_API_KEY is ignored. Debo keeps conversations in its own database and sends them to no one.",
+    "[Daksha] CPK_INTELLIGENCE_API_KEY is ignored. Daksha keeps conversations in its own database and sends them to no one.",
   );
 
 export interface Config {

@@ -1,4 +1,4 @@
-// DEV ONLY. An in-memory Debo journal for trying the screens on a laptop with
+// DEV ONLY. An in-memory Daksha journal for trying the screens on a laptop with
 // no database and no AI key. Everything is forgotten when the server stops.
 //
 // It is switched on by DEBO_DEV_MEMORY=1 and only in a sample workspace
@@ -212,7 +212,7 @@ export function devMemoryBackend(): DeboBackend {
       }
       entry.title = callTitle(entry.text);
       t.ingestedAt = t.updatedAt;
-      // Stands in for memory: only the person's own turns become memories, never Debo's.
+      // Stands in for memory: only the person's own turns become memories, never Daksha's.
       const kept = (memories.get(owner) ?? []).filter((m) => m.sourceId !== id);
       for (const turn of parseCall(entry.text))
         if (turn.who === "person")
@@ -350,7 +350,7 @@ export function devMemoryBackend(): DeboBackend {
         ]);
       },
     },
-    // Stands in for "Debo remembers what is in it": the first line becomes a memory.
+    // Stands in for "Daksha remembers what is in it": the first line becomes a memory.
     async afterChange(owner, entryId, change) {
       if (change !== "saved") return;
       const entry = mine(owner).find((e) => e.id === entryId);

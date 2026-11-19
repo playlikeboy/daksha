@@ -1,4 +1,4 @@
-// Settings card: what Debo sends on her own. Birthday and special-day reminders (on until
+// Settings card: what Daksha sends on her own. Birthday and special-day reminders (on until
 // the person turns them off), the morning check-in (off until turned on, with a time), the
 // reminders the person asked for, and "Send me reminders" on this device (web push in a
 // browser, notifications the phone holds itself in the app). Nothing between 22:00 and 07:00.
@@ -84,8 +84,8 @@ export function RemindersSetting() {
       if (deviceOn) return turnOffDeviceReminders(api);
       const result = await turnOnDeviceReminders(api, push.publicKey ?? undefined);
       if (result === "denied")
-        throw new Error("Notifications are blocked for Debo. Allow them in your browser or phone settings, then try again.");
-      if (result === "unsupported") throw new Error("This device can't show Debo's reminders. They still show in the app.");
+        throw new Error("Notifications are blocked for Daksha. Allow them in your browser or phone settings, then try again.");
+      if (result === "unsupported") throw new Error("This device can't show Daksha's reminders. They still show in the app.");
     }, deviceOn ? "Reminders on this device are off." : "Reminders on this device are on.");
 
   if (!settings)

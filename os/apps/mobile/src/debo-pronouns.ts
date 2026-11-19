@@ -2,7 +2,7 @@ import { useAssistantName, useCustomAvatar, useDeboCharacter } from "./debo-char
 
 /**
  * How labels talk about the character the person picked: "How fast she speaks",
- * "How fast they speak". Debo the creature has no gender (DESIGN.md), so it is "they".
+ * "How fast they speak". Daksha the creature has no gender (DESIGN.md), so it is "they".
  * A character missing from the table is "they" too, so a new one never reads wrong.
  */
 export interface Pronouns {

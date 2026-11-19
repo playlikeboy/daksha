@@ -79,12 +79,12 @@ export function threadIdFrom(part: string): string {
   return UUID_TAIL.exec(part)?.[1] ?? CALL_TAIL.exec(part)?.[1] ?? part;
 }
 
-/** What the page title says for each screen, as in "Journal · Debo". */
+/** What the page title says for each screen, as in "Journal · Daksha". */
 const NAMES: Partial<Record<Section, string>> = {
   chat: "Chat",
   talk: "Talk",
   journal: "Journal",
-  knows: "What Debo knows",
+  knows: "What Daksha knows",
   activity: "Tasks",
   apps: "Apps",
   ideas: "Ideas",
@@ -136,7 +136,7 @@ export function parsePath(path: string): Route | null {
   return null;
 }
 
-/** Reads a native deep link such as debo://journal/abc or https://my.debo.life/talk. */
+/** Reads a native deep link such as debo://journal/abc or https://my.daksha.life/talk. */
 export function pathFromUrl(url: string): string {
   const match = /^([a-z][a-z0-9+.-]*):\/\/([^/?#]*)([^?#]*)/i.exec(url);
   if (!match) return url;
@@ -147,10 +147,10 @@ export function pathFromUrl(url: string): string {
 }
 
 export function titleFor(route: Route | null): string {
-  if (!route) return "That page isn't here · Debo";
+  if (!route) return "That page isn't here · Daksha";
   const chat = route.section === "chat" && route.threadId ? chatNameOf(route.threadId) : undefined;
-  if (chat) return `${chat} · Debo`;
+  if (chat) return `${chat} · Daksha`;
   const entry = route.section === "journal" && route.entryId ? entryNameOf(route.entryId) : undefined;
-  if (entry) return `${entry} · Debo`;
-  return `${NAMES[canonicalSection(route.section)] ?? "Debo"} · Debo`;
+  if (entry) return `${entry} · Daksha`;
+  return `${NAMES[canonicalSection(route.section)] ?? "Daksha"} · Daksha`;
 }

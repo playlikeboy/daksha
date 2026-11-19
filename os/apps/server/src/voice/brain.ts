@@ -1,5 +1,5 @@
 
-/** One source Debo used, shown as a chip next to the answer. */
+/** One source Daksha used, shown as a chip next to the answer. */
 export interface VoiceSource {
   id: string;
   label: string;
@@ -33,7 +33,7 @@ export type VoiceBrainEvent =
   | { type: "done"; status: "answered" | "unknown" | "limit" | "stopped" | "error" };
 
 /**
- * The one thing the voice route needs from Debo's brain. Swap the
+ * The one thing the voice route needs from Daksha's brain. Swap the
  * implementation in `createApp` (the `voiceBrain` line in app.ts); the route
  * and the voice agent do not change.
  */

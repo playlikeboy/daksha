@@ -1,4 +1,4 @@
-// A picture Debo made (the make_image tool), shown in the chat. The tool result names the picture;
+// A picture Daksha made (the make_image tool), shown in the chat. The tool result names the picture;
 // a fresh short-lived link is asked for each time, so it shows again when the thread is opened later.
 import { ImageIcon } from "lucide-react-native";
 import { useEffect, useState } from "react";
@@ -65,7 +65,7 @@ export function ImageToolCard({ result, loading }: { result: unknown; loading: b
         <Image
           source={{ uri: link.url }}
           accessible
-          accessibilityLabel={`Picture Debo made: ${link.prompt}`}
+          accessibilityLabel={`Picture Daksha made: ${link.prompt}`}
           resizeMode="cover"
           style={{ width: "100%", aspectRatio: RATIO[made.data.shape], borderRadius: radius.container, backgroundColor: colors.line }}
         />

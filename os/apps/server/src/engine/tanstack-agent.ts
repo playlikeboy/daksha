@@ -31,7 +31,7 @@ export const OPENROUTER_BASE_URL = "https://openrouter.ai/api/v1";
 // Same "provider/model" strings, env vars and base URL formats as the AI SDK resolver in
 // @copilotkit/runtime. Each provider SDK retries transient failures up to MODEL_MAX_RETRIES times.
 // `apiKey` is a person's own key (own-keys/service.ts): it goes straight to that provider, never
-// through Debo's base URL or gateway, and is never logged.
+// through Daksha's base URL or gateway, and is never logged.
 export function adapter(spec: string, apiKey?: string) {
   const [, provider = "", model = ""] = spec.trim().match(/^([^/:]*)[/:](.*)$/) ?? [];
   if (!provider || !model.trim())
@@ -134,7 +134,7 @@ const stateTools = [
 /** A BuiltInAgent in TanStack factory mode with the options of the classic AI SDK mode. */
 export function tanstackAgent(options: {
   model: string;
-  /** A person's own key for that provider. Without it, Debo's own key from the environment. */
+  /** A person's own key for that provider. Without it, Daksha's own key from the environment. */
   apiKey?: string;
   maxSteps: number;
   tools: ToolDefinition[];

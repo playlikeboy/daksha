@@ -37,7 +37,7 @@ export async function rolePrompt(db: Store, owner: string, persona?: Persona | n
 }
 
 /**
- * The voice of the custom person Debo is talking as, if any, for calls:
+ * The voice of the custom person Daksha is talking as, if any, for calls:
  *  - `voice`: the voice from `VOICES` they were given. The signed call token carries it, so it
  *    is used over the person's own setting, and it is the fallback if a voice copy can't be used.
  *  - `voiceCopy`: a copy of their real voice was made (`voiceCloneId`). The voice agent then asks

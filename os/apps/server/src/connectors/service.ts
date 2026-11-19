@@ -1,4 +1,4 @@
-// What the routes, the agent tools and the review flow call. The rules of Debo's connectors
+// What the routes, the agent tools and the review flow call. The rules of Daksha's connectors
 // live here, on top of a ConnectorBackend:
 //   - every call is for one owner, and the owner is always the signed-in person, never a client value;
 //   - only apps the owner has really connected can be used;
@@ -26,7 +26,7 @@ const CATALOGUE_TTL = 6 * 60 * 60_000;
 const TOOL_TTL = 10 * 60_000;
 /** A connect link that was never finished is treated as expired after this long. */
 const LINK_TTL = 30 * 60_000;
-/** Apps Debo already reaches through the built-in Google connection. */
+/** Apps Daksha already reaches through the built-in Google connection. */
 const GOOGLE_BUILT_IN = new Set(["gmail", "googlecalendar"]);
 const SLUG = /^[a-z0-9_]{1,64}$/;
 
@@ -35,7 +35,7 @@ export interface ConnectorOptions {
   backend: ConnectorBackend | null;
   /** The API's public address. The connect page sends people back to it. */
   publicUrl: string;
-  /** True when this Debo has its own Google sign-in, so Gmail and Calendar already have a card. */
+  /** True when this Daksha has its own Google sign-in, so Gmail and Calendar already have a card. */
   googleBuiltIn?: boolean;
   /** True when this person's built-in Google is connected: the agent then uses it, not a second Gmail. */
   googleConnected?: (owner: string) => Promise<boolean>;
@@ -287,7 +287,7 @@ export class ConnectorService {
     if (!info || this.hidden(toolkit)) throw new AppError("I don't know that app.", 404);
     if (!info.connectable)
       throw new AppError(
-        `${info.name} can't be connected from Debo yet. Whoever runs this Debo needs to set it up first.`,
+        `${info.name} can't be connected from Daksha yet. Whoever runs this Daksha needs to set it up first.`,
         409,
       );
     const mine = (await this.accounts(owner)).filter((a) => a.toolkit === toolkit);
@@ -379,7 +379,7 @@ export class ConnectorService {
     );
   }
 
-  /** Names of the apps this person can use through Debo right now. Never throws. */
+  /** Names of the apps this person can use through Daksha right now. Never throws. */
   async connectedNames(owner: string): Promise<string[]> {
     try {
       return (await this.usable(owner)).map((u) => u.name);
@@ -467,7 +467,7 @@ export class ConnectorService {
    */
   async prepare(owner: string, slug: string, args: unknown): Promise<Prepared> {
     if (isMetaTool(slug) || !/^[A-Za-z0-9_]{1,200}$/.test(slug))
-      throw new AppError("Debo can't use that tool.", 400);
+      throw new AppError("Daksha can't use that tool.", 400);
     if (!args || typeof args !== "object" || Array.isArray(args))
       throw new AppError("The tool's arguments must be an object.", 400);
     if (JSON.stringify(args).length > 60_000)
@@ -527,10 +527,10 @@ export class ConnectorService {
     );
     if (!usable)
       throw new AppError(
-        `${data.toolkitName} was disconnected or changed. Connect it again, then ask Debo again.`,
+        `${data.toolkitName} was disconnected or changed. Connect it again, then ask Daksha again.`,
         409,
       );
-    if (isMetaTool(data.tool)) throw new AppError("Debo can't use that tool.", 400);
+    if (isMetaTool(data.tool)) throw new AppError("Daksha can't use that tool.", 400);
     const outcome = await this.backend.execute(
       owner,
       [{ toolkit: data.toolkit, accountId: data.accountId }],

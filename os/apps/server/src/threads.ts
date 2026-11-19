@@ -5,7 +5,7 @@ import type { Store } from "./db.ts";
 import { AppError } from "./errors.ts";
 
 /**
- * Debo-owned conversation storage. Everything lives in the `records` table, scoped by owner:
+ * Daksha-owned conversation storage. Everything lives in the `records` table, scoped by owner:
  *   threads         one row per conversation (name, archived, timestamps)
  *   thread-history  one row per conversation (replayable AG-UI events and the message list)
  *   conversation-settings/main  which thread is the person's main chat

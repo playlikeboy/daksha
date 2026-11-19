@@ -1,5 +1,5 @@
 // Kabir, the young man: his own paint (see debo-paint-diya.ts for why raw colours live here).
-// Few colours on purpose, like Debo: skin, hair, one mustard hoodie, ink for the face,
+// Few colours on purpose, like Daksha: skin, hair, one mustard hoodie, ink for the face,
 // pink for the cheeks.
 export const kabirPaint = {
   skin: "#dfa57f",

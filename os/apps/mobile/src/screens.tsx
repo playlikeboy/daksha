@@ -146,7 +146,7 @@ function CalendarInApps() {
     <Empty
       icon={CalendarDays}
       title="Your calendar lives in Apps"
-      detail="Connect Google Calendar or Outlook under Connect your apps. Then ask Debo in chat or by voice, for example “what is on my calendar tomorrow?”."
+      detail="Connect Google Calendar or Outlook under Connect your apps. Then ask Daksha in chat or by voice, for example “what is on my calendar tomorrow?”."
     >
       <Button primary onPress={() => navigate("apps")}>
         Connect your apps
@@ -297,7 +297,7 @@ export function MailScreen() {
             detail={
               query
                 ? "Try a different name or subject."
-                : "Debo reads your mail through the apps you connect. Open Apps, connect Gmail, then ask Debo about your inbox in chat."
+                : "Daksha reads your mail through the apps you connect. Open Apps, connect Gmail, then ask Daksha about your inbox in chat."
             }
           >
             {!query && (
@@ -969,7 +969,7 @@ export function ConnectionsScreen({ query = "" }: { query?: string }) {
     },
     {
       id: "browser",
-      name: "Debo's computer",
+      name: "Daksha's computer",
       icon: Globe2,
       color: colors.blueDark,
       connected: w.connections.some((c) => c.id === "browser" && c.status === "connected"),
@@ -1063,7 +1063,7 @@ export function ConnectionsScreen({ query = "" }: { query?: string }) {
           {selected === "google" && (
             <View style={{ gap: spacing[5] }}>
               <Text style={s.muted}>
-                Bring Gmail and Google Calendar into your conversations. Debo can only read at first.
+                Bring Gmail and Google Calendar into your conversations. Daksha can only read at first.
                 You choose when it may send or edit.
               </Text>
               <View style={[s.row, { gap: spacing[2], flexWrap: "wrap" }]}>
@@ -1099,7 +1099,7 @@ export function ConnectionsScreen({ query = "" }: { query?: string }) {
               />
               <SettingsLine
                 label="Conversations"
-                value={w.runtime.richThreads ? "Saved in your Debo account" : "Not saved"}
+                value={w.runtime.richThreads ? "Saved in your Daksha account" : "Not saved"}
               />
               <Button
                 small

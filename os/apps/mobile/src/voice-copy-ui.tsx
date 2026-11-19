@@ -1,7 +1,7 @@
 // "Voice notes and calls" for one custom person: add a voice note or a call
 // recording, say which voice is who, keep only their words, and (if you choose,
 // with their permission) copy their voice for your calls with them.
-// Shown under "What Debo learned" on each person in "People you made" (custom-people-ui.tsx).
+// Shown under "What Daksha learned" on each person in "People you made" (custom-people-ui.tsx).
 import { createAudioPlayer } from "expo-audio";
 import { Play, Plus } from "lucide-react-native";
 import { useCallback, useEffect, useRef, useState } from "react";
@@ -171,7 +171,7 @@ function RecordingCard({
             ) : null}
             {state.key === "none" ? <Text style={s.small}>{state.message}</Text> : null}
             <Text style={s.small}>
-              I send a short clip of only {name}'s voice (10 to 30 seconds) to Cartesia, the voice service Debo's calls use.
+              I send a short clip of only {name}'s voice (10 to 30 seconds) to Cartesia, the voice service Daksha's calls use.
               Cartesia keeps a private voice model until you remove the voice copy or delete {name}. Every call in this voice
               starts by saying it's an AI version. It is never used outside your own calls.
             </Text>
@@ -256,7 +256,7 @@ export function VoiceRecordingsPanel({ personId, name }: { personId: string; nam
     setError("");
     try {
       const answer = await api.removeVoice();
-      setNote(answer.message ?? `Voice copy removed, here and at Cartesia. Calls with ${name} use a Debo voice again.`);
+      setNote(answer.message ?? `Voice copy removed, here and at Cartesia. Calls with ${name} use a Daksha voice again.`);
       await load();
     } catch (e) {
       setError(errorText(e));
@@ -273,7 +273,7 @@ export function VoiceRecordingsPanel({ personId, name }: { personId: string; nam
         only {name}'s words to learn how they talk. The recording itself is deleted when we're done, or after 24 hours.
       </Text>
       {!available ? (
-        <Text style={s.small}>Adding recordings is not turned on in this Debo yet.</Text>
+        <Text style={s.small}>Adding recordings is not turned on in this Daksha yet.</Text>
       ) : (
         <View style={{ gap: spacing[2] }}>
           <Segmented<"voice-note" | "call">

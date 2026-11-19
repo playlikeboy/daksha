@@ -116,7 +116,7 @@ export async function runUseAppTool(
         actionId: proposal.id,
         title: proposal.title,
         app: prepared.toolkitName,
-        note: "Nothing has happened yet. The person needs to approve this in the Debo app first. Tell them it is waiting for their yes.",
+        note: "Nothing has happened yet. The person needs to approve this in the Daksha app first. Tell them it is waiting for their yes.",
       },
     };
   } catch (error) {

@@ -56,7 +56,7 @@ export function SourceChips({ sources }: { sources: SourceChip[] }) {
 }
 
 /**
- * The chat card for Debo's journal tools. An answer always shows its source
+ * The chat card for Daksha's journal tools. An answer always shows its source
  * chips; when the journal has nothing, the card says so and shows none.
  */
 export function DeboToolCard({

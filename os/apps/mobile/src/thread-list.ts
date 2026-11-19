@@ -13,7 +13,7 @@ interface Page {
   nextCursor: string | null;
 }
 
-/** The conversation list, read from Debo's own server (`/api/threads`). Nothing leaves Debo. */
+/** The conversation list, read from Daksha's own server (`/api/threads`). Nothing leaves Daksha. */
 export function useSavedThreads(enabled: boolean, limit = 20) {
   const { api } = useWorkspace();
   const [threads, setThreads] = useState<SavedThread[]>([]);

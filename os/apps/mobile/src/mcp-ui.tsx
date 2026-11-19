@@ -1,8 +1,8 @@
-// "Add your own tool server (MCP)" on the Apps screen. A person can point Debo at a tool
-// server they run or trust. It is NOT one of Debo's apps: a stranger may run it, and what Debo
-// sends it leaves Debo. The words on this screen say so. Colours and sizes come from ui.tsx.
+// "Add your own tool server (MCP)" on the Apps screen. A person can point Daksha at a tool
+// server they run or trust. It is NOT one of Daksha's apps: a stranger may run it, and what Daksha
+// sends it leaves Daksha. The words on this screen say so. Colours and sizes come from ui.tsx.
 // A server can take a secret, or a sign-in (OAuth) on the server's own page. The Composio card
-// is a shortcut for a person's OWN Composio account (not the apps Debo connects for them).
+// is a shortcut for a person's OWN Composio account (not the apps Daksha connects for them).
 import { KeyRound, LogIn, Plus, Server, ShieldAlert } from "lucide-react-native";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { AppState, Platform, Text, View } from "react-native";
@@ -68,7 +68,7 @@ export function ToolServersSection() {
   useEffect(() => {
     void refresh();
   }, [refresh]);
-  // Back from a sign-in page: check again when Debo is in front.
+  // Back from a sign-in page: check again when Daksha is in front.
   useEffect(() => {
     const sub = AppState.addEventListener("change", (state) => {
       if (state === "active") void refresh();
@@ -135,7 +135,7 @@ export function ToolServersSection() {
       });
       setForm(emptyForm);
       setAdding(false);
-      notify(`${made.name} is added. Debo found ${made.tools.length} ${made.tools.length === 1 ? "tool" : "tools"}.`);
+      notify(`${made.name} is added. Daksha found ${made.tools.length} ${made.tools.length === 1 ? "tool" : "tools"}.`);
       await refresh();
     } catch (e) {
       setError(errorText(e));
@@ -157,7 +157,7 @@ export function ToolServersSection() {
         preset: "composio",
       });
       setComposioKey(undefined);
-      notify(`Composio is added. Debo found ${made.tools.length} ${made.tools.length === 1 ? "tool" : "tools"}.`);
+      notify(`Composio is added. Daksha found ${made.tools.length} ${made.tools.length === 1 ? "tool" : "tools"}.`);
       await refresh();
     } catch (e) {
       setError(errorText(e));
@@ -170,7 +170,7 @@ export function ToolServersSection() {
     <View style={{ gap: spacing[3] }} accessibilityLabel="Your own tool servers">
       <Text style={s.heading}>Your own tool servers</Text>
       <Text style={s.muted}>
-        If you run or trust a tool server (MCP), Debo can use its tools in chat and by voice. Every
+        If you run or trust a tool server (MCP), Daksha can use its tools in chat and by voice. Every
         tool waits for your yes, unless you allow a server to read without asking.
       </Text>
       <ErrorNotice error={error} />
@@ -252,7 +252,7 @@ export function ToolServersSection() {
                   void run(
                     server.id,
                     () => signOutToolServer(api, server.id),
-                    `Signed out of ${server.name}. Debo deleted its sign-in.`,
+                    `Signed out of ${server.name}. Daksha deleted its sign-in.`,
                   )
                 }
               >
@@ -275,7 +275,7 @@ export function ToolServersSection() {
                 <Text style={s.muted}>This server did not list any tools.</Text>
               )}
               <Text style={s.small}>
-                What each tool says about itself comes from the server. Debo treats it as a claim,
+                What each tool says about itself comes from the server. Daksha treats it as a claim,
                 not a promise.
               </Text>
             </View>
@@ -283,7 +283,7 @@ export function ToolServersSection() {
           {confirming === server.id ? (
             <View accessibilityRole="alert" style={{ gap: spacing[2] }}>
               <Text style={s.text}>
-                Remove {server.name}? Debo stops using it and deletes the secret or sign-in it saved.
+                Remove {server.name}? Daksha stops using it and deletes the secret or sign-in it saved.
                 You can add it again any time.
               </Text>
               <View style={[s.row, { gap: spacing[2], flexWrap: "wrap" }]}>
@@ -339,8 +339,8 @@ export function ToolServersSection() {
           <View style={[s.row, { gap: spacing[3], alignItems: "flex-start" }]}>
             <ShieldAlert size={18} color={colors.danger} />
             <Text style={[s.small, { flex: 1 }]}>
-              Only add a server you trust. Debo sends it what you ask it to do, such as the words
-              of a note, and Debo does not control what it does with them. Debo never sends your
+              Only add a server you trust. Daksha sends it what you ask it to do, such as the words
+              of a note, and Daksha does not control what it does with them. Daksha never sends your
               journal or memories to it by itself. What it sends back is treated as plain data, and
               every change waits for your yes.
             </Text>
@@ -374,7 +374,7 @@ export function ToolServersSection() {
           </View>
           {form.signIn ? (
             <Text style={s.small}>
-              Debo opens the server’s own sign-in page. After you sign in, Debo keeps the sign-in
+              Daksha opens the server’s own sign-in page. After you sign in, Daksha keeps the sign-in
               encrypted and never shows it. Sign out or Remove deletes it.
             </Text>
           ) : (
@@ -396,7 +396,7 @@ export function ToolServersSection() {
                 autoCapitalize="none"
                 autoCorrect={false}
               />
-              <Text style={s.small}>Debo saves the secret encrypted and never shows it again.</Text>
+              <Text style={s.small}>Daksha saves the secret encrypted and never shows it again.</Text>
             </>
           )}
           <View style={[s.row, { gap: spacing[2], flexWrap: "wrap" }]}>
@@ -444,8 +444,8 @@ function ComposioCard(props: {
     <Card style={{ gap: spacing[3], padding: spacing[4] }}>
       <Text style={[s.text, { fontWeight: "600" }]}>Composio: connect all your apps at once</Text>
       <Text style={s.small}>
-        If you have your own Composio account, add it once and Debo can use the apps you connected
-        there. This uses your Composio account, not Debo’s. Every change still waits for your yes.
+        If you have your own Composio account, add it once and Daksha can use the apps you connected
+        there. This uses your Composio account, not Daksha’s. Every change still waits for your yes.
       </Text>
       {keyForm ? (
         <View style={{ gap: spacing[3] }}>
@@ -475,7 +475,7 @@ function ComposioCard(props: {
           />
           <Text style={s.small}>
             For connect.composio.dev, use your own API key. For a project address from your Composio
-            dashboard, use that project’s API key. Debo saves the key encrypted and never shows it again.
+            dashboard, use that project’s API key. Daksha saves the key encrypted and never shows it again.
           </Text>
           <View style={[s.row, { gap: spacing[2], flexWrap: "wrap" }]}>
             <Button

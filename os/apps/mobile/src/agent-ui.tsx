@@ -973,7 +973,7 @@ export function DelegateSheet({ goalId, milestoneId }: { goalId?: string; milest
   return (
     <Sheet
       title="Hand over an outcome"
-      subtitle="Debo saves a plan and keeps working on the server."
+      subtitle="Daksha saves a plan and keeps working on the server."
       onClose={close}
     >
       {milestoneId && (
@@ -1186,7 +1186,7 @@ function IdeaCard({ idea }: { idea: Idea }) {
         <View style={{ gap: spacing[4], marginTop: spacing[5], paddingLeft: spacing[12] }}>
           <EvidenceList items={idea.evidence} />
           {editing && (
-            <Field label="What should Debo do?" value={prompt} onChangeText={setPrompt} multiline />
+            <Field label="What should Daksha do?" value={prompt} onChangeText={setPrompt} multiline />
           )}
           <ErrorNotice error={error} />
           <View style={[s.row, { gap: spacing[2], flexWrap: "wrap" }]}>
@@ -1606,7 +1606,7 @@ function MonitorForm({ onDone }: { onDone: () => void }) {
       <Text style={[s.small, { marginBottom: spacing[4] }]}>
         {sample
           ? "Changes to this built-in page stay in your workspace."
-          : "Debo checks this public page on the server and saves meaningful changes in Notifications."}
+          : "Daksha checks this public page on the server and saves meaningful changes in Notifications."}
       </Text>
       <ErrorNotice error={error} />
       <Button
@@ -1769,7 +1769,7 @@ export function AppsScreen() {
   const talkSettingsName = useTalkSettingsName();
   const [query, setQuery] = useState("");
   const [settings, setSettings] = useState(false);
-  const [name, setName] = useState(data?.identity.name || "Debo");
+  const [name, setName] = useState(data?.identity.name || "Daksha");
   const [tone, setTone] = useState(data?.identity.tone || "warm");
   const [avatar, setAvatar] = useState(data?.identity.avatar || "sky");
   const [character, setCharacter] = useState<CharacterId>(characterOrDefault(data?.identity.character));
@@ -1866,7 +1866,7 @@ export function AppsScreen() {
     },
     {
       section: "browser" as const,
-      title: "Debo's computer",
+      title: "Daksha's computer",
       detail: "Persistent browser sessions",
       icon: Globe2,
     },
@@ -1889,7 +1889,7 @@ export function AppsScreen() {
       <ConnectionsScreen query={query} />
       <ConnectAppsSection query={query} />
       <ToolServersSection />
-      <Text style={s.heading}>More from Debo</Text>
+      <Text style={s.heading}>More from Daksha</Text>
       <Card style={{ paddingVertical: spacing[1], backgroundColor: colors.subtle }}>
         {shortcuts
           .filter((item) =>
@@ -1919,7 +1919,7 @@ export function AppsScreen() {
       {settings && (
         <>
           <Card style={{ gap: spacing[3] }}>
-            <SectionHeading title="About Debo" />
+            <SectionHeading title="About Daksha" />
             <CharacterPicker
               value={character}
               onChange={(id) => void choose(id)}
@@ -2020,7 +2020,7 @@ export function AppsScreen() {
           </Card>
           <Card style={{ gap: spacing[3] }}>
             <SectionHeading title="Notes" />
-            <Text style={s.muted}>Little things Debo keeps for chat. You can fix or forget any of them.</Text>
+            <Text style={s.muted}>Little things Daksha keeps for chat. You can fix or forget any of them.</Text>
             {data?.memories.map((item) => (
               <MemoryRow key={item.id} memory={item} />
             ))}

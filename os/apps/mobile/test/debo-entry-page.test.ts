@@ -20,7 +20,7 @@ test("the segment playing now is found, and none in a long pause", () => {
 });
 
 test("a voice call's text reads back as turns, with how long it ran", () => {
-  const turns = parseCallTurns("[00:00] You: what did I do\n[00:07] Debo: You went hiking.\nnot a turn\n[01:05] You: right");
+  const turns = parseCallTurns("[00:00] You: what did I do\n[00:07] Daksha: You went hiking.\nnot a turn\n[01:05] You: right");
   assert.deepEqual(
     turns.map((t) => [t.who, t.seconds, t.text]),
     [

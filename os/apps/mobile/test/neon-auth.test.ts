@@ -147,7 +147,7 @@ test("refresh happens 90 seconds before the JWT runs out, and never in a tight l
 });
 
 test("sign-in with a cookie session: no bearer header, cookies are included, the marker is never sent", async () => {
-  // This is how Debo's own Neon Auth answers: a token in the body, a session cookie, no set-auth-token.
+  // This is how Daksha's own Neon Auth answers: a token in the body, a session cookie, no set-auth-token.
   const jwt = jwtWithExp(2_000_000_000);
   const { client, calls } = fake({
     "/sign-in/email": { body: { token: "opaque-session", user } },

@@ -41,7 +41,7 @@ export interface CharacterInfo {
 export const characters: Record<CharacterId, CharacterInfo> = {
   debo: {
     id: "debo",
-    name: "Debo",
+    name: "Daksha",
     blurb: "A soft blue creature",
     looks: "a small round blue creature with two little ears",
     pronoun: "she",

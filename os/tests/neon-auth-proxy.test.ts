@@ -27,7 +27,7 @@ describe("sign-in pass-through to Neon Auth", () => {
     });
     const response = await app.request("/api/neon-auth/sign-in/email?x=1", {
       method: "POST",
-      headers: { "content-type": "application/json", origin: "https://my.debo.life", cookie: "old=1", "x-secret": "no" },
+      headers: { "content-type": "application/json", origin: "https://my.daksha.life", cookie: "old=1", "x-secret": "no" },
       body: JSON.stringify({ email: "a@example.test", password: "pw" }),
     });
     assert.equal(response.status, 200);
@@ -38,7 +38,7 @@ describe("sign-in pass-through to Neon Auth", () => {
     const sent = seen[0] as Request;
     assert.equal(sent.url, `${BASE}/sign-in/email?x=1`);
     assert.equal(sent.method, "POST");
-    assert.equal(sent.headers.get("origin"), "https://my.debo.life");
+    assert.equal(sent.headers.get("origin"), "https://my.daksha.life");
     assert.equal(sent.headers.get("cookie"), "old=1");
     assert.equal(sent.headers.get("x-secret"), null);
     assert.deepEqual(await sent.json(), { email: "a@example.test", password: "pw" });
@@ -57,21 +57,21 @@ describe("sign-in pass-through to Neon Auth", () => {
   });
 
   test("fills in the app's Origin for a phone, which sends none", async () => {
-    const { app, seen } = setup(() => new Response("{}"), "https://my.debo.life");
+    const { app, seen } = setup(() => new Response("{}"), "https://my.daksha.life");
     await app.request("/api/neon-auth/get-session", { headers: { cookie: "a=1" } });
-    assert.equal((seen[0] as Request).headers.get("origin"), "https://my.debo.life");
+    assert.equal((seen[0] as Request).headers.get("origin"), "https://my.daksha.life");
   });
 
   test("never invents an Origin for a browser request", async () => {
-    const { app, seen } = setup(() => new Response("{}"), "https://my.debo.life");
+    const { app, seen } = setup(() => new Response("{}"), "https://my.daksha.life");
     await app.request("/api/neon-auth/get-session", { headers: { "sec-fetch-site": "cross-site" } });
     assert.equal((seen[0] as Request).headers.get("origin"), null);
   });
 
   test("keeps the Origin a caller sent", async () => {
-    const { app, seen } = setup(() => new Response("{}"), "https://my.debo.life");
-    await app.request("/api/neon-auth/get-session", { headers: { origin: "https://www.debo.life" } });
-    assert.equal((seen[0] as Request).headers.get("origin"), "https://www.debo.life");
+    const { app, seen } = setup(() => new Response("{}"), "https://my.daksha.life");
+    await app.request("/api/neon-auth/get-session", { headers: { origin: "https://www.daksha.life" } });
+    assert.equal((seen[0] as Request).headers.get("origin"), "https://www.daksha.life");
   });
 
   test("says so plainly when Neon Auth cannot be reached", async () => {

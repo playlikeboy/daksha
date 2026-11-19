@@ -1,4 +1,4 @@
-// Debo the soft blue creature: its own paint. The blue is the app's accent blue, a little
+// Daksha the soft blue creature: its own paint. The blue is the app's accent blue, a little
 // deeper so the creature stands out on the soft blue circle behind it. Characters are not
 // UI chrome, so the app theme never recolours them (see debo-paint-diya.ts).
 // Few colours on purpose: one blue for the body, a deeper blue inside the ears, ink for the

@@ -10,7 +10,7 @@ export const ToolServerSchema = z.object({
   hasSecret: z.boolean(),
   headerName: z.string().optional(),
   autoRead: z.boolean(),
-  /** How Debo gets in: a sign-in (OAuth), a saved secret, or nothing. */
+  /** How Daksha gets in: a sign-in (OAuth), a saved secret, or nothing. */
   auth: z.enum(["sign-in", "key", "none"]).optional(),
   signedIn: z.boolean().optional(),
   preset: z.enum(["composio"]).optional(),

@@ -1,5 +1,5 @@
 // The upload sheet for a custom person: pick a WhatsApp chat export (.zip or .txt), photos and
-// videos, tick the consent box, send them, and follow the steps while Debo reads them. If the
+// videos, tick the consent box, send them, and follow the steps while Daksha reads them. If the
 // chat has several people, the person picks which one is "them". The files are deleted once
 // they are read, on success and on failure; the sheet says so.
 import { Check, Circle, CircleAlert, CircleDashed, FileUp, Loader } from "lucide-react-native";
@@ -74,7 +74,7 @@ export function CustomPersonUploadSheet({
     return parsed?.success ? parsed.data : null;
   }, [api, base]);
 
-  // While Debo reads, look again every two seconds. Stops when it is done, failed or waiting for a pick.
+  // While Daksha reads, look again every two seconds. Stops when it is done, failed or waiting for a pick.
   useEffect(() => {
     if (!upload || FINISHED.has(upload.status) || upload.status === "needs-sender") return;
     const timer = setTimeout(() => {
@@ -130,7 +130,7 @@ export function CustomPersonUploadSheet({
   for (const f of files) counts[f.kind] += 1;
 
   return (
-    <Sheet title={`Add files for ${person.name}`} subtitle="A WhatsApp chat, photos and videos, so Debo can learn how they talk." onClose={onClose}>
+    <Sheet title={`Add files for ${person.name}`} subtitle="A WhatsApp chat, photos and videos, so Daksha can learn how they talk." onClose={onClose}>
       <View style={{ gap: spacing[4] }}>
         {!upload && (
           <>
@@ -139,7 +139,7 @@ export function CustomPersonUploadSheet({
               You can also add up to 20 photos (JPEG, PNG or WebP, under 5 MB each) and 5 videos.
             </Text>
             <Text style={s.small}>
-              Debo reads the files once, takes out phone numbers, emails, codes and addresses, builds a short profile, then
+              Daksha reads the files once, takes out phone numbers, emails, codes and addresses, builds a short profile, then
               deletes the files. Text and photos go to Anthropic (Claude) to be read, using your own key if you set one; the
               sound of videos goes to Cloudflare to be written out. Nothing is used to train any AI.
             </Text>
@@ -165,7 +165,7 @@ export function CustomPersonUploadSheet({
             )}
             {skipped > 0 && (
               <Text style={s.small} accessibilityLiveRegion="polite">
-                {skipped === 1 ? "One file was left out:" : `${skipped} files were left out:`} Debo can use .zip and .txt chats,
+                {skipped === 1 ? "One file was left out:" : `${skipped} files were left out:`} Daksha can use .zip and .txt chats,
                 photos and videos.
               </Text>
             )}

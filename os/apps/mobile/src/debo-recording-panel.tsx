@@ -209,7 +209,7 @@ export function RecordingPanel({
           )}
           <Text style={s.small}>
             {limitLine} The microphone is only on while you see “Recording”. Your recording is kept privately and only you can
-            play it. Debo writes out the words with Cloudflare's speech service. You can delete it whenever you like.
+            play it. Daksha writes out the words with Cloudflare's speech service. You can delete it whenever you like.
           </Text>
         </>
       )}
@@ -317,7 +317,7 @@ export function RecordingPanel({
             </View>
           )}
           <Text style={s.small}>
-            Kept privately; only you can play it. Debo writes out the words with Cloudflare's speech service.
+            Kept privately; only you can play it. Daksha writes out the words with Cloudflare's speech service.
           </Text>
         </>
       )}

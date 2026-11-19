@@ -1,4 +1,4 @@
-// Debo: a small, round, soft blue blob with two round ears. Not a tomato, not a person:
+// Daksha: a small, round, soft blue blob with two round ears. Not a tomato, not a person:
 // just a friendly something, drawn like a sticker. Flat shapes only, no outlines and no
 // shading lines: one body, two ears, one soft shine. The face does the rest, so it still
 // reads at 24 px.

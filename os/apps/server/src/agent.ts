@@ -57,10 +57,10 @@ export function makeRuntime(
   });
   const runtime = new CopilotRuntime({
     agents,
-    // Debo's own Postgres-backed runner. No CopilotKit Intelligence service is used.
+    // Daksha's own Postgres-backed runner. No CopilotKit Intelligence service is used.
     runner,
     // Only used if the operator opts in to telemetry (see config.ts and docs/TELEMETRY.md).
-    telemetryProperties: { accessibility_title: "Debo" },
+    telemetryProperties: { accessibility_title: "Daksha" },
   });
   return createCopilotHonoHandler({ runtime, basePath: "/api/copilotkit" });
 }

@@ -214,7 +214,7 @@ export class WorkspaceService {
         from: "stay@seabird.example",
         to: ["alex@example.com"],
         subject: "Your weekend, all sorted",
-        body: "Your reservation is confirmed.\n\nCheck-in: Friday, 3 PM\nCheck-out: Sunday, 11 AM\n\nThis fictional reservation demonstrates how Debo can organize travel details.",
+        body: "Your reservation is confirmed.\n\nCheck-in: Friday, 3 PM\nCheck-out: Sunday, 11 AM\n\nThis fictional reservation demonstrates how Daksha can organize travel details.",
         date: at(7, 30),
         unread: false,
         label: "Travel",
@@ -390,7 +390,7 @@ export class WorkspaceService {
     };
   }
   async prepare(owner: string, input: ProposalInput, connectionId?: string) {
-    // Debo's own journal and connected apps are not the Google workspace.
+    // Daksha's own journal and connected apps are not the Google workspace.
     if (input.kind === "journal.add" || input.kind === "connector.call") return { input };
     if (input.kind === "email.send") {
       for (const id of input.data.attachmentIds) await this.files.get(owner, id);
@@ -416,7 +416,7 @@ export class WorkspaceService {
     connectionId?: string,
     targetVersion?: string,
   ): Promise<string> {
-    // Journal entries are saved by Debo's brain (see debo/), never by the workspace.
+    // Journal entries are saved by Daksha's brain (see debo/), never by the workspace.
     if (input.kind === "journal.add") throw new AppError("Journal entries are not saved here", 400);
     if (input.kind === "connector.call") throw new AppError("App actions are not run here", 400);
     if (this.config.mode === "sample") {

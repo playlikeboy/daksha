@@ -254,7 +254,7 @@ test("saved conversations survive a restart of the store", async () => {
 test("the CopilotKit thread routes that need Intelligence stay closed", async () => {
   for (const path of ["/api/copilotkit/threads?agentId=default", "/api/copilotkit/threads/x/messages"]) {
     const response = await app.request(path, { headers: auth(alice) });
-    // No second, unscoped thread store is exposed next to Debo's own.
+    // No second, unscoped thread store is exposed next to Daksha's own.
     assert.ok([404, 422].includes(response.status), `${path} -> ${response.status}`);
     assert.doesNotMatch(await response.text(), /Show my calendar/);
   }

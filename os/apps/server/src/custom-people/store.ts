@@ -56,7 +56,7 @@ export interface CustomPerson {
   /**
    * Set when a copy of their voice was made (voice-clone/, the `voice-clones` record with the
    * same id holds the provider's voice id and whose key made it). Only ever used in this
-   * person's own Debo calls. Deleted at the provider when the custom person or the account is
+   * person's own Daksha calls. Deleted at the provider when the custom person or the account is
    * deleted. The app only reads whether it is there.
    */
   voiceCloneId?: string;
@@ -68,7 +68,7 @@ export interface CustomPerson {
   spokenLines?: { text: string; source: string }[];
   /** A saved avatar (records kind `custom-avatars`). Must be one of the owner's own. Missing: the app draws initials. */
   avatarId?: string;
-  /** They have died: Debo speaks gently and the app shows a soft note. */
+  /** They have died: Daksha speaks gently and the app shows a soft note. */
   passedAway?: boolean;
   /** When the profile was last built from uploads, and from what. Counts only. */
   builtFrom?: { chats: number; messages: number; photos: number; videos: number; voice: number; at: string };

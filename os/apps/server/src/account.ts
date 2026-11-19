@@ -33,9 +33,9 @@ export function accountRoutes(
   const app = new Hono<{ Variables: { owner: string } }>();
   app.get("/export", async (c) => {
     const rows = (await db.listOwner(c.get("owner"))).filter((row) => !NEVER_EXPORTED.has(row.kind));
-    c.header("Content-Disposition", 'attachment; filename="debo-data.json"');
+    c.header("Content-Disposition", 'attachment; filename="daksha-data.json"');
     const journal = (await debo?.exportMine(c.get("owner"))) ?? null;
-    // Which apps are connected, and since when. Never a token: Debo does not hold them.
+    // Which apps are connected, and since when. Never a token: Daksha does not hold them.
     const apps = (await connectors?.exportMine(c.get("owner"))) ?? null;
     // The person's own tool servers: name, address, tools and when each last worked. Never the secret.
     const toolServers = mcp
@@ -72,13 +72,13 @@ export function accountRoutes(
       .object({ confirm: z.literal(true) })
       .safeParse(await c.req.json().catch(() => ({})));
     if (!body.success)
-      throw new AppError('Send {"confirm": true} to delete all of your Debo data', 400);
+      throw new AppError('Send {"confirm": true} to delete all of your Daksha data', 400);
     // The journal first: if it fails the person can try again and nothing else is gone yet.
     const entriesRemoved = (await debo?.deleteMine(owner)) ?? 0;
     // Connected apps next: the sign-ins held at the provider must go too, or the wipe is not a wipe.
     const appsDisconnected = (await connectors?.removeAll(owner)) ?? 0;
     const filesRemoved = await files.removeAll(owner);
-    // Pictures Debo made: the files in the bucket go before their records do.
+    // Pictures Daksha made: the files in the bucket go before their records do.
     const imagesRemoved = (await images?.removeAll(owner)) ?? 0;
     // Voice copies are deleted at Cartesia, and leftover recordings in the bucket. This runs
     // before the custom people and the own keys go: a voice copy made on the person's own

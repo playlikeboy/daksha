@@ -28,7 +28,7 @@ const callDay = (date: Date) =>
 const CONTEXT_MESSAGES = 40;
 
 /**
- * Debo's voice brain: the same conversation agent as chat (journal search and
+ * Daksha's voice brain: the same conversation agent as chat (journal search and
  * saving, memories, tasks, web, browser, computer, mail, calendar, connected
  * apps), told it is speaking out loud. Each call is one conversation in the
  * person's Chat, saved by the same runner chat uses, so it can be read and

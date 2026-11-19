@@ -34,14 +34,14 @@ export class NeonVerifier {
     } catch (error) {
       // Never log the token or the reason text: it can echo the token's claims.
       const expired = (error as { code?: string }).code === "ERR_JWT_EXPIRED";
-      throw new AppError(expired ? "Session expired. Sign in again." : "Sign in to Debo", 401);
+      throw new AppError(expired ? "Session expired. Sign in again." : "Sign in to Daksha", 401);
     }
     const audience = [payload.aud ?? []].flat();
     if (audience.length && !audience.includes(this.origin))
-      throw new AppError("Sign in to Debo", 401);
+      throw new AppError("Sign in to Daksha", 401);
     // Reserved owners ("system", "local-user") are not uuids, so no account can ever claim them.
     if (typeof payload.sub !== "string" || !userId.test(payload.sub))
-      throw new AppError("Sign in to Debo", 401);
+      throw new AppError("Sign in to Daksha", 401);
     return payload.sub.toLowerCase();
   }
 }
@@ -58,7 +58,7 @@ export class Auth {
     return Boolean(this.neon);
   }
   async session(accessKey?: string) {
-    if (this.neon) throw new AppError("Sign in with your Debo account", 400);
+    if (this.neon) throw new AppError("Sign in with your Daksha account", 400);
     if (
       this.config.mode === "live" &&
       (!accessKey ||
@@ -75,7 +75,7 @@ export class Auth {
     return { token, mode: this.config.mode };
   }
   async owner(authorization?: string) {
-    if (!authorization?.startsWith("Bearer ")) throw new AppError("Sign in to Debo", 401);
+    if (!authorization?.startsWith("Bearer ")) throw new AppError("Sign in to Daksha", 401);
     if (this.neon) return this.neon.owner(authorization.slice(7).trim());
     const id = digest(authorization.slice(7)).toString("hex");
     const session = await this.db.get<{ owner: string; expiresAt: number }>(

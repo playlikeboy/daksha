@@ -249,7 +249,7 @@ export function Composer({ status, onSaved }: { status: DeboStatus; onSaved: () 
         {asking && (
           <View accessibilityRole="alert" style={{ gap: spacing[2], padding: spacing[3], borderRadius: radius.container, backgroundColor: colors.subtle }}>
             <Text style={s.text}>
-              Speak sends short clips of your voice to Debo, which uses Cloudflare's speech service to write them out as text.
+              Speak sends short clips of your voice to Daksha, which uses Cloudflare's speech service to write them out as text.
               Nothing is kept. The microphone is only on while you see “Listening”.
             </Text>
             <View style={[s.row, { gap: spacing[2], flexWrap: "wrap" }]}>

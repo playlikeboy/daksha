@@ -1,7 +1,7 @@
-// A person's own tool servers (MCP, over Streamable HTTP). They are NOT Debo's apps: a stranger
-// runs the server, so everything it says is untrusted and everything Debo sends it leaves
-// Debo. The rules, in order of importance:
-//   1. Debo sends a server only the arguments the model chose for a call the person approved
+// A person's own tool servers (MCP, over Streamable HTTP). They are NOT Daksha's apps: a stranger
+// runs the server, so everything it says is untrusted and everything Daksha sends it leaves
+// Daksha. The rules, in order of importance:
+//   1. Daksha sends a server only the arguments the model chose for a call the person approved
 //      (or for a read the person allowed). Never journal text or memories on its own.
 //   2. A tool is a CHANGE that waits for the person's yes, unless the server says it only reads
 //      AND the person turned on "run read-only tools without asking" for that server.
@@ -69,7 +69,7 @@ export interface McpServer {
   createdAt: string;
   /** "oauth": the person signs in to the server instead of giving a secret. */
   auth?: "oauth";
-  /** For a sign-in server: whether Debo holds a working sign-in. */
+  /** For a sign-in server: whether Daksha holds a working sign-in. */
   signedIn?: boolean;
   /** Added with the "Composio" choice on the Apps screen. */
   preset?: "composio";
@@ -86,7 +86,7 @@ export interface McpOptions {
   resolve?: Resolver;
   now?: () => number;
   log?: (entry: Record<string, unknown>) => void;
-  /** For servers that need a sign-in. Without it, Debo can't offer sign-in. */
+  /** For servers that need a sign-in. Without it, Daksha can't offer sign-in. */
   signIn?: SignInSetup;
 }
 
@@ -197,7 +197,7 @@ export class McpService {
       throw new AppError("That secret is not valid. It must be one line, up to 2,000 characters.", 400);
     if (headerName && !secret) throw new AppError("A header name needs a secret to go with it.", 400);
     if (secret && !this.options.encryptionKey)
-      throw new AppError("This Debo can't store secrets safely yet, so it can't save one. Use a server without a secret.", 503);
+      throw new AppError("This Daksha can't store secrets safely yet, so it can't save one. Use a server without a secret.", 503);
     // The address is checked now so the person hears why before anything is saved.
     const { url } = await checkPublicUrl(input.url, this.options.resolve);
     url.hash = "";
@@ -265,7 +265,7 @@ export class McpService {
   private signInReady(): SignInSetup {
     if (!this.signIn || !this.options.encryptionKey)
       throw new AppError(
-        "This Debo can't keep sign-ins safely yet, so it can't sign in to a tool server. Use a secret instead.",
+        "This Daksha can't keep sign-ins safely yet, so it can't sign in to a tool server. Use a secret instead.",
         503,
       );
     return this.signIn;
@@ -305,7 +305,7 @@ export class McpService {
       throw new AppError(NO_SIGN_IN, 400);
     if (!meta.registration_endpoint)
       throw new AppError(
-        "This server's sign-in needs Debo to be registered with it by hand, which Debo can't do yet. Use a secret instead.",
+        "This server's sign-in needs Daksha to be registered with it by hand, which Daksha can't do yet. Use a secret instead.",
         400,
       );
     // Ask for the scopes the server lists. If it lists none, ask only for what keeps a sign-in going.
@@ -643,9 +643,9 @@ export class McpService {
     const id = data.toolkit.replace(/^mcp:/, "");
     const server = (await this.list(owner)).find((s) => s.id === id);
     if (!server)
-      throw new AppError(`${data.toolkitName} was removed. Add it again, then ask Debo again.`, 409);
+      throw new AppError(`${data.toolkitName} was removed. Add it again, then ask Daksha again.`, 409);
     if (!server.tools.some((t) => t.name === data.tool))
-      throw new AppError(`${data.toolkitName} no longer has that tool. Ask Debo again.`, 409);
+      throw new AppError(`${data.toolkitName} no longer has that tool. Ask Daksha again.`, 409);
     const outcome = await this.call(owner, server, data.tool, data.arguments);
     if (!outcome.ok) {
       const error = new Error(outcome.error);
@@ -710,7 +710,7 @@ function compactArguments(schema: Record<string, unknown> | undefined) {
 }
 
 /** Keeps our own plain errors, and marks everything else with what the SDK says went wrong. */
-const NO_SIGN_IN = "This server does not offer a sign-in Debo can use. Add it with a secret instead.";
+const NO_SIGN_IN = "This server does not offer a sign-in Daksha can use. Add it with a secret instead.";
 
 /** A sign-in server whose sign-in failed is marked signed out, so the screen offers Sign in again. */
 function signedOut(error: unknown): Partial<McpServer> {
@@ -740,7 +740,7 @@ function plain(error: unknown, row: ErrorRow): string {
         ? "The server did not accept the secret. Check it, then remove the server and add it again."
         : "The server asked for a sign-in or a secret. Add it again with a secret, or choose Sign in instead.";
   if (code === 404 || code === 405 || /404|405|not found/i.test(text))
-    return "That address did not answer like a tool server. Debo supports MCP over Streamable HTTP; older SSE-only servers are not supported yet.";
+    return "That address did not answer like a tool server. Daksha supports MCP over Streamable HTTP; older SSE-only servers are not supported yet.";
   if (/too much data/i.test(text)) return "That server sent back too much data.";
   if (/timeout|timed out/i.test(text)) return "The server took too long to answer.";
   return "I couldn't talk to that tool server just now. Check the address and try again.";

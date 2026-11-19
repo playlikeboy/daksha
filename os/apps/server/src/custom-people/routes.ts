@@ -45,7 +45,7 @@ export function customPeopleRoutes(service: CustomPeopleService) {
     await service.remove(c.get("owner"), c.req.param("id"));
     return c.json({ ok: true });
   });
-  // "Talk to them": Debo talks as this person in chat and on calls until stopped.
+  // "Talk to them": Daksha talks as this person in chat and on calls until stopped.
   app.post("/:id/talk", async (c) => c.json({ person: await service.talkAs(c.get("owner"), c.req.param("id")) }));
   app.post("/:id/sources", async (c) =>
     c.json(await service.startSources(c.get("owner"), c.req.param("id"), await c.req.json()), 201),
