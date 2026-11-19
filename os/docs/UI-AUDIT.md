@@ -180,7 +180,13 @@ Debo's face, typing dots and skeletons already respect reduce motion. Fixed here
 
 ## Screenshots
 
-`os/docs/ui-audit/` has small before and after PNGs of the main screens (phone 390x844 and desktop 1280x800, light and dark system settings). They were taken with the steps below. Some "before" screens late in the first run show "Too many requests" because the script was not yet paced under the API's limit of 120 requests a minute; the script now waits.
+`os/docs/ui-audit/` has before and after PNGs (about 1.7 MB in all), taken with the steps below against the same made-up content:
+
+- `before-*` is the app at commit `2d6285d` (where this branch started); `after-*` is this branch.
+- Every screen at phone size (390x844) with a light system setting, five screens at desktop size (1280x800), and Chat with a dark system setting.
+- The full set, both sizes and both settings for every screen (about 50 each), was taken too but is not committed, to keep the repo small. Run the script to make it again.
+- The entry page's "after" still shows the title repeated as the first line; that was fixed after the photos (`c29589a`).
+- On a phone, Talk with a waiting approval still needs a scroll to reach Start talking.
 
 ## Screenshots with made-up content
 
