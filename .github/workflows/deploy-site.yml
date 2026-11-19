@@ -1,5 +1,5 @@
 # Deploy the landing page (apps/site) to Cloudflare Workers as "debo-site".
-# It is served at about.debo.life. debo.life is still served by debo-web.
+# It is served at about.daksha.life. daksha.life is still served by debo-web.
 # Runs on a push to main that touches the landing page, or by hand.
 # Secrets used (names only): CLOUDFLARE_API_TOKEN, CLOUDFLARE_ACCOUNT_ID.
 name: Deploy site
@@ -47,9 +47,9 @@ jobs:
       - name: Live check
         run: |
           for i in $(seq 1 20); do
-            code=$(curl -s -m 20 -o /dev/null -w '%{http_code}' https://about.debo.life/ || true)
+            code=$(curl -s -m 20 -o /dev/null -w '%{http_code}' https://about.daksha.life/ || true)
             echo "attempt $i: $code"
             [ "$code" = "200" ] && exit 0
             sleep 10
           done
-          echo "::error::about.debo.life did not answer 200"; exit 1
+          echo "::error::about.daksha.life did not answer 200"; exit 1

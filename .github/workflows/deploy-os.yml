@@ -1,11 +1,11 @@
-# Deploy the new Debo app (os/) to Cloudflare Workers + Containers at my.debo.life and api.debo.life.
-# Runs on a push to main that touches it, or by hand. Separate from deploy.yml: it never touches the debo-web Worker, which still serves debo.life.
+# Deploy the new Daksha app (os/) to Cloudflare Workers + Containers at my.daksha.life and api.daksha.life.
+# Runs on a push to main that touches it, or by hand. Separate from deploy.yml: it never touches the debo-web Worker, which still serves daksha.life.
 # Deploys three Workers: debo-os-browser (private), debo-os-api, debo-os-app.
 # Secrets used (names only; set in GitHub repo settings > Secrets). See
 # os/infra/cloudflare/README.md for how to create each one.
 #   Already exist:
 #     CLOUDFLARE_API_TOKEN, CLOUDFLARE_ACCOUNT_ID   - needs Workers + Containers edit
-#     DATABASE_URL_UNPOOLED                         - Debo's Neon database (os keeps its rows in schema "os")
+#     DATABASE_URL_UNPOOLED                         - Daksha's Neon database (os keeps its rows in schema "os")
 #     MEM0_API_KEY, LIVEKIT_URL, LIVEKIT_API_KEY, LIVEKIT_API_SECRET, VOICE_AGENT_SECRET
 #   Must be created (required):
 #     NEON_AUTH_BASE_URL, NEON_AUTH_JWKS_URL        - same values the web app uses
@@ -22,6 +22,7 @@
 #   Optional:
 #     NEON_AI_GATEWAY_BASE_URL, NEON_AI_GATEWAY_TOKEN - search by meaning (keyword search works without)
 #     DEBO_OS_VAPID_PUBLIC_KEY, DEBO_OS_VAPID_PRIVATE_KEY - web push for reminders (npx web-push generate-vapid-keys);
+#                                                   DAKSHA_OS_VAPID_* are optional new names for them, used first;
 #                                                   without both, push is off and the app hides the switch
 name: Deploy OS
 
@@ -77,12 +78,16 @@ jobs:
       # wrangler builds the container images with Docker (BuildKit).
       - uses: docker/setup-buildx-action@v3
 
-      # The new app lives on its own addresses. debo.life itself stays on the debo-web Worker.
+      # The new app lives on its own addresses. daksha.life itself stays on the debo-web Worker.
       - name: Set the addresses
         id: urls
         run: |
-          echo "api=https://api.debo.life" >> "$GITHUB_OUTPUT"
-          echo "app=https://my.debo.life" >> "$GITHUB_OUTPUT"
+          echo "api=https://api.daksha.life" >> "$GITHUB_OUTPUT"
+          echo "app=https://my.daksha.life" >> "$GITHUB_OUTPUT"
+          # Browsers allowed to call the API. The new app comes first: the API uses the first
+          # https:// origin for links back to the app and for phone sign-in. my.debo.life is the
+          # address from before the rename (docs/RENAME.md); a tab still running an old copy works.
+          echo "origins=https://my.daksha.life,https://my.debo.life" >> "$GITHUB_OUTPUT"
 
       - name: Install
         run: |
@@ -129,8 +134,10 @@ jobs:
           TOKEN_ENCRYPTION_KEY: ${{ secrets.DEBO_OS_TOKEN_ENCRYPTION_KEY }}
           SESSION_SIGNING_KEY: ${{ secrets.DEBO_OS_SESSION_SIGNING_KEY }}
           WORKER_TOKEN: ${{ secrets.DEBO_OS_WORKER_TOKEN }}
-          DEBO_OS_VAPID_PUBLIC_KEY: ${{ secrets.DEBO_OS_VAPID_PUBLIC_KEY }}
-          DEBO_OS_VAPID_PRIVATE_KEY: ${{ secrets.DEBO_OS_VAPID_PRIVATE_KEY }}
+          # The DAKSHA_ names are optional new names for the same secrets (docs/RENAME.md).
+          DEBO_OS_VAPID_PUBLIC_KEY: ${{ secrets.DAKSHA_OS_VAPID_PUBLIC_KEY || secrets.DEBO_OS_VAPID_PUBLIC_KEY }}
+          DEBO_OS_VAPID_PRIVATE_KEY: ${{ secrets.DAKSHA_OS_VAPID_PRIVATE_KEY || secrets.DEBO_OS_VAPID_PRIVATE_KEY }}
+          DEBO_OS_VAPID_SUBJECT: ${{ secrets.DAKSHA_OS_VAPID_SUBJECT || secrets.DEBO_OS_VAPID_SUBJECT }}
         run: |
           # Empty values are dropped, so an optional secret that is not set just turns its feature off.
           jq -n 'env | {DATABASE_URL, NEON_AUTH_BASE_URL, NEON_AUTH_JWKS_URL, ANTHROPIC_API_KEY,
@@ -138,13 +145,13 @@ jobs:
                   R2_ACCOUNT_ID, R2_ACCESS_KEY_ID, R2_SECRET_ACCESS_KEY, CF_AI_API_TOKEN,
                   LIVEKIT_URL, LIVEKIT_API_KEY, LIVEKIT_API_SECRET, VOICE_AGENT_SECRET, CARTESIA_API_KEY,
                   TOKEN_ENCRYPTION_KEY, SESSION_SIGNING_KEY, WORKER_TOKEN,
-                  DEBO_OS_VAPID_PUBLIC_KEY, DEBO_OS_VAPID_PRIVATE_KEY}
+                  DEBO_OS_VAPID_PUBLIC_KEY, DEBO_OS_VAPID_PRIVATE_KEY, DEBO_OS_VAPID_SUBJECT}
                  | with_entries(select(.value != null and .value != ""))' \
             > "$RUNNER_TEMP/api-secrets.json"
           npx wrangler deploy -c api/wrangler.jsonc \
             --secrets-file "$RUNNER_TEMP/api-secrets.json" \
             --var "PUBLIC_API_URL:${{ steps.urls.outputs.api }}" \
-            --var "ALLOWED_ORIGINS:${{ steps.urls.outputs.app }}"
+            --var "ALLOWED_ORIGINS:${{ steps.urls.outputs.origins }}"
 
       - name: Deploy the app
         working-directory: os/infra/cloudflare

@@ -7,6 +7,10 @@
   "compatibility_date": "2026-11-01",
   "compatibility_flags": ["nodejs_compat", "global_fetch_strictly_public"],
   "routes": [
+    { "pattern": "daksha.life", "custom_domain": true },
+    { "pattern": "www.daksha.life", "custom_domain": true },
+    // The old addresses from before the rename (docs/RENAME.md). They serve the same pages,
+    // so old links to /privacy and the sign-in email webhook keep working.
     { "pattern": "debo.life", "custom_domain": true },
     { "pattern": "www.debo.life", "custom_domain": true }
   ],

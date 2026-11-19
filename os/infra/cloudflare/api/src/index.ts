@@ -38,7 +38,7 @@ const PASSED = [
   // Database
   "DATABASE_URL",
   "DEBO_DATABASE_URL",
-  // Debo's journal: answers, meaning search, memory
+  // Daksha's journal: answers, meaning search, memory
   "ANTHROPIC_API_KEY",
   "NEON_AI_GATEWAY_BASE_URL",
   "NEON_AI_GATEWAY_TOKEN",
@@ -56,7 +56,7 @@ const PASSED = [
   "LIVEKIT_API_KEY",
   "LIVEKIT_API_SECRET",
   "VOICE_AGENT_SECRET",
-  // Optional: Debo's own Cartesia account, for voice copies of custom people when the person has no key.
+  // Optional: Daksha's own Cartesia account, for voice copies of custom people when the person has no key.
   "CARTESIA_API_KEY",
   // Keys for the API itself
   "TOKEN_ENCRYPTION_KEY",
@@ -66,6 +66,10 @@ const PASSED = [
   "DEBO_OS_VAPID_PUBLIC_KEY",
   "DEBO_OS_VAPID_PRIVATE_KEY",
   "DEBO_OS_VAPID_SUBJECT",
+  // The same three under their new names (docs/RENAME.md). Read first when set.
+  "DAKSHA_OS_VAPID_PUBLIC_KEY",
+  "DAKSHA_OS_VAPID_PRIVATE_KEY",
+  "DAKSHA_OS_VAPID_SUBJECT",
   // Optional
   "OPENFUSE_ACCESS_KEY", // only for AUTH_MODE=access-key; not used with Neon Auth
   "OPENAI_API_KEY",

@@ -1,5 +1,5 @@
 {
-  // debo-os-api: a Worker that fronts one container running the Debo OS API
+  // debo-os-api: a Worker that fronts one container running the Daksha OS API
   // (Hono + in-process task worker). Run from os/infra/cloudflare:
   //   npx wrangler deploy -c api/wrangler.jsonc
   "$schema": "../node_modules/wrangler/config-schema.json",
@@ -13,8 +13,13 @@
   "preview_urls": false,
 
   // The API's public address. The deploy workflow passes PUBLIC_API_URL and
-  // ALLOWED_ORIGINS (https://my.debo.life) to match.
-  "routes": [{ "pattern": "api.debo.life", "custom_domain": true }],
+  // ALLOWED_ORIGINS (https://my.daksha.life, then the old https://my.debo.life) to match.
+  // api.debo.life is the address from before the rename (docs/RENAME.md). Phone apps already
+  // installed have it built in, so it must keep working.
+  "routes": [
+    { "pattern": "api.daksha.life", "custom_domain": true },
+    { "pattern": "api.debo.life", "custom_domain": true }
+  ],
 
   "containers": [
     {
@@ -54,7 +59,7 @@
     // An Anthropic model, so no OpenAI key is needed. Same family the journal uses.
     "MODEL": "anthropic/claude-haiku-5-5",
     "AUTH_MODE": "neon",
-    // os keeps its own table, os.records, in this schema of Debo's Neon database.
+    // os keeps its own table, os.records, in this schema of Daksha's Neon database.
     "OS_DB_SCHEMA": "os",
     "TASK_WORKER_ENABLED": "true",
     "TRUST_PROXY": "true",

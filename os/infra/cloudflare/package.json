@@ -2,7 +2,7 @@
   "name": "debo-os-cloudflare",
   "private": true,
   "type": "module",
-  "description": "Cloudflare Workers + Containers deployment of Debo OS. Standalone: not part of the os/ pnpm workspace.",
+  "description": "Cloudflare Workers + Containers deployment of Daksha OS. Standalone: not part of the os/ pnpm workspace.",
   "scripts": {
     "typecheck": "tsc --noEmit",
     "dry-run": "wrangler deploy --dry-run --outdir .dry -c api/wrangler.jsonc && wrangler deploy --dry-run --outdir .dry -c browser/wrangler.jsonc && wrangler deploy --dry-run --outdir .dry -c app/wrangler.jsonc"

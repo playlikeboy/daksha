@@ -1,8 +1,9 @@
-# Build the Debo phone apps and, on a version tag, publish them as a GitHub Release.
+# Build the Daksha phone apps and, on a version tag, publish them as a GitHub Release.
 #
 # What it makes:
-#   Android  debo-<version>.apk  (and debo.apk, the same file under a fixed name so
-#            https://github.com/playlikeboy/debo.life/releases/latest/download/debo.apk works).
+#   Android  debo-<version>.apk  (and debo.apk and daksha.apk, the same file under fixed names, so
+#            https://github.com/playlikeboy/daksha/releases/latest/download/debo.apk works, and so
+#            does .../daksha.apk. debo.apk is the name from before the rename: old links use it.)
 #            It is TEST-SIGNED with the debug key Expo's template uses, unless the four
 #            Android signing secrets below exist. It cannot go to Google Play as it is.
 #   iOS      debo-<version>-ios-simulator.zip: an UNSIGNED build that only runs in the
@@ -51,7 +52,7 @@ permissions:
 
 env:
   # The API address is baked into the app at build time.
-  EXPO_PUBLIC_API_URL: https://api.debo.life
+  EXPO_PUBLIC_API_URL: https://api.daksha.life
 
 jobs:
   android:
@@ -134,6 +135,7 @@ jobs:
           apk=$(ls os/apps/mobile/android/app/build/outputs/apk/release/*.apk | head -n 1)
           cp "$apk" "out/debo-$VERSION.apk"
           cp "$apk" out/debo.apk
+          cp "$apk" out/daksha.apk
           ls -l out
           # The Android SDK is on the runner. Show the package and the signer.
           build_tools=$(ls -d "$ANDROID_HOME"/build-tools/* | sort -V | tail -n 1)
@@ -172,7 +174,7 @@ jobs:
         working-directory: os/apps/mobile/ios
         run: |
           pod install
-          xcodebuild -workspace Debo.xcworkspace -scheme Debo -configuration Release \
+          xcodebuild -workspace Daksha.xcworkspace -scheme Daksha -configuration Release \
             -sdk iphonesimulator -destination 'generic/platform=iOS Simulator' \
             -derivedDataPath build ARCHS=arm64 ONLY_ACTIVE_ARCH=NO \
             CODE_SIGNING_ALLOWED=NO build | tail -n 40
@@ -182,7 +184,7 @@ jobs:
           version=$(node -p "require('./os/apps/mobile/app.json').expo.version")
           mkdir -p out
           cd os/apps/mobile/ios/build/Build/Products/Release-iphonesimulator
-          ditto -c -k --sequesterRsrc --keepParent Debo.app "$GITHUB_WORKSPACE/out/debo-$version-ios-simulator.zip"
+          ditto -c -k --sequesterRsrc --keepParent Daksha.app "$GITHUB_WORKSPACE/out/debo-$version-ios-simulator.zip"
           ls -l "$GITHUB_WORKSPACE/out"
 
       - uses: actions/upload-artifact@v4
@@ -222,9 +224,9 @@ jobs:
             gh release upload "$TAG" "${files[@]}" --clobber
           elif [ "${GITHUB_REF_TYPE}" = "tag" ]; then
             gh release create "$TAG" "${files[@]}" \
-              --title "Debo $VERSION (early test build)" --notes-file notes.md --verify-tag
+              --title "Daksha $VERSION (early test build)" --notes-file notes.md --verify-tag
           else
             # A tag made here with the workflow token does not start this workflow again.
             gh release create "$TAG" "${files[@]}" --target "$GITHUB_SHA" --latest \
-              --title "Debo $VERSION, build ${GITHUB_RUN_NUMBER} (early test build)" --notes-file notes.md
+              --title "Daksha $VERSION, build ${GITHUB_RUN_NUMBER} (early test build)" --notes-file notes.md
           fi

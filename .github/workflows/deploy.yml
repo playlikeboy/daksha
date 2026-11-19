@@ -1,4 +1,4 @@
-# Deploy the web app (apps/web) to Cloudflare Workers at debo.life.
+# Deploy the web app (apps/web) to Cloudflare Workers at daksha.life.
 # Runs on every push to main, or by hand from the Actions tab.
 # Secrets used (names only; set in GitHub repo settings > Secrets):
 #   CLOUDFLARE_API_TOKEN, CLOUDFLARE_ACCOUNT_ID  - for wrangler
@@ -58,6 +58,6 @@ jobs:
 
       - name: Check the live site
         run: |
-          code=$(curl -s -o /dev/null -w '%{http_code}' https://debo.life/privacy)
-          echo "debo.life/privacy returned $code"
+          code=$(curl -s -o /dev/null -w '%{http_code}' https://daksha.life/privacy)
+          echo "daksha.life/privacy returned $code"
           test "$code" = "200"

@@ -1,13 +1,17 @@
 {
   "$schema": "node_modules/wrangler/config-schema.json",
-  // The debo.life landing page: Next.js on Cloudflare Workers through OpenNext.
-  // Served at about.debo.life. The app itself is at my.debo.life.
+  // The daksha.life landing page: Next.js on Cloudflare Workers through OpenNext.
+  // Served at about.daksha.life. The app itself is at my.daksha.life.
   "name": "debo-site",
   "main": ".open-next/worker.js",
   "compatibility_date": "2026-11-01",
   "compatibility_flags": ["nodejs_compat", "global_fetch_strictly_public"],
   "workers_dev": true,
-  "routes": [{ "pattern": "about.debo.life", "custom_domain": true }],
+  // about.debo.life is the address from before the rename (docs/RENAME.md), kept so old links work.
+  "routes": [
+    { "pattern": "about.daksha.life", "custom_domain": true },
+    { "pattern": "about.debo.life", "custom_domain": true }
+  ],
   "assets": {
     "directory": ".open-next/assets",
     "binding": "ASSETS"

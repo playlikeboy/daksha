@@ -1,13 +1,13 @@
-# Debo OS on Cloudflare
+# Daksha OS on Cloudflare
 
-> **Where it runs now (14 November 2026).** The new app is served at `https://my.debo.life` and its API at `https://api.debo.life`. The deploy workflow runs on a push to `main` that touches `os/`, `packages/` or the workflow. `https://my.debo.life` is in Neon Auth's trusted domains. `debo.life` itself is still the older web app (`debo-web`). Where the text below says a `workers.dev` address, read these two addresses.
+> **Where it runs now (14 November 2026).** The new app is served at `https://my.daksha.life` and its API at `https://api.daksha.life`. The deploy workflow runs on a push to `main` that touches `os/`, `packages/` or the workflow. `https://my.daksha.life` is in Neon Auth's trusted domains. `daksha.life` itself is still the older web app (`debo-web`). Where the text below says a `workers.dev` address, read these two addresses.
 
 
-Three Workers. Nothing here touches `debo-web` or `debo.life`. Nothing is deployed yet.
+Three Workers. Nothing here touches `debo-web` or `daksha.life`. Nothing is deployed yet.
 
 ```
-browser ──> debo-os-app (static assets, SPA fallback)          my.debo.life later
-browser ──> debo-os-api (Worker) ──> DeboApi container (Hono + task worker) ──> Debo's Neon database
+browser ──> debo-os-app (static assets, SPA fallback)          my.daksha.life later
+browser ──> debo-os-api (Worker) ──> DeboApi container (Hono + task worker) ──> Daksha's Neon database
                  ^ cron every 5 min wakes it         │ http://browser.internal (intercepted)
                                                      v
                               debo-os-browser (Worker, no public URL) ──> DeboBrowser container (Chromium)
@@ -19,7 +19,7 @@ browser ──> debo-os-api (Worker) ──> DeboApi container (Hono + task work
 | `debo-os-browser` | `browser/wrangler.jsonc`, `../../apps/worker/Dockerfile` | Playwright + Chromium | `standard-1` (1/2 vCPU, 4 GiB) |
 | `debo-os-app` | `app/wrangler.jsonc` | Expo web export from `apps/mobile/dist/web` | assets only |
 
-Preview URLs: `https://debo-os-api.<account>.workers.dev`, `https://debo-os-app.<account>.workers.dev`. There are no custom-domain routes yet; the commented ones for `api.debo.life` and `my.debo.life` are in the configs.
+Preview URLs: `https://debo-os-api.<account>.workers.dev`, `https://debo-os-app.<account>.workers.dev`. There are no custom-domain routes yet; the commented ones for `api.daksha.life` and `my.daksha.life` are in the configs.
 
 ## How the API image is built
 
@@ -33,11 +33,11 @@ The API imports TypeScript source from the repo root (`@debo/db`, `@debo/llm`, `
 
 The API runs with `AUTH_MODE=neon`. It needs `NEON_AUTH_BASE_URL` and `NEON_AUTH_JWKS_URL`, the same values the web app uses. The shared access key (`OPENFUSE_ACCESS_KEY`) is not used. The app does not need its own Neon variable: it asks `GET /api/health` for the Neon Auth address. The Expo web build needs only `EXPO_PUBLIC_API_URL`, which the workflow sets.
 
-**Owner step, before anyone can sign in:** add the app's origin, `https://debo-os-app.<account>.workers.dev`, to the trusted origins of Debo's Neon Auth project (Neon console, the project's Auth settings). Without it, the browser's sign-in call is refused. Do the same for any custom domain later. See `os/docs/AUTH.md`.
+**Owner step, before anyone can sign in:** add the app's origin, `https://debo-os-app.<account>.workers.dev`, to the trusted origins of Daksha's Neon Auth project (Neon console, the project's Auth settings). Without it, the browser's sign-in call is refused. Do the same for any custom domain later. See `os/docs/AUTH.md`.
 
 ## What the database gets on first boot
 
-`DATABASE_URL` is Debo's existing Neon database (the secret `DATABASE_URL_UNPOOLED`, a direct connection). os keeps its own rows in schema `os`. On every start it runs, in this order:
+`DATABASE_URL` is Daksha's existing Neon database (the secret `DATABASE_URL_UNPOOLED`, a direct connection). os keeps its own rows in schema `os`. On every start it runs, in this order:
 
 ```sql
 CREATE SCHEMA IF NOT EXISTS os;
@@ -47,7 +47,7 @@ UPDATE os.records SET data = data || '{"status":"outcome_unknown", ...}'::jsonb 
 
 That is all (`apps/server/src/db.ts`, `index.ts`). There is no `CREATE INDEX`; the primary key makes its own index. The last line is not a schema change: it marks actions that were mid-run when the server stopped. It only touches `os.records`. Nothing else in the server or in `@debo/db` runs `CREATE`, `ALTER` or `DROP`. The role in the URL needs permission to create a schema in the database.
 
-The journal features read and write Debo's existing `public` tables (`sources`, `chunks`, `activity`, `usage`, `conversations`, `messages`, `user_settings`) through the same URL (or `DEBO_DATABASE_URL` if you set it). os never creates or changes them. They must already exist: run Debo's migrations `0000` to `0004` first (they are in `packages/db/migrations`; the web app's deploy normally does this).
+The journal features read and write Daksha's existing `public` tables (`sources`, `chunks`, `activity`, `usage`, `conversations`, `messages`, `user_settings`) through the same URL (or `DEBO_DATABASE_URL` if you set it). os never creates or changes them. They must already exist: run Daksha's migrations `0000` to `0004` first (they are in `packages/db/migrations`; the web app's deploy normally does this).
 
 ## Variables and secrets
 
@@ -58,7 +58,7 @@ The container entry (`api/src/index.ts`) passes a fixed list of names into the c
 | Variable the API reads | GitHub secret | Status | Service |
 |---|---|---|---|
 | Cloudflare token, account id (CI only) | `CLOUDFLARE_API_TOKEN`, `CLOUDFLARE_ACCOUNT_ID` | exists (token needs Containers edit; check) | Cloudflare |
-| `DATABASE_URL` | `DATABASE_URL_UNPOOLED` | exists | Neon (Debo's database) |
+| `DATABASE_URL` | `DATABASE_URL_UNPOOLED` | exists | Neon (Daksha's database) |
 | `NEON_AUTH_BASE_URL` | `NEON_AUTH_BASE_URL` | **create** (same as the web app) | Neon Auth |
 | `NEON_AUTH_JWKS_URL` | `NEON_AUTH_JWKS_URL` | **create** (same as the web app) | Neon Auth |
 | `ANTHROPIC_API_KEY` | `ANTHROPIC_API_KEY` | **create** | Anthropic |
@@ -76,17 +76,17 @@ The container entry (`api/src/index.ts`) passes a fixed list of names into the c
 | `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET` | not wired in CI | optional | Google |
 | `DEBO_OS_VAPID_PUBLIC_KEY`, `DEBO_OS_VAPID_PRIVATE_KEY` | same names | **create** (optional: web push for reminders; without both, push is off and the app hides the switch). Make the pair once with `npx web-push generate-vapid-keys` on your own machine and paste each value into its secret; never commit them. Changing the pair later stops every saved browser subscription, so people turn the switch on again | os only (no outside account) |
 
-`DEBO_OS_VAPID_SUBJECT` is an optional plain var (default `https://debo.life`): the contact push services see.
+`DEBO_OS_VAPID_SUBJECT` is an optional plain var (default `https://daksha.life`): the contact push services see.
 
 `CPK_INTELLIGENCE_API_KEY` is gone. `OPENFUSE_ACCESS_KEY` and `OPENAI_API_KEY` are no longer needed. Secrets never go in the image or in `wrangler.jsonc`. Worker secrets are copied into the container's environment at start.
 
-Voice: the LiveKit voice agent (`apps/voice-agent`) sends questions to the address in its `DEBO_URL`, which is `https://debo.life` today. To have it use this preview, point `DEBO_URL` at the API preview URL. Both sides must use the same `VOICE_AGENT_SECRET`.
+Voice: the LiveKit voice agent (`apps/voice-agent`) sends questions to the address in its `DEBO_URL`, which is `https://daksha.life` today. To have it use this preview, point `DEBO_URL` at the API preview URL. Both sides must use the same `VOICE_AGENT_SECRET`.
 
 ## First preview deploy
 
 1. Create the secrets that are marked **create** above. Set the required ones; the Neon AI Gateway pair is optional.
 2. Add the app origin to Neon Auth's trusted origins (see above). You get the exact workers.dev address from the workflow summary or `https://debo-os-app.<subdomain>.workers.dev`.
-3. Make sure Debo's database migrations are applied.
+3. Make sure Daksha's database migrations are applied.
 4. Run the workflow (the branch must be on GitHub):
 
 ```sh
@@ -116,9 +116,9 @@ curl https://debo-os-api.<sub>.workers.dev/api/health
 
 Deploy the browser first: the API config has a service binding to it. The workflow's smoke test checks that `/api/health` says `auth.mode` is `neon`, that the browser is configured, that `/api/debo/status` answers 401 without a sign-in, and that the app serves a deep link.
 
-## Switching to debo.life later
+## Switching to daksha.life later
 
-Uncomment the `routes` in `api/wrangler.jsonc` and `app/wrangler.jsonc`, set `PUBLIC_API_URL=https://api.debo.life` and `ALLOWED_ORIGINS=https://my.debo.life`, rebuild the web app with `EXPO_PUBLIC_API_URL=https://api.debo.life`, add `https://my.debo.life` to Neon Auth's trusted origins, redeploy. Update the Google redirect URI. `debo-web` is not involved.
+Uncomment the `routes` in `api/wrangler.jsonc` and `app/wrangler.jsonc`, set `PUBLIC_API_URL=https://api.daksha.life` and `ALLOWED_ORIGINS=https://my.daksha.life`, rebuild the web app with `EXPO_PUBLIC_API_URL=https://api.daksha.life`, add `https://my.daksha.life` to Neon Auth's trusted origins, redeploy. Update the Google redirect URI. `debo-web` is not involved.
 
 ## Voice notes and videos
 

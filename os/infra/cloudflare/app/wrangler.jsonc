@@ -8,7 +8,12 @@
   "compatibility_date": "2026-11-01",
   "workers_dev": true,
   "preview_urls": false,
-  "routes": [{ "pattern": "my.debo.life", "custom_domain": true }],
+  // my.debo.life is the address from before the rename (docs/RENAME.md). The page there sends
+  // people on to my.daksha.life (the first script in apps/mobile/public/index.html).
+  "routes": [
+    { "pattern": "my.daksha.life", "custom_domain": true },
+    { "pattern": "my.debo.life", "custom_domain": true }
+  ],
   "assets": {
     "directory": "../../../apps/mobile/dist/web",
     "not_found_handling": "single-page-application"

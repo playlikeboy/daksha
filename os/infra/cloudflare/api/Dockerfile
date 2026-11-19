@@ -1,4 +1,4 @@
-# Debo OS API for Cloudflare Containers.
+# Daksha OS API for Cloudflare Containers.
 # Build context: the REPO ROOT (the API imports TypeScript packages from ../packages).
 #   docker build -f os/infra/cloudflare/api/Dockerfile -t debo-os-api .
 # Cloudflare Containers runs linux/amd64 only.
