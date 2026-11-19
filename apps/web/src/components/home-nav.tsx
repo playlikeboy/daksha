@@ -8,8 +8,8 @@ const links = [
   { href: "/home/journal", label: "Journal" },
   { href: "/home/chat", label: "Chat" },
   { href: "/home/voice", label: "Talk" },
-  { href: "/home/memories", label: "What Debo knows" },
-  { href: "/home/activity", label: "What Debo did" },
+  { href: "/home/memories", label: "What Daksha knows" },
+  { href: "/home/activity", label: "What Daksha did" },
 ];
 
 /** The header on every /home page, as wide as the page under it (the chat page is wider, for its list of chats). */
@@ -37,7 +37,7 @@ function HomeNav() {
   }, [pathname]);
 
   return (
-    <nav aria-label="Your Debo" className="-mx-5 sm:mx-0">
+    <nav aria-label="Your Daksha" className="-mx-5 sm:mx-0">
       <ul
         ref={listRef}
         className="flex gap-2 overflow-x-auto px-5 pb-1 [scrollbar-width:none] sm:flex-wrap sm:overflow-visible sm:px-0 sm:pb-0"

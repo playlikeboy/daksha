@@ -6,10 +6,10 @@ import { getAuth } from "@/lib/auth/server";
 import type { ChatListItem, Chip, ReplyKind, Turn } from "@/lib/chat";
 import { databaseUrl } from "@/lib/server-env";
 
-export const metadata: Metadata = { title: "Chat with Debo", robots: { index: false } };
+export const metadata: Metadata = { title: "Chat with Daksha", robots: { index: false } };
 export const dynamic = "force-dynamic";
 
-/** Chat with Debo. `?c=<id>` opens a past chat; without it, a new chat starts. */
+/** Chat with Daksha. `?c=<id>` opens a past chat; without it, a new chat starts. */
 export default async function ChatPage({ searchParams }: { searchParams: Promise<{ c?: string | string[] }> }) {
   const { data: session } = await getAuth().getSession();
   if (!session?.user) redirect("/auth/sign-in");
@@ -33,9 +33,9 @@ export default async function ChatPage({ searchParams }: { searchParams: Promise
 
   return (
     <main className="wrap max-w-[72rem] pb-8 pt-10">
-      <h1 className="h-section">Chat with Debo</h1>
+      <h1 className="h-section">Chat with Daksha</h1>
       <p className="mt-4 max-w-[40rem] text-[1.125rem] text-ink-soft">
-        Ask about your entries. Debo only answers from what you wrote, shows which entry each answer came from, and
+        Ask about your entries. Daksha only answers from what you wrote, shows which entry each answer came from, and
         says so when it doesn&rsquo;t know.
       </p>
       <ChatLoader
@@ -51,7 +51,7 @@ export default async function ChatPage({ searchParams }: { searchParams: Promise
   );
 }
 
-/** Pair each question with Debo's reply, with chip labels for entries that still exist. */
+/** Pair each question with Daksha's reply, with chip labels for entries that still exist. */
 async function turnsFrom(db: string, userId: string, messages: ChatMessage[]): Promise<Turn[]> {
   const ids = [...new Set(messages.flatMap((m) => m.sourceIds))];
   const found = await getSources(db, userId, ids);

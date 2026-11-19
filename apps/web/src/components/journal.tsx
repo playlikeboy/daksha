@@ -20,7 +20,7 @@ export function AskBox() {
     <section aria-labelledby="ask-heading">
       <form action={action}>
         <label id="ask-heading" htmlFor="question" className="text-[1.375rem] font-display font-bold">
-          Ask Debo about your entries
+          Ask Daksha about your entries
         </label>
         <div className="mt-2 flex flex-col gap-3 sm:flex-row">
           <input
@@ -34,7 +34,7 @@ export function AskBox() {
             className={`${box} mt-0 min-h-12 flex-1`}
           />
           <button type="submit" disabled={pending} className="btn btn-primary shrink-0">
-            {pending ? "Looking…" : "Ask Debo"}
+            {pending ? "Looking…" : "Ask Daksha"}
           </button>
         </div>
       </form>

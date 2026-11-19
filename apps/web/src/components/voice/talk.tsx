@@ -11,10 +11,10 @@ type AgentState = "listening" | "thinking" | "speaking" | "initializing" | "";
 
 /**
  * The Talk screen. Connects to a LiveKit room with a token from
- * /api/voice/token; Debo's voice agent joins the same room. The microphone
+ * /api/voice/token; Daksha's voice agent joins the same room. The microphone
  * is on only between "Start talking" and "End", and the page says so.
  * Captions come from LiveKit's transcription stream; sources come on the
- * "debo.sources" topic. Audio is never recorded by Debo.
+ * "debo.sources" topic. Audio is never recorded by Daksha.
  */
 export function TalkToDebo() {
   const [status, setStatus] = useState<Status>("idle");
@@ -45,7 +45,7 @@ export function TalkToDebo() {
       for (let i = next.length - 1; i >= 0; i--) {
         const line = next[i];
         if (line?.who === "you") {
-          // Sources belong to Debo's reply after this question; keep them until it arrives.
+          // Sources belong to Daksha's reply after this question; keep them until it arrives.
           next.splice(i + 1, 0, { id: `src-${crypto.randomUUID()}`, who: "debo", text: "", final: false, sources });
           return next;
         }
@@ -107,7 +107,7 @@ export function TalkToDebo() {
       setStatus("error");
       setProblem(
         error instanceof Error && error.name === "NotAllowedError"
-          ? "Debo can't use your microphone. Allow it in your browser's settings, or type below instead."
+          ? "Daksha can't use your microphone. Allow it in your browser's settings, or type below instead."
           : error instanceof Error && error.message
             ? error.message
             : "I couldn't start a voice session. Check your connection and try again.",
@@ -168,7 +168,7 @@ export function TalkToDebo() {
           />
           {status === "idle" && "Not listening. Your microphone is off."}
           {status === "connecting" && "Connecting…"}
-          {live && `Microphone ${muted ? "off" : "on"}. ${stateWords[agentState] ?? "Waiting for Debo to join"}.`}
+          {live && `Microphone ${muted ? "off" : "on"}. ${stateWords[agentState] ?? "Waiting for Daksha to join"}.`}
           {status === "ended" && "Conversation ended. Your microphone is off."}
           {status === "error" && "Not connected. Your microphone is off."}
         </p>
@@ -182,7 +182,7 @@ export function TalkToDebo() {
           {live && (
             <>
               <button type="button" className="btn btn-primary" onClick={stopDebo} disabled={agentState !== "speaking"}>
-                Stop Debo
+                Stop Daksha
               </button>
               <button type="button" className="btn btn-quiet" onClick={toggleMute} aria-pressed={muted}>
                 {muted ? "Turn microphone on" : "Turn microphone off"}
@@ -195,7 +195,7 @@ export function TalkToDebo() {
         </div>
         {status === "idle" && (
           <p className="mt-4 text-ink-soft">
-            Your browser will ask to use your microphone. Debo listens only while this conversation is on, and never
+            Your browser will ask to use your microphone. Daksha listens only while this conversation is on, and never
             keeps the recording. A written copy is saved in Chat unless you turn that off in Settings.
           </p>
         )}
@@ -216,7 +216,7 @@ export function TalkToDebo() {
               key={line.id}
               className={`rounded-[18px] border border-line p-4 ${line.who === "you" ? "bg-sky/40" : "bg-paper"}`}
             >
-              <p className="text-sm font-semibold text-ink-soft">{line.who === "you" ? "You" : "Debo"}</p>
+              <p className="text-sm font-semibold text-ink-soft">{line.who === "you" ? "You" : "Daksha"}</p>
               {line.text && <p className="mt-1 whitespace-pre-wrap wrap-anywhere">{line.text}</p>}
               {line.sources.length > 0 && (
                 <ul className="mt-2 flex flex-wrap gap-2" aria-label="Where this answer came from">
@@ -236,7 +236,7 @@ export function TalkToDebo() {
       {live && (
         <form onSubmit={sendTyped} className="flex flex-wrap gap-3">
           <label htmlFor="voice-typed" className="sr-only">
-            Type to Debo instead
+            Type to Daksha instead
           </label>
           <input
             id="voice-typed"

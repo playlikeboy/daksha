@@ -2,11 +2,11 @@ import type { MetadataRoute } from "next";
 
 export const dynamic = "force-static";
 
-/** Lets a person add Debo to their phone's home screen. Colours match DESIGN.md. */
+/** Lets a person add Daksha to their phone's home screen. Colours match DESIGN.md. */
 export default function manifest(): MetadataRoute.Manifest {
   return {
-    name: "Debo",
-    short_name: "Debo",
+    name: "Daksha",
+    short_name: "Daksha",
     description: "A friendly assistant that remembers your life.",
     start_url: "/home",
     scope: "/",

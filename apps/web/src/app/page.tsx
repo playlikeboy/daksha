@@ -1,14 +1,14 @@
-import { Debo } from "@/components/debo";
+import { Daksha } from "@/components/debo";
 import { DeboArt } from "@/components/debo-art";
 import { MemoryDemo } from "@/components/memory-demo";
 
-const REPO = "https://github.com/playlikeboy/debo.life";
+const REPO = "https://github.com/playlikeboy/daksha";
 
 const GIVE = [
   { name: "Write", text: "Keep a journal. A line or a page, whenever you like." },
-  { name: "Talk", text: "Record a voice note. Debo will turn it into words and keep both." },
-  { name: "Papers", text: "Add a bill, a letter or a report. Debo will read it for you." },
-  { name: "Photos", text: "Add a photo. Debo will note what is in it and any words on it." },
+  { name: "Talk", text: "Record a voice note. Daksha will turn it into words and keep both." },
+  { name: "Papers", text: "Add a bill, a letter or a report. Daksha will read it for you." },
+  { name: "Photos", text: "Add a photo. Daksha will note what is in it and any words on it." },
 ];
 
 const PROMISES = [
@@ -21,7 +21,7 @@ const PROMISES = [
     text: "Not by us, and we will pick AI providers who agree to the same.",
   },
   {
-    title: "Debo shows its sources",
+    title: "Daksha shows its sources",
     text: "Every answer links to the entry, recording or file it came from. No source, no answer.",
   },
   {
@@ -33,38 +33,38 @@ const PROMISES = [
     text: "Download all of it in open formats, or delete your account and all of it goes.",
   },
   {
-    title: "Debo asks first",
-    text: "Before reading from a new app or doing anything outside Debo, it asks you.",
+    title: "Daksha asks first",
+    text: "Before reading from a new app or doing anything outside Daksha, it asks you.",
   },
   {
     title: "Nothing happens in secret",
-    text: "Debo keeps a plain list of everything it read and did. You can read all of it.",
+    text: "Daksha keeps a plain list of everything it read and did. You can read all of it.",
   },
 ];
 
 const QUESTIONS = [
   {
-    q: "Can I use Debo today?",
-    a: "Yes, an early version. You can write journal entries and ask Debo about them, and every answer shows which entry it came from. Voice notes, papers and photos come next. You can delete your account any time.",
+    q: "Can I use Daksha today?",
+    a: "Yes, an early version. You can write journal entries and ask Daksha about them, and every answer shows which entry it came from. Voice notes, papers and photos come next. You can delete your account any time.",
   },
   {
     q: "Who will be able to read my notes?",
-    a: "To answer you, Debo sends the pieces of your notes that match your question to an AI company. Today that is Anthropic. Debo's own servers also need to read your notes to search them, so they are not locked in a way only you can open. We would rather tell you that now than hide it.",
+    a: "To answer you, Daksha sends the pieces of your notes that match your question to an AI company. Today that is Anthropic. Daksha's own servers also need to read your notes to search them, so they are not locked in a way only you can open. We would rather tell you that now than hide it.",
   },
   {
-    q: "Will Debo give me medical, legal or money advice?",
-    a: "No. Debo can tell you what your own notes say, like what the doctor told you in March. It will not tell you what to do about it.",
+    q: "Will Daksha give me medical, legal or money advice?",
+    a: "No. Daksha can tell you what your own notes say, like what the doctor told you in March. It will not tell you what to do about it.",
   },
   {
-    q: "Is Debo a person?",
-    a: "No. Debo is an AI assistant with a friendly face. It will never pretend to be a person.",
+    q: "Is Daksha a person?",
+    a: "No. Daksha is an AI assistant with a friendly face. It will never pretend to be a person.",
   },
 ];
 
 const STEPS = [
   { title: "Save and ask", text: "Journal, voice notes, papers and photos. Ask about them and get answers with sources." },
-  { title: "See what Debo knows", text: "One page with every memory, where you can fix or forget each one." },
-  { title: "Talk to Debo", text: "Ask out loud and hear Debo answer." },
+  { title: "See what Daksha knows", text: "One page with every memory, where you can fix or forget each one." },
+  { title: "Talk to Daksha", text: "Ask out loud and hear Daksha answer." },
   { title: "Connect your apps", text: "Bring in your calendar and notes, and let other AI tools use your memories, only if you say so." },
   { title: "Plans", text: "Use your own AI key for free, or pay monthly and use ours." },
 ];
@@ -82,7 +82,7 @@ export default function Home() {
       <header className="wrap flex items-center justify-between py-5">
         <a href="/" className="flex min-h-11 items-center gap-2 font-display text-[1.375rem] font-bold no-underline">
           <Mark />
-          Debo
+          Daksha
         </a>
         <nav aria-label="Main" className="flex items-center gap-6">
           <ul className="hidden items-center gap-6 font-semibold md:flex">
@@ -112,9 +112,9 @@ export default function Home() {
         {/* Hero */}
         <section className="wrap grid items-center gap-10 pb-16 pt-6 md:grid-cols-[1.1fr_0.9fr] md:gap-8 md:pb-24 md:pt-12">
           <div>
-            <p className="chip">Early version. Most of Debo is still being built.</p>
+            <p className="chip">Early version. Most of Daksha is still being built.</p>
             <h1 className="h-hero mt-5">
-              Hi, I&rsquo;m Debo. I&rsquo;ll remember your life, so you can stop trying to.
+              Hi, I&rsquo;m Daksha. I&rsquo;ll remember your life, so you can stop trying to.
             </h1>
             <p className="mt-6 max-w-[34rem] text-[1.125rem] text-ink-soft md:text-[1.25rem]">
               Give me your journals, voice notes, papers and photos. Ask me anything about them. I will always
@@ -131,7 +131,7 @@ export default function Home() {
           </div>
 
           <div className="relative mx-auto w-full max-w-[26rem]">
-            <Debo className="relative z-10 mx-auto -mb-10 block w-[52%] md:w-[58%]" />
+            <Daksha className="relative z-10 mx-auto -mb-10 block w-[52%] md:w-[58%]" />
             <figure
               className="rounded-[24px] border-2 border-ink bg-paper p-5 pt-12 md:p-6 md:pt-14"
               style={{ boxShadow: "var(--shadow-hard)" }}
@@ -147,16 +147,16 @@ export default function Home() {
                 <li className="chip">Voice note, 16 March</li>
               </ul>
               <figcaption className="mt-5 border-t border-line pt-3 text-ink-soft">
-                An example of how Debo will answer. The names are made up.
+                An example of how Daksha will answer. The names are made up.
               </figcaption>
             </figure>
           </div>
         </section>
 
-        {/* Give Debo anything */}
+        {/* Give Daksha anything */}
         <section className="border-y-2 border-ink bg-paper">
           <div className="wrap py-16 md:py-24">
-            <h2 className="h-section max-w-[18ch]">Give Debo the bits of your life, in any form</h2>
+            <h2 className="h-section max-w-[18ch]">Give Daksha the bits of your life, in any form</h2>
             <dl className="mt-10 grid gap-x-10 gap-y-8 sm:grid-cols-2 lg:grid-cols-4">
               {GIVE.map((item) => (
                 <div key={item.name} className="border-t-2 border-ink pt-4">
@@ -173,7 +173,7 @@ export default function Home() {
           <div>
             <h2 className="h-section">Nothing is hidden from you</h2>
             <p className="mt-5 max-w-[30rem] text-[1.125rem] text-ink-soft">
-              Most assistants keep what they know about you out of sight. Debo will show you all of it on one
+              Most assistants keep what they know about you out of sight. Daksha will show you all of it on one
               page, with where each thing came from.
             </p>
             <p className="mt-4 max-w-[30rem] text-[1.125rem] text-ink-soft">
@@ -186,9 +186,9 @@ export default function Home() {
         {/* Promises */}
         <section id="promises" className="scroll-mt-6 bg-ink text-paper">
           <div className="wrap py-16 md:py-24">
-            <h2 className="h-section max-w-[20ch]">Seven promises we are building Debo around</h2>
+            <h2 className="h-section max-w-[20ch]">Seven promises we are building Daksha around</h2>
             <p className="mt-5 max-w-[38rem] text-[1.125rem] text-line">
-              Debo is still early, so not all of these are true yet. They are the rules it is being built by,
+              Daksha is still early, so not all of these are true yet. They are the rules it is being built by,
               written down so you can hold us to them.
             </p>
             <ul className="mt-10 grid gap-x-12 gap-y-8 md:grid-cols-2">
@@ -200,10 +200,10 @@ export default function Home() {
               ))}
             </ul>
             <p className="mt-10 max-w-[38rem] text-line">
-              One honest limit: to answer you, Debo has to send the relevant pieces of your notes to an AI
+              One honest limit: to answer you, Daksha has to send the relevant pieces of your notes to an AI
               model. We will always tell you which company runs it.{" "}
               <a href="/privacy" className="font-semibold text-paper underline underline-offset-4">
-                Read how Debo handles your data
+                Read how Daksha handles your data
               </a>
               .
             </p>
@@ -235,13 +235,13 @@ export default function Home() {
         {/* Two ways to use it */}
         <section id="plans" className="scroll-mt-6 border-t-2 border-ink bg-paper">
           <div className="wrap py-16 md:py-24">
-            <h2 className="h-section">Two ways you will be able to use Debo</h2>
+            <h2 className="h-section">Two ways you will be able to use Daksha</h2>
             <div className="mt-10 grid gap-6 md:grid-cols-2">
               <div className="rounded-[24px] border-2 border-ink bg-sky p-6 md:p-8">
                 <h3 className="text-[1.75rem]">Your own key</h3>
                 <p className="mt-1 font-semibold">Free</p>
                 <p className="mt-4 text-ink-soft">
-                  If you already pay an AI company, paste your key into Debo. You pay them for what you use.
+                  If you already pay an AI company, paste your key into Daksha. You pay them for what you use.
                   We will store your key encrypted, and you can remove it any time.
                 </p>
               </div>
@@ -285,7 +285,7 @@ export default function Home() {
         <div className="wrap flex flex-col gap-4 py-10 sm:flex-row sm:items-center sm:justify-between">
           <p className="flex items-center gap-2 font-display text-[1.375rem] font-bold">
             <Mark />
-            Debo
+            Daksha
           </p>
           <p className="text-ink-soft">Being built in the open by one person.</p>
           <nav aria-label="Footer" className="flex gap-6">

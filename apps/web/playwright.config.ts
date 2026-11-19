@@ -2,7 +2,7 @@ import { defineConfig, devices } from "@playwright/test";
 
 // End-to-end tests against a running app.
 // Locally: `pnpm --filter @debo/web test:e2e` starts `next dev` on port 3000.
-// Against the live site: BASE_URL=https://debo.life pnpm --filter @debo/web test:e2e
+// Against the live site: BASE_URL=https://daksha.life pnpm --filter @debo/web test:e2e
 const baseURL = process.env.BASE_URL ?? "http://localhost:3000";
 
 // Test helpers read the database URL from the repo-root .env (see e2e/helpers.ts).

@@ -1,7 +1,7 @@
 import "server-only";
 import { z } from "zod";
 
-// Sends email through Cloudflare's Email Sending API from mail.debo.life.
+// Sends email through Cloudflare's Email Sending API from mail.daksha.life.
 // Today only sign-in emails (codes and links) use it. Never log the
 // recipient, the subject or the body: log ids only.
 
@@ -21,7 +21,13 @@ const SendResult = z.object({
 
 export type Email = { to: string; subject: string; html: string; text: string };
 
-export const SENDER = { address: "signin@mail.debo.life", name: "Debo" };
+export const SENDER = { address: "signin@mail.daksha.life", name: "Daksha" };
+
+/** The sender. DAKSHA_EMAIL_FROM can set another address, for example while mail.daksha.life is not verified yet. */
+export function senderFrom(env: Record<string, string | undefined>): { address: string; name: string } {
+  const address = z.string().email().safeParse(env.DAKSHA_EMAIL_FROM?.trim());
+  return address.success ? { ...SENDER, address: address.data } : SENDER;
+}
 
 /** Send one email. Throws with a short reason if Cloudflare does not accept it. */
 export async function sendEmail(email: Email, env: Record<string, string | undefined>): Promise<{ messageId: string }> {
@@ -31,7 +37,7 @@ export async function sendEmail(email: Email, env: Record<string, string | undef
     {
       method: "POST",
       headers: { Authorization: `Bearer ${CLOUDFLARE_API_TOKEN}`, "Content-Type": "application/json" },
-      body: JSON.stringify({ from: SENDER, to: email.to, subject: email.subject, html: email.html, text: email.text }),
+      body: JSON.stringify({ from: senderFrom(env), to: email.to, subject: email.subject, html: email.html, text: email.text }),
     },
   );
   const body = SendResult.safeParse(await response.json().catch(() => null));

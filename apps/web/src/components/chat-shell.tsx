@@ -4,7 +4,7 @@ import type { ReactNode } from "react";
 import { ChatComposer } from "@/components/chat-composer";
 import { ChatHistory } from "@/components/chat-history";
 import { ChatTurn } from "@/components/chat-turn";
-import { Debo } from "@/components/debo";
+import { Daksha } from "@/components/debo";
 import type { ChatListItem, Turn } from "@/lib/chat";
 
 // The chat page's layout and its first paint. Nothing here imports
@@ -73,7 +73,7 @@ export function MissingChatNote() {
 export function EmptyState({ hasEntries, ready, onAsk }: { hasEntries: boolean; ready: boolean; onAsk: (q: string) => boolean }) {
   return (
     <div className="grid gap-6 py-6 sm:grid-cols-[6rem_1fr] sm:items-start">
-      <Debo className="w-20 sm:w-24" />
+      <Daksha className="w-20 sm:w-24" />
       {hasEntries ? (
         <div>
           <p className="text-[1.125rem] font-semibold">What would you like to remember?</p>
@@ -95,7 +95,7 @@ export function EmptyState({ hasEntries, ready, onAsk }: { hasEntries: boolean; 
         </div>
       ) : (
         <div>
-          <p className="text-[1.125rem] font-semibold">Debo answers from your journal, and it&rsquo;s empty so far.</p>
+          <p className="text-[1.125rem] font-semibold">Daksha answers from your journal, and it&rsquo;s empty so far.</p>
           <p className="mt-2 text-ink-soft">Write a few entries about your days, then come back and ask about them.</p>
           <a href="/home/journal" className="btn btn-primary mt-4">
             Write your first entry
@@ -112,7 +112,7 @@ const nothing = () => {};
 /**
  * What the page shows until CopilotKit has loaded in the browser: the same
  * layout, the saved chat and the list of chats, with the question box saying
- * "Getting Debo ready…". "Start a new chat" is a plain link, so it works
+ * "Getting Daksha ready…". "Start a new chat" is a plain link, so it works
  * even now.
  */
 export function ChatShell({ chatId, initialTurns, initialChats, hasEntries, missingChat }: ChatProps) {
@@ -130,7 +130,7 @@ export function ChatShell({ chatId, initialTurns, initialChats, hasEntries, miss
           {initialTurns.length === 0 ? (
             <EmptyState hasEntries={hasEntries} ready={false} onAsk={never} />
           ) : (
-            <ol className="grid gap-8 pb-6" aria-label="Your chat with Debo">
+            <ol className="grid gap-8 pb-6" aria-label="Your chat with Daksha">
               {initialTurns.map((turn) => (
                 <ChatTurn key={turn.id} turn={turn} pending={false} onRetry={nothing} onCopied={nothing} />
               ))}

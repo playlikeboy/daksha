@@ -5,7 +5,7 @@ import type { Reply, Turn } from "@/lib/chat";
 import { entryHref } from "@/lib/links";
 
 /**
- * One question and Debo's reply. While Debo works, `pending` shows a calm
+ * One question and Daksha's reply. While Daksha works, `pending` shows a calm
  * "looking" line until the first words arrive. An answer always ends with
  * its source chips; anything else says what to do next.
  */
@@ -30,7 +30,7 @@ export function ChatTurn({
 
       <div className="max-w-[40rem]">
         <p className="mb-1 font-semibold text-ink-soft" aria-hidden="true">
-          Debo
+          Daksha
         </p>
         {!reply?.text && pending ? (
           <Looking />
@@ -73,7 +73,7 @@ function ReplyView({
   if (isAnswer) {
     return (
       <div className="rounded-[24px] border-2 border-ink bg-paper p-5" style={{ boxShadow: "var(--shadow-hard)" }}>
-        <p className="sr-only">Debo said:</p>
+        <p className="sr-only">Daksha said:</p>
         <p className="whitespace-pre-wrap wrap-anywhere">{reply.text}</p>
         {reply.kind === "stopped" && <p className="mt-3 text-ink-soft">You stopped this answer here.</p>}
         {reply.sources.length > 0 && (
@@ -103,7 +103,7 @@ function ReplyView({
   }
 
   if (reply.kind === "stopped") {
-    return <p className="text-ink-soft">You stopped this before Debo answered.</p>;
+    return <p className="text-ink-soft">You stopped this before Daksha answered.</p>;
   }
 
   return (

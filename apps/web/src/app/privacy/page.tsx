@@ -1,12 +1,12 @@
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "How Debo handles your data",
-  description: "What Debo stores, where it lives, who else sees it, and how you delete it. Plain words, true today.",
+  title: "How Daksha handles your data",
+  description: "What Daksha stores, where it lives, who else sees it, and how you delete it. Plain words, true today.",
   alternates: { canonical: "/privacy" },
 };
 
-const REPO = "https://github.com/playlikeboy/debo.life";
+const REPO = "https://github.com/playlikeboy/daksha";
 
 function Section({ id, title, children }: { id: string; title: string; children: React.ReactNode }) {
   return (
@@ -33,44 +33,44 @@ export default function PrivacyPage() {
   return (
     <main className="wrap max-w-[48rem] py-16">
       <a href="/" className="inline-flex min-h-11 items-center font-semibold underline underline-offset-4">
-        Back to Debo
+        Back to Daksha
       </a>
 
-      <h1 className="h-section mt-8">How Debo handles your data</h1>
+      <h1 className="h-section mt-8">How Daksha handles your data</h1>
       <p className="mt-4 text-[1.125rem] text-ink-soft">Last updated 19 November 2026.</p>
 
       <div className="mt-8 max-w-[40rem] rounded-[24px] border-2 border-ink bg-paper p-6">
         <p>
-          This page explains how Debo works today. A full privacy policy, checked by someone qualified, comes
-          before Debo opens fully.
+          This page explains how Daksha works today. A full privacy policy, checked by someone qualified, comes
+          before Daksha opens fully.
         </p>
       </div>
 
-      <Section id="stores" title="What Debo stores">
+      <Section id="stores" title="What Daksha stores">
         <List
           items={[
-            <>Your name, email and password. Your password passes through Debo on its way to our sign-in service, which stores only a hashed version. Debo never stores or logs it.</>,
+            <>Your name, email and password. Your password passes through Daksha on its way to our sign-in service, which stores only a hashed version. Daksha never stores or logs it.</>,
             <>Your journal entries.</>,
-            <>In the new app, the people in your life that you tell Debo about: name, who they are to you, birthdays and other special days, and a few notes. Described below.</>,
+            <>In the new app, the people in your life that you tell Daksha about: name, who they are to you, birthdays and other special days, and a few notes. Described below.</>,
             <>
               In the new app, the time zone your device is set to (for example Asia/Kolkata), so &ldquo;today&rdquo; means
               your today. Only the latest one is kept, with the time it changed. It is part of your download and is
               deleted with your data.
             </>,
             <>
-              Voice calls with Debo in the new app, written out as text: what you said and what Debo said, in order, with
+              Voice calls with Daksha in the new app, written out as text: what you said and what Daksha said, in order, with
               how far into the call each line was said. The sound of your voice is not kept.
             </>,
-            <>Short pieces of each entry, made so Debo can search them.</>,
+            <>Short pieces of each entry, made so Daksha can search them.</>,
             <>
-              Your chats with Debo: each question you ask in the chat and Debo&rsquo;s reply, with links to the entries
+              Your chats with Daksha: each question you ask in the chat and Daksha&rsquo;s reply, with links to the entries
               it used, so you can come back to a chat later. They stay until you delete the chat or your account.
             </>,
             <>
-              Memories: short facts Debo picks out of your entries, like &ldquo;Riya moved to Pune in March&rdquo;. Each
+              Memories: short facts Daksha picks out of your entries, like &ldquo;Riya moved to Pune in March&rdquo;. Each
               one keeps a link to the entry it came from. Mem0 stores these, not our database.
             </>,
-            <>A list of what Debo saved, deleted, forgot and answered for you (ids and times, not your words).</>,
+            <>A list of what Daksha saved, deleted, forgot and answered for you (ids and times, not your words).</>,
             <>How many AI tokens your questions used each day (numbers only, never your words), so we can keep costs fair.</>,
           ]}
         />
@@ -91,7 +91,7 @@ export default function PrivacyPage() {
       <Section id="who" title="Who else sees pieces of your data">
         <p>
           When you save or change an entry, its text goes to the Neon AI Gateway, whose models are run by
-          Databricks, to turn it into numbers that let Debo search by meaning. Your questions go there too, for
+          Databricks, to turn it into numbers that let Daksha search by meaning. Your questions go there too, for
           the same reason.
         </p>
         <p>
@@ -108,22 +108,22 @@ export default function PrivacyPage() {
           customers send to train any AI. It may keep your text for up to 30 days, only to spot abuse.
         </p>
         <p>
-          When you talk to Debo out loud, your voice goes to LiveKit (LiveKit, Inc.), which carries the call. LiveKit
-          turns your speech into text with Deepgram and turns Debo&rsquo;s answer into speech with Cartesia. Only the
-          text of your question reaches Debo&rsquo;s answer pipeline, the same as typing it. Debo does not record your
+          When you talk to Daksha out loud, your voice goes to LiveKit (LiveKit, Inc.), which carries the call. LiveKit
+          turns your speech into text with Deepgram and turns Daksha&rsquo;s answer into speech with Cartesia. Only the
+          text of your question reaches Daksha&rsquo;s answer pipeline, the same as typing it. Daksha does not record your
           voice.
         </p>
         <p>
           In the new app, a call works like chat. What you say, as text, goes to the same assistant that answers in
           chat, so it can use your journal, your tasks and the apps you connected, and the AI that writes the answer
           (Anthropic) receives it as it does for a typed question. Each call is saved as a chat that you can read in
-          Chat, and also as a voice call in your journal, described below. Anything that sends, posts or changes something outside Debo, and anything that deletes your data, still waits for your yes on screen. Saving to your own journal does not: Debo does it at once and tells you, and you can delete it.
-          If you ask Debo to act as someone, for example a friend, the role you asked for is saved with your account
-          so she keeps it next time. You can see it, change it or stop it in the Apps screen, under &ldquo;A role for Debo&rdquo;, and it is removed when you
+          Chat, and also as a voice call in your journal, described below. Anything that sends, posts or changes something outside Daksha, and anything that deletes your data, still waits for your yes on screen. Saving to your own journal does not: Daksha does it at once and tells you, and you can delete it.
+          If you ask Daksha to act as someone, for example a friend, the role you asked for is saved with your account
+          so she keeps it next time. You can see it, change it or stop it in the Apps screen, under &ldquo;A role for Daksha&rdquo;, and it is removed when you
           delete your account.
         </p>
         <p>
-          In the new app you can also choose a voice and speed for Debo and write a few notes about yourself (what to
+          In the new app you can also choose a voice and speed for Daksha and write a few notes about yourself (what to
           call you, your city, people, how you like things), under &ldquo;How she talks and what she knows&rdquo;. They
           are saved with your account. The notes are sent to the assistant model with your questions, as your own words,
           so she can be personal; the voice choice is sent to LiveKit with the call. Both are in &ldquo;Download my
@@ -137,11 +137,11 @@ export default function PrivacyPage() {
           deleted with your account.
         </p>
         <p>
-          In the new app Debo also keeps &ldquo;People in your life&rdquo;: a short card for each person you tell her
+          In the new app Daksha also keeps &ldquo;People in your life&rdquo;: a short card for each person you tell her
           about, with their name, who they are to you, their birthday and other special days, and a few notes in your
           words (for example &ldquo;loves jasmine tea&rdquo;). She saves a card when you mention someone in chat or on a
           call, and tells you. You can see every card, fix it, add someone or remove them on the Apps screen, under
-          &ldquo;People in your life&rdquo;. The cards are saved in Debo&rsquo;s database at Neon, with your other
+          &ldquo;People in your life&rdquo;. The cards are saved in Daksha&rsquo;s database at Neon, with your other
           settings. Up to 40 of them (name, who they are, the start of the notes) and the birthdays coming up in the next
           week are sent to the assistant model (Anthropic) with your questions, so she can ask after people by name. They
           are in &ldquo;Download my data&rdquo; and are removed by &ldquo;Delete my data&rdquo; and when you delete your
@@ -149,12 +149,12 @@ export default function PrivacyPage() {
           not remove a card.
         </p>
         <p>
-          When you say good morning, or ask how your day looks, Debo may put together a short check-in. It reads only what
-          Debo already holds: the people cards, tasks waiting for you, your goals, and your journal entries from the last
+          When you say good morning, or ask how your day looks, Daksha may put together a short check-in. It reads only what
+          Daksha already holds: the people cards, tasks waiting for you, your goals, and your journal entries from the last
           week. It goes to the assistant model like any other answer, and the check-in itself is not saved anywhere.
         </p>
         <p>
-          Reminders in the new app. Once a minute Debo&rsquo;s server checks, in your own time zone, three things and
+          Reminders in the new app. Once a minute Daksha&rsquo;s server checks, in your own time zone, three things and
           nothing else: birthdays and special days on your people cards (a reminder the day before at 18:00 and on the
           morning at 08:00; on unless you turn it off), the morning check-in (off unless you turn it on, at the time you
           pick; it is built from the same things as above, and the update says only names and counts, never your journal
@@ -174,8 +174,8 @@ export default function PrivacyPage() {
         <p>
           Notifications outside the app are off until you turn on &ldquo;Send me reminders&rdquo; on a device. In a
           browser or the installed web app this uses web push: your browser&rsquo;s push service (Google for Chrome,
-          Mozilla for Firefox, Apple for Safari, Microsoft for Edge) gives Debo an address for that browser, which Debo
-          keeps until you turn it off there or delete your data (signing out stops that browser at once, and Debo
+          Mozilla for Firefox, Apple for Safari, Microsoft for Edge) gives Daksha an address for that browser, which Daksha
+          keeps until you turn it off there or delete your data (signing out stops that browser at once, and Daksha
           forgets the address the next time it tries it); your download lists the address but not
           its keys. A push carries only a short title, such as &ldquo;Good morning&rdquo;, &ldquo;Call Mum&rdquo; or
           &ldquo;Tomorrow is Riya&rsquo;s birthday&rdquo;, encrypted so the push service cannot read it; never what you
@@ -195,8 +195,8 @@ export default function PrivacyPage() {
         </p>
         <p className="text-ink-soft">
           Mem0&rsquo;s privacy policy says it trains its AI models on data from its free plan users, and not on data
-          from its paid plan users. We have not yet confirmed which of these covers Debo&rsquo;s Mem0 account. Until
-          we do, assume Mem0 may train on what Debo sends it.
+          from its paid plan users. We have not yet confirmed which of these covers Daksha&rsquo;s Mem0 account. Until
+          we do, assume Mem0 may train on what Daksha sends it.
         </p>
         <p>We do not sell your data, share it, or show ads against it. We do not train AI on it ourselves.</p>
       </Section>
@@ -204,9 +204,9 @@ export default function PrivacyPage() {
       <Section id="limits" title="Honest limits">
         <List
           items={[
-            <>Debo is not end-to-end encrypted. Debo&rsquo;s servers have to read your notes to search them.</>,
-            <>Our database provider may keep backups for a short time. We will state the exact period before Debo opens fully.</>,
-            <>Sign-in emails (codes and links) are sent from mail.debo.life through Cloudflare&rsquo;s email service. Cloudflare sees your email address and the code or link, never your entries.</>,
+            <>Daksha is not end-to-end encrypted. Daksha&rsquo;s servers have to read your notes to search them.</>,
+            <>Our database provider may keep backups for a short time. We will state the exact period before Daksha opens fully.</>,
+            <>Sign-in emails (codes and links) are sent from mail.daksha.life through Cloudflare&rsquo;s email service. Cloudflare sees your email address and the code or link, never your entries.</>,
             <>Mem0&rsquo;s privacy policy does not say how long it keeps data after it is deleted.</>,
           ]}
         />
@@ -217,10 +217,10 @@ export default function PrivacyPage() {
           items={[
             <>Delete any entry. It is deleted right away, and the memories from it a few seconds later.</>,
             <>Delete any chat from the chat page. It and every message in it are deleted right away.</>,
-            <>See every memory on the &ldquo;What Debo knows&rdquo; page, with the entry it came from. Fix it or forget it there.</>,
+            <>See every memory on the &ldquo;What Daksha knows&rdquo; page, with the entry it came from. Fix it or forget it there.</>,
             <>
               Download everything from your home page. You get a zip with every entry and every chat as a plain text
-              file and your activity record as a spreadsheet. It opens without Debo.
+              file and your activity record as a spreadsheet. It opens without Daksha.
             </>,
             <>
               Delete your account from your home page. That deletes your memories in Mem0, your account, every entry,
@@ -230,9 +230,9 @@ export default function PrivacyPage() {
         />
       </Section>
 
-      <Section id="new-app" title="The new Debo app (early version)">
+      <Section id="new-app" title="The new Daksha app (early version)">
         <p>
-          A new version of Debo is being tried at my.debo.life. You sign in with the same account, and it reads and
+          A new version of Daksha is being tried at my.daksha.life. You sign in with the same account, and it reads and
           writes the same journal entries and memories described on this page, with the same companies involved.
         </p>
         <List
@@ -254,7 +254,7 @@ export default function PrivacyPage() {
             </>,
           ]}
         />
-        <h3 className="mt-6 font-semibold">Voice calls with Debo</h3>
+        <h3 className="mt-6 font-semibold">Voice calls with Daksha</h3>
         <p>
           Every call you make from the Talk screen is saved as text. There is no setting to turn this off. The Talk
           screen says so before the microphone starts.
@@ -262,16 +262,16 @@ export default function PrivacyPage() {
         <List
           items={[
             <>
-              What is saved: your words and Debo&rsquo;s words, as text, in Debo&rsquo;s database at Neon (the same place
+              What is saved: your words and Daksha&rsquo;s words, as text, in Daksha&rsquo;s database at Neon (the same place
               as your journal entries). Never the sound. While a call is on, each line is saved as it is said. If you
               close the tab or lose the connection, the call is still saved.
             </>,
             <>
-              Debo learns from it like from a journal entry. When the call ends (or, if it never says so, when it has been
+              Daksha learns from it like from a journal entry. When the call ends (or, if it never says so, when it has been
               quiet for ten minutes), the text is cut into short pieces for search, and those pieces go to the Neon AI
               Gateway (run by Databricks) to be turned into numbers for searching by meaning. The text of the call also
-              goes to Mem0, which picks out lasting facts. Only what you said can become a memory. Debo&rsquo;s own lines are
-              sent along only so your short answers make sense, and Mem0 is told not to save them. A role Debo played is
+              goes to Mem0, which picks out lasting facts. Only what you said can become a memory. Daksha&rsquo;s own lines are
+              sent along only so your short answers make sense, and Mem0 is told not to save them. A role Daksha played is
               not a fact about you. When you later ask a question, matching pieces go to Anthropic, as for any entry.
             </>,
             <>
@@ -285,7 +285,7 @@ export default function PrivacyPage() {
               the Chat copy does not remove the call from your journal.
             </>,
             <>
-              The call itself is carried by LiveKit, Deepgram and Cartesia, as described above in this page. Debo does not
+              The call itself is carried by LiveKit, Deepgram and Cartesia, as described above in this page. Daksha does not
               store the audio.
             </>,
             <>
@@ -293,8 +293,8 @@ export default function PrivacyPage() {
               while the bar is there, and the bar always says whether it is on. On the web, the call keeps going if you
               switch tabs or minimise the window, and stops when you close the tab. On iPhone the call is allowed to
               continue when the app is in the background or the screen is locked, and iOS shows its orange microphone
-              dot. On Android the call keeps going too, and Android shows a &ldquo;Debo is listening&rdquo; notification
-              with an End button for as long as the call lasts. Android may ask whether Debo can show notifications when
+              dot. On Android the call keeps going too, and Android shows a &ldquo;Daksha is listening&rdquo; notification
+              with an End button for as long as the call lasts. Android may ask whether Daksha can show notifications when
               a call starts; if you say no, the call still works. Press End, or Mute, at any time.
             </>,
           ]}
@@ -304,10 +304,10 @@ export default function PrivacyPage() {
         <List
           items={[
             <>
-              The recording is stored in Cloudflare R2, in a private bucket with no public address. Only Debo&rsquo;s
-              server can reach it. Your phone or browser sends the recording to Debo&rsquo;s server, which passes it on
-              to that bucket as it arrives and does not keep a copy of its own. When you play it, Debo gives you a link
-              that stops working after an hour, and only you can get one. The sound comes through Debo&rsquo;s server
+              The recording is stored in Cloudflare R2, in a private bucket with no public address. Only Daksha&rsquo;s
+              server can reach it. Your phone or browser sends the recording to Daksha&rsquo;s server, which passes it on
+              to that bucket as it arrives and does not keep a copy of its own. When you play it, Daksha gives you a link
+              that stops working after an hour, and only you can get one. The sound comes through Daksha&rsquo;s server
               too.
             </>,
             <>
@@ -322,27 +322,27 @@ export default function PrivacyPage() {
               note&rdquo; or &ldquo;Video&rdquo; and the date.
             </>,
             <>
-              While the words are written, a temporary copy of the sound sits on Debo&rsquo;s server. It is deleted when
+              While the words are written, a temporary copy of the sound sits on Daksha&rsquo;s server. It is deleted when
               that work ends. The recording itself is kept until you delete it.
             </>,
             <>
-              When you press &ldquo;Speak&rdquo;, short clips of your voice go to Debo&rsquo;s server and on to the same
+              When you press &ldquo;Speak&rdquo;, short clips of your voice go to Daksha&rsquo;s server and on to the same
               Cloudflare service. The clips are not saved. The microphone is on only while the screen says
               &ldquo;Listening&rdquo; or &ldquo;Recording&rdquo;.
             </>,
             <>
-              Debo keeps, with each recording: its type, size, length, when you recorded it, the file name if you added a
+              Daksha keeps, with each recording: its type, size, length, when you recorded it, the file name if you added a
               file, the words with their timing, the language, and a fingerprint of the file so the same file is not
               written out twice. It never keeps where you were.
             </>,
             <>
-              In the phone app, a voice note or video you record stays in Debo&rsquo;s own storage on your phone, which
+              In the phone app, a voice note or video you record stays in Daksha&rsquo;s own storage on your phone, which
               other apps cannot read, until your phone clears it. One you cancel is deleted from the phone at once. On
               the phone, speaking into the text uses your keyboard&rsquo;s own microphone, so your keyboard&rsquo;s
-              maker handles that sound, not Debo.
+              maker handles that sound, not Daksha.
             </>,
             <>
-              To delete a recording, delete its entry: the file is removed from storage first, then the entry and what Debo
+              To delete a recording, delete its entry: the file is removed from storage first, then the entry and what Daksha
               learned from it. &ldquo;Delete my data&rdquo; removes every recording you have. A recording you started to
               add but never finished is removed within a day. We have not checked whether Cloudflare keeps any backup
               copy of a deleted file.
@@ -350,8 +350,8 @@ export default function PrivacyPage() {
             <>A recording can be up to 200 MB and 60 minutes. You can add up to 4 hours and 40 recordings a day.</>,
           ]}
         />
-        <h3 className="mt-6 font-semibold">Pictures Debo makes</h3>
-        <p>In the new app you can ask Debo to make a picture, in chat or on a call. If pictures are not switched on, Debo says so and none of the below applies.</p>
+        <h3 className="mt-6 font-semibold">Pictures Daksha makes</h3>
+        <p>In the new app you can ask Daksha to make a picture, in chat or on a call. If pictures are not switched on, Daksha says so and none of the below applies.</p>
         <List
           items={[
             <>
@@ -361,12 +361,12 @@ export default function PrivacyPage() {
             </>,
             <>
               The picture is kept in the same private Cloudflare R2 bucket as recordings, and shown to you with a link
-              that stops working after an hour. Debo keeps the words it was made from, when, and which service made it.
+              that stops working after an hour. Daksha keeps the words it was made from, when, and which service made it.
               This is in &ldquo;Download my data&rdquo;.
             </>,
             <>
-              Debo refuses sexual pictures and pictures meant to fool people, and the picture service has its own
-              safety filter. You can make up to 20 pictures a day on Debo&rsquo;s service.
+              Daksha refuses sexual pictures and pictures meant to fool people, and the picture service has its own
+              safety filter. You can make up to 20 pictures a day on Daksha&rsquo;s service.
             </>,
             <>You can delete a picture, which removes the file too. &ldquo;Delete my data&rdquo; removes them all.</>,
           ]}
@@ -374,7 +374,7 @@ export default function PrivacyPage() {
         <h3 className="mt-6 font-semibold">People you make</h3>
         <p>
           In the new app you can make your own people to talk to, such as a friend, a family member, someone who has died,
-          or a made-up character. You can describe them in words, or add a WhatsApp chat export, photos and videos so Debo
+          or a made-up character. You can describe them in words, or add a WhatsApp chat export, photos and videos so Daksha
           learns how they talk. You can also add voice notes and call recordings of them, described in the next part. This is an
           early version. If you never make anyone, none of this applies.
         </p>
@@ -382,17 +382,17 @@ export default function PrivacyPage() {
           items={[
             <>
               A chat export holds other people&rsquo;s messages, not only yours. Before you add files you tick a box saying
-              you&rsquo;re allowed to use them and it&rsquo;s for your own private use. Debo keeps when you ticked it and
+              you&rsquo;re allowed to use them and it&rsquo;s for your own private use. Daksha keeps when you ticked it and
               the words you agreed to.
             </>,
             <>
-              The files go to the same private Cloudflare R2 bucket as recordings, in a separate temporary folder. Debo reads
+              The files go to the same private Cloudflare R2 bucket as recordings, in a separate temporary folder. Daksha reads
               them once, then deletes them, whether reading worked or not. If anything is left behind, it is deleted within
               24 hours.
             </>,
             <>
-              Debo reads only the last 5,000 messages of a chat, and uses only the messages of the person you pick. Before
-              any AI reads them, Debo takes out phone numbers, emails, one-time codes, card and account numbers, links and
+              Daksha reads only the last 5,000 messages of a chat, and uses only the messages of the person you pick. Before
+              any AI reads them, Daksha takes out phone numbers, emails, one-time codes, card and account numbers, links and
               addresses. This is a careful filter, not a guarantee: unusual formats can slip through.
             </>,
             <>
@@ -405,7 +405,7 @@ export default function PrivacyPage() {
               models.
             </>,
             <>
-              Debo keeps only the profile: a short summary of how they talk, up to 40 lines they really wrote or said,
+              Daksha keeps only the profile: a short summary of how they talk, up to 40 lines they really wrote or said,
               nicknames, languages and short facts, each with where it came from, and the lines kept from their voice notes
               and calls. You can see it, remove any line or fact, change
               the person or delete them in the app, under &ldquo;People you made&rdquo;. Profiles are kept until you
@@ -414,7 +414,7 @@ export default function PrivacyPage() {
             <>
               When you talk to one of them, their profile is sent to the AI with your messages, like a role. They are
               always honest that they are an AI if you sincerely ask, never sexual, drop the role if you seem to be in
-              crisis, and never send messages or act outside Debo as that person.
+              crisis, and never send messages or act outside Daksha as that person.
             </>,
             <>
               You can give them a face from the face builder. A face is only drawing choices (a shape, colours, hair and
@@ -424,49 +424,49 @@ export default function PrivacyPage() {
           ]}
         />
         <h3 className="mt-6 font-semibold">Voice notes and call recordings of a custom person, and voice copies</h3>
-        <p>In the new app you can add voice notes or call recordings of a custom person you made, so Debo learns how they talk, and you can choose to copy their voice for your calls with them. If you never add one, none of this applies.</p>
+        <p>In the new app you can add voice notes or call recordings of a custom person you made, so Daksha learns how they talk, and you can choose to copy their voice for your calls with them. If you never add one, none of this applies.</p>
         <List
           items={[
             <>
               These recordings have other people in them: the person, you, and maybe others. You must tick a box saying
-              you are allowed to use them and that it is for your own private use. Debo saves that you ticked it, with the
+              you are allowed to use them and that it is for your own private use. Daksha saves that you ticked it, with the
               exact words and the time.
             </>,
             <>
-              The recording waits in the same private Cloudflare R2 bucket as your voice notes. Debo makes a small copy of
+              The recording waits in the same private Cloudflare R2 bucket as your voice notes. Daksha makes a small copy of
               the sound and sends it to Cloudflare Workers AI (a model called Deepgram Nova-3, run by Cloudflare) to tell
               the voices apart and write out who said what. Cloudflare says it does not use content processed by Workers
               AI to train AI models.
             </>,
             <>
-              You say which voice is the person. Debo keeps only their lines, with phone numbers, email addresses, codes,
+              You say which voice is the person. Daksha keeps only their lines, with phone numbers, email addresses, codes,
               card and account numbers, links and street addresses taken out. Everything the other voices said is thrown
               away.
             </>,
             <>
-              The recording is deleted from the bucket as soon as you have said who is who, or at once if Debo could not
+              The recording is deleted from the bucket as soon as you have said who is who, or at once if Daksha could not
               read it. Anything left over is deleted after 24 hours.
             </>,
             <>
               A voice copy is only made if you ask for it and tick a second box: you have the person&rsquo;s permission, or
-              you are close family and they have died, and they are not a public figure, actor or character. Debo then
+              you are close family and they have died, and they are not a public figure, actor or character. Daksha then
               cuts 10 to 30 seconds of only that person&rsquo;s voice and sends it to Cartesia, the company whose voices
-              Debo&rsquo;s calls use. Cartesia keeps a private voice model made from it until it is deleted. Debo does not
+              Daksha&rsquo;s calls use. Cartesia keeps a private voice model made from it until it is deleted. Daksha does not
               send Cartesia the person&rsquo;s name. We have not yet checked Cartesia&rsquo;s terms on training AI.
             </>,
             <>
               The voice copy is made on your own Cartesia account if you added your Cartesia key (below), otherwise on
-              Debo&rsquo;s, if Debo has one. If neither exists, Debo says a voice copy needs a Cartesia key, and still uses
+              Daksha&rsquo;s, if Daksha has one. If neither exists, Daksha says a voice copy needs a Cartesia key, and still uses
               the person&rsquo;s words.
             </>,
             <>
-              The copied voice is only used to speak Debo&rsquo;s replies on your own calls while Debo is talking as that
-              person, and every such call starts by saying it is Debo&rsquo;s AI version of them. It is never used for
-              anything sent outside Debo.
+              The copied voice is only used to speak Daksha&rsquo;s replies on your own calls while Daksha is talking as that
+              person, and every such call starts by saying it is Daksha&rsquo;s AI version of them. It is never used for
+              anything sent outside Daksha.
             </>,
             <>
               &ldquo;Remove voice copy&rdquo;, deleting the custom person, and deleting your account all delete the voice
-              copy at Cartesia, then in Debo. If the key that made it is gone, Debo removes it on its side and tells you
+              copy at Cartesia, then in Daksha. If the key that made it is gone, Daksha removes it on its side and tells you
               to delete it in your Cartesia account. The person&rsquo;s kept lines and the consent ticks are in
               &ldquo;Download my data&rdquo; and are deleted with the custom person or your account.
             </>,
@@ -477,19 +477,19 @@ export default function PrivacyPage() {
         <List
           items={[
             <>
-              Debo checks a key with one small request to that company before saving it, then stores it encrypted. It is
+              Daksha checks a key with one small request to that company before saving it, then stores it encrypted. It is
               never shown again, never written to our logs and never in &ldquo;Download my data&rdquo;, which only says
               that a key is set. The screen shows only its last four characters.
             </>,
             <>
-              With your own key, what you say in chats and calls, the parts of your entries Debo uses to answer, and
+              With your own key, what you say in chats and calls, the parts of your entries Daksha uses to answer, and
               picture descriptions go to that company on your account, under its terms and privacy policy, and it bills
-              you. OpenRouter passes your requests on to the model maker you picked. Debo&rsquo;s daily limits do not
+              you. OpenRouter passes your requests on to the model maker you picked. Daksha&rsquo;s daily limits do not
               apply to what runs on your key.
             </>,
             <>
-              On calls, your key is used for what Debo says. Hearing you and speaking out loud still go through
-              Debo&rsquo;s voice service, as described above.
+              On calls, your key is used for what Daksha says. Hearing you and speaking out loud still go through
+              Daksha&rsquo;s voice service, as described above.
             </>,
             <>
               You can also add your own Cartesia key. It is used only to make a voice copy of a custom person and to speak
@@ -502,27 +502,27 @@ export default function PrivacyPage() {
 
       <Section id="connected-apps" title="Connecting your apps (new app, optional)">
         <p>
-          In the new app you can connect other apps, such as Gmail, Slack or Notion, so Debo can look things up in them
+          In the new app you can connect other apps, such as Gmail, Slack or Notion, so Daksha can look things up in them
           and, when you say yes, make changes. This is off until you connect an app, and you choose each one.
         </p>
         <List
           items={[
             <>
               Composio (Sampark Inc, doing business as Composio) holds your sign-in to each app you connect and carries
-              each request between Debo and that app. You sign in on the app&rsquo;s own page. Debo never sees your
+              each request between Daksha and that app. You sign in on the app&rsquo;s own page. Daksha never sees your
               password.
             </>,
             <>
-              What Debo sends Composio: your Debo account id, so it knows whose connection to use; which app you chose;
+              What Daksha sends Composio: your Daksha account id, so it knows whose connection to use; which app you chose;
               and each request, such as the words to search for, or the text of a message you approved. What comes back
-              is shown to you, and the parts needed are sent to the AI that writes Debo&rsquo;s answer (Anthropic).
+              is shown to you, and the parts needed are sent to the AI that writes Daksha&rsquo;s answer (Anthropic).
             </>,
             <>
-              Debo only looks things up on its own. Anything that sends, posts, creates, changes or deletes waits for
+              Daksha only looks things up on its own. Anything that sends, posts, creates, changes or deletes waits for
               your yes on screen. Voice can never give that yes.
             </>,
             <>
-              Debo&rsquo;s own logs keep which app and tool were used and whether it worked, never your messages or
+              Daksha&rsquo;s own logs keep which app and tool were used and whether it worked, never your messages or
               results.
             </>,
             <>
@@ -542,43 +542,43 @@ export default function PrivacyPage() {
 
       <Section id="tool-servers" title="Your own tool servers (new app, optional)">
         <p>
-          In the new app you can also add a tool server of your own (an &ldquo;MCP&rdquo; server) by giving Debo its
-          address. This is off until you add one. Debo does not run these servers, does not choose them and does not
+          In the new app you can also add a tool server of your own (an &ldquo;MCP&rdquo; server) by giving Daksha its
+          address. This is off until you add one. Daksha does not run these servers, does not choose them and does not
           control them. Only add one you trust.
         </p>
         <List
           items={[
             <>
-              A tool server you add receives what Debo sends it: the tool name and the values for the call, such as the
-              words of a note. Debo only sends a call you asked for, and a call that changes something waits for your yes
-              on screen. Debo never sends your journal or memories to it by itself. What the server does with what it
-              receives is up to whoever runs it. Debo&rsquo;s people do not control it and cannot undo it.
+              A tool server you add receives what Daksha sends it: the tool name and the values for the call, such as the
+              words of a note. Daksha only sends a call you asked for, and a call that changes something waits for your yes
+              on screen. Daksha never sends your journal or memories to it by itself. What the server does with what it
+              receives is up to whoever runs it. Daksha&rsquo;s people do not control it and cannot undo it.
             </>,
             <>
               What the server sends back is shown to you, and the parts needed are sent to the AI that writes
-              Debo&rsquo;s answer (Anthropic). Debo treats it as plain data, never as instructions.
+              Daksha&rsquo;s answer (Anthropic). Daksha treats it as plain data, never as instructions.
             </>,
             <>
-              If you give a secret (a token or key), Debo saves it encrypted, never shows it again and never writes it to
-              its logs. Debo&rsquo;s logs keep which server and tool were used and whether it worked, never the values or
-              the results. Debo only connects to public https addresses.
+              If you give a secret (a token or key), Daksha saves it encrypted, never shows it again and never writes it to
+              its logs. Daksha&rsquo;s logs keep which server and tool were used and whether it worked, never the values or
+              the results. Daksha only connects to public https addresses.
             </>,
             <>
               If you choose to sign in to a server instead of giving a secret, you sign in on that server&rsquo;s own
-              page, not in Debo. To set this up, Debo sends the server&rsquo;s sign-in service its name
-              (&ldquo;Debo&rdquo;) and the address to send you back to. Debo then keeps the sign-in it gets back (its
+              page, not in Daksha. To set this up, Daksha sends the server&rsquo;s sign-in service its name
+              (&ldquo;Daksha&rdquo;) and the address to send you back to. Daksha then keeps the sign-in it gets back (its
               tokens) encrypted, never shows them and never writes them to its logs.
             </>,
             <>
               Your own Composio account works the same way. If you add it with &ldquo;Sign in with Composio&rdquo; or
-              your own Composio API key, Debo saves the key or the sign-in encrypted, and the calls go to your Composio
+              your own Composio API key, Daksha saves the key or the sign-in encrypted, and the calls go to your Composio
               account with what each call needs: the tool name and its values. What Composio and the apps you connected
-              there do with it is set by your Composio account, not by Debo.
+              there do with it is set by your Composio account, not by Daksha.
             </>,
             <>
               &ldquo;Remove&rdquo; on the Apps screen deletes the server and its secret or sign-in. &ldquo;Sign
-              out&rdquo; deletes the sign-in and keeps the server. Both only make Debo forget it: to cut off access on
-              the other side too, do that in the server&rsquo;s own settings (Composio offers no way for Debo to do it).
+              out&rdquo; deletes the sign-in and keeps the server. Both only make Daksha forget it: to cut off access on
+              the other side too, do that in the server&rsquo;s own settings (Composio offers no way for Daksha to do it).
               &ldquo;Delete my data&rdquo; removes every server you added. &ldquo;Download my data&rdquo; lists each
               server&rsquo;s name, address and tools, never its secret or sign-in.
             </>,
@@ -587,10 +587,10 @@ export default function PrivacyPage() {
       </Section>
 
       <Section id="cookies" title="Cookies and your browser">
-        <p>Debo only uses the sign-in cookies it needs to keep you signed in. No ads, no tracking, no analytics.</p>
+        <p>Daksha only uses the sign-in cookies it needs to keep you signed in. No ads, no tracking, no analytics.</p>
         <p>
-          While you write a journal entry, Debo keeps your unsaved draft only in this browser, so you don&rsquo;t lose
-          it if the page closes. It is not sent to Debo until you save it. Saving, signing out or deleting your
+          While you write a journal entry, Daksha keeps your unsaved draft only in this browser, so you don&rsquo;t lose
+          it if the page closes. It is not sent to Daksha until you save it. Saving, signing out or deleting your
           account removes the draft from the browser.
         </p>
       </Section>
@@ -599,7 +599,7 @@ export default function PrivacyPage() {
         <p>
           Ask on{" "}
           <a href={`${REPO}/issues`} className="font-semibold underline underline-offset-4">
-            Debo&rsquo;s GitHub issues page
+            Daksha&rsquo;s GitHub issues page
           </a>
           . Please do not post anything private there, since it is public.
         </p>

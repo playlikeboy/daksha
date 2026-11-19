@@ -7,7 +7,7 @@ export const dynamic = "force-dynamic";
 
 /**
  * Download everything the signed-in person has saved, as a zip.
- * Writes one activity row so the download shows in "What Debo did".
+ * Writes one activity row so the download shows in "What Daksha did".
  * Never logs entry text: only the user id and a short error reason.
  */
 export async function GET() {
@@ -20,7 +20,7 @@ export async function GET() {
   try {
     const exportedAt = new Date();
     const [records, chats] = await Promise.all([exportRecords(databaseUrl(), userId), exportChats(databaseUrl(), userId)]);
-    // Add a section here when Debo stores more (files, memories).
+    // Add a section here when Daksha stores more (files, memories).
     const zip = buildExportZip(
       [entriesSection(records.entries), chatsSection(chats), activitySection(records.activity)],
       exportedAt,
@@ -30,7 +30,7 @@ export async function GET() {
     return new Response(zip as Uint8Array<ArrayBuffer>, {
       headers: {
         "Content-Type": "application/zip",
-        "Content-Disposition": `attachment; filename="debo-export-${exportedAt.toISOString().slice(0, 10)}.zip"`,
+        "Content-Disposition": `attachment; filename="daksha-export-${exportedAt.toISOString().slice(0, 10)}.zip"`,
         "Content-Length": String(zip.byteLength),
         "Cache-Control": "no-store",
       },

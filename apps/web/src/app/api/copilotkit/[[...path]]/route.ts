@@ -4,14 +4,14 @@ import { RUNTIME_INFO } from "@/lib/copilot-info";
 
 export const dynamic = "force-dynamic";
 
-// No usage data leaves Debo for CopilotKit's telemetry (AGENTS.md: no
+// No usage data leaves Daksha for CopilotKit's telemetry (AGENTS.md: no
 // analytics that send data to a third party). The runtime reads this each time.
 process.env.COPILOTKIT_TELEMETRY_DISABLED = "true";
 
 const BASE_PATH = "/api/copilotkit";
 
 /**
- * The CopilotKit runtime and Debo's agent, loaded only when a request needs
+ * The CopilotKit runtime and Daksha's agent, loaded only when a request needs
  * them. They are large: loading them on a cold Worker costs about half a
  * second of CPU, so /info (asked each time the chat opens) skips them.
  * The import is cached for the life of the Worker; nothing about a person is.
@@ -34,7 +34,7 @@ async function handle(request: Request): Promise<Response> {
     // Only accept writes from our own pages, never from another site.
     const origin = request.headers.get("origin");
     if (!origin || origin !== new URL(request.url).origin) {
-      return Response.json({ error: "This request must come from Debo itself." }, { status: 403 });
+      return Response.json({ error: "This request must come from Daksha itself." }, { status: 403 });
     }
   }
 

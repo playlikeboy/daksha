@@ -8,13 +8,13 @@ import { getAuth } from "@/lib/auth/server";
 import { memoryStore } from "@/lib/memory";
 import { databaseUrl } from "@/lib/server-env";
 
-export const metadata: Metadata = { title: "What Debo knows", robots: { index: false } };
+export const metadata: Metadata = { title: "What Daksha knows", robots: { index: false } };
 export const dynamic = "force-dynamic";
 
 type Shown = Memory & { sourceLabel: string };
 type Loaded = { status: "off" } | { status: "error" } | { status: "ok"; memories: Shown[] };
 
-/** Promises 3 and 4: see everything Debo knows, where it learned it, and fix or forget it. */
+/** Promises 3 and 4: see everything Daksha knows, where it learned it, and fix or forget it. */
 export default async function MemoriesPage() {
   const { data: session } = await getAuth().getSession();
   if (!session?.user) redirect("/auth/sign-in");
@@ -23,23 +23,23 @@ export default async function MemoriesPage() {
 
   return (
     <main className="wrap max-w-[48rem] pb-16 pt-10">
-      <h1 className="h-section">What Debo knows</h1>
+      <h1 className="h-section">What Daksha knows</h1>
       <p className="mt-4 text-[1.125rem] text-ink-soft">
-        After you save an entry, Debo picks out the lasting facts in it, like people, places and plans. Each memory
-        shows the entry it came from. Fix anything that is wrong, or forget anything you don&rsquo;t want Debo to keep.
+        After you save an entry, Daksha picks out the lasting facts in it, like people, places and plans. Each memory
+        shows the entry it came from. Fix anything that is wrong, or forget anything you don&rsquo;t want Daksha to keep.
       </p>
 
       {loaded.status === "off" && (
         <p className="mt-8 text-ink-soft">
-          Debo is not keeping memories right now. Your entries are safe, and you can still ask about them.
+          Daksha is not keeping memories right now. Your entries are safe, and you can still ask about them.
         </p>
       )}
       {loaded.status === "error" && (
-        <p className="mt-8 font-semibold">I couldn&rsquo;t load what Debo knows just now. Try again in a moment.</p>
+        <p className="mt-8 font-semibold">I couldn&rsquo;t load what Daksha knows just now. Try again in a moment.</p>
       )}
       {loaded.status === "ok" && loaded.memories.length === 0 && (
         <p className="mt-8 text-ink-soft">
-          Nothing yet. Write an entry about the people, places and plans in your life, and Debo will remember them
+          Nothing yet. Write an entry about the people, places and plans in your life, and Daksha will remember them
           here within a minute or so.
         </p>
       )}
@@ -59,7 +59,7 @@ const MEM0_WAIT_MS = 10_000;
 
 /**
  * Everything that can fail is inside the try, so the page always draws:
- * at worst it says it couldn't load what Debo knows. Errors are logged with
+ * at worst it says it couldn't load what Daksha knows. Errors are logged with
  * ids and the error's name only.
  */
 async function load(userId: string): Promise<Loaded> {

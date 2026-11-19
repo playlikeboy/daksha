@@ -15,7 +15,7 @@ import { AGENT_ID, NOTICE_TOOL, SOURCES_TOOL, type Chip, type ReplyKind, type Tu
 // It is loaded only in the browser (chat-loader.tsx); chat-shell.tsx holds
 // the layout and the first paint, which the server draws.
 
-const CONNECTION_ERROR = "I couldn’t reach Debo just now. Check your internet connection, then try again.";
+const CONNECTION_ERROR = "I couldn’t reach Daksha just now. Check your internet connection, then try again.";
 
 /** `initialDraft`: what the person typed in the question box before CopilotKit loaded. */
 type Props = ChatProps & { initialDraft?: string };
@@ -146,7 +146,7 @@ function ChatThread({
       setInFlight(id);
       agent.addMessage({ id, role: "user", content: question });
       stick.current = true;
-      announce("Debo is looking through your entries.");
+      announce("Daksha is looking through your entries.");
       requestAnimationFrame(() => composer.current?.focus());
       void (async () => {
         let ok = true;
@@ -212,7 +212,7 @@ function ChatThread({
       {turns.length === 0 ? (
         <EmptyState hasEntries={hasEntries} ready={isReady} onAsk={ask} />
       ) : (
-        <ol className="grid gap-8 pb-6" aria-label="Your chat with Debo">
+        <ol className="grid gap-8 pb-6" aria-label="Your chat with Daksha">
           {turns.map((turn) => (
             <ChatTurn
               key={turn.id}
@@ -253,7 +253,7 @@ type AgentMessage = AbstractAgent["messages"][number];
 const SourcesArgs = z.object({ sources: z.array(z.object({ id: z.string(), label: z.string() })) });
 const NoticeArgs = z.object({ kind: z.enum(["unknown", "limit", "error", "invalid"]) });
 
-/** Group the agent's messages into turns: each person's question, then everything Debo sent after it. */
+/** Group the agent's messages into turns: each person's question, then everything Daksha sent after it. */
 function turnsFromMessages(messages: AgentMessage[]): Turn[] {
   const turns: Turn[] = [];
   for (const message of messages) {
@@ -322,11 +322,11 @@ function parseJson(text: string): unknown {
 function spoken(kind: ReplyKind, text: string, sources: number): string {
   if (kind !== "answer") return text;
   const from = sources === 1 ? "It came from 1 entry." : `It came from ${sources} entries.`;
-  return `Debo answered: ${text} ${from}`;
+  return `Daksha answered: ${text} ${from}`;
 }
 
 function titleFrom(question: string): string {
-  const line = question.split("\n").find((l) => l.trim())?.trim() ?? "Chat with Debo";
+  const line = question.split("\n").find((l) => l.trim())?.trim() ?? "Chat with Daksha";
   return line.length > 60 ? `${line.slice(0, 57)}…` : line;
 }
 

@@ -6,7 +6,7 @@ import { askStream, UNKNOWN_MESSAGE, type SourceChip } from "@/lib/ask";
 import { MAX_QUESTION, NOTICE_TOOL, SOURCES_TOOL, type ReplyKind } from "@/lib/chat";
 import { databaseUrl } from "@/lib/server-env";
 
-// Debo's chat agent for CopilotKit, speaking AG-UI.
+// Daksha's chat agent for CopilotKit, speaking AG-UI.
 //
 // It never calls a model itself: every question goes through askStream()
 // (lib/ask.ts), which keeps the rules: answers only from the person's own

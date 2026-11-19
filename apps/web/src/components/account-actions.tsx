@@ -7,7 +7,7 @@ import { clearAllDrafts } from "@/lib/journal-draft";
 
 /**
  * Download everything, sign out, and delete the account for good.
- * When Debo starts storing entries and files, deleting the account must also
+ * When Daksha starts storing entries and files, deleting the account must also
  * remove every row and file the person owns (docs/PRIVACY-AND-TRUST.md).
  */
 export function AccountActions() {
@@ -37,7 +37,7 @@ export function AccountActions() {
       }
     } catch {
       setPending(false);
-      setMessage("I couldn't reach Debo. Check your connection and try again.");
+      setMessage("I couldn't reach Daksha. Check your connection and try again.");
       return;
     }
     clearAllDrafts();
@@ -51,7 +51,7 @@ export function AccountActions() {
         Your account
       </h2>
       <p className="mt-2 text-ink-soft">
-        Get a zip of all your entries and your activity record to keep. It opens without Debo.
+        Get a zip of all your entries and your activity record to keep. It opens without Daksha.
       </p>
       <div className="mt-4 flex flex-wrap gap-3">
         <a href="/api/export" download className="btn btn-quiet">

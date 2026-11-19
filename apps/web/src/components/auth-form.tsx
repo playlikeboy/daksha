@@ -7,7 +7,7 @@ import { authClient } from "@/lib/auth/client";
 
 // Sign up and sign in. Three ways in: password, a code by email, or a link by
 // email. New accounts confirm their email with a 6-digit code. Codes and
-// links are sent from mail.debo.life (see api/neon-auth/webhook).
+// links are sent from mail.daksha.life (see api/neon-auth/webhook).
 
 const Email = z.string().trim().email("That email doesn't look right. Check it and try again.");
 const SignUp = z.object({

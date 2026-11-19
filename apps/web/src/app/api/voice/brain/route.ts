@@ -18,10 +18,10 @@ const Body = z.object({
 const ERROR_SPOKEN = "Sorry, I couldn't reach my memory just now. Please try again in a moment.";
 
 /**
- * Debo's one brain, for the voice agent (apps/voice-agent).
+ * Daksha's one brain, for the voice agent (apps/voice-agent).
  *
  * Only the voice agent may call this: it sends VOICE_AGENT_SECRET. The user id
- * comes from the LiveKit participant identity, which debo.life set itself
+ * comes from the LiveKit participant identity, which daksha.life set itself
  * when it signed the room token (/api/voice/token).
  *
  * Streams newline-delimited JSON: `sources` (before any text), `text` deltas,

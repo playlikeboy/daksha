@@ -135,7 +135,7 @@
     line-height: 1.4;
   }
 
-  /* Debo blinks now and then (the keyframes are below, outside the layer). */
+  /* Daksha blinks now and then (the keyframes are below, outside the layer). */
   .debo-eye {
     transform-box: fill-box;
     transform-origin: center;

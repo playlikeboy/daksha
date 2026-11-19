@@ -26,17 +26,17 @@ export function buildExportZip(sections: ExportSection[], exportedAt: Date): Uin
 
 function readme(sections: ExportSection[], exportedAt: Date): string {
   return [
-    "# Your Debo export",
+    "# Your Daksha export",
     "",
-    `This is a copy of everything you saved in Debo, made on ${exportedAt.toISOString().slice(0, 10)} (UTC).`,
-    "It is yours to keep. Every file opens without Debo, in any text editor or spreadsheet.",
+    `This is a copy of everything you saved in Daksha, made on ${exportedAt.toISOString().slice(0, 10)} (UTC).`,
+    "It is yours to keep. Every file opens without Daksha, in any text editor or spreadsheet.",
     "",
     "## What is inside",
     "",
     ...sections.map((section) => `- ${section.readme}`),
     "- `README.md`: this note.",
     "",
-    "Times are in UTC. Ids are the names Debo uses inside for each entry and record, so you can match them up.",
+    "Times are in UTC. Ids are the names Daksha uses inside for each entry and record, so you can match them up.",
     "",
   ].join("\n");
 }

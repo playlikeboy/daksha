@@ -7,17 +7,17 @@ import { getAuth } from "@/lib/auth/server";
 import { entryHref } from "@/lib/links";
 import { databaseUrl } from "@/lib/server-env";
 
-export const metadata: Metadata = { title: "Your Debo", robots: { index: false } };
+export const metadata: Metadata = { title: "Your Daksha", robots: { index: false } };
 export const dynamic = "force-dynamic";
 
 const places = [
   { href: "/home/journal", title: "Your journal", text: "Write a new entry, read old ones, find, fix or delete them." },
-  { href: "/home/chat", title: "Chat with Debo", text: "Talk things through. Debo answers only from your entries." },
-  { href: "/home/memories", title: "What Debo knows", text: "The facts Debo picked out of your entries. Fix or forget any of them." },
-  { href: "/home/activity", title: "What Debo did", text: "Everything Debo saved, changed and answered for you, newest first." },
+  { href: "/home/chat", title: "Chat with Daksha", text: "Talk things through. Daksha answers only from your entries." },
+  { href: "/home/memories", title: "What Daksha knows", text: "The facts Daksha picked out of your entries. Fix or forget any of them." },
+  { href: "/home/activity", title: "What Daksha did", text: "Everything Daksha saved, changed and answered for you, newest first." },
 ];
 
-/** The calm front door: ask, glance at recent entries, and go anywhere in Debo. */
+/** The calm front door: ask, glance at recent entries, and go anywhere in Daksha. */
 export default async function HomePage() {
   const { data: session } = await getAuth().getSession();
   if (!session?.user) redirect("/auth/sign-in");
@@ -42,7 +42,7 @@ export default async function HomePage() {
         {recent.length === 0 ? (
           <div className="mt-4 rounded-[24px] border border-line bg-paper p-6">
             <p className="font-semibold">Nothing here yet.</p>
-            <p className="mt-2 text-ink-soft">Write a line about your day. Then ask Debo about it.</p>
+            <p className="mt-2 text-ink-soft">Write a line about your day. Then ask Daksha about it.</p>
             <a href="/home/journal" className="btn btn-quiet mt-4">
               Write your first entry
             </a>
@@ -77,7 +77,7 @@ export default async function HomePage() {
 
       <section className="mt-12" aria-labelledby="places-heading">
         <h2 id="places-heading" className="text-[1.75rem]">
-          Everything in Debo
+          Everything in Daksha
         </h2>
         <ul className="mt-4 grid gap-4 sm:grid-cols-2">
           {places.map((place) => (

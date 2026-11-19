@@ -9,7 +9,7 @@ export const dynamic = "force-dynamic";
 /**
  * Neon Auth calls this instead of sending its own email (events send.otp and
  * send.magic_link; set with `neon neon-auth config webhook update`). We check
- * Neon's signature, then send the code or link from mail.debo.life through
+ * Neon's signature, then send the code or link from mail.daksha.life through
  * Cloudflare. Logs carry the event id and type only: never the address, code
  * or link.
  *

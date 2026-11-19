@@ -1,6 +1,6 @@
 import { HomeHeader } from "@/components/home-nav";
 
-/** Every signed-in page shares this header: a skip link, then the same links to each part of Debo. */
+/** Every signed-in page shares this header: a skip link, then the same links to each part of Daksha. */
 export default function HomeLayout({ children }: { children: React.ReactNode }) {
   return (
     <>

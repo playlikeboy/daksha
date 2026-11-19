@@ -1,7 +1,7 @@
 import type { ActivityItem, ChatMessage, ExportChat, ExportEntry } from "@debo/db";
 import type { ExportSection } from "./zip";
 
-/** Each chat with Debo as a Markdown file, e.g. `chats/2026-11-11-where-did-riya-move.md`. */
+/** Each chat with Daksha as a Markdown file, e.g. `chats/2026-11-11-where-did-riya-move.md`. */
 export function chatsSection(chats: ExportChat[]): ExportSection {
   const used = new Set<string>();
   const files = chats.map((chat) => {
@@ -13,7 +13,7 @@ export function chatsSection(chats: ExportChat[]): ExportSection {
   });
   const count = chats.length === 1 ? "1 chat" : `${chats.length} chats`;
   return {
-    readme: `\`chats/\`: your ${count} with Debo, one Markdown file each, with every question and reply. Each answer lists the ids of the entries it came from.`,
+    readme: `\`chats/\`: your ${count} with Daksha, one Markdown file each, with every question and reply. Each answer lists the ids of the entries it came from.`,
     files,
   };
 }
@@ -21,16 +21,16 @@ export function chatsSection(chats: ExportChat[]): ExportSection {
 const REPLY_NOTE: Record<ChatMessage["kind"], string> = {
   question: "",
   answer: "",
-  unknown: " (Debo had nothing about this)",
+  unknown: " (Daksha had nothing about this)",
   limit: " (daily limit reached)",
-  error: " (Debo could not answer)",
+  error: " (Daksha could not answer)",
   stopped: " (you stopped this answer)",
 };
 
 function chatMarkdown(chat: ExportChat): string {
   const lines = ["---", `title: ${JSON.stringify(chat.title)}`, `started: ${chat.createdAt.toISOString()}`, `id: ${chat.id}`, "---", ""];
   for (const message of chat.messages) {
-    const who = message.role === "person" ? "You" : "Debo";
+    const who = message.role === "person" ? "You" : "Daksha";
     lines.push(`**${who}**, ${message.createdAt.toISOString()}${REPLY_NOTE[message.kind]}`, "", message.text || "(nothing yet)", "");
     if (message.sourceIds.length > 0) lines.push(`Sources (entry ids): ${message.sourceIds.join(", ")}`, "");
   }
@@ -62,7 +62,7 @@ export function activitySection(items: ActivityItem[]): ExportSection {
   ];
   return {
     readme:
-      "`activity.csv`: the record of what Debo saved, changed, deleted and answered for you, oldest first. It keeps ids and times, never your words. `source_ids` lists the entries each row touched, split by spaces.",
+      "`activity.csv`: the record of what Daksha saved, changed, deleted and answered for you, oldest first. It keeps ids and times, never your words. `source_ids` lists the entries each row touched, split by spaces.",
     files: [{ path: "activity.csv", content: `${rows.map((row) => row.map(csvCell).join(",")).join("\r\n")}\r\n` }],
   };
 }

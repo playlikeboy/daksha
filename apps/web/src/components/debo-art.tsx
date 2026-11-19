@@ -1,9 +1,9 @@
 import type { Ref } from "react";
 
 /**
- * The drawing of Debo, shared by the live mascot, the logo and the share image.
+ * The drawing of Daksha, shared by the live mascot, the logo and the share image.
  * Plain SVG with no state, so it also works at build time.
- * Colours come from DESIGN.md. Debo is always decorative: aria-hidden.
+ * Colours come from DESIGN.md. Daksha is always decorative: aria-hidden.
  */
 
 const INK = "#1b1f4b";
@@ -13,7 +13,7 @@ const WHITE = "#ffffff";
 
 type DeboArtProps = {
   className?: string;
-  /** Draw the soft shadow under Debo. Off for small marks. */
+  /** Draw the soft shadow under Daksha. Off for small marks. */
   ground?: boolean;
   /** Blink now and then. Only the one live mascot on a screen should blink. */
   blink?: boolean;

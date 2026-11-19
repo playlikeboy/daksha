@@ -7,7 +7,7 @@ import { entryHref } from "@/lib/links";
 
 const box = "mt-2 block w-full rounded-[12px] border-2 border-ink bg-paper px-3 py-2";
 
-/** One thing Debo knows: the sentence, where it learned it, "Fix this" and "Forget this". */
+/** One thing Daksha knows: the sentence, where it learned it, "Fix this" and "Forget this". */
 export function MemoryItem({
   id,
   text,

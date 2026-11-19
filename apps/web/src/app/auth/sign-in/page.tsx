@@ -1,14 +1,14 @@
 import type { Metadata } from "next";
 import { AuthForm } from "@/components/auth-form";
 
-export const metadata: Metadata = { title: "Sign in to Debo", robots: { index: false } };
+export const metadata: Metadata = { title: "Sign in to Daksha", robots: { index: false } };
 
 export default async function SignInPage({ searchParams }: { searchParams: Promise<{ confirmed?: string }> }) {
   const { confirmed } = await searchParams;
   return (
     <main className="wrap max-w-[34rem] py-16">
       <a href="/" className="inline-flex min-h-11 items-center font-semibold underline underline-offset-4">
-        Back to Debo
+        Back to Daksha
       </a>
       <h1 className="h-section mt-8">Sign in</h1>
       {confirmed === "1" && (

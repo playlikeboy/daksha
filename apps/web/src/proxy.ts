@@ -1,16 +1,16 @@
 import { type NextRequest, NextResponse } from "next/server";
 
-// debo.life no longer shows the old app. The landing page lives at about.debo.life
-// and the app at my.debo.life, so the old addresses send people there.
+// daksha.life no longer shows the old app. The landing page lives at about.daksha.life
+// and the app at my.daksha.life, so the old addresses send people there.
 // Everything else stays as it was and is NOT in the matcher below: /privacy,
 // every /api/* route (sign-in email webhook, voice, export, delete account),
 // robots.txt, sitemap.xml, the share image and icons.
 //
 // These are temporary (307) redirects on purpose, so they are easy to change
-// later, for example when the landing page is served from debo.life itself.
+// later, for example when the landing page is served from daksha.life itself.
 
-const LANDING = "https://about.debo.life";
-const APP = "https://my.debo.life";
+const LANDING = "https://about.daksha.life";
+const APP = "https://my.daksha.life";
 
 // Old signed-in screens and the screen they became in the new app.
 const OLD_SCREENS: Record<string, string> = {

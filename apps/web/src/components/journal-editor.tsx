@@ -85,7 +85,7 @@ export function JournalEditor({ userId }: { userId: string }) {
         Write an entry
       </label>
       <p id="entry-hint" className="mt-1 text-ink-soft">
-        A line or a page. Debo keeps it and can answer questions about it later. Until you save, your draft stays
+        A line or a page. Daksha keeps it and can answer questions about it later. Until you save, your draft stays
         only in this browser.
       </p>
       {prompt && (

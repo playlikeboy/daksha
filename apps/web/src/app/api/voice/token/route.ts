@@ -13,7 +13,7 @@ const AGENT_NAME = "debo-voice";
  * Returns a LiveKit room token that lasts 10 minutes and works for one new
  * room only. The participant identity is the person's user id, taken from
  * the session here on the server; the browser cannot choose it. The token
- * also asks LiveKit to send Debo's voice agent into the room.
+ * also asks LiveKit to send Daksha's voice agent into the room.
  * The browser never sees the LiveKit API key or secret.
  */
 export async function POST() {
@@ -26,7 +26,7 @@ export async function POST() {
   const apiKey = env.LIVEKIT_API_KEY;
   const apiSecret = env.LIVEKIT_API_SECRET;
   if (!url || !apiKey || !apiSecret || !env.VOICE_AGENT_SECRET) {
-    return Response.json({ error: "Talking to Debo is not set up yet." }, { status: 503 });
+    return Response.json({ error: "Talking to Daksha is not set up yet." }, { status: 503 });
   }
 
   const room = `debo-${crypto.randomUUID()}`;

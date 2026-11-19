@@ -12,7 +12,7 @@ import { databaseUrl, serverEnv } from "@/lib/server-env";
 
 const reason = (error: unknown) => (error instanceof Error ? error.name : "unknown");
 
-/** Make the entry searchable by meaning, then let Debo remember what is in it. */
+/** Make the entry searchable by meaning, then let Daksha remember what is in it. */
 export async function afterEntryChanged(userId: string, sourceId: string) {
   try {
     await indexSource(databaseUrl(), serverEnv(), userId, sourceId);
@@ -22,7 +22,7 @@ export async function afterEntryChanged(userId: string, sourceId: string) {
   await rememberEntry(userId, sourceId);
 }
 
-/** After an entry is deleted: forget everything Debo learned from it. */
+/** After an entry is deleted: forget everything Daksha learned from it. */
 export async function afterEntryDeleted(userId: string, sourceId: string) {
   const memory = memoryStore();
   if (!memory) return;

@@ -3,27 +3,27 @@ import "@fontsource-variable/bricolage-grotesque";
 import "@fontsource-variable/figtree";
 import "./globals.css";
 
-const title = "Debo: a friendly assistant that remembers your life";
+const title = "Daksha: a friendly assistant that remembers your life";
 const description =
-  "Give Debo your journals, voice notes, papers and photos. Ask about your own life and get answers that show where they came from. Being built now.";
+  "Give Daksha your journals, voice notes, papers and photos. Ask about your own life and get answers that show where they came from. Being built now.";
 
 // Made by scripts/og/build-og.mjs. The ?v= changes when the picture changes, so chat apps fetch it again.
-const OG_IMAGE = "https://debo.life/og.png?v=2";
+const OG_IMAGE = "https://daksha.life/og.png?v=2";
 const OG_ALT =
-  "Debo, a small red tomato, next to a phone showing the app, and the words: a friendly assistant that remembers your life";
+  "Daksha, a small red tomato, next to a phone showing the app, and the words: a friendly assistant that remembers your life";
 
 export const metadata: Metadata = {
-  metadataBase: new URL("https://debo.life"),
+  metadataBase: new URL("https://daksha.life"),
   title,
   description,
-  applicationName: "Debo",
-  // Added to an iPhone's home screen, Debo opens full screen with its own name.
-  appleWebApp: { title: "Debo", statusBarStyle: "default" },
+  applicationName: "Daksha",
+  // Added to an iPhone's home screen, Daksha opens full screen with its own name.
+  appleWebApp: { title: "Daksha", statusBarStyle: "default" },
   alternates: { canonical: "/" },
   openGraph: {
     type: "website",
-    url: "https://debo.life",
-    siteName: "Debo",
+    url: "https://daksha.life",
+    siteName: "Daksha",
     title,
     description,
     images: [{ url: OG_IMAGE, width: 1200, height: 630, alt: OG_ALT }],

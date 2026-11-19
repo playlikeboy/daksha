@@ -4,7 +4,7 @@ import { redirect } from "next/navigation";
 import { getAuth } from "@/lib/auth/server";
 import { databaseUrl } from "@/lib/server-env";
 
-export const metadata: Metadata = { title: "What Debo did", robots: { index: false } };
+export const metadata: Metadata = { title: "What Daksha did", robots: { index: false } };
 export const dynamic = "force-dynamic";
 
 /** Promise 7: nothing happens in secret. A plain list, newest first, no hiding. */
@@ -16,14 +16,14 @@ export default async function ActivityPage() {
 
   return (
     <main className="wrap max-w-[48rem] pb-16 pt-10">
-      <h1 className="h-section">What Debo did</h1>
+      <h1 className="h-section">What Daksha did</h1>
       <p className="mt-4 text-[1.125rem] text-ink-soft">
-        Everything Debo saved, changed, deleted, forgot and answered for you, and every copy you downloaded, newest first. This list keeps when it
+        Everything Daksha saved, changed, deleted, forgot and answered for you, and every copy you downloaded, newest first. This list keeps when it
         happened and which entries it touched, never your words.
       </p>
 
       {items.length === 0 ? (
-        <p className="mt-8 text-ink-soft">Nothing yet. Write an entry or ask Debo a question, and it will show here.</p>
+        <p className="mt-8 text-ink-soft">Nothing yet. Write an entry or ask Daksha a question, and it will show here.</p>
       ) : (
         <ol className="mt-8 divide-y divide-line border-y border-line">
           {items.map((item) => (
@@ -51,15 +51,15 @@ function describe(item: ActivityItem): string {
     case "deleted":
       return "You deleted an entry.";
     case "answered":
-      return `Debo answered a question using ${entries}.`;
+      return `Daksha answered a question using ${entries}.`;
     case "did-not-know":
-      return "Debo had nothing about a question, so it said so.";
+      return "Daksha had nothing about a question, so it said so.";
     case "exported":
       return "You downloaded a copy of everything.";
     case "fixed-memory":
       return "You fixed a memory.";
     case "forgot-memory":
-      return "You asked Debo to forget a memory.";
+      return "You asked Daksha to forget a memory.";
   }
 }
 

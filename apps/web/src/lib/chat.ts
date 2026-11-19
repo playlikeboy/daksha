@@ -17,7 +17,7 @@ export const MAX_QUESTION = 500;
 export type Chip = { id: string; label: string };
 
 /**
- * What kind of reply Debo gave. `answer` has sources. The rest are not
+ * What kind of reply Daksha gave. `answer` has sources. The rest are not
  * answers: `unknown` (nothing in the entries), `limit` (daily limit),
  * `error` (could not answer), `stopped` (the person stopped it) and
  * `invalid` (the question was too short or too long).
@@ -32,7 +32,7 @@ export type Reply = {
   missingSources: number;
 };
 
-/** One question and Debo's reply, or null while Debo is still answering. */
+/** One question and Daksha's reply, or null while Daksha is still answering. */
 export type Turn = { id: string; question: string; reply: Reply | null };
 
 /** A chat in the list of past chats. */

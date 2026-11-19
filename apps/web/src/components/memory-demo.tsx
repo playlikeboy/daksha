@@ -12,7 +12,7 @@ const EXAMPLES: Memory[] = [
 ];
 
 /**
- * A small working demo of the "What Debo knows" page:
+ * A small working demo of the "What Daksha knows" page:
  * each memory shows its source and can be fixed or forgotten.
  */
 export function MemoryDemo() {
@@ -69,7 +69,7 @@ export function MemoryDemo() {
   return (
     <div className="rounded-[24px] border-2 border-ink bg-paper p-5 md:p-7">
       <div className="flex flex-wrap items-baseline justify-between gap-2">
-        <h3 className="text-[1.375rem]">What Debo knows</h3>
+        <h3 className="text-[1.375rem]">What Daksha knows</h3>
         <p className="text-ink-soft">Made-up memories. Try it.</p>
       </div>
 
@@ -145,7 +145,7 @@ export function MemoryDemo() {
         )}
         {memories.length === 0 && (
           <li className="py-6">
-            <p className="font-semibold">Debo knows nothing now.</p>
+            <p className="font-semibold">Daksha knows nothing now.</p>
             <p className="text-ink-soft">That is how forgetting will work: gone means gone.</p>
           </li>
         )}

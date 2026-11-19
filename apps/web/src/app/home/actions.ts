@@ -99,13 +99,13 @@ export async function askDebo(_prev: AskState, formData: FormData): Promise<AskS
   }
 }
 
-// "What Debo knows": the person fixes or forgets one memory.
+// "What Daksha knows": the person fixes or forgets one memory.
 // Mem0 calls always pass this person's id, and @debo/memory checks the
 // memory is theirs first. The activity record gets the entry id, never text.
 
 const MemoryId = z.string().uuid();
 const MEMORY_GONE = "I couldn't find that memory. It may already be forgotten.";
-const MEMORY_OFF = "Debo is not keeping memories right now, so there is nothing to change.";
+const MEMORY_OFF = "Daksha is not keeping memories right now, so there is nothing to change.";
 
 export async function fixMemory(memoryId: string, text: string): Promise<SaveState> {
   const userId = await requireUserId();

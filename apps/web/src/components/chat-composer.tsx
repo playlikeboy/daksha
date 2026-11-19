@@ -7,7 +7,7 @@ export type ComposerHandle = { focus: () => void };
 
 /**
  * The question box. Enter sends, Shift and Enter makes a new line. While
- * Debo answers, the send button becomes "Stop answering". The box grows
+ * Daksha answers, the send button becomes "Stop answering". The box grows
  * with the text up to about five lines.
  *
  * `pinned`: stay at the bottom of the screen while the person scrolls the
@@ -99,7 +99,7 @@ export const ChatComposer = forwardRef<
           </button>
         ) : (
           <button type="submit" className="btn btn-primary shrink-0" disabled={!ready} aria-disabled={!ready}>
-            Ask Debo
+            Ask Daksha
           </button>
         )}
       </div>
@@ -107,13 +107,13 @@ export const ChatComposer = forwardRef<
         {hint ? (
           <span className="font-semibold text-ink">{hint}</span>
         ) : !ready ? (
-          "Getting Debo ready…"
+          "Getting Daksha ready…"
         ) : left < 50 ? (
           left >= 0 ? `${left} characters left.` : `${-left} characters too many.`
         ) : (
           <>
             <span className="hidden [@media(pointer:fine)]:inline">Press Enter to ask, or Shift and Enter for a new line. </span>
-            Debo only reads your own entries.
+            Daksha only reads your own entries.
           </>
         )}
       </p>

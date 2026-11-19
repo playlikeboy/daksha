@@ -4,10 +4,10 @@ import { useEffect, useRef } from "react";
 import { DeboArt } from "./debo-art";
 
 /**
- * Debo, the mascot. Its eyes follow the pointer.
+ * Daksha, the mascot. Its eyes follow the pointer.
  * Decorative: always aria-hidden. See DESIGN.md before changing it.
  */
-export function Debo({ className }: { className?: string }) {
+export function Daksha({ className }: { className?: string }) {
   const svgRef = useRef<SVGSVGElement>(null);
   const leftRef = useRef<SVGGElement>(null);
   const rightRef = useRef<SVGGElement>(null);

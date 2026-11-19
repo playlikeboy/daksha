@@ -36,7 +36,7 @@ export default async function JournalPage({ searchParams }: { searchParams: Prom
     <main className="wrap max-w-[48rem] pb-16 pt-10">
       <h1 className="h-section">Your journal</h1>
       <p className="mt-4 text-[1.125rem] text-ink-soft">
-        Write about your day, the people in it and your plans. Only you can read your entries. Debo uses them to
+        Write about your day, the people in it and your plans. Only you can read your entries. Daksha uses them to
         answer your questions, and shows which entry each answer came from.
       </p>
 
@@ -90,7 +90,7 @@ export default async function JournalPage({ searchParams }: { searchParams: Prom
             <p className="font-semibold">Nothing here yet.</p>
             <p className="mt-2 text-ink-soft">
               Start small: write one line about today, like who you saw or what you ate. Your entries show here,
-              newest first, and then you can ask Debo about them.
+              newest first, and then you can ask Daksha about them.
             </p>
           </div>
         )}

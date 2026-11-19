@@ -19,7 +19,7 @@ export async function POST(request: Request) {
   // Only accept this from our own pages, never from another site.
   const origin = request.headers.get("origin");
   if (!origin || origin !== new URL(request.url).origin) {
-    return Response.json({ error: "This request must come from Debo itself." }, { status: 403 });
+    return Response.json({ error: "This request must come from Daksha itself." }, { status: 403 });
   }
 
   const { data: session } = await getAuth().getSession();

@@ -7,8 +7,8 @@ import { newTestPerson, signUp } from "./helpers";
 // Uses made-up data only.
 test("write an entry, ask about it, then delete everything", async ({ page }) => {
   test.setTimeout(180_000); // many model calls in one test
-  const nav = page.getByRole("navigation", { name: "Your Debo" });
-  const askBox = page.getByRole("textbox", { name: "Ask Debo about your entries" });
+  const nav = page.getByRole("navigation", { name: "Your Daksha" });
+  const askBox = page.getByRole("textbox", { name: "Ask Daksha about your entries" });
 
   await signUp(page, newTestPerson("journal"));
   await expect(page.getByText("Nothing here yet.")).toBeVisible();
@@ -42,7 +42,7 @@ test("write an entry, ask about it, then delete everything", async ({ page }) =>
   await page.waitForLoadState("networkidle");
   await expect(page.getByRole("link", { name: /^Riya moved to Pune in March\./ })).toBeVisible(); // recent entries
   await askBox.fill("When did Riya move to Pune?");
-  await page.getByRole("button", { name: "Ask Debo" }).click();
+  await page.getByRole("button", { name: "Ask Daksha" }).click();
   const sources = page.getByRole("list", { name: "Where this answer came from" });
   await expect(sources).toBeVisible({ timeout: 60_000 });
   const chip = sources.getByRole("link", { name: /^Journal, / });
@@ -51,24 +51,24 @@ test("write an entry, ask about it, then delete everything", async ({ page }) =>
   await expect(page.getByText(/March/).first()).toBeVisible();
 
   // Small talk gets a short reply with no sources (decision 24).
-  await askBox.fill("Hi Debo!");
-  await page.getByRole("button", { name: "Ask Debo" }).click();
+  await askBox.fill("Hi Daksha!");
+  await page.getByRole("button", { name: "Ask Daksha" }).click();
   const reply = page.locator('[aria-live="polite"]').first();
   await expect(reply).not.toContainText("March", { timeout: 60_000 }); // the Riya answer is replaced
   await expect(reply).toContainText(/\w/);
   await expect(page.getByText("I don’t have anything about that yet.", { exact: false })).toHaveCount(0);
   await expect(page.getByRole("list", { name: "Where this answer came from" })).toHaveCount(0);
 
-  // A question nothing answers: Debo must say it does not know.
+  // A question nothing answers: Daksha must say it does not know.
   await askBox.fill("What is my passport number?");
-  await page.getByRole("button", { name: "Ask Debo" }).click();
+  await page.getByRole("button", { name: "Ask Daksha" }).click();
   await expect(page.getByText("I don’t have anything about that yet.", { exact: false })).toBeVisible({
     timeout: 60_000,
   });
 
   // The source chip opens the entry it came from, marked on the journal page.
   await askBox.fill("When did Riya move to Pune?");
-  await page.getByRole("button", { name: "Ask Debo" }).click();
+  await page.getByRole("button", { name: "Ask Daksha" }).click();
   await expect(chip).toBeVisible({ timeout: 60_000 });
   await chip.click();
   await expect(page).toHaveURL(/\/home\/journal#entry-/);
@@ -97,16 +97,16 @@ test("write an entry, ask about it, then delete everything", async ({ page }) =>
   await nav.getByRole("link", { name: "Home", exact: true }).click();
   await page.waitForLoadState("networkidle");
   await askBox.fill("Where did Riya move to?");
-  await page.getByRole("button", { name: "Ask Debo" }).click();
+  await page.getByRole("button", { name: "Ask Daksha" }).click();
   await expect(page.getByRole("list", { name: "Where this answer came from" })).toBeVisible({ timeout: 60_000 });
 
   // The activity record shows what happened, without the words.
-  await nav.getByRole("link", { name: "What Debo did", exact: true }).click();
-  await expect(page.getByRole("heading", { name: "What Debo did" })).toBeVisible();
+  await nav.getByRole("link", { name: "What Daksha did", exact: true }).click();
+  await expect(page.getByRole("heading", { name: "What Daksha did" })).toBeVisible();
   await expect(page.getByText("You saved an entry.")).toBeVisible();
   await expect(page.getByText("You changed an entry.")).toBeVisible();
-  await expect(page.getByText("Debo answered a question using 1 entry.").first()).toBeVisible();
-  await expect(page.getByText("Debo had nothing about a question, so it said so.")).toBeVisible();
+  await expect(page.getByText("Daksha answered a question using 1 entry.").first()).toBeVisible();
+  await expect(page.getByText("Daksha had nothing about a question, so it said so.")).toBeVisible();
   await expect(page.getByText("Mumbai")).toHaveCount(0);
   await nav.getByRole("link", { name: "Home", exact: true }).click();
   await page.waitForLoadState("networkidle");
@@ -115,23 +115,23 @@ test("write an entry, ask about it, then delete everything", async ({ page }) =>
   const downloadPromise = page.waitForEvent("download");
   await page.getByRole("link", { name: "Download everything" }).click();
   const download = await downloadPromise;
-  expect(download.suggestedFilename()).toMatch(/^debo-export-\d{4}-\d{2}-\d{2}\.zip$/);
+  expect(download.suggestedFilename()).toMatch(/^daksha-export-\d{4}-\d{2}-\d{2}\.zip$/);
   const zip = readFileSync(await download.path());
   expect(zip.subarray(0, 2).toString()).toBe("PK"); // every zip file starts with "PK"
   expect(zip.includes("entries/")).toBe(true);
 
-  // "What Debo knows" opens. Mem0 reads entries in the background, so do not
+  // "What Daksha knows" opens. Mem0 reads entries in the background, so do not
   // depend on which memories are there yet, only that the page loads.
-  await nav.getByRole("link", { name: "What Debo knows", exact: true }).click();
-  await expect(page.getByRole("heading", { name: "What Debo knows" })).toBeVisible();
-  await expect(page.getByText("couldn’t load what Debo knows")).toHaveCount(0);
+  await nav.getByRole("link", { name: "What Daksha knows", exact: true }).click();
+  await expect(page.getByRole("heading", { name: "What Daksha knows" })).toBeVisible();
+  await expect(page.getByText("couldn’t load what Daksha knows")).toHaveCount(0);
   await nav.getByRole("link", { name: "Home", exact: true }).click();
   await page.waitForLoadState("networkidle");
 
   // The chat answers from the same entry, with a source chip.
   await page.goto("/home/chat");
   // CopilotKit keeps a connection open, so wait for the button, not network idle.
-  await expect(page.getByRole("button", { name: "Ask Debo" })).toBeEnabled({ timeout: 30_000 });
+  await expect(page.getByRole("button", { name: "Ask Daksha" })).toBeEnabled({ timeout: 30_000 });
   const chatInput = page.getByLabel("Your question");
   await chatInput.fill("Where did Riya move to?");
   await chatInput.press("Enter");
