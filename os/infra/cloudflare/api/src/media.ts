@@ -2,7 +2,7 @@
 // need no access keys and no API tokens:
 //
 //   media.internal  the private R2 bucket, through a Worker binding
-//   ai.internal     Workers AI (Whisper for recordings, FLUX for pictures), through a Worker binding
+//   ai.internal     Workers AI (Whisper for recordings, FLUX for pictures, Nova-3 to tell voices apart), through a Worker binding
 //
 // Only the container's outbound traffic is routed here (see index.ts). Even so,
 // every key is checked: it must look exactly like the keys the API makes
@@ -55,9 +55,16 @@ export const WHISPER_MODEL = "@cf/openai/whisper-large-v3-turbo";
 /** Text to picture: fast, square. https://developers.cloudflare.com/workers-ai/models/flux-1-schnell/ */
 export const IMAGE_MODEL = "@cf/black-forest-labs/flux-1-schnell";
 
-/** `<owner id>/<random id>.<ext>`: the only shape the API ever writes. */
-const KEY = /^[A-Za-z0-9_-]{1,64}\/[A-Za-z0-9_-]{1,64}\.[a-z0-9]{1,8}$/;
-const OWNER_PREFIX = /^[A-Za-z0-9_-]{1,64}\/$/;
+/**
+ * `<owner id>/<random id>.<ext>`: the only shapes the API ever writes. Recordings of a custom
+ * person wait under `persona-uploads/<owner id>/` for a short time (deleted after use or 24 hours).
+ */
+const KEY = /^(?:persona-uploads\/)?[A-Za-z0-9_-]{1,64}\/[A-Za-z0-9_-]{1,64}\.[a-z0-9]{1,8}$/;
+const OWNER_PREFIX = /^(?:persona-uploads\/)?[A-Za-z0-9_-]{1,64}\/$/;
+/** Speaker separation: who said what. https://developers.cloudflare.com/workers-ai/models/nova-3/ */
+export const DIARIZE_MODEL = "@cf/deepgram/nova-3";
+const AUDIO_TYPE = /^audio\/(mpeg|mp3|wav|x-wav|ogg|opus|flac|webm|mp4|aac)$/;
+const MAX_DIARIZE_BYTES = 100 * 1024 * 1024;
 const UPLOAD_ID = /^[A-Za-z0-9._~+/=-]{1,2048}$/;
 const MIME = /^[a-z0-9.+-]+\/[a-z0-9.+-]+$/;
 /** The API never sends more than this in one request (200 MB recording). */
@@ -277,10 +284,45 @@ async function handleImage(request: Request, ai: AiLike): Promise<Response> {
   }
 }
 
+/**
+ * POST /diarize with the audio as the body (its own Content-Type) and the settings in the query.
+ * Passes it to Nova-3 as `{ audio: { body, contentType } }` with diarize and utterances on.
+ * Answers { success, result } like /run. Only the documented settings go through.
+ */
+async function handleDiarize(request: Request, ai: AiLike): Promise<Response> {
+  const url = new URL(request.url);
+  const contentType = (request.headers.get("content-type") ?? "").split(";")[0]?.trim().toLowerCase() ?? "";
+  if (!AUDIO_TYPE.test(contentType)) return refuse(415, "audio type not allowed");
+  const body = await bodyForR2(request, MAX_DIARIZE_BYTES);
+  if (body === "big") return refuse(413, "too big");
+  if (body === "empty") return refuse(400, "audio is required");
+  const input: Record<string, unknown> = {
+    // Always a stream, as the model's docs show.
+    audio: { body: body instanceof ArrayBuffer ? new Response(body).body : body, contentType },
+    diarize: true,
+    utterances: true,
+    punctuate: true,
+    smart_format: true,
+  };
+  const language = url.searchParams.get("language");
+  if (language && /^[a-z]{2,3}$/.test(language)) input.language = language;
+  else input.detect_language = true;
+  try {
+    const result = await ai.run(DIARIZE_MODEL, input);
+    return json({ success: true, result });
+  } catch (error) {
+    // The name only. Never anything from the recording.
+    console.error("ai.internal diarize failed", error instanceof Error ? error.name : "unknown");
+    const message = error instanceof Error ? error.message : "";
+    return json({ success: false }, /rate|capacity|overload|timeout|temporar/i.test(message) ? 503 : 502);
+  }
+}
+
 /** POST /run with the JSON the REST API takes (base64 audio, task, vad_filter, ...). Answers { success, result }. */
 export async function handleAi(request: Request, ai: AiLike): Promise<Response> {
   const url = new URL(request.url);
   if (request.method === "POST" && url.pathname === "/image") return handleImage(request, ai);
+  if (request.method === "POST" && url.pathname === "/diarize") return handleDiarize(request, ai);
   if (request.method !== "POST" || url.pathname !== "/run") return refuse(404, "not found");
   const input = (await request.json().catch(() => null)) as Record<string, unknown> | null;
   if (!input || typeof input.audio !== "string" || input.audio.length === 0) return refuse(400, "audio is required");
