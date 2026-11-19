@@ -1,7 +1,7 @@
 import { BookOpen, FileText, Mic, Search, Video } from "lucide-react-native";
 import { ActivityIndicator, Pressable, Text, View } from "react-native";
 import { entryFocus, readDeboTool, type SourceChip } from "./debo-data";
-import { Button, Card, colors, ErrorNotice, fontSize, radius, s } from "./ui";
+import { Button, Card, colors, ErrorNotice, fontSize, radius, s, spacing } from "./ui";
 import { useWorkspace } from "./workspace";
 
 /** Open the journal on one entry. Used by every source chip. */
@@ -45,7 +45,7 @@ export function SourceChips({ sources }: { sources: SourceChip[] }) {
             ) : (
               <BookOpen size={14} color={colors.blueText} />
             )}
-            <Text style={[s.text, { fontSize: fontSize.supporting, color: colors.blueText, flexShrink: 1 }]}>
+            <Text style={[s.text, { fontSize: fontSize.base, lineHeight: spacing[5], color: colors.blueText, flexShrink: 1 }]}>
               {source.label}
             </Text>
           </Pressable>

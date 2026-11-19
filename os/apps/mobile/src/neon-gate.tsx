@@ -29,7 +29,7 @@ import {
 } from "./neon-auth";
 import { forgetDeviceReminders } from "./debo-device-reminders";
 import { clearSessionToken, loadSessionToken, saveSessionToken } from "./session-store";
-import { Button, Card, colors, ErrorNotice, Field, fontSize, Mascot, s } from "./ui";
+import { Button, Card, colors, ErrorNotice, Field, fontSize, Mascot, s, spacing } from "./ui";
 
 interface Account {
   email: string;
@@ -179,8 +179,13 @@ export function NeonGate({
       {phase === "loading" ? (
         <ActivityIndicator color={colors.blueDark} accessibilityLabel="Opening Debo" />
       ) : phase === "offline" ? (
-        <Card style={{ width: "100%" }}>
-          <ErrorNotice error={notice} />
+        <Card style={{ width: "100%", gap: spacing[3] }}>
+          <ErrorNotice
+            error={
+              notice ||
+              "I can't reach Debo right now. Check your internet, then press Try again. I'll also try again by myself in 30 seconds."
+            }
+          />
           <Button primary onPress={() => void refresh()}>
             Try again
           </Button>

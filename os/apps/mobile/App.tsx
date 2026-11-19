@@ -251,6 +251,17 @@ function AccessKeyApp() {
 }
 const onWeb = Platform.OS === "web";
 /**
+ * What to say when the workspace does not load. A plain sentence with a next step, and the
+ * server's own words only when it sent a readable message (not "TypeError: Failed to fetch").
+ */
+function workspaceError(e: unknown): string {
+  const message = e instanceof Error ? e.message : String(e);
+  const plain = /^[A-Z][^{}<>]*[.!?]$/.test(message) && !/^(TypeError|Error|Request failed)/.test(message);
+  return plain
+    ? message
+    : "I couldn't open your workspace. Check your internet connection, then press Try again.";
+}
+/**
  * Where the person is. On the web the address bar is the truth: each move adds a
  * browser history entry, so back, forward and reload work. On the phone the route
  * lives in memory and debo:// links move it. null means "no screen at this address".
@@ -301,11 +312,11 @@ function WorkspaceApp({ token, sessionKey }: { token: string; sessionKey?: strin
     setError("");
   }, [api]);
   useEffect(() => {
-    void refresh().catch((e) => setError(String(e)));
+    void refresh().catch((e) => setError(workspaceError(e)));
   }, [refresh]);
   useEffect(() => {
     const listener = AppState.addEventListener("change", (state) => {
-      if (state === "active") void refresh().catch((e) => setError(String(e)));
+      if (state === "active") void refresh().catch((e) => setError(workspaceError(e)));
     });
     return () => listener.remove();
   }, [refresh]);
@@ -341,10 +352,7 @@ function WorkspaceApp({ token, sessionKey }: { token: string; sessionKey?: strin
         <Mascot size={avatarSize.lg} />
         {error ? (
           <>
-            <ErrorNotice error={error} />
-            <Button onPress={() => void refresh().catch((e) => setError(String(e)))}>
-              Try again
-            </Button>
+            <ErrorNotice error={error} onRetry={() => void refresh().catch((e) => setError(workspaceError(e)))} />
           </>
         ) : (
           // The face is already moving, so it is the loading sign; no spinner needed.

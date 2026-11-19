@@ -91,7 +91,7 @@ export function TopBar({
             <Text
               numberOfLines={1}
               accessibilityLiveRegion="polite"
-              style={{ fontSize: fontSize.sm, lineHeight: spacing[4], color: colors.muted }}
+              style={{ fontSize: fontSize.base, lineHeight: spacing[5], color: colors.muted }}
             >
               {status}
             </Text>
