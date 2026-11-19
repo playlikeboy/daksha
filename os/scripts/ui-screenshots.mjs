@@ -71,7 +71,7 @@ const screens = [
     name: "journal-entry",
     path: "/journal",
     steps: async (page) => {
-      await page.getByText("Long walk by the lake after work").first().click({ timeout: 8000 });
+      await page.getByRole("link", { name: /Long walk by the lake/ }).first().click({ timeout: 8000 });
       await page.waitForTimeout(1200);
     },
   },
