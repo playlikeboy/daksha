@@ -1,28 +1,37 @@
-import { TOUCH } from "../touch";
-import { HStack, LayoutHeader } from "@astryxdesign/core/Layout";
-import { Center } from "@astryxdesign/core/Center";
-import { Button } from "@astryxdesign/core/Button";
-import { Text } from "@astryxdesign/core/Text";
+import { BRAND } from "../brand";
 import { START_URL } from "../links";
+import { ThemeToggle } from "./theme-toggle";
+
+const LINKS = [
+  { href: "#how", label: "How it works" },
+  { href: "#film", label: "Watch the film" },
+  { href: "#trust", label: "Your data" },
+  { href: "#get-app", label: "Get the app" },
+];
 
 // Open Debo is also the way to sign in: the app has its own sign-in page.
 export function SiteHeader() {
   return (
-    <LayoutHeader role="banner" padding={0}>
-      <Center axis="horizontal" paddingInline={5} paddingBlock={3}>
-        <HStack hAlign="between" vAlign="center" gap={3} width="100%" maxWidth={1120}>
-          <HStack gap={2} vAlign="center">
-            <img src="/debo.svg" alt="" width={40} height={40} />
-            <Text type="large" weight="bold">
-              Debo
-            </Text>
-          </HStack>
-          <HStack gap={2} vAlign="center">
-            <Button label="Get the app" variant="ghost" href="#get-app" style={TOUCH} />
-            <Button label="Open Debo" variant="secondary" href={START_URL} style={TOUCH} />
-          </HStack>
-        </HStack>
-      </Center>
-    </LayoutHeader>
+    <header className="site-header">
+      <div className="wrap site-header__inner">
+        <a className="brand" href="#top">
+          <img src="/debo.svg" alt="" width={36} height={36} />
+          {BRAND}
+        </a>
+        <nav className="site-nav" aria-label="Main">
+          <ul className="site-nav__links" role="list">
+            {LINKS.map((link) => (
+              <li key={link.href}>
+                <a href={link.href}>{link.label}</a>
+              </li>
+            ))}
+          </ul>
+          <ThemeToggle />
+          <a className="btn btn--primary btn--small" href={START_URL}>
+            Open {BRAND}
+          </a>
+        </nav>
+      </div>
+    </header>
   );
 }
