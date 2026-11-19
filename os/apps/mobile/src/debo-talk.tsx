@@ -10,7 +10,7 @@
 // the small bar (debo-talk-pill.tsx) while the call goes on. The chevron, Escape
 // and a swipe down collapse a live call; only End ends it. With no call, they
 // just close.
-import { ChevronDown, Keyboard, SlidersHorizontal, MessageCircle, Mic, MicOff, PhoneOff, Square } from "lucide-react-native";
+import { Check, ChevronDown, Keyboard, SlidersHorizontal, MessageCircle, Mic, MicOff, PhoneOff, Square } from "lucide-react-native";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
   Animated,
@@ -90,7 +90,8 @@ export function TalkPopup({ onClose }: { onClose: () => void }) {
   useEffect(() => {
     Animated.timing(enter, {
       toValue: 1,
-      duration: reduceMotion ? duration.fast : duration.medium,
+      // With reduce motion on, panels appear in place instead of sliding.
+      duration: reduceMotion ? 0 : duration.medium,
       easing: Easing.out(Easing.cubic),
       useNativeDriver: native,
     }).start();
@@ -98,7 +99,8 @@ export function TalkPopup({ onClose }: { onClose: () => void }) {
   useEffect(() => {
     Animated.timing(keyboardIn, {
       toValue: typing ? 1 : 0,
-      duration: reduceMotion ? duration.fast : duration.medium,
+      // With reduce motion on, panels appear in place instead of sliding.
+      duration: reduceMotion ? 0 : duration.medium,
       easing: Easing.out(Easing.cubic),
       useNativeDriver: native,
     }).start();
@@ -107,7 +109,8 @@ export function TalkPopup({ onClose }: { onClose: () => void }) {
     if (transcript) setTranscriptMounted(true);
     Animated.timing(transcriptIn, {
       toValue: transcript ? 1 : 0,
-      duration: reduceMotion ? duration.fast : duration.medium,
+      // With reduce motion on, panels appear in place instead of sliding.
+      duration: reduceMotion ? 0 : duration.medium,
       easing: Easing.out(Easing.cubic),
       useNativeDriver: native,
     }).start(() => {
@@ -149,7 +152,7 @@ export function TalkPopup({ onClose }: { onClose: () => void }) {
       closing.current = true;
       Animated.timing(enter, {
         toValue: 0,
-        duration: reduceMotion ? duration.fast : duration.exit + 100,
+        duration: reduceMotion ? 0 : duration.exit + 100,
         easing: Easing.in(Easing.cubic),
         useNativeDriver: native,
       }).start(() => {
@@ -367,14 +370,21 @@ export function TalkPopup({ onClose }: { onClose: () => void }) {
               </View>
 
               {status === "idle" && (
-                <View style={{ gap: spacing[3], alignItems: "center" }}>
-                  <Text style={[s.muted, { textAlign: "center", fontSize: fontSize.base }]}>
-                    Your device asks for microphone access when you start. Debo listens only during the call,
-                    and the mic status is always visible. What you say is saved as text in your journal, where
-                    Debo learns from it and you can delete it. Voice recordings aren't kept. Minimise the call
-                    to use the app, or mute/end anytime. Closing the web tab ends the call. You can type instead.
-                  </Text>
-                  <View style={[s.row, { gap: spacing[3] }]}>
+                <View style={{ gap: spacing[4], alignItems: "center", width: "100%", maxWidth: 420 }}>
+                  {/* Short points instead of one long paragraph, so the promise is easy to read. */}
+                  <View style={{ gap: spacing[2], alignSelf: "stretch" }}>
+                    {[
+                      `${assistant} listens only during the call. Your device asks for the microphone when you start.`,
+                      "What you say is saved as text in your journal. You can delete it. Voice recordings are not kept.",
+                      "You can mute, make the call small or end it at any time. Closing this tab ends it too.",
+                    ].map((line) => (
+                      <View key={line} style={[s.row, { gap: spacing[2], alignItems: "flex-start" }]}>
+                        <Check size={16} color={colors.success} style={{ marginTop: spacing[1] }} />
+                        <Text style={[s.muted, { flex: 1 }]}>{line}</Text>
+                      </View>
+                    ))}
+                  </View>
+                  <View style={[s.row, { gap: spacing[3], flexWrap: "wrap", justifyContent: "center" }]}>
                     <Button primary icon={Mic} onPress={() => void begin()}>
                       Start talking
                     </Button>
