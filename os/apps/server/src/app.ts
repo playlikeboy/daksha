@@ -25,6 +25,7 @@ import {
   createConnectors,
 } from "./connectors/index.ts";
 import type { Config } from "./config.ts";
+import { publicUrlFor } from "./public-address.ts";
 import { McpService } from "./mcp/service.ts";
 import { mcpOAuthCallbackRoute, mcpRoutes } from "./mcp/routes.ts";
 import { imageMakerFromEnv } from "./images/makers.ts";
@@ -192,7 +193,11 @@ export async function createApp(
   const runner = new DatabaseAgentRunner(threads);
   const runtime = makeRuntime(config, agent, auth, runner);
   const app = new Hono<{ Variables: { owner: string } }>();
-  const origins = new Set([...config.allowedOrigins, new URL(config.publicUrl).origin]);
+  const origins = new Set([
+    ...config.allowedOrigins,
+    new URL(config.publicUrl).origin,
+    ...(config.publicUrlAliases ?? []),
+  ]);
   app.use("*", async (c, next) => {
     const origin = c.req.header("origin");
     if (origin && !origins.has(origin)) return c.json({ error: "Origin is not allowed" }, 403);
@@ -248,10 +253,11 @@ export async function createApp(
       mode: config.mode,
       // The app reads this to choose between the access-key and email sign-in screens.
       // Sign-in goes through this server (see neon-auth-proxy.ts), so its cookie is not third-party.
+      // It goes through the address the app called, so my.daksha.life signs in at api.daksha.life.
       auth: {
         mode: config.authMode ?? "access-key",
         neonAuthUrl: config.neonAuthBaseUrl
-          ? `${config.publicUrl.replace(/\/$/, "")}/api/neon-auth`
+          ? `${publicUrlFor(config, c.req.url)}/api/neon-auth`
           : undefined,
       },
       agentConfigured: agentConfigured(config),

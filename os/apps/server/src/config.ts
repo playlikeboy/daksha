@@ -1,6 +1,7 @@
 import { existsSync, readFileSync } from "node:fs";
 import { resolve } from "node:path";
 import { parseEnv } from "node:util";
+import { readPublicUrlAliases } from "./public-address.ts";
 
 /** .env keys whose file value loses to a different value already set in the environment. */
 export function shadowedEnvKeys(
@@ -51,6 +52,8 @@ export interface Config {
   port: number;
   host: string;
   publicUrl: string;
+  /** Other addresses this same API answers on (PUBLIC_API_URL_ALIASES). Only sign-in follows them. */
+  publicUrlAliases?: string[];
   dataDir: string;
   databaseUrl?: string;
   accessKey?: string;
@@ -198,6 +201,7 @@ export function readConfig(): Config {
     port,
     host: process.env.HOST ?? "127.0.0.1",
     publicUrl,
+    publicUrlAliases: readPublicUrlAliases(process.env.PUBLIC_API_URL_ALIASES),
     dataDir: resolve(process.env.DATA_DIR ?? defaultDataDir()),
     databaseUrl: process.env.DATABASE_URL,
     accessKey: accessKeyFromEnv(),
