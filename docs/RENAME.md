@@ -185,7 +185,7 @@ os/infra/cloudflare/app/wrangler.jsonc | debo\.life
 .github/workflows/deploy-pitch.yml | debo\.life
 AGENTS.md | old debo\.life addresses
 docs/SETUP.md | from before the rename
-os/apps/mobile/public/index.html | debo\.life
+os/apps/mobile/public/index.html | address from before the rename|a debo\.life page
 ```
 
 ## Re-run recipe
