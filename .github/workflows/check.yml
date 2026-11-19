@@ -28,6 +28,10 @@ jobs:
       - uses: actions/setup-node@v5
         with:
           node-version: 22
+          # This job installs nothing, so pnpm is not set up. Without this,
+          # setup-node reads packageManager from package.json and fails
+          # looking for pnpm to cache.
+          package-manager-cache: false
       # Fails if the old brand name or an old address is outside the allowlist in docs/RENAME.md.
       - run: node scripts/check-brand.mjs
 
