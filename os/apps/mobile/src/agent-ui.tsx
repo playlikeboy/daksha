@@ -39,6 +39,7 @@ import { useAgentWorkspace } from "./agent-workspace";
 import { ConnectAppsSection } from "./connectors-ui";
 import { ToolServersSection } from "./mcp-ui";
 import { deboCharacter } from "./debo-character-store";
+import { type CustomAvatar, useCustomAvatars } from "./debo-custom-avatars";
 import { type PickPlan, planPick, planRename } from "./debo-character-pick";
 import { CharacterPicker } from "./debo-character-picker";
 import { PromiseCard } from "./debo-promise-card";
@@ -1763,7 +1764,7 @@ export function NotificationsSheet() {
   );
 }
 export function AppsScreen() {
-  const { navigate, open } = useWorkspace();
+  const { navigate, open, api } = useWorkspace();
   const { data, mutate } = useAgentWorkspace();
   const talkSettingsName = useTalkSettingsName();
   const [query, setQuery] = useState("");
@@ -1772,6 +1773,9 @@ export function AppsScreen() {
   const [tone, setTone] = useState(data?.identity.tone || "warm");
   const [avatar, setAvatar] = useState(data?.identity.avatar || "sky");
   const [character, setCharacter] = useState<CharacterId>(characterOrDefault(data?.identity.character));
+  // With character "custom": which face the person made is in use.
+  const [face, setFace] = useState(data?.identity.customAvatar);
+  const faces = useCustomAvatars(api, settings);
   const [nameOffer, setNameOffer] = useState<PickPlan["offer"]>();
   const [showChatUpdates, setShowChatUpdates] = useState(data?.identity.showChatUpdates !== false);
   const [memory, setMemory] = useState("");
@@ -1783,6 +1787,7 @@ export function AppsScreen() {
       setTone(data.identity.tone);
       setAvatar(data.identity.avatar || "sky");
       setCharacter(characterOrDefault(data.identity.character));
+      setFace(data.identity.customAvatar);
       setShowChatUpdates(data.identity.showChatUpdates !== false);
     }
   }, [
@@ -1790,6 +1795,7 @@ export function AppsScreen() {
     data?.identity.tone,
     data?.identity.avatar,
     data?.identity.character,
+    data?.identity.customAvatar,
     data?.identity.showChatUpdates,
   ]);
   async function save(path: string, body: unknown) {
@@ -1805,11 +1811,16 @@ export function AppsScreen() {
     }
   }
   /** Picking a character saves at once and every face follows. The name only follows when it is safe. */
-  async function choose(id: CharacterId) {
-    if (!data || id === character) return;
+  async function choose(id: CharacterId, picked?: CustomAvatar) {
+    if (!data || (id === character && (id !== "custom" || picked?.id === face))) return;
     const previous = character;
-    const plan = planPick(data.identity, id);
+    const previousFace = face;
+    const plan = planPick(data.identity, id, picked);
     setCharacter(id);
+    if (picked) {
+      setFace(picked.id);
+      deboCharacter.setCustom(picked);
+    }
     deboCharacter.set(id);
     setNameOffer(plan.offer);
     setBusy(true);
@@ -1818,6 +1829,9 @@ export function AppsScreen() {
       await mutate("/identity", plan.save);
     } catch (e) {
       setCharacter(previous);
+      setFace(previousFace);
+      const old = faces.avatars.find((f) => f.id === previousFace);
+      if (old) deboCharacter.setCustom(old);
       deboCharacter.set(previous);
       setNameOffer(undefined);
       setError(errorText(e));
@@ -1906,7 +1920,18 @@ export function AppsScreen() {
         <>
           <Card style={{ gap: spacing[3] }}>
             <SectionHeading title="About Debo" />
-            <CharacterPicker value={character} onChange={(id) => void choose(id)} busy={busy} />
+            <CharacterPicker
+              value={character}
+              onChange={(id) => void choose(id)}
+              busy={busy}
+              faces={faces.avatars}
+              facesMax={faces.max}
+              pickedFace={face}
+              onPickFace={(picked) => void choose("custom", picked)}
+              onEditFace={(picked) => open({ type: "avatar-builder", avatarId: picked.id })}
+              onMakeOwn={() => open({ type: "avatar-builder" })}
+            />
+            <ErrorNotice error={faces.error} />
             {nameOffer && data && (
               <View style={{ gap: spacing[2] }} accessibilityLiveRegion="polite">
                 <Text style={s.muted}>

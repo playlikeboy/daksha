@@ -10,6 +10,7 @@ import type {
   Section,
   Workspace,
 } from "../../../packages/domain/src";
+import type { CustomAvatar } from "../../../packages/domain/src/avatar";
 import type { FuseApi } from "./api";
 import type { Route, RouteParams } from "./routes";
 export type Detail =
@@ -24,6 +25,12 @@ export type Detail =
   | { type: "notifications" }
   | { type: "computer" }
   | { type: "talk-settings" }
+  /**
+   * "Make your own" face, or edit a saved one. `onSaved` gets the saved face (a custom
+   * person's card uses it to link the face by id). With `pickOnly`, saving never changes
+   * who the person talks to.
+   */
+  | { type: "avatar-builder"; avatarId?: string; onSaved?: (avatar: CustomAvatar) => void; pickOnly?: boolean }
   | { type: "menu" };
 export interface WorkspaceContextValue {
   workspace: Workspace;

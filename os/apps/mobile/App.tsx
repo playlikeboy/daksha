@@ -37,6 +37,7 @@ import { ChatScreen, WorkspaceTools } from "./src/chat";
 import { onCopilotError } from "./src/conversation-run";
 import { timeZoneHeaders } from "./src/time-zone";
 import { deboCharacter } from "./src/debo-character-store";
+import { getAvatar } from "./src/debo-custom-avatars";
 import { DeboFaceGallery } from "./src/debo-face-gallery";
 import { useTaskMood } from "./src/debo-mood-hooks";
 import { deboMood } from "./src/debo-mood-store";
@@ -450,6 +451,19 @@ function WorkspaceShell({
     deboCharacter.set(savedCharacter);
     deboCharacter.setName(agentName);
   }, [data, savedCharacter, agentName]);
+  // A face the person made: load its drawing once per face, not on every refresh.
+  const savedFace = savedCharacter === "custom" ? data?.identity.customAvatar : undefined;
+  useEffect(() => {
+    if (!savedFace) return;
+    let live = true;
+    void getAvatar(api, savedFace)
+      .then((face) => live && deboCharacter.setCustom(face))
+      // The copy on this device keeps showing; the next start tries again.
+      .catch(() => {});
+    return () => {
+      live = false;
+    };
+  }, [api, savedFace]);
   // The line under the name shows only when something is happening: the call, or a task.
   const callWords = talkState.active
     ? stateWords({ ...talkState, name: agentName })
