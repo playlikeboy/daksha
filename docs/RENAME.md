@@ -164,7 +164,7 @@ apps/pitch/src/host-redirect.ts | debo\.life
 apps/pitch/src/host-redirect.test.ts | debo\.life|DEBO\.LIFE
 apps/pitch/src/proxy.ts | debo\.life
 os/infra/cloudflare/app/src/ | debo\.life
-os/tests/app-redirect.test.ts | debo\.life
+os/tests/app-redirect.test.ts | debo\.life|DEBO\.LIFE
 os/apps/mobile/src/api-address.ts | debo\.life
 os/apps/mobile/test/api-address.test.ts | debo\.life
 os/apps/server/src/public-address.ts | debo\.life
