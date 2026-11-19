@@ -187,6 +187,14 @@ function EntryCard({
   const status = media?.transcript.status;
   const recording = entry.kind === "voice" || entry.kind === "video";
   const call = entry.kind === "call";
+  // A written entry's first line is its title: show it on its own, in bold, above the rest,
+  // instead of running it into the first sentence.
+  const [firstLine = "", ...restLines] = entry.text.split("\n");
+  const headline =
+    !recording && !call && restLines.join("").trim() && firstLine.trim() === entry.title.trim()
+      ? firstLine.trim()
+      : "";
+  const body = headline ? restLines.join("\n").trim() : entry.text;
 
   async function run(work: () => Promise<void>, done: string) {
     setBusy(true);
@@ -248,7 +256,7 @@ function EntryCard({
       {media && (status === "waiting" || status === "working") && (
         <View style={[s.row, { gap: spacing[2] }]} accessibilityLiveRegion="polite">
           <ActivityIndicator size="small" color={colors.blueDark} />
-          <Text style={s.muted}>Writing out what was said. This can take a minute. You can leave this page.</Text>
+          <Text style={[s.muted, { flex: 1 }]}>Writing out what was said. This can take a minute. You can leave this page.</Text>
         </View>
       )}
       {media && status === "failed" && (
@@ -305,14 +313,17 @@ function EntryCard({
         </>
       ) : (
         !!entry.text.trim() && (
+          <>
+          {!!headline && <Text style={[s.text, { fontWeight: "600" }]}>{headline}</Text>}
           <Text
             selectable
             numberOfLines={open ? undefined : 3}
             accessibilityLabel={`${recording ? `${kindName(entry.kind)} words` : call ? "Voice call words" : "Entry"} from ${day}. ${open ? entry.text : preview(entry.text)}`}
             style={s.text}
           >
-            {open ? entry.text : preview(entry.text, 220)}
+            {open ? body : preview(body, 220)}
           </Text>
+          </>
         )
       )}
       <ErrorNotice error={error} />
