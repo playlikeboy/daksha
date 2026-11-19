@@ -40,6 +40,8 @@ By area (files with any `debo` / lines / whole-word `Debo` / `debo.life`):
 | `.github` (workflows, release notes) | 7 | 61 | 10 | 19 |
 | top level (`README.md`, `AGENTS.md`, `DESIGN.md`, `SECURITY.md`, `CONTRIBUTING.md`, `THIRD_PARTY_NOTICES.md`, `.env.example`, `package.json`) | 9 | | | |
 
+After the rename, 42 lines in 13 files still have the word `Debo`, and 45 lines in 13 files a `debo.life` address. Most are in this file; every one is in the allowlist below or marked `brand-check: keep`.
+
 To list every file again: `git grep -Iil debo`. To count by pattern: `git grep -Ic '\bDebo\b' | awk -F: '{s+=$NF} END {print s}'`.
 
 ## Renamed now
@@ -61,10 +63,11 @@ To list every file again: `git grep -Iil debo`. To count by pattern: `git grep -
 | The voice agent's API address | `apps/voice-agent/src/main.ts` | Default `https://api.daksha.life`. It also reads `DAKSHA_URL` first, then `DEBO_URL`. |
 | The sign-in email sender | `apps/web/src/lib/email.ts` | `signin@mail.daksha.life`, named Daksha. `DAKSHA_EMAIL_FROM` can override the address. |
 | The web-push contact | `os/apps/server/src/push.ts` | Default subject `https://daksha.life`. `DAKSHA_OS_VAPID_*` are read first, then `DEBO_OS_VAPID_*`. |
-| The share images | `scripts/og/og.html` and the `og.png` files it makes | The word on the image. |
+| The share images | `scripts/og/og.html` and the four `og.png` files it makes | Rebuilt with `node scripts/og/build-og.mjs`: the name on them is Daksha. The phone screenshot inside them is an old one and still shows Debo (see "Possible later steps"). |
 | The launch film sources | `video/launch` | The words, so the next render says Daksha. The films already published still say Debo (see below). |
 | The APK | `release-mobile.yml` | Each release now also carries `daksha.apk` next to `debo.apk`. |
-| The data export file name | `os/apps/mobile/src/neon-gate.tsx` | `daksha-data.json` |
+| Download file names | `os/apps/server/src/account.ts`, `os/apps/mobile/src/neon-gate.tsx`, `apps/web/src/app/api/export/route.ts` | `daksha-data.json` and `daksha-export-<date>.zip` |
+| The mascot component in the old web app | `apps/web/src/components/debo.tsx` | The React component is now called `Daksha` (the file keeps its name). |
 
 ### about.debo.life becomes about.daksha.life, not the root
 
@@ -89,8 +92,9 @@ What a person notices: on my.daksha.life they sign in once more, because browser
 | What | Examples | Why it stays |
 |---|---|---|
 | The default character's id | `"debo"` in `CharacterId`, `characterIds`, `defaultCharacter`, `agentCharacters`, `voice-copy-data.ts`, saved `agent-settings` records | Saved settings store `character: "debo"`. Renaming the id would reset everyone who picked it. Only its display name changed. |
-| Database tables, columns and record kinds | `debo_memories`, `debo_memories_entities`, record kinds, `DeboMediaDb`, `DeboCallsDb` | Renaming them needs a migration on live data. |
-| Encryption contexts and device storage keys | `debo.session`, `debo.character`, `debo.journal.draft.v1`, `debo.reactions`, `debo.talk-consent`, `debo.dictation.ok.v1`, `debo:journal-draft:` | Changing a key loses what is already stored on people's devices, or makes stored secrets unreadable. |
+| Database tables, columns and stored values | `debo_memories`, `debo_memories_entities`, record kinds, the speaker and actor value `"debo"` in calls and the activity record, `DeboMediaDb`, `DeboCallsDb` | Renaming them needs a migration on live data. |
+| Hash and id inputs | `debo-call:<user>:<session>` in `packages/db/src/voice-call.ts` | It makes each call's stable source id. A new prefix would give the same call a new id and duplicate it. No encryption context in the code contains the old name. |
+| Device storage keys | `debo.session`, `debo.character`, `debo.journal.draft.v1`, `debo.reactions`, `debo.talk-consent`, `debo.dictation.ok.v1`, `debo:journal-draft:` | Changing a key loses what is already stored on people's devices. |
 | Secret and environment variable names | `DEBO_OS_*`, `DEBO_DATABASE_URL`, `DEBO_URL`, `DEBO_TELEMETRY`, `DEBO_SAMPLE_CONNECTORS`, `DEBO_DEV_*`, `DEBO_DEMO_*` | Changing a name silently turns a feature off where the old one is set. Optional `DAKSHA_*` aliases are read first where it matters: `DAKSHA_URL`, `DAKSHA_OS_VAPID_PUBLIC_KEY`, `DAKSHA_OS_VAPID_PRIVATE_KEY`, `DAKSHA_OS_VAPID_SUBJECT`, and the new `DAKSHA_EMAIL_FROM`. |
 | Android `applicationId` and iOS bundle id | `life.debo.app` | A new id is a different app: it cannot update the one people installed, and keeps none of its data. |
 | Expo `slug` and the deep-link scheme | `"slug": "debo"`, `debo://` | The slug names the Expo project; links like `debo://journal/abc` are already out there. |
@@ -101,13 +105,14 @@ What a person notices: on my.daksha.life they sign in once more, because browser
 | File and folder names, code identifiers | `debo-*.tsx`, `os/apps/server/src/debo/`, `DeboService`, `deboApi`, CSS classes like `debo-eye` | Never seen by a person. Renaming them is churn with merge risk. |
 | Wire names between the app, API and voice agent | LiveKit agent `debo-voice`, text topic `debo.sources`, RPC `debo.interrupt`, API paths `/api/debo/*`, error code `NOT_A_DEBO_ACCOUNT` | Installed phone apps and the deployed voice agent use them. Changing one side breaks the other. |
 | The LiveKit project | `apps/voice-agent/livekit.toml` `subdomain = "https-debo-life-..."` | It is the name of an existing LiveKit Cloud project. |
-| Published media files | `debo-launch.mp4`, `debo-demo.mp4`, their posters, `debo.svg`, `debo-banner.svg`, `debo-pitch-deck.pdf` | Their addresses are linked from the README and elsewhere. The films and the PDF have the old name drawn into them; see "Later steps". |
+| Screenshots of the app | `apps/site/public/shots/*`, `os/apps/mobile/public/screenshots/*`, the screenshot inside `og.png`, the pitch's `shots/` | They are pictures of the live app, which still says Debo until this is deployed. |
+| Published media files | `debo-launch.mp4`, `debo-demo.mp4`, their posters, `debo.svg`, `debo-banner.svg`, `debo-pitch-deck.pdf` | Their addresses are linked from the README and elsewhere. The films and the PDF have the old name drawn into them; see "Possible later steps". |
 | Film descriptions on the landing page | `apps/site/src/components/film.tsx` | They describe the films as they are, and the films still say Debo. |
-| Third-party notices | `THIRD_PARTY_NOTICES.md` | Only the brand word changed; licences are untouched. |
 
 ### Possible later steps
 
 - Re-render the launch films (`video/launch`) and the pitch deck PDF so they say Daksha, then update `film.tsx` and remove it from the allowlist.
+- Take new screenshots of the app once it is deployed (site, pitch, install screenshots), then run `node scripts/og/build-og.mjs` again.
 - Rename `@debo/*` packages to `@daksha/*` (mechanical: package.json names, imports, `pnpm-lock.yaml`, tsconfig paths).
 - New Workers named `daksha-*` with the same routes, then delete the `debo-*` ones.
 - Point the site's Android button at `daksha.apk` once a release has it.
@@ -124,7 +129,7 @@ Do these before merging `daksha-rename` into `main`, because a push to `main` ru
 5. **OAuth redirect addresses.** The API now builds callbacks from `https://api.daksha.life`. Add the new ones next to the old ones:
    - Google Cloud OAuth client: `https://api.daksha.life/api/google/callback`.
    - Composio: allow `https://api.daksha.life/api/connectors/callback` if your Composio project keeps an allowlist.
-   - MCP servers sign in with dynamic client registration, using `https://api.daksha.life/...`. Nothing to set, but connections made through `api.debo.life` keep their old callback.
+   - MCP tool servers: nothing to set. They register Daksha themselves (dynamic client registration) with the callback `https://api.daksha.life/api/mcp/oauth/callback`. A server registered before the rename keeps refreshing its tokens with its old registration; the next time the person signs in to it, Daksha registers again for the new callback (`os/apps/server/src/mcp/oauth.ts`).
 6. **LiveKit.** In the deployed voice agent's secrets, set `DAKSHA_URL=https://api.daksha.life` (or update `DEBO_URL`). Without either, the new default is already `https://api.daksha.life`.
 7. **Web push.** Nothing is required: the VAPID keys stay the same and the default subject is now `https://daksha.life`. To set it yourself, use `DAKSHA_OS_VAPID_SUBJECT` (or the old `DEBO_OS_VAPID_SUBJECT`) as a GitHub secret.
 8. **New optional secrets** (all optional, all fall back to the old names): `DAKSHA_URL` (voice agent), `DAKSHA_EMAIL_FROM` (`debo-web`), `DAKSHA_OS_VAPID_PUBLIC_KEY`, `DAKSHA_OS_VAPID_PRIVATE_KEY`, `DAKSHA_OS_VAPID_SUBJECT` (API).
@@ -132,15 +137,20 @@ Do these before merging `daksha-rename` into `main`, because a push to `main` ru
 
 ## The brand check
 
-`node scripts/check-brand.mjs` fails if the word `Debo` (or `DEBO` on its own), or a `debo.life` address, appears in a tracked text file, except where the allowlist below says it may. The Check workflow runs it. A line can also opt out by containing `brand-check: keep`, for the rare line that must name the old brand, like the code that maps an old saved name.
+`node scripts/check-brand.mjs` (or `pnpm check:brand`) fails if the word `Debo` (or `DEBO` on its own), or a `debo.life` address, appears in a tracked text file, except where the allowlist below says it may. The Check workflow runs it as its own `brand` job, which needs no install. A line can also opt out by containing `brand-check: keep`, for the rare line that must name the old brand, like the code that maps an old saved name.
 
 Each allowlist line is a path (or a folder ending in `/`), optionally followed by ` | ` and a regular expression. With an expression, only lines matching it are allowed in that file.
 
 ```brand-allowlist
 docs/RENAME.md
 scripts/check-brand.mjs
-README.md | Debo is now Daksha|debo-banner|debo-launch|debo\.svg
+README.md | Debo is now Daksha
+docs/DECISIONS.md | Debo is renamed Daksha|The old debo\.life addresses|redirect from `my\.debo\.life`
+apps/site/src/brand.ts | it was Debo until the rename
 apps/site/src/components/film.tsx | LABEL|films themselves
+os/tests/brand-rename.test.ts
+.github/release-mobile-notes.md | earlier Debo build
+.env.example | while mail\.daksha\.life is not verified
 apps/web/wrangler.jsonc | debo\.life
 apps/site/wrangler.jsonc | debo\.life
 apps/pitch/wrangler.jsonc | debo\.life
@@ -148,8 +158,6 @@ os/infra/cloudflare/api/wrangler.jsonc | debo\.life
 os/infra/cloudflare/app/wrangler.jsonc | debo\.life
 .github/workflows/deploy-os.yml | debo\.life
 os/apps/mobile/public/index.html | debo\.life
-apps/voice-agent/livekit.toml | debo-life
-os/tests/ | debo\.life
 ```
 
 ## Re-run recipe
@@ -157,26 +165,31 @@ os/tests/ | debo\.life
 When this branch merges, text added to `main` in the meantime may still say Debo. From the repo root:
 
 ```sh
-# Files that may still say Debo, minus the allowlisted ones.
-files=$(git grep -lI -e '\bDebo\b' -e '\bDEBO\b' -e 'debo\.life' -- . \
-  ':!docs/RENAME.md' ':!scripts/check-brand.mjs' ':!apps/site/src/components/film.tsx' \
-  ':!**/wrangler.jsonc' ':!.github/workflows/deploy-os.yml' ':!os/apps/mobile/public/index.html')
+# 1. Rename every line the brand check would flag. Allowlisted lines and lines marked
+#    "brand-check: keep" are left alone. It renames the repository link, then every
+#    debo.life host (www, my, api, about, pitch, mail), then the word Debo / DEBO.
+node scripts/check-brand.mjs --fix
 
-# 1. The repository link first, then every host, then the bare word.
+# 2. Read the diff, then run the check again. It must pass.
+git diff
+node scripts/check-brand.mjs
+```
+
+The same replacements as a plain codemod, for a tool other than the script (it does not know the allowlist, so pass it only the files you mean to change):
+
+```sh
 perl -pi -e '
-  s{github\.com/playlikeboy/debo\.life}{github.com/playlikeboy/daksha}g;
-  s{\b((?:www|my|api|about|pitch|mail)\.)?debo\.life\b}{$1daksha.life}g;
+  s{playlikeboy/debo\.life}{playlikeboy/daksha}g;
+  s{\b((?:www|my|api|about|pitch|mail)\.)?debo\.life\b}{($1 // "") . "daksha.life"}ge;
   s{\bDebo\b}{Daksha}g;
   s{\bDEBO\b}{DAKSHA}g;
-' $files
-
-# 2. Review, then run the check.
-git diff --stat
-node scripts/check-brand.mjs
+' path/to/file ...
 ```
 
 Then look at the diff by hand for these:
 
-- `debo.apk`, `life.debo.app`, `debo://`, `@debo/`, `DEBO_*`, `"debo"` ids and storage keys are untouched by the recipe on purpose (they are not the whole word `Debo`, or not a `debo.life` host). Keep them.
-- A new user-facing string that the recipe could not see, like a lowercase `debo` in text, needs a manual fix. `node scripts/check-brand.mjs` does not catch lowercase.
-- Any line that must keep the old name gets `brand-check: keep` or an allowlist entry above.
+- `debo.apk`, `life.debo.app`, `debo://`, `@debo/`, `DEBO_*`, `"debo"` ids, storage keys and file names are untouched on purpose (they are not the whole word `Debo`, or not a `debo.life` host). Keep them.
+- Text that reads oddly after the swap, like "renamed from Daksha to Daksha", needs a hand edit.
+- A new user-facing string with a lowercase `debo` in it (a download file name, for example) is not caught by the check and needs a manual fix. `git grep -n debo -- ':!*lock*'` lists them.
+- Code that compares against saved text (for example the "Debo:" lines in old calls, or a saved assistant name of "Debo") must keep accepting the old word. Mark such lines `brand-check: keep`.
+- A line that must keep the old name gets `brand-check: keep` or an entry in the allowlist above.

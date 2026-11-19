@@ -3,6 +3,7 @@
 // debo.life address, in any tracked text file. Debo was renamed Daksha; see docs/RENAME.md.
 //
 //   node scripts/check-brand.mjs        (from anywhere inside the repo)
+//   node scripts/check-brand.mjs --fix  rename what it finds, then check the diff by hand
 //
 // Some places must keep the old name, for example the old web addresses that still work.
 // They are listed in the `brand-allowlist` block in docs/RENAME.md, one per line:
@@ -13,7 +14,7 @@
 // Code names like DeboService, @debo/db, DEBO_OS_* and the "debo" character id are not the
 // whole word "Debo", so this check does not see them. They are kept on purpose (docs/RENAME.md).
 import { execFileSync } from "node:child_process";
-import { readFileSync } from "node:fs";
+import { readFileSync, writeFileSync } from "node:fs";
 import path from "node:path";
 import { pathToFileURL } from "node:url";
 
@@ -36,6 +37,15 @@ export function readAllowlist(markdown) {
     });
 }
 
+/** The new name for one line: the repository link, then every host, then the word. */
+export function renameLine(line) {
+  return line
+    .replace(/playlikeboy\/debo\.life/g, "playlikeboy/daksha")
+    .replace(/\b((?:www|my|api|about|pitch|mail)\.)?debo\.life\b/g, (_, sub = "") => `${sub}daksha.life`)
+    .replace(/\bDebo\b/g, "Daksha")
+    .replace(/\bDEBO\b/g, "DAKSHA");
+}
+
 /** The lines in one file that still carry the old brand and are not allowed. */
 export function findOldBrand(file, text, allowlist) {
   const rules = allowlist.filter((rule) => (rule.folder ? file.startsWith(rule.path) : file === rule.path));
@@ -50,7 +60,7 @@ export function findOldBrand(file, text, allowlist) {
   return found;
 }
 
-function main() {
+function main(fix) {
   const allowlist = readAllowlist(readFileSync(path.join(root, "docs/RENAME.md"), "utf8"));
   const files = execFileSync("git", ["ls-files", "-z"], { cwd: root, encoding: "utf8" }).split("\0").filter(Boolean);
   const found = [];
@@ -62,7 +72,18 @@ function main() {
       continue; // deleted in the working tree, or a folder link
     }
     if (buffer.includes(0)) continue; // binary
-    found.push(...findOldBrand(file, buffer.toString("utf8"), allowlist));
+    const text = buffer.toString("utf8");
+    const hits = findOldBrand(file, text, allowlist);
+    found.push(...hits);
+    if (fix && hits.length) {
+      const lines = text.split("\n");
+      for (const hit of hits) lines[hit.line - 1] = renameLine(lines[hit.line - 1]);
+      writeFileSync(path.join(root, file), lines.join("\n"));
+    }
+  }
+  if (fix) {
+    console.log(`Renamed ${found.length} line(s). Check them with git diff, then run this again without --fix.`);
+    return;
   }
   if (found.length === 0) {
     console.log(`Brand check passed: no "Debo" text outside the allowlist in ${files.length} files.`);
@@ -77,4 +98,4 @@ function main() {
   process.exitCode = 1;
 }
 
-if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) main();
+if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) main(process.argv.includes("--fix"));
