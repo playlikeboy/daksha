@@ -7,5 +7,3 @@ export const PRIVACY_URL = "https://debo.life/privacy";
 // (GitHub redirects the old debo.life address). Debo also works in the phone browser (START_URL).
 export const ANDROID_APK_URL = "https://github.com/playlikeboy/daksha/releases/latest/download/debo.apk";
 export const RELEASES_URL = "https://github.com/playlikeboy/daksha/releases";
-// The films live in public/. The README links to the launch film by this address, so keep it.
-export const LAUNCH_FILM_URL = "/debo-launch.mp4";
