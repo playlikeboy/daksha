@@ -7,6 +7,7 @@ import type {
   AgentNotification,
 } from "../../../../packages/domain/src/agent.ts";
 import { agentCharacters, createTaskSchema } from "../../../../packages/domain/src/agent.ts";
+import { AVATARS_KIND } from "../custom-avatars.ts";
 import { AppError } from "../errors.ts";
 import type { AgentService } from "./service.ts";
 
@@ -130,11 +131,19 @@ export function agentRoutes(service: AgentService): Hono<{ Variables: { owner: s
         tone: z.enum(["warm", "concise", "thoughtful"]),
         avatar: z.enum(["sky", "sand", "lilac"]).optional(),
         character: z.enum(agentCharacters).optional(),
+        customAvatar: z.string().trim().min(1).max(100).optional(),
         showChatUpdates: z.boolean().optional(),
       })
       .parse(await c.req.json());
     const owner = c.get("owner");
     await service.ensure(owner);
+    // A face the person made must be one of their own saved faces (custom-avatars.ts).
+    if (body.character === "custom" || body.customAvatar) {
+      const saved = await service.db.get<AgentIdentity>(owner, "agent-settings", "identity");
+      const id = body.customAvatar ?? saved?.customAvatar;
+      if (!id || !(await service.db.get(owner, AVATARS_KIND, id)))
+        throw new AppError("That face is not saved any more. Pick another one.", 422);
+    }
     const identity = await service.db.compareAndSwap<AgentIdentity>(
       owner,
       "agent-settings",

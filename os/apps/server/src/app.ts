@@ -45,6 +45,7 @@ import { PromiseFinder } from "./promises.ts";
 import { PushService, pushKeysFromEnv, pushRoutes } from "./push.ts";
 import { companionRoutes } from "./reminders.ts";
 import { PeopleStore, peopleRoutes } from "./people.ts";
+import { CustomAvatarStore, customAvatarRoutes, voiceCharacterOf } from "./custom-avatars.ts";
 import { PersonaStore, personaRoutes } from "./persona.ts";
 import { OnboardingStore, onboardingRoutes } from "./onboarding.ts";
 import { TalkSettingsStore, talkSettingsRoutes, voiceFor } from "./talk-settings.ts";
@@ -317,7 +318,10 @@ export async function createApp(
       options.voiceEnv,
       (owner) => debo.callEnded(owner),
       // The voice and speed this person chose, sent to the agent inside the signed token.
-      async (owner) => voiceFor(await talkSettings.get(owner).catch(() => null), await characterOf(owner)),
+      async (owner) => {
+        const who = await voiceCharacterOf(db, owner);
+        return voiceFor(await talkSettings.get(owner).catch(() => null), who.character, who.pronoun);
+      },
     ));
   app.route("/api/persona", personaRoutes(new PersonaStore(db)));
   app.route("/api/onboarding", onboardingRoutes(new OnboardingStore(db)));
@@ -328,7 +332,11 @@ export async function createApp(
   const talkSettings = new TalkSettingsStore(db);
   const characterOf = async (owner: string) =>
     (await db.get<{ character?: string }>(owner, "agent-settings", "identity").catch(() => null))?.character;
-  app.route("/api/talk-settings", talkSettingsRoutes(talkSettings, characterOf));
+  app.route(
+    "/api/talk-settings",
+    talkSettingsRoutes(talkSettings, characterOf, async (owner) => (await voiceCharacterOf(db, owner)).pronoun),
+  );
+  app.route("/api/custom-avatars", customAvatarRoutes(new CustomAvatarStore(db)));
   app.route("/api/account", accountRoutes(db, files, debo, connectors, mcp, ownKeys, images));
   app.route("/api/connectors", connectorRoutes(connectors));
   app.route("/api/mcp", mcpRoutes(mcp));
