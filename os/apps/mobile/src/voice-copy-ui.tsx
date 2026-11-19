@@ -1,9 +1,7 @@
 // "Voice notes and calls" for one custom person: add a voice note or a call
 // recording, say which voice is who, keep only their words, and (if you choose,
 // with their permission) copy their voice for your calls with them.
-//
-// MERGE NOTE: Workstream A (custom people) owns the custom person's screen.
-// Place <VoiceRecordingsPanel personId name /> on that screen when it is merged.
+// Shown under "What Debo learned" on each person in "People you made" (custom-people-ui.tsx).
 import { createAudioPlayer } from "expo-audio";
 import { Play, Plus } from "lucide-react-native";
 import { useCallback, useEffect, useRef, useState } from "react";

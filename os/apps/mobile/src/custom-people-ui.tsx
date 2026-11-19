@@ -1,21 +1,35 @@
 // Settings card "People you made": custom people to talk to, built from a description or from
-// the person's own WhatsApp chats, photos and videos. See, make, change, talk to, add files for,
-// and delete them (deleting is only here, never by chat). Debo is always honest that each one
-// is an AI portrait. The server checks everything again (apps/server/src/custom-people).
-import { FileUp, MessageCircle, Pencil, Trash2, UserRoundPlus } from "lucide-react-native";
+// the person's own WhatsApp chats, photos, videos, voice notes and calls. See, make, change,
+// give a face to, talk to, add files for, and delete them (deleting is only here, never by
+// chat). Debo is always honest that each one is an AI portrait. The server checks everything
+// again (apps/server/src/custom-people, apps/server/src/voice-clone).
+import { FileUp, MessageCircle, Pencil, Smile, Trash2, UserRoundPlus } from "lucide-react-native";
 import { useCallback, useEffect, useState } from "react";
-import { Text, View } from "react-native";
+import { Pressable, Text, View } from "react-native";
 import { type CustomPerson, initials, type PeopleReply, PeopleReplySchema } from "./custom-people-data";
 import { CustomPersonUploadSheet } from "./custom-person-upload";
+import { type AvatarConfig, type CustomAvatar, useCustomAvatars } from "./debo-custom-avatars";
 import { errorText } from "./debo-api";
+import { CustomFace } from "./debo-face";
 import { Button, Card, CheckRow, colors, ErrorNotice, Field, radius, s, SectionHeading, Sheet, spacing } from "./ui";
+import { VoiceRecordingsPanel } from "./voice-copy-ui";
 import { useWorkspace } from "./workspace";
 
 /**
- * A custom person's face. Until saved avatars exist (`avatarId`, records kind `custom-avatars`),
- * it is their initials in a soft circle. Swap the inside for the saved avatar when it is there.
+ * A custom person's face: the face made for them in the avatar builder (`avatarId`, records
+ * kind `custom-avatars`) when there is one, otherwise their initials in a soft circle.
  */
-export function PersonAvatar({ person, size = 44 }: { person: Pick<CustomPerson, "name" | "avatarId">; size?: number }) {
+export function PersonAvatar({
+  person,
+  face,
+  size = 44,
+}: {
+  person: Pick<CustomPerson, "name" | "avatarId">;
+  /** The saved face `person.avatarId` points at, if it is loaded. */
+  face?: AvatarConfig;
+  size?: number;
+}) {
+  if (person.avatarId && face) return <CustomFace size={size} config={face} mood="idle" label={`${person.name}'s face`} />;
   return (
     <View
       accessible
@@ -36,18 +50,90 @@ export function PersonAvatar({ person, size = 44 }: { person: Pick<CustomPerson,
   );
 }
 
-type Draft = { id?: string; name: string; relation: string; description: string; voice?: string; passedAway: boolean };
+type Draft = {
+  id?: string;
+  name: string;
+  relation: string;
+  description: string;
+  voice?: string;
+  avatarId?: string;
+  passedAway: boolean;
+};
 const EMPTY: Draft = { name: "", relation: "", description: "", passedAway: false };
+
+/**
+ * Pick one of the saved faces, or none. "Make a new face" and "Edit this face" open the avatar
+ * builder, which takes the whole screen: the editor closes, the face is linked to the person
+ * when it is saved, and this settings sheet opens again.
+ */
+function FacePicker({
+  draft,
+  faces,
+  onPick,
+  onBuild,
+}: {
+  draft: Draft;
+  faces: CustomAvatar[];
+  onPick: (avatarId?: string) => void;
+  onBuild: (avatarId?: string) => void;
+}) {
+  return (
+    <View style={{ gap: spacing[2] }}>
+      <Text style={s.muted}>Their face</Text>
+      <View accessibilityRole="radiogroup" accessibilityLabel="Their face" style={[s.row, { gap: spacing[2], flexWrap: "wrap" }]}>
+        <Button small primary={!draft.avatarId} onPress={() => onPick(undefined)}>
+          Just initials
+        </Button>
+        {faces.map((f) => (
+          <Pressable
+            key={f.id}
+            accessibilityRole="radio"
+            accessibilityState={{ checked: draft.avatarId === f.id }}
+            accessibilityLabel={`Use the face ${f.name}`}
+            onPress={() => onPick(f.id)}
+            style={{
+              borderRadius: radius.full,
+              borderWidth: 2,
+              borderColor: draft.avatarId === f.id ? colors.text : "transparent",
+              padding: 2,
+            }}
+          >
+            <CustomFace size={44} config={f} mood="idle" label={f.name} />
+          </Pressable>
+        ))}
+      </View>
+      {draft.id ? (
+        <View style={[s.row, { gap: spacing[2], flexWrap: "wrap" }]}>
+          <Button small icon={Smile} onPress={() => onBuild(undefined)}>
+            Make a new face
+          </Button>
+          {draft.avatarId && (
+            <Button small icon={Pencil} onPress={() => onBuild(draft.avatarId)}>
+              Edit this face
+            </Button>
+          )}
+        </View>
+      ) : (
+        <Text style={s.small}>Pick a face you made, or make this person first and then make a new face for them.</Text>
+      )}
+    </View>
+  );
+}
 
 function PersonEditor({
   draft,
   voices,
+  faces,
   onSave,
+  onBuildFace,
   onClose,
 }: {
   draft: Draft;
   voices: PeopleReply["voices"];
+  faces: CustomAvatar[];
   onSave: (draft: Draft) => Promise<void>;
+  /** Open the avatar builder for this saved person: a new face, or the one with this id. */
+  onBuildFace: (personId: string, avatarId?: string) => void;
   onClose: () => void;
 }) {
   const [d, setD] = useState(draft);
@@ -98,6 +184,16 @@ function PersonEditor({
             ))}
           </View>
         </View>
+        <FacePicker
+          draft={d}
+          faces={faces}
+          onPick={(avatarId) => setD({ ...d, avatarId })}
+          onBuild={(avatarId) => {
+            if (!d.id) return;
+            onClose();
+            onBuildFace(d.id, avatarId);
+          }}
+        />
         <CheckRow label="They have died" checked={d.passedAway} onPress={() => setD({ ...d, passedAway: !d.passedAway })} />
         {d.passedAway && (
           <Text style={s.small}>
@@ -115,6 +211,7 @@ function PersonEditor({
 
 function PersonRow({
   person,
+  face,
   active,
   factSources,
   canRead,
@@ -125,6 +222,7 @@ function PersonRow({
   onRemoveLine,
 }: {
   person: CustomPerson;
+  face?: AvatarConfig;
   active: boolean;
   factSources: Record<string, string>;
   canRead: boolean;
@@ -139,14 +237,20 @@ function PersonRow({
   return (
     <View style={{ gap: spacing[2], paddingVertical: spacing[2], borderTopWidth: 1, borderTopColor: colors.line }}>
       <View style={[s.row, { gap: spacing[3] }]}>
-        <PersonAvatar person={person} />
+        <PersonAvatar person={person} face={face} />
         <View style={{ flex: 1 }}>
           <Text style={s.text}>
             {person.name}
             {active ? <Text style={s.muted}> · talking as them now</Text> : null}
           </Text>
           <Text style={s.small}>
-            {[person.relation, person.builtFrom ? `learned from ${person.builtFrom.messages} messages, ${person.builtFrom.photos} photos, ${person.builtFrom.videos} videos` : "from your description"]
+            {[
+              person.relation,
+              person.builtFrom
+                ? `learned from ${person.builtFrom.messages} messages, ${person.builtFrom.photos} photos, ${person.builtFrom.videos} videos, ${person.builtFrom.voice} spoken lines`
+                : "from your description",
+              person.voiceCloneId ? "speaks in a copy of their voice on calls" : "",
+            ]
               .filter(Boolean)
               .join(" · ")}
           </Text>
@@ -195,6 +299,8 @@ function PersonRow({
               </Button>
             </View>
           ))}
+          {/* Voice notes and calls: keep only their words, and an optional copy of their voice. */}
+          <VoiceRecordingsPanel personId={person.id} name={person.name} />
         </View>
       )}
       {confirm ? (
@@ -221,7 +327,9 @@ function PersonRow({
 }
 
 export function CustomPeopleSetting() {
-  const { api } = useWorkspace();
+  const { api, open, notify } = useWorkspace();
+  const { avatars } = useCustomAvatars(api);
+  const faceOf = (id?: string) => (id ? avatars.find((a) => a.id === id) : undefined);
   const [data, setData] = useState<PeopleReply | null>(null);
   const [editing, setEditing] = useState<Draft | null>(null);
   const [uploading, setUploading] = useState<CustomPerson | null>(null);
@@ -252,11 +360,32 @@ export function CustomPeopleSetting() {
 
   const save = async (d: Draft) => {
     const body = { name: d.name, relation: d.relation, description: d.description, passedAway: d.passedAway, ...(d.voice ? { voice: d.voice } : {}) };
-    if (d.id) await api.request(`/api/custom-people/${encodeURIComponent(d.id)}`, body, "PUT");
-    else await api.request("/api/custom-people", body, "POST");
+    // A face can be taken off a saved person (null); a new person only sends one that was picked.
+    if (d.id) await api.request(`/api/custom-people/${encodeURIComponent(d.id)}`, { ...body, avatarId: d.avatarId ?? null }, "PUT");
+    else await api.request("/api/custom-people", { ...body, ...(d.avatarId ? { avatarId: d.avatarId } : {}) }, "POST");
     setStatus(d.id ? "Saved." : `${d.name} is ready. Tap "Talk to them" to start.`);
     await load();
   };
+
+  /**
+   * The avatar builder replaces this settings sheet while it is open. When the face is saved
+   * it is linked to the person, and this sheet opens again.
+   */
+  const buildFace = (personId: string, avatarId?: string) =>
+    open({
+      type: "avatar-builder",
+      avatarId,
+      pickOnly: true,
+      onSaved: (face) =>
+        void (async () => {
+          try {
+            await api.request(`/api/custom-people/${encodeURIComponent(personId)}`, { avatarId: face.id }, "PUT");
+          } catch (e) {
+            notify(errorText(e));
+          }
+          open({ type: "talk-settings" });
+        })(),
+    });
 
   const people = data?.people ?? [];
   const max = typeof data?.limits.people === "number" ? data.limits.people : 10;
@@ -274,11 +403,22 @@ export function CustomPeopleSetting() {
         <PersonRow
           key={p.id}
           person={p}
+          face={faceOf(p.avatarId)}
           active={data?.activeId === p.id}
           factSources={data?.factSources ?? {}}
           canRead={Boolean(data?.canRead)}
           onTalk={() => void run(() => api.request(`/api/custom-people/${encodeURIComponent(p.id)}/talk`, {}, "POST"), `Talking as ${p.name} now, in chat and on calls. Say "stop" to go back.`)}
-          onEdit={() => setEditing({ id: p.id, name: p.name, relation: p.relation, description: p.description, voice: p.voice, passedAway: Boolean(p.passedAway) })}
+          onEdit={() =>
+            setEditing({
+              id: p.id,
+              name: p.name,
+              relation: p.relation,
+              description: p.description,
+              voice: p.voice,
+              avatarId: p.avatarId,
+              passedAway: Boolean(p.passedAway),
+            })
+          }
           onUpload={() => setUploading(p)}
           onDelete={() => void run(() => api.request(`/api/custom-people/${encodeURIComponent(p.id)}`, undefined, "DELETE"), `${p.name} is deleted.`)}
           onRemoveLine={(kind, index) =>
@@ -303,7 +443,16 @@ export function CustomPeopleSetting() {
       <Text accessibilityLiveRegion="polite" style={s.small}>
         {status}
       </Text>
-      {editing && <PersonEditor draft={editing} voices={data?.voices ?? []} onSave={save} onClose={() => setEditing(null)} />}
+      {editing && (
+        <PersonEditor
+          draft={editing}
+          voices={data?.voices ?? []}
+          faces={avatars}
+          onSave={save}
+          onBuildFace={buildFace}
+          onClose={() => setEditing(null)}
+        />
+      )}
       {uploading && (
         <CustomPersonUploadSheet
           person={uploading}
