@@ -49,10 +49,17 @@ export const appScreenInfo: Record<AppScreen, { title: string; where: string }> 
   files: { title: "Files", where: "Menu, then Files" },
   calendar: { title: "Calendar", where: "Menu, then Calendar" },
   computer: { title: "Debo's computer", where: "Menu, then Debo's computer" },
-  "avatar-builder": { title: "Make a face", where: "Apps & settings, then Make your own" },
-  "custom-people": { title: "Your own people", where: "Apps & settings, then Your own people" },
+  "avatar-builder": {
+    title: "Make your own face",
+    where: "Apps & settings, then Name, voice and notes, then Make your own",
+  },
+  "custom-people": {
+    title: "People you made",
+    where: "Menu, then Voice, personality and notes, then People you made",
+  },
   "custom-person-upload": {
     title: "Add chats, photos and recordings",
-    where: "Apps & settings, then Your own people, then Add files",
+    where:
+      "Menu, then Voice, personality and notes, then People you made: Add chats and photos, or What Debo learned for voice notes and calls",
   },
 };
