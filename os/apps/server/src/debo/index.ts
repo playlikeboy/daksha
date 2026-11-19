@@ -7,6 +7,7 @@ import { r2ConfigFromEnv, r2Store } from "./object-store.ts";
 import { bindingWhisper, cloudflareWhisper, fakeTranscriber } from "./transcriber.ts";
 import { type DeboBackend, deboDatabaseUrl, realBackend } from "./backend.ts";
 import { devMemoryBackend } from "./dev-backend.ts";
+import { seedDevJournal } from "./dev-seed.ts";
 import { DeboService } from "./service.ts";
 
 export { deboRoutes } from "./routes.ts";
@@ -25,6 +26,11 @@ export {
 /** DEBO_DEV_MEMORY=1 asks for the dev-only in-memory journal. */
 export function devMemoryRequested(env: Record<string, string | undefined> = process.env): boolean {
   return ["1", "true", "on"].includes(env.DEBO_DEV_MEMORY?.trim().toLowerCase() ?? "");
+}
+
+/** DEBO_DEV_SEED=1 fills the dev-only journal with made-up entries, for screenshots and demos. */
+export function devSeedRequested(env: Record<string, string | undefined> = process.env): boolean {
+  return ["1", "true", "on"].includes(env.DEBO_DEV_SEED?.trim().toLowerCase() ?? "");
 }
 
 /**
@@ -83,7 +89,13 @@ export function createDebo(
     // DEBO_DEV_FAIL_FIRST=1: the first transcript fails, so the "Try again" screen can be seen.
     let failedOnce = !["1", "true"].includes(env.DEBO_DEV_FAIL_FIRST?.trim().toLowerCase() ?? "");
     const store = memoryStore((config.publicUrl ?? "http://localhost:8787").replace(/\/$/, ""));
-    const service = new DeboService(devMemoryBackend(), ["local-user"], {
+    const backend = devMemoryBackend();
+    // Made-up entries for the local sample person only. Never real words; off unless asked for.
+    if (devSeedRequested(env)) {
+      console.warn("[Debo] DEV ONLY: the journal starts with made-up sample entries.");
+      void seedDevJournal(backend, "local-user");
+    }
+    const service = new DeboService(backend, ["local-user"], {
       store,
       audio: fakeAudioTools({ durationSeconds: 12 }),
       transcriber: fakeTranscriber({ fail: () => (failedOnce ? false : ((failedOnce = true), "retryable")) }),
