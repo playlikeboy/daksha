@@ -53,3 +53,10 @@ jobs:
             sleep 10
           done
           echo "::error::pitch.debo.life did not answer 200"; exit 1
+
+      # pitch.daksha.life serves the same pitch (docs/DOMAINS.md). Only a warning.
+      - name: Check the daksha.life twin
+        run: |
+          code=$(curl -s -m 20 -o /dev/null -w '%{http_code}' https://pitch.daksha.life/ || true)
+          echo "pitch.daksha.life returned $code"
+          [ "$code" = "200" ] || echo "::warning::pitch.daksha.life did not answer 200 yet"

@@ -1,6 +1,6 @@
 # Debo OS on Cloudflare
 
-> **Where it runs now (14 November 2026).** The new app is served at `https://my.debo.life` and its API at `https://api.debo.life`. The deploy workflow runs on a push to `main` that touches `os/`, `packages/` or the workflow. `https://my.debo.life` is in Neon Auth's trusted domains. `debo.life` itself is still the older web app (`debo-web`). Where the text below says a `workers.dev` address, read these two addresses.
+> **Where it runs now (14 November 2026).** The new app is served at `https://my.debo.life` and its API at `https://api.debo.life`. The deploy workflow runs on a push to `main` that touches `os/`, `packages/` or the workflow. `https://my.debo.life` is in Neon Auth's trusted domains. `debo.life` itself is still the older web app (`debo-web`). Where the text below says a `workers.dev` address, read these two addresses. The same app and API also answer at `https://my.daksha.life` and `https://api.daksha.life`; on `my.daksha.life` the app talks to `api.daksha.life`, so its sign-in cookie stays same-site. See [`docs/DOMAINS.md`](../../../docs/DOMAINS.md).
 
 
 Three Workers. Nothing here touches `debo-web` or `debo.life`. Nothing is deployed yet.
@@ -51,7 +51,7 @@ The journal features read and write Debo's existing `public` tables (`sources`, 
 
 ## Variables and secrets
 
-Plain settings in `api/wrangler.jsonc`: `WORKSPACE_MODE=live`, `AGENT_BACKEND=model`, `MODEL=anthropic/claude-haiku-5-5`, `AUTH_MODE=neon`, `OS_DB_SCHEMA=os`, `TASK_WORKER_ENABLED`, `TRUST_PROXY`, `API_SLEEP_AFTER`, `PUBLIC_API_URL`, `ALLOWED_ORIGINS`. The workflow overrides the last two with the real workers.dev URLs. `MODEL` is an Anthropic model, so no OpenAI key is needed. `DAILY_TOKEN_LIMIT` (default 40000 per person per day) can be added as a plain var.
+Plain settings in `api/wrangler.jsonc`: `WORKSPACE_MODE=live`, `AGENT_BACKEND=model`, `MODEL=anthropic/claude-haiku-5-5`, `AUTH_MODE=neon`, `OS_DB_SCHEMA=os`, `TASK_WORKER_ENABLED`, `TRUST_PROXY`, `API_SLEEP_AFTER`, `PUBLIC_API_URL`, `ALLOWED_ORIGINS`. The workflow overrides the last two with the real addresses (`https://api.debo.life`; `https://my.debo.life,https://my.daksha.life`, with `my.debo.life` first) and adds `PUBLIC_API_URL_ALIASES=https://api.daksha.life`, the other address the API answers on. Sign-in follows the alias a request came in on; callbacks and signed links always use `PUBLIC_API_URL`. `MODEL` is an Anthropic model, so no OpenAI key is needed. `DAILY_TOKEN_LIMIT` (default 40000 per person per day) can be added as a plain var.
 
 The container entry (`api/src/index.ts`) passes a fixed list of names into the container. Anything not on that list never reaches the API.
 

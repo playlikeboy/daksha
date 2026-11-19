@@ -14,9 +14,11 @@ import { SiteFooter } from "../components/site-footer";
 import { SiteHeader } from "../components/site-header";
 import { Trust } from "../components/trust";
 import { YourPeople } from "../components/your-people";
+import { LAUNCH_FILM, videoJsonLd, WALKTHROUGH_FILM } from "../media";
 
 // Structured data for search engines. It says what Debo is and nothing more:
-// no ratings, no prices, no counts, because none exist yet.
+// no ratings, no prices, no counts, because none exist yet. The two films
+// come from media.ts, so their entries change with the files.
 const JSON_LD = {
   "@context": "https://schema.org",
   "@graph": [
@@ -38,6 +40,8 @@ const JSON_LD = {
         acceptedAnswer: { "@type": "Answer", text: item.a },
       })),
     },
+    videoJsonLd(LAUNCH_FILM),
+    videoJsonLd(WALKTHROUGH_FILM),
   ],
 };
 

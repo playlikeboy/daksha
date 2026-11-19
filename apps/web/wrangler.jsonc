@@ -6,9 +6,13 @@
   "main": ".open-next/worker.js",
   "compatibility_date": "2026-11-01",
   "compatibility_flags": ["nodejs_compat", "global_fetch_strictly_public"],
+  // daksha.life and www.daksha.life do the same as debo.life: /privacy, /api/* and the
+  // same redirects to about.debo.life and my.debo.life (see docs/DOMAINS.md).
   "routes": [
     { "pattern": "debo.life", "custom_domain": true },
-    { "pattern": "www.debo.life", "custom_domain": true }
+    { "pattern": "www.debo.life", "custom_domain": true },
+    { "pattern": "daksha.life", "custom_domain": true },
+    { "pattern": "www.daksha.life", "custom_domain": true }
   ],
   "assets": {
     "directory": ".open-next/assets",

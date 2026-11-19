@@ -61,3 +61,11 @@ jobs:
           code=$(curl -s -o /dev/null -w '%{http_code}' https://debo.life/privacy)
           echo "debo.life/privacy returned $code"
           test "$code" = "200"
+
+      # daksha.life serves the same thing (docs/DOMAINS.md). Only a warning: a new custom
+      # domain can take a few minutes to get its certificate.
+      - name: Check the daksha.life twin
+        run: |
+          code=$(curl -s -m 20 -o /dev/null -w '%{http_code}' https://daksha.life/privacy || true)
+          echo "daksha.life/privacy returned $code"
+          [ "$code" = "200" ] || echo "::warning::daksha.life/privacy did not answer 200 yet"

@@ -26,6 +26,35 @@ The landing page has its own look, written in one plain stylesheet, `apps/site/s
 - **Shape:** soft rounded panels (20 to 32px), pill buttons, soft shadows with blur. No hard offset shadows on this page.
 - **The brand name** is one constant, `BRAND` in `apps/site/src/brand.ts`, so a rename changes every heading and button at once.
 - **Section order** is in `apps/site/src/app/page.tsx`, one line per section. New sections use `Section` and `SectionHead` from `apps/site/src/components/section.tsx`.
+- **Films** (the launch film and the walkthrough) play in a Video.js player. Their files, posters, words-on-screen tracks and descriptions are listed once, in `apps/site/src/media.ts`, so new footage is a change to that file and `public/`. See "The film player" below.
+
+### The film player (`apps/site`)
+
+The films use **Video.js 10** through `@videojs/react`, pinned to `10.3.0` (Apache-2.0, published 4 November 2026). Chosen in November 2026 from four open-source players:
+
+| Player | Licence | State in November 2026 | Why not |
+|---|---|---|---|
+| Video.js 10 (`@videojs/react`) | Apache-2.0 | Active. 10.0 came out on 1 October 2026 and new releases come every week or two. | Chosen. |
+| Vidstack (`@vidstack/react` 1.15.7) | MIT | Deprecated on npm: security fixes only, until January 2028. Its makers point to Video.js 10. | No new work. |
+| Plyr 3.8.5 | MIT | Deprecated on npm: security fixes only. Points to Video.js 10. | No new work, not made for React. |
+| Media Chrome 4.19 | MIT | Active, but its makers (Mux) now build Video.js 10 together with the Vidstack and Plyr makers, and Video.js has a guide for moving from it. | Web components, so React and server rendering need a wrapper. |
+
+Why Video.js 10 fits this page:
+
+- **React 19 and Next.js.** It is React components, not a wrapper around a script. It supports React 18 and 19 and renders plain markup on the server.
+- **Accessible out of the box.** Every control is a labelled button or slider, the player is a named group you can tab to, changes like "playing" or "captions on" are read out by screen readers, and it follows `prefers-reduced-motion` and `prefers-contrast`. Keys: Space or K play and pause, M mute, F fullscreen, C captions, arrows seek and change volume, 0 to 9 jump.
+- **Phones.** Plays inline (`playsInline`), tap shows the controls and double tap seeks. Fullscreen uses the standard browser call, and on iPhone falls back to Safari's own video fullscreen.
+- **Theming without copying its code.** The skin takes a few public settings (`--media-accent-color`, `--media-font-family`, `--media-border-radius` and others). We set them from our own tokens, so the slider is tomato and the type is Figtree in light and dark.
+- **Small where it counts.** We load it only near the films (below). In the November 2026 build the player is about 78 KB of script and 10 KB of styles after compression, fetched in the background; the first page load carries none of it.
+
+How it is built:
+
+- `film.tsx` (server) holds the words. `film-player.tsx` is a small client island: it shows the poster and an ink play button inside the same 16:9 frame, so nothing moves when the player arrives. About a screen before the film scrolls into view it imports `film-player-vjs.tsx`, which brings Video.js and its stylesheet. The rest of the page never loads player code.
+- Nothing plays by itself. The film starts, with sound, only when pressed. `preload="none"` means no part of the film downloads before that.
+- Without JavaScript the poster is a plain link to the film file.
+- The skin is the Neutral video skin. Its controls stay dark in both themes, which suits a dark film frame; only the accent, font and corners follow ours.
+- Each film has a "words on screen" track (`public/debo-launch.en.vtt`, `public/debo-demo.en.vtt`). The films have no speech, so the track holds only the words the film shows, timed from the film's own timeline in `video/launch`. When the footage changes, change or remove its track.
+- The long description of each film is a hidden paragraph linked to the player, for screen readers. The same text, with the poster, length and file, goes to search engines as a `VideoObject`.
 
 - Its eyes follow the pointer. This is the one playful moment on a screen. Do not add a second.
 - Debo appears once per screen at most. It is a character, not a pattern.
