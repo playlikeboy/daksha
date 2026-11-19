@@ -56,6 +56,8 @@ const PASSED = [
   "LIVEKIT_API_KEY",
   "LIVEKIT_API_SECRET",
   "VOICE_AGENT_SECRET",
+  // Optional: Debo's own Cartesia account, for voice copies of custom people when the person has no key.
+  "CARTESIA_API_KEY",
   // Keys for the API itself
   "TOKEN_ENCRYPTION_KEY",
   "SESSION_SIGNING_KEY",

@@ -5,15 +5,19 @@
 // agent ("debo-voice") into the room. The agent hears the person (Deepgram
 // Nova-3 through LiveKit Inference, English and Hindi mixed), asks Debo's
 // brain for the answer (the same agent as chat), and speaks it (Cartesia Sonic-3 through LiveKit
-// Inference). Interrupting stops the answer at once.
+// Inference). Interrupting stops the answer at once. When Debo is talking as a
+// custom person with a voice copy, it speaks in that voice instead, through the
+// Cartesia plugin with the key Debo's server sends (see voice-copy.ts).
 //
 // Audio is never stored by Debo. Based on livekit-examples/agent-starter-node (MIT).
 import { ServerOptions, cli, defineAgent, inference, voice } from "@livekit/agents";
+import * as cartesia from "@livekit/agents-plugin-cartesia";
 import { randomUUID } from "node:crypto";
 import { fileURLToPath } from "node:url";
 import { z } from "zod";
 import { DeboVoiceAgent } from "./agent.ts";
 import { readVoiceChoice } from "./brain.ts";
+import { chooseTts, fetchVoiceCopy, greeting } from "./voice-copy.ts";
 
 const Env = z.object({
   // The Debo app's server. Voice runs through the same agent as chat there.
@@ -45,12 +49,28 @@ export default defineAgent({
     // The voice and speed this person chose (Settings), else the env defaults.
     const chosen = readVoiceChoice(participant.metadata);
     const speed = chosen?.speed ?? env.VOICE_TTS_SPEED;
-    const tts = new inference.TTS({
-      model: "cartesia/sonic-3",
-      voice: chosen?.voice ?? env.VOICE_TTS_VOICE,
-      language: env.VOICE_TTS_LANGUAGE,
-      ...(speed ? { modelOptions: { speed } } : {}),
+    // A custom person's copied voice, if Debo is talking as one that has it. Asked over the agent's
+    // secret; the key stays in this process and is never sent to the room.
+    const copy = await fetchVoiceCopy({ deboUrl: env.DEBO_URL, secret: env.VOICE_AGENT_SECRET }, userId.data);
+    const picked = chooseTts<inference.TTS<"cartesia/sonic-3"> | cartesia.TTS>(copy, {
+      inference: () =>
+        new inference.TTS({
+          model: "cartesia/sonic-3",
+          voice: chosen?.voice ?? env.VOICE_TTS_VOICE,
+          language: env.VOICE_TTS_LANGUAGE,
+          ...(speed ? { modelOptions: { speed } } : {}),
+        }),
+      cartesia: (c) =>
+        new cartesia.TTS({
+          apiKey: c.apiKey,
+          model: "sonic-3",
+          voice: c.voiceId,
+          language: c.language,
+          ...(speed ? { speed } : {}),
+        }),
     });
+    const tts = picked.tts;
+    if (tts instanceof cartesia.TTS) ctx.addShutdownCallback(async () => tts.close());
     const session = new voice.AgentSession({
       stt: new inference.STT({ model: "deepgram/nova-3", language: "multi" }),
       // Never used for answers: DeboVoiceAgent.llmNode asks Debo's brain.
@@ -76,8 +96,9 @@ export default defineAgent({
         userId: userId.data,
         sessionId,
         room: ctx.room,
-        tts,
-        emotion: env.VOICE_EMOTION === "on",
+        // A copied voice keeps one steady feeling: only Debo's own voices change per reply.
+        ...(tts instanceof inference.TTS ? { tts } : {}),
+        emotion: env.VOICE_EMOTION === "on" && !picked.copied,
         speed,
       }),
       room: ctx.room,
@@ -93,7 +114,8 @@ export default defineAgent({
       return "ok";
     });
 
-    session.say("Hey! I'm here. What's on your mind?");
+    // In a copied voice, the first words always say this is Debo's AI version of the person.
+    session.say(greeting(copy));
   },
 });
 

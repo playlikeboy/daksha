@@ -8,13 +8,16 @@
 //      (the download says only which keys are set).
 //   3. A key is checked with one cheap call before it is saved. A key that fails is not kept.
 //   4. Removing a key deletes it. Deleting the account deletes every key (the records go).
+//
+// A Cartesia key is used only to make and speak a voice copy of a custom person (voice-clone/).
 import Anthropic from "@anthropic-ai/sdk";
 import { decryptSecret, encryptSecret } from "../../../../packages/integrations/src/vault.ts";
 import type { Store } from "../db.ts";
 import { AppError } from "../errors.ts";
 import { createRateLimitStore } from "../rate-limit.ts";
+import { checkKey as checkCartesiaKey } from "../voice-clone/cartesia.ts";
 
-export const KEY_PROVIDERS = ["anthropic", "openrouter"] as const;
+export const KEY_PROVIDERS = ["anthropic", "openrouter", "cartesia"] as const;
 export type KeyProvider = (typeof KEY_PROVIDERS)[number];
 
 export const OPENROUTER_URL = "https://openrouter.ai/api/v1";
@@ -81,7 +84,8 @@ const KEY_SHAPE = /^[A-Za-z0-9._~+/=:-]{16,400}$/;
 const ANTHROPIC_MODEL = /^claude-[a-z0-9.-]{1,80}$/;
 const OPENROUTER_MODEL = /^~?[a-z0-9][a-z0-9._-]{0,80}\/[a-z0-9][a-z0-9._:-]{0,120}$/i;
 
-export const NAMES: Record<KeyProvider, string> = { anthropic: "Anthropic", openrouter: "OpenRouter" };
+export const NAMES: Record<KeyProvider, string> = { anthropic: "Anthropic", openrouter: "OpenRouter", cartesia: "Cartesia" };
+const AN: Record<KeyProvider, string> = { anthropic: "an", openrouter: "an", cartesia: "a" };
 
 export interface OwnKeysOptions {
   /** TOKEN_ENCRYPTION_KEY. Without it no key can be saved, and none is used. */
@@ -133,12 +137,18 @@ export class OwnKeysService {
     const existing = await this.db.get<OwnKeyRow>(owner, KIND, provider);
     const typed = input.key?.trim();
     if (typed !== undefined && !KEY_SHAPE.test(typed))
-      throw new AppError(`That doesn't look like an ${NAMES[provider]} key. Copy the whole key, with no spaces.`, 400);
+      throw new AppError(`That doesn't look like ${AN[provider]} ${NAMES[provider]} key. Copy the whole key, with no spaces.`, 400);
     const key = typed || (existing ? await this.secret(owner, provider) : undefined);
     if (!key) throw new AppError(`Paste your ${NAMES[provider]} key first.`, 400);
     const model = input.model?.trim() || undefined;
     const imageModel = input.imageModel?.trim() || undefined;
-    if (provider === "anthropic") {
+    if (provider === "cartesia") {
+      if (model || imageModel) throw new AppError("A Cartesia key has no model to pick. Paste the key only.", 400);
+      const checked = await checkCartesiaKey(key, this.fetcher);
+      if (checked === "bad")
+        throw new AppError("Cartesia did not accept that key. Check it on play.cartesia.ai and paste it again.", 400);
+      if (checked === "unreachable") throw new AppError("I couldn't reach Cartesia to check the key. Try again in a moment.", 502);
+    } else if (provider === "anthropic") {
       if (imageModel) throw new AppError("Anthropic does not make pictures. Use OpenRouter for that.", 400);
       if (model && !ANTHROPIC_MODEL.test(model))
         throw new AppError("That is not a Claude model name. It looks like claude-haiku-5-5.", 400);

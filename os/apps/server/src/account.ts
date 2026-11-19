@@ -9,6 +9,7 @@ import type { ImageService } from "./images/service.ts";
 import type { McpService } from "./mcp/service.ts";
 import type { OwnKeysService } from "./own-keys/service.ts";
 import type { CustomPeopleService } from "./custom-people/index.ts";
+import type { VoiceCopyService } from "./voice-clone/service.ts";
 
 /** Kinds that hold secrets or session state. They are never part of a person's export. */
 const NEVER_EXPORTED = new Set(["credentials", "sessions"]);
@@ -27,6 +28,7 @@ export function accountRoutes(
   ownKeys?: OwnKeysService,
   images?: ImageService,
   customPeople?: Pick<CustomPeopleService, "removeAll">,
+  voiceCopy?: VoiceCopyService,
 ) {
   const app = new Hono<{ Variables: { owner: string } }>();
   app.get("/export", async (c) => {
@@ -78,13 +80,31 @@ export function accountRoutes(
     const filesRemoved = await files.removeAll(owner);
     // Pictures Debo made: the files in the bucket go before their records do.
     const imagesRemoved = (await images?.removeAll(owner)) ?? 0;
-    // Custom people: any raw upload still in the bucket, and anything kept elsewhere about them.
-    // Their profiles are records, so they go with the records below.
+    // Voice copies are deleted at Cartesia, and leftover recordings in the bucket. This runs
+    // before the custom people and the own keys go: a voice copy made on the person's own
+    // Cartesia key needs that key to be deleted.
+    const voice = (await voiceCopy?.removeAll(owner)) ?? { voiceCopiesRemoved: 0, notConfirmedAtCartesia: 0 };
+    // Custom people: any raw upload still in the bucket. Their profiles are records, so they go
+    // with the records below.
     const customUploadsRemoved = (await customPeople?.removeAll(owner)) ?? 0;
     // The person's own AI keys. The records below would go anyway; this is the clear path.
     await ownKeys?.removeAll(owner);
     const recordsRemoved = await db.removeOwner(owner);
-    return c.json({ ok: true, recordsRemoved, filesRemoved, entriesRemoved, appsDisconnected, imagesRemoved, customUploadsRemoved });
+    return c.json({
+      ok: true,
+      recordsRemoved,
+      filesRemoved,
+      entriesRemoved,
+      appsDisconnected,
+      imagesRemoved,
+      customUploadsRemoved,
+      voiceCopiesRemoved: voice.voiceCopiesRemoved,
+      ...(voice.notConfirmedAtCartesia
+        ? {
+            note: "Some voice copies could not be confirmed as deleted at Cartesia, because their key was gone. If you used your own Cartesia key, delete them in your Cartesia account.",
+          }
+        : {}),
+    });
   });
   return app;
 }
