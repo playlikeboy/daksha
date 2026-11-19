@@ -8,7 +8,8 @@ import { AskIcon, EyeIcon, MicIcon, PenIcon } from "./icons";
 // How it works: four steps on the left, and on wide screens one phone that
 // stays in view on the right and changes to the screen of the step being read.
 // On phones each step shows its own screenshot instead.
-// The screenshots are real, from the app with a demo account (public/shots).
+// The screenshots are real, from the app in demo mode with made-up entries (public/shots).
+// To take them again, see docs/MEDIA.md.
 type Step = {
   id: string;
   icon: ReactNode;
@@ -31,7 +32,7 @@ const STEPS: Step[] = [
     ],
     shot: {
       src: "/shots/journal-light.webp",
-      alt: `The ${BRAND} journal. A large writing box asks: What happened today? Who did you see? Below it are the day, a Save entry button and a box to find an entry.`,
+      alt: `The ${BRAND} journal. A writing box asks: What happened today? Who did you see? Inside it are the buttons Speak, Record voice, Record video and Add a recording. Below it are the day, a Save entry button and a box to find an entry.`,
     },
   },
   {
@@ -46,7 +47,7 @@ const STEPS: Step[] = [
     ],
     shot: {
       src: "/shots/chat-light.webp",
-      alt: `The ${BRAND} app. ${BRAND} answers a question about getting ready for Mum's visit and a Goa trip: clean the spare room before Mum arrives, talk to Neha and Aarav, and it says plainly that the journal does not give Mum's arrival date.`,
+      alt: `The ${BRAND} chat before you ask anything. ${BRAND} says: I keep your journal and remember what is in it. Ask me about your days, and I will show you which entry each answer came from. Below are three suggestions, Write in my journal, What did I do last week? and See what ${BRAND} knows, and a box to type a message.`,
     },
   },
   {
@@ -61,7 +62,7 @@ const STEPS: Step[] = [
     ],
     shot: {
       src: "/shots/knows-light.webp",
-      alt: `The What ${BRAND} knows page. A memory reads: You plan to water them every second morning while the weather stays warm. It shows the source chip Journal, 11 November and the buttons Fix this memory and Forget this memory.`,
+      alt: `The What ${BRAND} knows page. Each memory, like Long walk by the lake after work, shows the entry it came from, such as Journal, 19 November, and the buttons Fix this and Forget this.`,
     },
   },
   {
@@ -76,7 +77,7 @@ const STEPS: Step[] = [
     ],
     shot: {
       src: "/shots/talk-light.webp",
-      alt: `A voice call with ${BRAND}. The red tomato sits above the word Listening and Microphone on. ${BRAND} has said: Hey! I'm here. What's on your mind? Buttons below: Mic on, Stop ${BRAND}, Type and End.`,
+      alt: `The Talk screen before a call. A card at the top is waiting for your yes: Create Coffee with Jamie, ${BRAND} will change your calendar, with the buttons Approve and Not now. Below are ${BRAND}'s face, Tap to start and Microphone off, and three points: ${BRAND} listens only during the call, what you say is saved as text in your journal, and you can mute or end the call at any time.`,
     },
   },
 ];

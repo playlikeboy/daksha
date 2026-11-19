@@ -121,11 +121,11 @@ export function Solution() {
 }
 
 const SHOTS = [
-  { src: "/shots/journal-light.webp", w: 780, h: 933, title: "Journal", alt: "The Debo journal. Entries from 11 November sit in a list, each with the buttons Change entry and Delete entry.", text: "Write or record. Edit and delete any entry." },
+  { src: "/shots/journal-light.webp", w: 780, h: 933, title: "Journal", alt: "The Debo journal. A box to find an entry, then entries from 19 and 18 November, each with the buttons Change entry and Delete entry.", text: "Write or record. Edit and delete any entry." },
   { src: "/shots/chat-light.webp", w: 780, h: 767, title: "Ask", alt: "The Debo chat. A person asks what they planted on the balcony and Debo answers with a source chip.", text: "Answers with a chip for every source." },
-  { src: "/shots/knows-light.webp", w: 780, h: 1067, title: "What Debo knows", alt: "The What Debo knows page. A memory with its source chip and the buttons Fix this memory and Forget this memory.", text: "Every memory, with fix and forget." },
-  { src: "/shots/talk-light.webp", w: 780, h: 833, title: "Talk", alt: "The Talk to Debo screen. A status line reads: Microphone off, Debo is not listening. A button says Start talking.", text: "Speak, with a clear microphone light." },
-  { src: "/shots/apps-light.webp", w: 780, h: 1067, title: "Apps", alt: "The Apps screen in Debo, with Gmail and Google Calendar listed as not connected yet.", text: "Connect apps one at a time." },
+  { src: "/shots/knows-light.webp", w: 780, h: 1067, title: "What Debo knows", alt: "The What Debo knows page. Each memory shows its source chip, like Journal, 19 November, and the buttons Fix this and Forget this.", text: "Every memory, with fix and forget." },
+  { src: "/shots/talk-light.webp", w: 780, h: 833, title: "Talk", alt: "The Talk screen in Debo. Above Debo's face, a card waiting for your yes: Create Coffee with Jamie, Debo will change your calendar, with the buttons Approve and Not now.", text: "Talk, and say yes before anything changes." },
+  { src: "/shots/apps-light.webp", w: 780, h: 1067, title: "Apps", alt: "The Apps screen in Debo. Gmail and Google Calendar show example data, and Debo's computer is not connected yet.", text: "Connect apps one at a time." },
 ];
 
 export function Product() {
@@ -135,7 +135,7 @@ export function Product() {
         id="product"
         badge="4. Product"
         title="What it looks like today"
-        lead="Real screenshots of the app at my.debo.life, with made-up demo entries."
+        lead="Real screenshots of the app, with made-up demo entries."
       />
       <Grid columns={{ minWidth: 220, repeat: "fit" }} gap={5} align="start">
         {SHOTS.map((shot) => (
