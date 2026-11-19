@@ -145,23 +145,29 @@ export function AvatarBuilderSheet({
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
   const [sureDelete, setSureDelete] = useState(false);
+  // If the saved face does not load, the form stays hidden: saving the blank starting face
+  // would quietly replace the person's drawing.
+  const [loadFailed, setLoadFailed] = useState("");
+  const [attempt, setAttempt] = useState(0);
   const inUse = !!avatarId && character === "custom" && data?.identity.customAvatar === avatarId;
 
   useEffect(() => {
     if (!avatarId) return;
     let live = true;
+    setLoading(true);
+    setLoadFailed("");
     getAvatar(api, avatarId)
       .then((saved) => {
         if (!live) return;
         const { id: _id, createdAt: _c, updatedAt: _u, ...rest } = saved;
         setConfig(rest);
       })
-      .catch((e) => live && setError(errorText(e)))
+      .catch((e) => live && setLoadFailed(`This face did not load, so nothing can be changed yet. ${errorText(e)}`))
       .finally(() => live && setLoading(false));
     return () => {
       live = false;
     };
-  }, [api, avatarId]);
+  }, [api, avatarId, attempt]);
 
   const set = (changes: Partial<AvatarConfig>) => setConfig((old) => ({ ...old, ...changes }));
   const setColour = (part: keyof AvatarColours, hex: string) => setConfig((old) => ({ ...old, colours: { ...old.colours, [part]: hex } }));
@@ -228,6 +234,8 @@ export function AvatarBuilderSheet({
     >
       {loading ? (
         <Skeleton label="Loading the face" rows={3} />
+      ) : loadFailed ? (
+        <ErrorNotice error={loadFailed} onRetry={() => setAttempt((n) => n + 1)} />
       ) : (
         <View style={{ gap: spacing[4] }}>
           <Card style={{ gap: spacing[3], alignItems: "center" }}>
@@ -311,6 +319,11 @@ export function AvatarBuilderSheet({
             {avatarId && (
               <Button danger busy={busy} onPress={() => void remove()}>
                 {sureDelete ? `Yes, delete ${config.name}` : "Delete this face"}
+              </Button>
+            )}
+            {avatarId && sureDelete && (
+              <Button disabled={busy} onPress={() => setSureDelete(false)}>
+                Keep it
               </Button>
             )}
           </View>
