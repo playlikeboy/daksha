@@ -7,6 +7,7 @@ import { z } from "zod";
 import { agentCharacters } from "../../../../packages/domain/src/agent.ts";
 import { AppError } from "../errors.ts";
 import { PersonaStore } from "../persona.ts";
+import { changeIdentity } from "../settings-tools.ts";
 import { VOICES } from "../talk-settings.ts";
 import type { CustomPeopleService } from "./service.ts";
 import type { CustomPerson } from "./store.ts";
@@ -93,18 +94,21 @@ export function customPeopleTools(service: CustomPeopleService, owner: string, c
     defineTool({
       name: "talk_as",
       description:
-        "Start talking as one of the person's custom people (give `person`), or switch to a built-in character (give `character`). It stays on in every chat and call until they say stop (then call clear_persona).",
+        "Start talking as one of the person's custom people (give `person`). It stays on in every chat and call until they say stop (then call clear_persona). To go back to a built-in character instead, give `character`; this is the same change as update_identity, which also changes your name, tone or a face the person made.",
       parameters: z.object({
         person: who.optional(),
-        character: z.enum(agentCharacters).optional().describe("A built-in character instead of a custom person."),
+        character: z
+          .enum(agentCharacters.filter((c) => c !== "custom") as [string, ...string[]])
+          .optional()
+          .describe("A built-in character instead of a custom person. For a face the person made, use update_identity."),
       }),
       execute: async ({ person: key, character }) => {
         try {
           if (character) {
-            await new PersonaStore(service.db).clear(owner);
-            const changed = await service.db.compareAndSwap(owner, "agent-settings", "identity", {}, { character });
-            if (!changed) await service.db.put(owner, "agent-settings", { id: "identity", name: "Debo", tone: "warm", character });
-            return { status: "talking", character };
+            // The same change as update_identity: the name follows the character, and talking as
+            // a custom person ends.
+            const { identity, changed } = await changeIdentity(service.db, owner, { character });
+            return { status: "talking", character: identity.character ?? character, changed };
           }
           if (!key) return { status: "failed", error: "Say who to talk as." };
           const person = await service.people.find(owner, key);

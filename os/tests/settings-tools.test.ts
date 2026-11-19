@@ -5,7 +5,11 @@ import { appScreenInfo, appScreens } from "../packages/domain/src/screens.ts";
 import { createStore, type Store } from "../apps/server/src/db.ts";
 import { voiceStyle } from "../apps/server/src/engine/personality.ts";
 import { CompanionSettingsStore } from "../apps/server/src/reminders.ts";
+import { CustomAvatarStore } from "../apps/server/src/custom-avatars.ts";
+import { CustomPeopleService, customPeopleTools } from "../apps/server/src/custom-people/index.ts";
+import { PersonaStore } from "../apps/server/src/persona.ts";
 import { findVoice, settingsInstructions, settingsTools } from "../apps/server/src/settings-tools.ts";
+import { defaultAvatarConfig } from "../packages/domain/src/avatar.ts";
 import { CONTEXT_MAX, TalkSettingsStore, VOICES } from "../apps/server/src/talk-settings.ts";
 
 let db: Store;
@@ -106,6 +110,45 @@ test("update_identity refuses bad values", async () => {
   assert.ok((await run("update_identity", { character: "batman" })).error);
   assert.match(String((await run("update_identity", {})).error), /Say what to change/);
   assert.equal(await db.get("id-d", "agent-settings", "identity"), null, "nothing is written on a bad ask");
+});
+
+test("update_identity takes a face the person made, by id or name, checked like the identity route", async () => {
+  const run = toolsFor("id-face");
+  const faces = new CustomAvatarStore(db);
+  const face = await faces.add("id-face", { ...defaultAvatarConfig, name: "Rani", pronoun: "she", base: "human" });
+  const other = await faces.add("id-face-other", { ...defaultAvatarConfig, name: "Not yours", pronoun: "he", base: "cat" });
+  assert.match(String((await run("update_identity", { character: "custom" })).error), /Say which face/);
+  assert.match(String((await run("update_identity", { customAvatar: other.id })).error), /not saved/);
+  assert.equal(await db.get("id-face", "agent-settings", "identity"), null, "nothing is written on a bad ask");
+
+  const byName = await run("update_identity", { customAvatar: "rani" });
+  assert.equal(byName.status, "saved", JSON.stringify(byName));
+  const saved = await db.get<{ character?: string; customAvatar?: string; name: string }>("id-face", "agent-settings", "identity");
+  assert.equal(saved?.character, "custom");
+  assert.equal(saved?.customAvatar, face.id);
+  assert.equal(saved?.name, "Rani", "the name follows the face, as it does for a character");
+  // Back to a built-in character: the face's name gives way to the character's.
+  await run("update_identity", { character: "kabir" });
+  assert.equal((await db.get<{ name: string }>("id-face", "agent-settings", "identity"))?.name, "Kabir");
+});
+
+test("choosing a character ends talking as a custom person, and talk_as uses the same change", async () => {
+  const owner = "id-role";
+  const people = new CustomPeopleService({ db, store: () => undefined, model: async () => undefined });
+  const nani = await people.people.create(owner, { name: "Nani" });
+  await people.talkAs(owner, nani.id);
+  const out = await toolsFor(owner)("update_identity", { character: "diya" });
+  assert.equal(out.endedRole, true);
+  assert.equal(await new PersonaStore(db).get(owner), null);
+
+  await people.talkAs(owner, nani.id);
+  const tools = customPeopleTools(people, owner, "chat") as unknown as Tool[];
+  const talkAs = tools.find((t) => t.name === "talk_as")!;
+  const back = await talkAs.execute({ character: "mishti" });
+  assert.equal(back.status, "talking");
+  assert.equal(await new PersonaStore(db).get(owner), null);
+  assert.equal((await db.get<{ name: string; character: string }>(owner, "agent-settings", "identity"))?.name, "Mishti");
+  assert.equal((await talkAs.execute({ character: "custom" })).status, "failed", "a face goes through update_identity");
 });
 
 test("update_reminders changes birthday reminders and the check-in, for this person only", async () => {

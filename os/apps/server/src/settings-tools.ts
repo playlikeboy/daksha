@@ -3,7 +3,11 @@
 //
 //   update_talk_settings  write  Voice, speed, mood, length, language, and adding a line to the
 //                                person's notes. Uses the talk settings store and its checks.
-//   update_identity       write  The assistant's name, tone and character (the "About Debo" row).
+//   update_identity       write  The assistant's name, tone and character (the "About Debo" row),
+//                                including a face the person made (character "custom" with one of
+//                                their own saved faces, checked like POST /api/agent/identity).
+//                                Choosing a character ends talking as a custom person; talk_as
+//                                (custom-people/tools.ts) uses the same change for built-in characters.
 //   update_reminders      write  Birthday reminders, the morning check-in and its time. Uses the
 //                                companion settings store and its checks (no quiet-hours times).
 //   open_screen           read   Returns a card that opens a screen or sheet in the app, for things
@@ -16,8 +20,10 @@ import { defineTool } from "@copilotkit/runtime/v2";
 import { z } from "zod";
 import { type AgentIdentity, agentCharacters } from "../../../packages/domain/src/agent.ts";
 import { appScreenInfo, appScreens } from "../../../packages/domain/src/screens.ts";
+import { CustomAvatarStore } from "./custom-avatars.ts";
 import type { Store } from "./db.ts";
 import { AppError } from "./errors.ts";
+import { PersonaStore } from "./persona.ts";
 import { CompanionSettingsStore } from "./reminders.ts";
 import {
   CONTEXT_MAX,
@@ -32,7 +38,7 @@ import {
 } from "./talk-settings.ts";
 
 export const settingsInstructions =
-  " CHANGING SETTINGS BY ASKING: when the person asks you to change how you talk (voice, speed, mood, how much you say, language), your name, your tone or which character you are, or their birthday reminders and morning check-in, change it at once with update_talk_settings, update_identity or update_reminders. Change only what they asked for, then say in one short sentence what changed. If a tool returns an error, say what went wrong in plain words. Never say a setting changed unless the tool returned status saved. " +
+  " CHANGING SETTINGS BY ASKING: when the person asks you to change how you talk (voice, speed, mood, how much you say, language), your name, your tone or which character you are (a face they made counts: update_identity with customAvatar), or their birthday reminders and morning check-in, change it at once with update_talk_settings, update_identity or update_reminders. Change only what they asked for, then say in one short sentence what changed. If a tool returns an error, say what went wrong in plain words. Never say a setting changed unless the tool returned status saved. " +
   "When they want something only the app can do (build a face, add chats, photos or recordings, connect an app, see what you know, tidy their notes, delete something), or ask where a setting is, call open_screen with the closest screen. In chat a card with a button appears. On a call they can't tap it, so tell them where to find it in a few words.";
 
 /** The name each built-in character offers. Any other character keeps the person's name. */
@@ -99,8 +105,61 @@ export const identityChangeInput = z
     name: z.string().trim().min(1, "A name needs at least one letter.").max(80).optional(),
     tone: z.enum(tones).optional(),
     character: z.enum(agentCharacters).optional(),
+    /** A face the person made: its id or its name. Means character "custom". */
+    customAvatar: z.string().trim().min(1).max(100).optional(),
   })
   .refine((v) => Object.values(v).some((x) => x !== undefined), "Say what to change.");
+
+/**
+ * Change the assistant's name, tone or character, the same way for every caller
+ * (update_identity, and talk_as for a built-in character). A face the person made must be
+ * one of their own saved faces, as POST /api/agent/identity checks. Picking a character
+ * ends talking as a custom person, so the new character is really the one who answers.
+ */
+export async function changeIdentity(db: Store, owner: string, input: unknown) {
+  const ask = identityChangeInput.parse(input);
+  const before = await db.get<AgentIdentity>(owner, "agent-settings", "identity");
+  const faces = new CustomAvatarStore(db);
+  const character = ask.customAvatar ? "custom" : ask.character;
+  let face: { id: string; name: string } | null = null;
+  if (character === "custom") {
+    const key = ask.customAvatar ?? before?.customAvatar;
+    const all = key ? await faces.list(owner) : [];
+    const lower = key?.toLocaleLowerCase();
+    face = all.find((f) => f.id === key) ?? all.find((f) => f.name.toLocaleLowerCase() === lower) ?? null;
+    if (!face)
+      throw new AppError(
+        key
+          ? "That face is not saved any more. Pick another one, or make one with open_screen avatar-builder."
+          : "Say which face you made to use. There is none picked yet.",
+        422,
+      );
+  }
+  let name = ask.name;
+  let keptName: string | undefined;
+  if (character && name === undefined) {
+    const current = before?.name?.trim() ?? "";
+    const offered = character === "custom" ? face?.name : characterNames[character];
+    const faceNames = character === "custom" || before?.character === "custom" ? (await faces.list(owner)).map((f) => f.name) : [];
+    const isCharacterName = [...Object.values(characterNames), ...faceNames].includes(current);
+    if (offered && (!current || isCharacterName)) name = offered;
+    else if (offered && current !== offered) keptName = current;
+  }
+  // Written only once the ask is known to be good.
+  await db.insertIfAbsent(owner, "agent-settings", { id: "identity", name: "Debo", tone: "warm" });
+  const patch = defined({ name, tone: ask.tone, character, customAvatar: face?.id });
+  const identity = await db.compareAndSwap<AgentIdentity>(owner, "agent-settings", "identity", {}, patch);
+  if (!identity) throw new AppError("I couldn't save that just now. Try again in a moment.", 409);
+  const personas = new PersonaStore(db);
+  const endedRole = character ? Boolean((await personas.get(owner).catch(() => null))?.customPersonId) : false;
+  if (endedRole) await personas.clear(owner);
+  const changed = [
+    ...(patch.name !== undefined ? [`Name: ${patch.name}`] : []),
+    ...(ask.tone ? [`Tone: ${toneWords[ask.tone]}`] : []),
+    ...(character ? [`Character: ${face ? `your face ${face.name}` : (characterNames[character] ?? character)}`] : []),
+  ];
+  return { identity, changed, keptName, endedRole };
+}
 
 export const remindersChangeInput = z
   .object({
@@ -163,37 +222,24 @@ export function settingsTools(
     }),
     defineTool({
       name: "update_identity",
-      description: `Change your own name, tone or character for this person, at once. name: what they want to call you. tone: ${tones.join(", ")} (concise means short and clear). character: who they talk to (${agentCharacters.join(", ")}). When only the character changes and your name is empty or another character's name, your name follows the new character; a name the person chose themselves is kept.`,
+      description: `Change your own name, tone or character for this person, at once. name: what they want to call you. tone: ${tones.join(", ")} (concise means short and clear). character: who they talk to (${agentCharacters.filter((c) => c !== "custom").join(", ")}, or custom for a face the person made). customAvatar: the id or name of a face the person made in the avatar builder (implies character custom); if they have none, use open_screen avatar-builder. When only the character changes and your name is empty or another character's or face's name, your name follows the new character; a name the person chose themselves is kept. Choosing a character stops talking as a custom person.`,
       parameters: identityChangeInput,
       execute: async (args) => {
         signal?.throwIfAborted();
         try {
-          const ask = identityChangeInput.parse(args);
-          await db.insertIfAbsent(owner, "agent-settings", { id: "identity", name: "Debo", tone: "warm" });
-          const before = await db.get<AgentIdentity>(owner, "agent-settings", "identity");
-          let name = ask.name;
-          let keptName: string | undefined;
-          if (ask.character && name === undefined) {
-            const current = before?.name?.trim() ?? "";
-            const offered = characterNames[ask.character];
-            const isCharacterName = Object.values(characterNames).includes(current);
-            if (offered && (!current || isCharacterName)) name = offered;
-            else if (offered && current !== offered) keptName = current;
-          }
-          const patch = defined({ name, tone: ask.tone, character: ask.character });
-          const identity = await db.compareAndSwap<AgentIdentity>(owner, "agent-settings", "identity", {}, patch);
-          if (!identity) return { error: "I couldn't save that just now. Try again in a moment." };
-          const changed = [
-            ...(patch.name !== undefined ? [`Name: ${patch.name}`] : []),
-            ...(ask.tone ? [`Tone: ${toneWords[ask.tone]}`] : []),
-            ...(ask.character ? [`Character: ${characterNames[ask.character] ?? ask.character}`] : []),
-          ];
+          const { identity, changed, keptName, endedRole } = await changeIdentity(db, owner, args);
           return {
             status: "saved",
             kind: "identity",
             changed,
-            identity: { name: identity.name, tone: identity.tone, character: identity.character ?? "debo" },
+            identity: {
+              name: identity.name,
+              tone: identity.tone,
+              character: identity.character ?? "debo",
+              ...(identity.character === "custom" && identity.customAvatar ? { customAvatar: identity.customAvatar } : {}),
+            },
             ...(keptName ? { keptName } : {}),
+            ...(endedRole ? { endedRole: true } : {}),
             screen: "apps",
             note: keptName
               ? `Saved. The name the person chose (${keptName}) is kept; you may ask once if they want the character's name instead. Use the new name from now on.`
