@@ -89,6 +89,15 @@ const screens = [
     path: "/apps",
     steps: (page) => press(page, /voice, personality and notes/i),
   },
+  {
+    // Further down the same sheet: the rows of choices (mood, length, language).
+    name: "talk-settings-choices",
+    path: "/apps",
+    steps: async (page) => {
+      await press(page, /voice, personality and notes/i);
+      await page.getByRole("radiogroup", { name: "Language" }).scrollIntoViewIfNeeded({ timeout: 8000 });
+    },
+  },
   { name: "notifications", path: "/chat", steps: (page) => press(page, /^notifications/i) },
   { name: "not-found", path: "/no-such-page" },
 ];
