@@ -424,11 +424,11 @@ function AppRow({
                 {`Open ${item.name} sign-in again`}
               </Button>
               <Button small disabled={busy} onPress={() => onDisconnect(connection)}>
-                Cancel
+                Stop connecting
               </Button>
             </>
           ) : item.connectable ? (
-            <Button small primary icon={Link2} busy={busy} onPress={onConnect}>
+            <Button small icon={Link2} busy={busy} onPress={onConnect}>
               {state ? `Connect ${item.name} again` : `Connect ${item.name}`}
             </Button>
           ) : null}
