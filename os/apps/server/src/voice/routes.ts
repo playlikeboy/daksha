@@ -5,6 +5,13 @@ import { VOICE_ERROR_MESSAGE, type VoiceBrain, type VoiceBrainEvent } from "./br
 import { readVoiceConfig, VOICE_NOT_SET_UP, type VoiceConfig } from "./config.ts";
 import { isVoiceAgent } from "./secret.ts";
 import { mintVoiceSession } from "./token.ts";
+import type { CallVoice } from "../voice-clone/service.ts";
+
+/** The first thing said on every call in a copied voice, before anything else. */
+export function copiedVoiceOpening(name: string): string {
+  const clean = name.replace(/[\p{C}<>{}]/gu, "").trim().slice(0, 60) || "this person";
+  return `Hi, it's Debo. I'm speaking as an AI version of ${clean}, in a copied voice. I'm not really ${clean}.`;
+}
 
 type Env = Record<string, string | undefined>;
 
@@ -35,8 +42,33 @@ export interface CallRecorder {
  * Streams newline-delimited JSON: `sources`, `text`, `say`, then `done`.
  * Never log the question or the answer: they hold the person's own words.
  */
-export function voiceAgentRoutes(brain: VoiceBrain, env: () => Env = () => process.env, calls?: CallRecorder) {
+export function voiceAgentRoutes(
+  brain: VoiceBrain,
+  env: () => Env = () => process.env,
+  calls?: CallRecorder,
+  callVoice?: (owner: string) => Promise<CallVoice | null>,
+) {
   const app = new Hono();
+  /**
+   * POST /api/voice/session { userId }. Asked once when a call starts: which
+   * voice to speak in. When Debo is talking as a custom person who has a voice
+   * copy, the answer carries its Cartesia voice id and the key to speak it, so
+   * the key travels only over this secret channel, never to the app. Otherwise
+   * `voiceCopy` is null and the call uses Debo's usual voices.
+   */
+  app.post("/session", async (c) => {
+    const config = readVoiceConfig(env());
+    if (!config) throw new AppError(VOICE_NOT_SET_UP, 503);
+    if (!isVoiceAgent(c.req.header("authorization"), config.agentSecret))
+      throw new AppError("Not allowed.", 401);
+    const parsed = z.object({ userId: z.string().trim().min(1).max(200) }).safeParse(await c.req.json().catch(() => null));
+    if (!parsed.success) throw new AppError("Bad request.", 400);
+    const voice = await callVoice?.(parsed.data.userId).catch((error) => {
+      console.error(`[Debo] voice session lookup failed: ${error instanceof Error ? error.name : "error"}`);
+      return null;
+    });
+    return c.json({ voiceCopy: voice ? { ...voice, opening: copiedVoiceOpening(voice.personName) } : null });
+  });
   app.post("/brain", async (c) => {
     const config = readVoiceConfig(env());
     if (!config) throw new AppError(VOICE_NOT_SET_UP, 503);

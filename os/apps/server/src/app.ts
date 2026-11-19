@@ -56,6 +56,14 @@ import { readTimeZone, requestTimeZone, TIME_ZONE_HEADER, TimeZoneStore } from "
 import type { VoiceBrain } from "./voice/brain.ts";
 import { EngineVoiceBrain } from "./voice/engine-brain.ts";
 import { voiceAgentRoutes, voiceTokenRoutes } from "./voice/routes.ts";
+import { ffmpegTools } from "./debo/audio.ts";
+import {
+  deboCartesiaKey,
+  diarizerFromEnv,
+  recordsGlue,
+  voiceCopyRoutes,
+  VoiceCopyService,
+} from "./voice-clone/index.ts";
 import { WorkspaceService } from "./workspace.ts";
 
 export async function createApp(
@@ -82,6 +90,8 @@ export async function createApp(
     ownKeys?: OwnKeysService;
     /** Pictures. Tests pass one with a fake picture service. */
     images?: ImageService;
+    /** Voice notes and calls of custom people, and voice copies. Tests pass one with fakes. */
+    voiceCopy?: VoiceCopyService;
   } = {},
 ) {
   await resolveComputerDeployment(config);
@@ -139,6 +149,20 @@ export async function createApp(
     options.images ??
     new ImageService(db, { store: () => debo.mediaStore, maker: imageMakerFromEnv(process.env), ownKeys });
   agent.images = images;
+  // Voice notes and call recordings of a custom person, kept in the same private bucket for a short time.
+  // MERGE NOTE: recordsGlue stands in for Workstream A's custom people; see voice-clone/glue.ts.
+  const voiceCopy =
+    options.voiceCopy ??
+    new VoiceCopyService({
+      db,
+      store: () => debo.mediaStore,
+      audio: ffmpegTools(),
+      diarizer: diarizerFromEnv(process.env),
+      glue: recordsGlue(db),
+      ownCartesiaKey: (owner) => ownKeys.secret(owner, "cartesia"),
+      deboCartesiaKey: deboCartesiaKey(process.env),
+      later: (work) => void work.catch((error) => backgroundFailure("voice recording", error)),
+    });
   const threads = new ThreadStore(db);
   const timeZones = new TimeZoneStore(db);
   const runner = new DatabaseAgentRunner(threads);
@@ -268,7 +292,7 @@ export async function createApp(
     voiceAgentRoutes(voiceBrain, options.voiceEnv, {
       turn: (owner, sessionId, who, text) => debo.recordCallTurn(owner, sessionId, who, text),
       sweep: (owner) => debo.sweepCalls(owner),
-    }),
+    }, (owner) => voiceCopy.callVoice(owner)),
   );
   // Deleting a call also deletes its copy in Chat (same words, same person).
   debo.onCallDeleted = (owner, callId) => threads.remove(owner, `voice-${callId}`);
@@ -327,7 +351,8 @@ export async function createApp(
   const characterOf = async (owner: string) =>
     (await db.get<{ character?: string }>(owner, "agent-settings", "identity").catch(() => null))?.character;
   app.route("/api/talk-settings", talkSettingsRoutes(talkSettings, characterOf));
-  app.route("/api/account", accountRoutes(db, files, debo, connectors, mcp, ownKeys, images));
+  app.route("/api/account", accountRoutes(db, files, debo, connectors, mcp, ownKeys, images, voiceCopy));
+  app.route("/api/custom-people", voiceCopyRoutes(voiceCopy));
   app.route("/api/connectors", connectorRoutes(connectors));
   app.route("/api/mcp", mcpRoutes(mcp));
   app.route("/api/own-keys", ownKeyRoutes(ownKeys));
@@ -537,5 +562,5 @@ export async function createApp(
   app.get("/", (c) =>
     c.json({ name: "Debo", app: "http://localhost:8081", health: "/api/health" }),
   );
-  return { app, auth, files, actions, workspace, agent, computer, debo, connectors, mcp };
+  return { app, auth, files, actions, workspace, agent, computer, debo, connectors, mcp, voiceCopy };
 }
