@@ -6,7 +6,7 @@ import type { UploadStarted } from "./debo-api";
 import type { Capture, SentRange } from "./debo-capture-types";
 import type { EntryView } from "./debo-data";
 
-export type UploadApi = {
+export type UploadApi<T = EntryView> = {
   startUpload(body: {
     kind: "voice" | "video";
     mimeType: string;
@@ -16,11 +16,11 @@ export type UploadApi = {
     origin: "recorded" | "picked";
     fileName?: string;
     lastModified?: number;
-  }): Promise<UploadStarted>;
+  }): Promise<Pick<UploadStarted, "mediaId" | "upload">>;
   completeUpload(
     mediaId: string,
     body: { parts?: { number: number; etag: string }[]; happenedAt?: string; title?: string },
-  ): Promise<EntryView>;
+  ): Promise<T>;
 };
 
 export type Sender = (
@@ -50,8 +50,8 @@ async function withRetries<T>(work: () => Promise<T>, tries = 3, pause = (ms: nu
  * Upload one recording and save it as an entry. `onProgress` gets 0 to 1.
  * Returns the new entry (its words may still be on the way).
  */
-export async function uploadRecording(
-  api: UploadApi,
+export async function uploadRecording<T = EntryView>(
+  api: UploadApi<T>,
   send: Sender,
   capture: Capture,
   options: {
@@ -61,7 +61,7 @@ export async function uploadRecording(
     onProgress?: (fraction: number) => void;
     pause?: (ms: number) => Promise<void>;
   } = {},
-): Promise<EntryView> {
+): Promise<T> {
   const report = options.onProgress ?? (() => {});
   const started = await api.startUpload({
     kind: capture.kind,
