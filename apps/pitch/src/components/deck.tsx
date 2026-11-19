@@ -38,7 +38,7 @@ export function DeckHero() {
             <Button label="Try the app" variant="primary" size="lg" href="/try" style={TOUCH} />
             <Button label="Use cases" variant="secondary" size="lg" href="/use-cases" style={TOUCH} />
             {PDF_AVAILABLE ? (
-              <Button label="Download the deck (PDF)" variant="secondary" size="lg" href="/debo-pitch-deck.pdf" style={TOUCH} />
+              <Button label="Download the deck (PDF)" variant="secondary" size="lg" href="/daksha-pitch-deck.pdf" style={TOUCH} />
             ) : null}
           </HStack>
         </VStack>

@@ -14,3 +14,9 @@ test("pitch.daksha.life and preview addresses are served", () => {
   expect(pitchRedirect("https://debo-pitch.example.workers.dev/")).toBeNull();
   expect(pitchRedirect("not a url")).toBeNull();
 });
+
+test("the deck PDF's old name sends to daksha-pitch-deck.pdf, in one hop from the old host", () => {
+  expect(pitchRedirect("https://pitch.daksha.life/debo-pitch-deck.pdf")).toBe("https://pitch.daksha.life/daksha-pitch-deck.pdf");
+  expect(pitchRedirect("https://pitch.debo.life/debo-pitch-deck.pdf")).toBe("https://pitch.daksha.life/daksha-pitch-deck.pdf");
+  expect(pitchRedirect("https://pitch.daksha.life/daksha-pitch-deck.pdf")).toBeNull();
+});
