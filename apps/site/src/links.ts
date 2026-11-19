@@ -2,8 +2,8 @@
 // The privacy page lives on daksha.life.
 export const START_URL = "https://my.daksha.life";
 export const PRIVACY_URL = "https://daksha.life/privacy";
-// The phone app. The newest GitHub release always carries a file named debo.apk,
-// so this address keeps working. The repository now lives at playlikeboy/daksha
+// The phone app. The newest GitHub release always carries a file named daksha.apk,
+// so this address keeps working (and a copy named debo.apk, for links from before the rename). The repository now lives at playlikeboy/daksha
 // (GitHub redirects links that use its old name). Daksha also works in the phone browser (START_URL).
-export const ANDROID_APK_URL = "https://github.com/playlikeboy/daksha/releases/latest/download/debo.apk";
+export const ANDROID_APK_URL = "https://github.com/playlikeboy/daksha/releases/latest/download/daksha.apk";
 export const RELEASES_URL = "https://github.com/playlikeboy/daksha/releases";

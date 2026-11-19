@@ -1,12 +1,13 @@
 # Build the Daksha phone apps and, on a version tag, publish them as a GitHub Release.
 #
 # What it makes:
-#   Android  debo-<version>.apk  (and debo.apk and daksha.apk, the same file under fixed names, so
-#            https://github.com/playlikeboy/daksha/releases/latest/download/debo.apk works, and so
-#            does .../daksha.apk. debo.apk is the name from before the rename: old links use it.)
+#   Android  daksha-<version>.apk, and the same file as daksha.apk, the fixed name the site, README
+#            and download links use: https://github.com/playlikeboy/daksha/releases/latest/download/daksha.apk
+#            It also uploads a copy named debo.apk, the name from before the rename, so old links
+#            to .../releases/latest/download/debo.apk keep working.
 #            It is TEST-SIGNED with the debug key Expo's template uses, unless the four
 #            Android signing secrets below exist. It cannot go to Google Play as it is.
-#   iOS      debo-<version>-ios-simulator.zip: an UNSIGNED build that only runs in the
+#   iOS      daksha-<version>-ios-simulator.zip: an UNSIGNED build that only runs in the
 #            iOS Simulator on a Mac. It does not install on an iPhone. An iPhone build
 #            needs the owner's paid Apple Developer account (see os/apps/mobile/README.md).
 #
@@ -133,15 +134,18 @@ jobs:
         run: |
           mkdir -p out
           apk=$(ls os/apps/mobile/android/app/build/outputs/apk/release/*.apk | head -n 1)
-          cp "$apk" "out/debo-$VERSION.apk"
-          cp "$apk" out/debo.apk
+          cp "$apk" "out/daksha-$VERSION.apk"
           cp "$apk" out/daksha.apk
+          # The same file under its name from before the rename, so old download links keep working.
+          cp "$apk" out/debo.apk
           ls -l out
           # The Android SDK is on the runner. Show the package and the signer.
           build_tools=$(ls -d "$ANDROID_HOME"/build-tools/* | sort -V | tail -n 1)
-          "$build_tools/aapt" dump badging out/debo.apk | grep -E "^package:|^application-label:|^uses-permission:" || true
-          "$build_tools/apksigner" verify --print-certs out/debo.apk | head -n 3
-          "$build_tools/aapt" dump badging out/debo.apk | grep -q "package: name='life.debo.app'"
+          "$build_tools/aapt" dump badging out/daksha.apk | grep -E "^package:|^application-label:|^uses-permission:" || true
+          "$build_tools/apksigner" verify --print-certs out/daksha.apk | head -n 3
+          # The app id stays life.debo.app, so this build installs over the ones before the rename.
+          "$build_tools/aapt" dump badging out/daksha.apk | grep -q "package: name='life.debo.app'"
+          cmp out/daksha.apk out/debo.apk
 
       - uses: actions/upload-artifact@v4
         with:
@@ -184,7 +188,7 @@ jobs:
           version=$(node -p "require('./os/apps/mobile/app.json').expo.version")
           mkdir -p out
           cd os/apps/mobile/ios/build/Build/Products/Release-iphonesimulator
-          ditto -c -k --sequesterRsrc --keepParent Daksha.app "$GITHUB_WORKSPACE/out/debo-$version-ios-simulator.zip"
+          ditto -c -k --sequesterRsrc --keepParent Daksha.app "$GITHUB_WORKSPACE/out/daksha-$version-ios-simulator.zip"
           ls -l "$GITHUB_WORKSPACE/out"
 
       - uses: actions/upload-artifact@v4

@@ -55,7 +55,7 @@ You can also change settings just by asking: "talk a bit slower", "call yourself
 | The API the app talks to | https://api.daksha.life |
 | Investor site | https://pitch.daksha.life |
 | Privacy page | https://daksha.life/privacy |
-| Android app (early test build) | [GitHub Releases](https://github.com/playlikeboy/daksha/releases/latest), file `debo.apk`. A new build is published each time the phone app changes on `main`. |
+| Android app (early test build) | [GitHub Releases](https://github.com/playlikeboy/daksha/releases/latest), file `daksha.apk` (direct link: https://github.com/playlikeboy/daksha/releases/latest/download/daksha.apk). A new build is published each time the phone app changes on `main`. |
 
 There is no iPhone app yet. On an iPhone, use https://my.daksha.life in Safari and choose Share, then Add to Home Screen.
 
@@ -146,7 +146,7 @@ The voice worker is deployed by hand with `lk agent deploy` from `apps/voice-age
 
 The phone app is the same Expo app as my.daksha.life, built as a real native app (`expo prebuild`; it needs native code for voice and PDFs, so Expo Go does not work). It talks to https://api.daksha.life.
 
-- **Android:** each release has `debo.apk`. It is an early test build, signed with a debug key, installed by hand. It is not on Google Play and cannot be until the owner makes a proper upload key. Nobody has run it on a real phone yet.
+- **Android:** each release has `daksha.apk` (and the same file as `debo.apk`, so links from before the rename work). It is an early test build, signed with a debug key, installed by hand. It is not on Google Play and cannot be until the owner makes a proper upload key. Nobody has run it on a real phone yet.
 - **iPhone:** no installable app. A release may carry an unsigned build for the iOS Simulator on a Mac, for developers only. A real iPhone build needs a paid Apple Developer account.
 
 How to build, what the workflow does and what is needed for the stores: [`os/apps/mobile/README.md`](./os/apps/mobile/README.md). Every push to `main` that changes the phone app publishes a new build as `v<version>-build.<run number>`. For a named version, put the version in `os/apps/mobile/app.json`, merge to `main`, then push a tag such as `v0.2.0`.

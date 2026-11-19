@@ -12,6 +12,6 @@ Early test build of the Daksha phone app. It talks to the live Daksha at https:/
 
 - There is no iPhone app yet. An installable iPhone build needs a paid Apple Developer account, which the project does not have yet.
 - Daksha works in the phone browser at https://my.daksha.life. In Safari, tap Share, then Add to Home Screen.
-- If `debo-__VERSION__-ios-simulator.zip` is attached, it is an unsigned build for the iOS Simulator on a Mac, for developers. It cannot be installed on an iPhone.
+- If `daksha-__VERSION__-ios-simulator.zip` is attached, it is an unsigned build for the iOS Simulator on a Mac, for developers. It cannot be installed on an iPhone.
 
 Privacy: https://daksha.life/privacy
