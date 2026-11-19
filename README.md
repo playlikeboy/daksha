@@ -25,7 +25,7 @@
 
 <p align="center"><a href="https://about.debo.life/debo-launch.mp4">Play the launch film (about a minute)</a> · <a href="https://about.debo.life/debo-demo.mp4">the full app walkthrough</a></p>
 
-The launch film is an animation: its cards are redrawn from the app's own screens and words, and it shows only what the app does today. The walkthrough is a real screen recording of the live app with a demo account. All names and entries in both are made-up sample text.
+The launch film is an animation: its cards are redrawn from the app's own screens and words, and it shows only what the app does today. The walkthrough is recorded from the app in demo mode (see `docs/MEDIA.md`). All names and entries in both are made-up sample text.
 
 ## What Debo is
 

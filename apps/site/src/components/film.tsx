@@ -4,7 +4,7 @@ import { FilmPlayer } from "./film-player";
 import { Badge, Section, SectionHead } from "./section";
 
 // A short animated film: the app's cards are redrawn (not screen recordings), with words that build
-// on screen (source in video/launch/film2). Below it, a walkthrough of one real recording with step captions.
+// on screen (source in video/launch/film2). Below it, a walkthrough recorded from the app in demo mode, with step captions.
 // Both have music and sound effects made in video/launch/audio, and no speech.
 // The files, posters and descriptions live in media.ts, so new footage is a change there.
 export function Film() {
@@ -37,7 +37,8 @@ export function Film() {
             The full walkthrough
           </h3>
           <p className="body-lg">
-            One real recording of the app, a little over a minute. The waiting is sped up and the long pauses are cut.
+            Recorded from the app in demo mode, just under a minute. All the entries are made-up sample text, and the
+            typing is sped up.
           </p>
         </div>
         <div className="film__frame" data-reveal="">

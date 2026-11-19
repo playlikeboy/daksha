@@ -39,18 +39,19 @@ export const LAUNCH_FILM: Film = {
   uploaded: "2026-11-15T13:25:19+05:30",
 };
 
-// The walkthrough: one real screen recording of the app, with step captions on screen.
+// The walkthrough: short clips recorded from the app in demo mode, with made-up sample
+// entries, and a caption on screen for each step. See docs/MEDIA.md to make it again.
 export const WALKTHROUGH_FILM: Film = {
   title: `The ${BRAND} app walkthrough`,
-  description: `A walkthrough of one real screen recording of the Debo app, with music and sound effects and no speech. The phone screen sits on the right, and a caption on the left names each step: sign in, write a day, ask about your own life, see where each answer came from, talk to Debo, and connect your apps. A label by the phone shows when the recording is sped up or slowed down. A person signs in and writes a journal entry about lunch with Neha and a Goa trip. In a new chat they ask what to sort out before Mum visits and before the trip. Debo answers with a list of things to do and who to talk to, and shows three journal entries as sources. Then the person starts a voice call, types that they feel overwhelmed, and Debo answers kindly. Then the Apps screen, with Gmail connected. It ends on the Debo name and my.debo.life.`,
+  description: `A walkthrough of the Debo app, recorded from the app in demo mode with made-up sample entries, with music and sound effects and no speech. The phone screen sits on the right, with a chip that says Sample entries, and a caption on the left names each of seven steps. It opens on the card Debo, a quick look: recorded from the app, with made-up sample entries, typing is sped up. Say hello: the welcome screen, Hi, I'm Debo. Write a day: a person types a short entry about coffee with Sam and a picnic on Sunday, presses Save entry and sees Entry saved. Open any entry: the entry Long walk by the lake after work, with what Debo learned from it and similar entries. See what Debo knows: a list of memories, each with the journal entry it came from and the buttons Fix this and Forget this. Record a voice note: the recorder counts up while the microphone is on. Debo asks before it acts: the Talk screen shows a card waiting for your yes, to add a calendar event, with Approve and Not now, and the Tasks screen lists it under Your actions. Make it yours: a face is made with Randomise, a person called Coach Sam is typed into Make someone new, and the reminders and check-in settings. It ends on the Debo name and my.debo.life.`,
   mp4: "/debo-demo.mp4",
   webm: "/debo-demo.webm",
   poster: "/debo-demo-poster.webp",
   captions: { src: "/debo-demo.en.vtt", label: "English (words on screen)" },
   width: 1920,
   height: 1080,
-  seconds: 66,
-  uploaded: "2026-11-15T12:00:42+05:30",
+  seconds: 58,
+  uploaded: "2026-11-19T15:40:00+05:30",
 };
 
 // Search engines read this. Every field comes from the entry above, so it stays true.

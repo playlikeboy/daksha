@@ -2,36 +2,41 @@ WEBVTT
 
 NOTE
 The words that appear on screen in the walkthrough. The film has no speech.
-Times come from video/launch/demo/timeline.js.
+Times come from video/launch/demo/timeline.js. A chip by the phone says Sample entries
+for the whole walkthrough.
 
-00:00.200 --> 00:03.000
-Debo, start to finish
-A real recording of the app. The waiting is sped up.
+00:00.250 --> 00:02.800
+Debo, a quick look
+Recorded from the app, with made-up sample entries. Typing is sped up.
 
-00:03.200 --> 00:07.400
-Step 1 of 6: Sign in
-Your journal, chats and apps in one private place.
+00:03.700 --> 00:06.200
+Step 1 of 7: Say hello
+Debo shows you around the first time you open it.
 
-00:07.400 --> 00:17.630
-Step 2 of 6: Write a day
-A few lines about what happened. Debo keeps it.
+00:06.300 --> 00:15.200
+Step 2 of 7: Write a day
+A few lines about what happened. It is saved when you press Save entry.
 
-00:17.630 --> 00:26.040
-Step 3 of 6: Ask about your own life
-Plain questions, in your own words.
+00:15.300 --> 00:20.600
+Step 3 of 7: Open any entry
+See what Debo learned from it, and the entries like it.
 
-00:26.040 --> 00:36.440
-Step 4 of 6: See where each answer came from
-Debo names the journal entries it used.
+00:20.700 --> 00:26.000
+Step 4 of 7: See what Debo knows
+Every memory shows the entry it came from. Fix it or forget it.
 
-00:36.440 --> 00:52.840
-Step 5 of 6: Talk to Debo
-Say it out loud, or type when you can't talk.
+00:26.100 --> 00:31.800
+Step 5 of 7: Record a voice note
+The screen shows when the microphone is on.
 
-00:52.840 --> 01:01.440
-Step 6 of 6: Connect your apps
-Debo asks before it sends or changes anything outside Debo.
+00:31.900 --> 00:40.400
+Step 6 of 7: Debo asks before it acts
+Anything that leaves Debo waits for your yes.
 
-01:02.500 --> 01:06.200
+00:40.500 --> 00:53.500
+Step 7 of 7: Make it yours
+Make a face, make someone to talk to, and pick your reminders.
+
+00:54.950 --> 00:58.400
 Debo. A friendly assistant that remembers your life.
 my.debo.life
