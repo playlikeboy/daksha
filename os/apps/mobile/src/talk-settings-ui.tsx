@@ -3,7 +3,8 @@
 // Talk popup. Every choice saves the moment it is tapped, except the notes, which have a
 // Save button. The server checks everything again (apps/server/src/talk-settings.ts).
 import { useCallback, useEffect, useState } from "react";
-import { Pressable, Text, View } from "react-native";
+import { Pressable, View } from "react-native";
+import { Text } from "./text";
 import { useAgentWorkspace } from "./agent-workspace";
 import { errorText } from "./debo-api";
 import { useAssistantName } from "./debo-character-store";

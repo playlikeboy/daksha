@@ -1,6 +1,7 @@
 import { Check, Globe2, Hand, RotateCw } from "lucide-react-native";
 import { createContext, useContext, useEffect, useState } from "react";
-import { ActivityIndicator, AppState, Image, Text, View } from "react-native";
+import { ActivityIndicator, AppState, Image, View } from "react-native";
+import { Text } from "./text";
 import { z } from "zod";
 import type { BrowserSession } from "../../../packages/domain/src";
 import { Button, Card, colors, ErrorNotice, fontSize, radius, s } from "./ui";

@@ -20,10 +20,10 @@ import {
   Platform,
   Pressable,
   ScrollView,
-  Text,
   useWindowDimensions,
   View,
 } from "react-native";
+import { Text } from "./text";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { duration } from "./astryx-tokens";
 import { useAssistantName } from "./debo-character-store";

@@ -9,7 +9,8 @@
 // os/docs/JOURNAL-MEDIA.md.
 import { AudioLines, Check, Mic, Paperclip, Square, Video } from "lucide-react-native";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { Platform, Pressable, Text, TextInput, View } from "react-native";
+import { Platform, Pressable, View } from "react-native";
+import { Text, TextInput } from "./text";
 import { deboApi, errorText } from "./debo-api";
 import { type Dictation, recordingSupport, startDictation } from "./debo-capture";
 import { type DeboStatus, type EntryView, happenedAtFor, todayInput, wordCountLabel } from "./debo-data";

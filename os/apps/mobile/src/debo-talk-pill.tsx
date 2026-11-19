@@ -10,7 +10,8 @@
 //   Review and End. Screen readers get the same as actions on the bubble.
 import { Mic, MicOff, PhoneOff, Maximize2, ShieldCheck } from "lucide-react-native";
 import { useEffect, useRef, useState } from "react";
-import { Animated, Easing, Platform, Pressable, Text, View } from "react-native";
+import { Animated, Easing, Platform, Pressable, View } from "react-native";
+import { Text } from "./text";
 import { DeboFace, useReducedMotion } from "./debo-face";
 import { useAssistantName } from "./debo-character-store";
 import { pillLabel, stateWords, useTalkCall, useTalkState } from "./debo-talk-session";

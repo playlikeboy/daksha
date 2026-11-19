@@ -3,7 +3,8 @@
 // Debo never sees the password. Colours and sizes come from ui.tsx tokens only.
 import { Link2, Search, ShieldCheck } from "lucide-react-native";
 import { useCallback, useEffect, useRef, useState } from "react";
-import { ActivityIndicator, AppState, Image, Platform, Text, View } from "react-native";
+import { ActivityIndicator, AppState, Image, Platform, View } from "react-native";
+import { Text } from "./text";
 import {
   type AppConnection,
   type AppItem,

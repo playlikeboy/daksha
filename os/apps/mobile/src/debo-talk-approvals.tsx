@@ -8,7 +8,8 @@
 // needs no review any more, so it never shows here.
 import { Check, X } from "lucide-react-native";
 import { useState } from "react";
-import { Text, View } from "react-native";
+import { View } from "react-native";
+import { Text } from "./text";
 import type { ActionProposal } from "../../../packages/domain/src";
 import { reviewsWaiting } from "./debo-talk-call";
 import { Button, Card, colors, ErrorNotice, s, spacing } from "./ui";

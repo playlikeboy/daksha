@@ -1,5 +1,6 @@
 import { useCallback, useState } from "react";
-import { Linking, Text, type TextStyle } from "react-native";
+import { Linking, type TextStyle } from "react-native";
+import { Text } from "./text";
 import Markdown, { type MarkdownStyles, type RenderRules } from "react-native-markdown-renderer";
 import { assistantMarkdown, isSafeAssistantUrl } from "./assistant-markdown";
 import { colors, ErrorNotice, fontSize } from "./ui";

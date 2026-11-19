@@ -13,7 +13,8 @@ import {
   Upload,
 } from "lucide-react-native";
 import { useCallback, useEffect, useRef, useState } from "react";
-import { ActivityIndicator, AppState, Platform, Text, View } from "react-native";
+import { ActivityIndicator, AppState, Platform, View } from "react-native";
+import { Text } from "./text";
 import type { Artifact } from "../../../packages/domain/src";
 import type {
   ComputerCommand,

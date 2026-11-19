@@ -18,10 +18,10 @@ import {
   Platform,
   Pressable,
   ScrollView,
-  Text,
   useWindowDimensions,
   View,
 } from "react-native";
+import { Text } from "./src/text";
 import { SafeAreaProvider, SafeAreaView, useSafeAreaInsets } from "react-native-safe-area-context";
 import type { Section, Workspace } from "../../packages/domain/src";
 import {
@@ -60,6 +60,7 @@ import { KnowsScreen } from "./src/debo-knows";
 import { Details } from "./src/details";
 import { BrowserScreen, CalendarScreen, FilesScreen, MailScreen } from "./src/screens";
 import { AccountCard, NeonGate, useAuthInfo } from "./src/neon-gate";
+import { WelcomeFrame } from "./src/welcome-frame";
 import { ThreadsProvider, ThreadsSheet, useFuseThread } from "./src/threads";
 import {
   avatarSize,
@@ -76,7 +77,7 @@ import {
   s,
   screenGap,
   screenPadding,
-  shadow,
+  brandShadow,
   Skeleton,
   spacing,
 } from "./src/ui";
@@ -117,7 +118,7 @@ function NotFound() {
   const { navigate } = useWorkspace();
   return (
     <View style={{ gap: spacing[4], alignItems: "flex-start" }}>
-      <Text accessibilityRole="header" style={[s.title, { fontSize: fontSize["2xl"] }]}>
+      <Text accessibilityRole="header" style={s.pageTitle}>
         That page isn't here
       </Text>
       <Text style={s.muted}>The link may be old or mistyped. Your chat is one tap away.</Text>
@@ -200,51 +201,29 @@ function AccessKeyApp() {
           <WorkspaceApp token={token} />
         </CopilotKitProvider>
       ) : (
-        <SafeAreaView
-          style={{
-            flex: 1,
-            backgroundColor: colors.canvas,
-            justifyContent: "center",
-            alignItems: "center",
-            padding: spacing[6],
-          }}
-        >
-          <View style={{ width: "100%", maxWidth: 420, gap: spacing[5], alignItems: "center" }}>
-            <Mascot size={avatarSize.lg} />
-            <Text
-              style={{
-                fontSize: fontSize["3xl"],
-                color: colors.text,
-                letterSpacing: -1,
-                fontWeight: "500",
-              }}
-            >
-              Welcome to Debo.
-            </Text>
-            <Text style={[s.muted, { textAlign: "center" }]}>A little room for your day.</Text>
-            {busy ? (
-              <ActivityIndicator color={colors.blueDark} />
-            ) : (
-              <Card style={{ width: "100%" }}>
-                <ErrorNotice error={error} />
-                <Field
-                  label="Workspace access key"
-                  value={accessKey}
-                  onChangeText={setAccessKey}
-                  secureTextEntry
-                  placeholder="Required for a live workspace"
-                />
-                <Button primary onPress={() => void connect(accessKey || undefined)}>
-                  Open workspace
-                </Button>
-                <Text style={[s.small, { marginTop: spacing[4] }]}>
-                  Local workspaces open without a key. Make sure your Debo server is running at{" "}
-                  {API_URL}.
-                </Text>
-              </Card>
-            )}
-          </View>
-        </SafeAreaView>
+        <WelcomeFrame subtitle="A little room for your day.">
+          {busy ? (
+            <ActivityIndicator color={colors.blueDark} />
+          ) : (
+            <Card style={{ width: "100%", padding: spacing[6] }}>
+              <ErrorNotice error={error} />
+              <Field
+                label="Workspace access key"
+                value={accessKey}
+                onChangeText={setAccessKey}
+                secureTextEntry
+                placeholder="Required for a live workspace"
+              />
+              <Button primary onPress={() => void connect(accessKey || undefined)} style={{ minHeight: spacing[12] }}>
+                Open workspace
+              </Button>
+              <Text style={[s.small, { marginTop: spacing[4] }]}>
+                Local workspaces open without a key. Make sure your Debo server is running at{" "}
+                {API_URL}.
+              </Text>
+            </Card>
+          )}
+        </WelcomeFrame>
       )}
     </SafeAreaProvider>
   );
@@ -561,7 +540,7 @@ function WorkspaceShell({
                 {title && (
                   <Text
                     accessibilityRole="header"
-                    style={[s.title, { fontSize: fontSize["2xl"], marginBottom: screenGap }]}
+                    style={[s.pageTitle, { marginBottom: screenGap }]}
                   >
                     {title.title}
                   </Text>
@@ -618,6 +597,7 @@ function WorkspaceShell({
             </ChromeContext.Provider>
             <TopBar
               height={barHeight}
+              wide={desktop}
               name={agentName}
               status={status}
               showFace={!talkBarShown}
@@ -653,7 +633,7 @@ function WorkspaceShell({
                 padding: spacing[1],
                 backgroundColor: colors.card,
                 borderRadius: radius.full,
-                boxShadow: shadow.low,
+                boxShadow: brandShadow.raised,
                 borderWidth: 1,
                 borderColor: colors.line,
               }}
@@ -675,14 +655,18 @@ function WorkspaceShell({
                 // A visible word under each icon, so no one has to guess what a shape means.
                 const icon = (
                   <>
-                    <item.icon size={22} strokeWidth={active ? 2.2 : 1.8} color={colors.text} />
+                    <item.icon
+                      size={22}
+                      strokeWidth={active ? 2.2 : 1.8}
+                      color={active ? colors.brandText : colors.muted}
+                    />
                     <Text
                       numberOfLines={1}
                       style={{
                         fontFamily,
                         fontSize: fontSize.sm,
                         lineHeight: spacing[4],
-                        fontWeight: active ? "600" : "500",
+                        fontWeight: active ? "700" : "500",
                         color: active ? colors.text : colors.muted,
                       }}
                     >

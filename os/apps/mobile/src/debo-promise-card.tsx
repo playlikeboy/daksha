@@ -2,7 +2,8 @@
 // suggestion with the entry it came from. Nothing happens until the person taps:
 // "Remind me" makes a reminder, "Dismiss" puts it away for good.
 import { useState } from "react";
-import { Text, View } from "react-native";
+import { View } from "react-native";
+import { Text } from "./text";
 import type { Idea } from "../../../packages/domain/src/agent";
 import { useAgentWorkspace } from "./agent-workspace";
 import { errorText } from "./debo-api";

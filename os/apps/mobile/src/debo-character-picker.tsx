@@ -1,7 +1,8 @@
 // "Choose who you talk to": the five characters, live, with their names, and the faces the
 // person made (with "Make your own" to design a new one). Picking one is a single tap. The
 // parent saves it and every face in the app follows.
-import { Pressable, Text, View } from "react-native";
+import { Pressable, View } from "react-native";
+import { Text } from "./text";
 import type { CustomAvatar } from "../../../packages/domain/src/avatar";
 import { builtInCharacterIds, type CharacterId, characters } from "./debo-characters";
 import { CustomFace, DeboFace } from "./debo-face";

@@ -16,11 +16,10 @@ import {
   Platform,
   Pressable,
   ScrollView,
-  Text,
-  TextInput,
   type TextStyle,
   View,
 } from "react-native";
+import { Text, TextInput } from "./text";
 import { z } from "zod";
 import { ArtifactCard } from "./agent-ui";
 import { useAgentWorkspace } from "./agent-workspace";
@@ -611,7 +610,7 @@ export function ChatScreen({
           >
             <Text
               accessibilityRole="header"
-              style={[s.title, { fontSize: fontSize["2xl"], lineHeight: spacing[8], textAlign: "center", maxWidth: 350 }]}
+              style={[s.pageTitle, { textAlign: "center", maxWidth: 350 }]}
             >
               Hi, I&apos;m {assistantName}.
             </Text>

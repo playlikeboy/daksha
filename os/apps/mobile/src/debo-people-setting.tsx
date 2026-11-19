@@ -2,7 +2,8 @@
 // chat or on a call ("my sister Riya's birthday is 3 March"). Here you can see everyone she
 // keeps, fix any detail, add someone yourself, or remove them.
 import { useCallback, useEffect, useState } from "react";
-import { Text, View } from "react-native";
+import { View } from "react-native";
+import { Text } from "./text";
 import { errorText } from "./debo-api";
 import { useAssistantName } from "./debo-character-store";
 import { usePronouns } from "./debo-pronouns";

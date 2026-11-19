@@ -7,7 +7,8 @@
 // Nothing leaves the device until "Save recording".
 import { Circle, Pause, Play, RefreshCw, Square, SwitchCamera, Trash2, Upload, X } from "lucide-react-native";
 import { type ReactNode, useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { Modal, Platform, Pressable, ScrollView, Text, useWindowDimensions, View } from "react-native";
+import { Modal, Platform, Pressable, ScrollView, useWindowDimensions, View } from "react-native";
+import { Text } from "./text";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { deboApi, errorText } from "./debo-api";
 import {

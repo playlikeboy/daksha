@@ -6,7 +6,8 @@
 // address stays the truth; renaming only changes the readable part.
 import { Pencil } from "lucide-react-native";
 import { useCallback, useEffect, useState } from "react";
-import { Platform, Pressable, Text, View } from "react-native";
+import { Platform, Pressable, View } from "react-native";
+import { Text } from "./text";
 import { errorText } from "./debo-api";
 import { pathFor, rememberChatName, titleFor } from "./routes";
 import { Button, colors, ErrorNotice, Field, s, spacing } from "./ui";

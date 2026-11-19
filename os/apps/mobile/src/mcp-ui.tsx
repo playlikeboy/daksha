@@ -5,7 +5,8 @@
 // is a shortcut for a person's OWN Composio account (not the apps Debo connects for them).
 import { KeyRound, LogIn, Plus, Server, ShieldAlert } from "lucide-react-native";
 import { useCallback, useEffect, useRef, useState } from "react";
-import { AppState, Platform, Text, View } from "react-native";
+import { AppState, Platform, View } from "react-native";
+import { Text } from "./text";
 import {
   addToolServer,
   COMPOSIO_CONNECT_URL,

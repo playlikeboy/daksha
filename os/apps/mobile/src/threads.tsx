@@ -12,7 +12,8 @@ import {
   Sparkles,
 } from "lucide-react-native";
 import { createContext, type ReactNode, useContext, useEffect, useRef, useState } from "react";
-import { Pressable, Text, View } from "react-native";
+import { Pressable, View } from "react-native";
+import { Text } from "./text";
 import { useTalkSettingsName } from "./debo-pronouns";
 import { isInstalledApp, openGetApp } from "./get-app";
 import { onboarding } from "./onboarding-store";

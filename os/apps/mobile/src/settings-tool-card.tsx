@@ -4,7 +4,8 @@
 // settings screen loads again, so it shows the new value.
 import { Check, SlidersHorizontal } from "lucide-react-native";
 import { useEffect, useRef } from "react";
-import { ActivityIndicator, Text, View } from "react-native";
+import { ActivityIndicator, View } from "react-native";
+import { Text } from "./text";
 import { z } from "zod";
 import { useAgentWorkspace } from "./agent-workspace";
 import { screenLink, screenTitle } from "./screen-links";

@@ -5,7 +5,8 @@
 import { createAudioPlayer } from "expo-audio";
 import { Play, Plus } from "lucide-react-native";
 import { useCallback, useEffect, useRef, useState } from "react";
-import { Text, View } from "react-native";
+import { View } from "react-native";
+import { Text } from "./text";
 import { errorText } from "./debo-api";
 import { pickRecording, sendRange } from "./debo-capture";
 import { uploadRecording } from "./debo-upload";

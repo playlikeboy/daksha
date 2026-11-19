@@ -3,7 +3,8 @@
 // reminders the person asked for, and "Send me reminders" on this device (web push in a
 // browser, notifications the phone holds itself in the app). Nothing between 22:00 and 07:00.
 import { useCallback, useEffect, useState } from "react";
-import { Text, View } from "react-native";
+import { View } from "react-native";
+import { Text } from "./text";
 import { errorText } from "./debo-api";
 import {
   deviceReminderKind,

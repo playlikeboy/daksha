@@ -17,6 +17,7 @@ function sourceFiles(dir: string): string[] {
 // Whole files that may hold raw colours. Key is the file name; value is the reason.
 const exemptFiles: Record<string, string> = {
   "astryx-tokens.ts": "generated from the Astryx theme",
+  "brand-tokens.ts": "Debo's own colours and shadows, shared with the landing page (apps/site site.css)",
   "debo-paint-diya.ts":
     "the paint of Diya the tomato, copied from docs/assets/debo.svg. She is a character, not UI, so the app theme must never recolour her",
   "debo-paint-debo.ts": "the paint of Debo, the soft blue creature. A character, not UI",
@@ -34,7 +35,7 @@ const files = [
 ].filter((file) => !Object.keys(exemptFiles).includes(path.basename(file)));
 
 // Short, explicit allowlist. Key is "relative/path:matched text"; value is the reason.
-// Keep it empty if you can. Colours belong in astryx-tokens.ts (generated from Astryx).
+// Keep it empty if you can. Colours belong in brand-tokens.ts or astryx-tokens.ts (generated from Astryx).
 const allowlist: Record<string, string> = {};
 
 function violations(pattern: RegExp) {
@@ -53,18 +54,31 @@ function violations(pattern: RegExp) {
   return found;
 }
 
-test("no hex colour literals outside astryx-tokens.ts", () => {
+test("no hex colour literals outside the token files", () => {
   const found = violations(/#[0-9A-Fa-f]{3,8}\b/g);
   assert.deepEqual(found, [], `Use a colour from palette.ts instead:\n${found.join("\n")}`);
 });
 
-test("no rgb() or rgba() colour literals outside astryx-tokens.ts", () => {
+test("no rgb() or rgba() colour literals outside the token files", () => {
   assert.deepEqual(violations(/\brgba?\(/g), []);
 });
 
 test("no number literals for fontSize or borderRadius", () => {
   const found = violations(/\b(?:fontSize|borderRadius): *\d/g);
   assert.deepEqual(found, [], `Use fontSize.* or radius.* from ui.tsx:\n${found.join("\n")}`);
+});
+
+test("Text and TextInput come from text.tsx, so every line uses the brand font", () => {
+  const found: string[] = [];
+  for (const file of files) {
+    if (path.basename(file) === "text.tsx") continue;
+    const source = readFileSync(file, "utf8");
+    for (const match of source.matchAll(/import\s*\{([^}]*)\}\s*from\s*"react-native"/g)) {
+      const names = match[1].split(",").map((name) => name.trim());
+      if (names.includes("Text") || names.includes("TextInput")) found.push(path.relative(root, file));
+    }
+  }
+  assert.deepEqual(found, [], `Import Text and TextInput from ./text instead:\n${found.join("\n")}`);
 });
 
 test("the allowlist stays short", () => {

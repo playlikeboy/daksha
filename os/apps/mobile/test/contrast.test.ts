@@ -1,6 +1,7 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 import { colorsLight } from "../src/astryx-tokens.ts";
+import { brandColors } from "../src/brand-tokens.ts";
 import { colors } from "../src/palette.ts";
 
 // WCAG 2.2 contrast ratio: https://www.w3.org/TR/WCAG22/#dfn-contrast-ratio
@@ -51,6 +52,7 @@ const textPairs: Pair[] = [
   ["success", "card"],
   ["success", "subtle"],
   ["success", "green"],
+  ["success", "successLine"],
   ["danger", "canvas"],
   ["danger", "card"],
   ["danger", "subtle"],
@@ -58,6 +60,13 @@ const textPairs: Pair[] = [
   ["onAccent", "accent"],
   ["onInk", "ink"],
   ["blue", "ink"],
+  ["brandText", "canvas"],
+  ["brandText", "card"],
+  ["brandText", "subtle"],
+  ["brandText", "brandSoft"],
+  ["text", "brandSoft"],
+  ["muted", "yellow"],
+  ["muted", "pink"],
 ];
 
 // Icons and component edges: WCAG 1.4.11 needs 3:1.
@@ -74,6 +83,8 @@ const nonTextPairs: Pair[] = [
   ["accent", "canvas"],
   ["inputBorder", "card"],
   ["inputBorder", "canvas"],
+  ["brandText", "subtle"],
+  ["text", "subtle"],
 ];
 
 for (const [fg, bg] of textPairs) {
@@ -90,10 +101,12 @@ for (const [fg, bg] of nonTextPairs) {
   });
 }
 
-test("the app palette only uses Astryx Neutral light values", () => {
-  const allowed = new Set(Object.values(colorsLight).map((v) => v.toUpperCase()));
+test("the app palette only uses brand tokens and Astryx Neutral light values", () => {
+  const allowed = new Set(
+    [...Object.values(brandColors), ...Object.values(colorsLight)].map((v) => v.toUpperCase()),
+  );
   for (const [name, value] of Object.entries(colors)) {
-    assert.ok(allowed.has(value.toUpperCase()), `${name} ${value} is not an Astryx token`);
+    assert.ok(allowed.has(value.toUpperCase()), `${name} ${value} is not a brand or Astryx token`);
   }
 });
 

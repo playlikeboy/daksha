@@ -1,5 +1,5 @@
 import { ArrowUpRight, Check, ChevronRight, type LucideIcon, RotateCw, X } from "lucide-react-native";
-import { Component, type ReactNode, useEffect, useRef } from "react";
+import { Component, type ReactNode, useEffect, useRef, useState } from "react";
 import {
   ActivityIndicator,
   Animated,
@@ -10,42 +10,56 @@ import {
   Pressable,
   ScrollView,
   StyleSheet,
-  Text,
-  TextInput,
   type TextInputProps,
   useWindowDimensions,
   View,
   type ViewStyle,
 } from "react-native";
+import { Text, TextInput } from "./text";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import {
+  radius as astryxRadius,
   borderWidth,
   fontSize,
-  fontStack,
-  radius,
   shadow,
   sizeElement,
   spacing,
   textStyle,
 } from "./astryx-tokens";
+import { brandRadius, brandShadow, typeSize } from "./brand-tokens";
 import { useAssistantName } from "./debo-character-store";
 import { type CharacterId, characters } from "./debo-characters";
 import { DeboFace, useReducedMotion } from "./debo-face";
 import type { Mood } from "./debo-mood";
 import { colors } from "./palette";
+import { fontFace } from "./text";
 
 export { colors };
-export { fontSize, radius, shadow, sizeElement, spacing, textStyle };
+export { fontSize, shadow, sizeElement, spacing, textStyle, typeSize, brandShadow };
 
-/** Body font stack on the web. Native apps use the system font. */
-const face = Platform.OS === "web" ? { fontFamily: fontStack.body } : {};
-export const fontFamily = face.fontFamily;
+/**
+ * Corner radii. Astryx's scale, with Debo's softer field (14) and card (20) corners from
+ * the landing page. `full` is a pill or circle.
+ */
+export const radius = {
+  ...astryxRadius,
+  container: brandRadius.field,
+  page: brandRadius.card,
+  sheet: brandRadius.sheet,
+} as const;
+
+/** Figtree, the body font (Text from text.tsx already uses it). */
+const face = { fontFamily: fontFace.body };
+export const fontFamily = fontFace.body;
+/** Bricolage Grotesque, the heading font, the same as the landing page. */
+const headingFace = { fontFamily: fontFace.heading };
+export const headingFamily = fontFace.heading;
 
 /**
  * Body text: 16px on a 24px line. DESIGN.md sets 16px as the floor for anything a person
  * reads, so this is larger than Astryx's 14px body. Small print and labels use 14px.
  */
-export const bodyText = { fontSize: spacing[4], fontWeight: "400", lineHeight: spacing[6] } as const;
+export const bodyText = { fontSize: typeSize.md, fontWeight: "400", lineHeight: spacing[6] } as const;
 
 /** The only sizes the character is drawn at, so it is the same size wherever it shows. */
 export const avatarSize = { sm: 36, md: 48, lg: 64, xl: 96 } as const;
@@ -59,16 +73,42 @@ export const s = StyleSheet.create({
   between: { flexDirection: "row", alignItems: "center", justifyContent: "space-between" },
   text: { ...face, color: colors.text, ...bodyText },
   muted: { ...face, color: colors.muted, ...bodyText },
-  small: { ...face, color: colors.muted, ...textStyle.body },
-  label: { ...face, color: colors.muted, ...textStyle.heading4, fontWeight: "600" },
-  title: { ...face, color: colors.text, ...textStyle.heading2 },
-  heading: { ...face, color: colors.text, ...textStyle.heading3 },
+  small: { ...face, color: colors.muted, fontSize: typeSize.sm, fontWeight: "400", lineHeight: spacing[5] },
+  label: { ...face, color: colors.muted, fontSize: typeSize.sm, lineHeight: spacing[5], fontWeight: "600" },
+  /** The big title at the top of a screen ("Your journal"). */
+  pageTitle: {
+    ...headingFace,
+    color: colors.text,
+    fontSize: typeSize["2xl"],
+    lineHeight: spacing[8] + spacing[1],
+    fontWeight: "800",
+    letterSpacing: -0.6,
+  },
+  /** Sheet titles and large card titles. */
+  title: {
+    ...headingFace,
+    color: colors.text,
+    fontSize: typeSize.xl,
+    lineHeight: spacing[7],
+    fontWeight: "700",
+    letterSpacing: -0.3,
+  },
+  /** Section and card headings. */
+  heading: {
+    ...headingFace,
+    color: colors.text,
+    fontSize: typeSize.lg,
+    lineHeight: spacing[6],
+    fontWeight: "700",
+    letterSpacing: -0.2,
+  },
   card: {
     backgroundColor: colors.card,
     borderRadius: radius.page,
     borderWidth: 0,
     borderColor: colors.line,
     padding: spacing[5],
+    boxShadow: brandShadow.card,
   },
   divider: { height: borderWidth, backgroundColor: colors.line, marginVertical: spacing[4] },
   input: {
@@ -79,40 +119,42 @@ export const s = StyleSheet.create({
     paddingHorizontal: spacing[4],
     paddingVertical: spacing[3],
     color: colors.text,
-    fontSize: fontSize.lg,
+    fontSize: typeSize.md,
+    lineHeight: spacing[6],
     backgroundColor: colors.card,
-    minHeight: sizeElement.lg,
+    minHeight: spacing[12],
   },
   field: { gap: spacing[2], marginBottom: spacing[4] },
+  fieldLabel: { ...face, color: colors.text, fontSize: typeSize.sm, lineHeight: spacing[5], fontWeight: "600" },
   button: {
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",
     gap: spacing[2],
-    paddingHorizontal: spacing[4],
+    paddingHorizontal: spacing[5],
     minHeight: spacing[11],
     paddingVertical: spacing[2],
-    borderRadius: radius.page,
+    borderRadius: radius.full,
   },
-  primary: { backgroundColor: colors.accent },
-  // The quiet fill is the same grey as the page, so the edge is what shows a button there.
-  secondary: { backgroundColor: colors.subtle, borderWidth, borderColor: colors.lineStrong },
-  buttonText: { ...face, ...textStyle.label },
+  primary: { backgroundColor: colors.accent, boxShadow: brandShadow.card },
+  // White on the warm page, with a soft edge, so a quiet button reads as a button anywhere.
+  secondary: { backgroundColor: colors.card, borderWidth, borderColor: colors.lineStrong },
+  buttonText: { ...face, fontSize: typeSize.md, lineHeight: spacing[5], fontWeight: "600" },
   chip: {
     paddingHorizontal: spacing[3],
     paddingVertical: spacing[1],
-    borderRadius: radius.page,
+    borderRadius: radius.full,
     alignSelf: "flex-start",
     backgroundColor: colors.subtle,
   },
-  chipText: { ...face, fontSize: fontSize.sm, fontWeight: "600", color: colors.text },
+  chipText: { ...face, fontSize: fontSize.sm, lineHeight: spacing[4] + spacing[0.5], fontWeight: "600", color: colors.text },
   iconBox: {
     width: spacing[11],
     height: spacing[11],
     borderRadius: radius.container,
     justifyContent: "center",
     alignItems: "center",
-    backgroundColor: colors.sky,
+    backgroundColor: colors.subtle,
   },
   error: {
     padding: spacing[4],
@@ -130,13 +172,12 @@ export const s = StyleSheet.create({
   },
   sheet: {
     backgroundColor: colors.canvas,
-    borderRadius: radius.page,
+    borderRadius: radius.sheet,
     width: "100%",
     maxWidth: 790,
     maxHeight: "94%",
     overflow: "hidden",
-    borderWidth,
-    borderColor: colors.line,
+    boxShadow: brandShadow.raised,
   },
 });
 export function Button({
@@ -184,15 +225,19 @@ export function Button({
         ...(choice ? { checked: selected } : {}),
       }}
       onPress={onPress}
-      style={({ pressed }) => [
+      style={(state) => [
         s.button,
         { maxWidth: "100%" },
         primary ? s.primary : s.secondary,
         choice && {
           borderWidth: 2,
           borderColor: selected ? colors.text : colors.lineStrong,
-          backgroundColor: selected ? colors.card : colors.subtle,
+          backgroundColor: selected ? colors.card : colors.canvas,
         },
+        // On the web a pointer over a quiet button darkens its edge, like the landing page.
+        !primary &&
+          !(disabled || busy) &&
+          (state as { hovered?: boolean }).hovered && { borderColor: colors.text },
         small && {
           minHeight: spacing[11],
           minWidth: spacing[11],
@@ -200,18 +245,25 @@ export function Button({
           paddingHorizontal: spacing[3],
         },
         (disabled || busy) && { opacity: 0.5 },
-        pressed && !reduceMotion && { transform: [{ scale: 0.98 }] },
+        state.pressed && !reduceMotion && { transform: [{ scale: 0.98 }] },
         style,
       ]}
     >
       {busy ? (
         <ActivityIndicator color={color} size="small" />
       ) : choice && selected ? (
-        <Check size={15} color={color} />
+        <Check size={16} strokeWidth={2.4} color={color} />
       ) : Icon ? (
-        <Icon size={15} color={color} />
+        <Icon size={16} strokeWidth={2} color={color} />
       ) : null}
-      <Text style={[s.buttonText, { color, flexShrink: 1, textAlign: "center" }, choice && selected && { fontWeight: "700" }]}>
+      <Text
+        style={[
+          s.buttonText,
+          { color, flexShrink: 1, textAlign: "center" },
+          small && { fontSize: typeSize.sm },
+          choice && selected && { fontWeight: "700" },
+        ]}
+      >
         {children}
       </Text>
     </Pressable>
@@ -315,15 +367,32 @@ export function Segmented<T extends string>({
   );
 }
 export function Field({ label, ...props }: TextInputProps & { label: string }) {
+  // On phones the edge turns ink and thicker while the field has the caret. On the web
+  // the browser's ring does the same job (public/index.html), so the edge stays put.
+  const [focused, setFocused] = useState(false);
   return (
     <View style={s.field}>
-      <Text style={[s.small, { fontWeight: "600", color: colors.text }]}>{label}</Text>
+      <Text style={s.fieldLabel}>{label}</Text>
       <TextInput
         placeholderTextColor={colors.muted}
         accessibilityLabel={label}
         {...props}
+        onFocus={(event) => {
+          setFocused(true);
+          props.onFocus?.(event);
+        }}
+        onBlur={(event) => {
+          setFocused(false);
+          props.onBlur?.(event);
+        }}
         style={[
           s.input,
+          focused &&
+            Platform.OS !== "web" && {
+              borderColor: colors.text,
+              borderWidth: 2,
+              paddingHorizontal: spacing[4] - 1,
+            },
           props.multiline && { minHeight: 120, textAlignVertical: "top" },
           props.style,
         ]}
@@ -343,20 +412,22 @@ export function Empty({
   children?: ReactNode;
 }) {
   return (
-    <View style={{ alignItems: "center", padding: spacing[10], gap: spacing[3] }}>
+    <View style={{ alignItems: "center", paddingVertical: spacing[10], paddingHorizontal: spacing[6], gap: spacing[3] }}>
       <View
         style={[
           s.iconBox,
           {
-            width: spacing[12] + spacing[2],
-            height: spacing[12] + spacing[2],
-            borderRadius: radius.page,
+            width: spacing[12] + spacing[4],
+            height: spacing[12] + spacing[4],
+            borderRadius: radius.full,
+            backgroundColor: colors.brandSoft,
+            marginBottom: spacing[1],
           },
         ]}
       >
-        <Icon size={24} color={colors.blueDark} />
+        <Icon size={26} strokeWidth={1.8} color={colors.brandText} />
       </View>
-      <Text accessibilityRole="header" style={[s.heading, { textAlign: "center" }]}>{title}</Text>
+      <Text accessibilityRole="header" style={[s.title, { textAlign: "center" }]}>{title}</Text>
       <Text style={[s.muted, { textAlign: "center", maxWidth: 360 }]}>{detail}</Text>
       {children}
     </View>
@@ -614,7 +685,7 @@ export function SectionHeading({
           onPress={onPress}
           style={[s.row, { gap: spacing[1] }]}
         >
-          <Text style={[s.small, { color: colors.text }]}>{action}</Text>
+          <Text style={[s.small, { color: colors.text, fontWeight: "600" }]}>{action}</Text>
           <ArrowUpRight size={13} color={colors.muted} />
         </Pressable>
       )}
@@ -644,11 +715,11 @@ export function LinkRow({
         pressed && { backgroundColor: colors.canvas },
       ]}
     >
-      <View style={[s.iconBox, { backgroundColor: tint || colors.sky }]}>
+      <View style={[s.iconBox, { backgroundColor: tint || colors.subtle }]}>
         <Icon size={19} color={colors.text} />
       </View>
       <View style={{ flex: 1, gap: spacing[1] }}>
-        <Text style={[s.text, { fontWeight: "500" }]}>{title}</Text>
+        <Text style={[s.text, { fontWeight: "600" }]}>{title}</Text>
         {!!detail && <Text style={s.small}>{detail}</Text>}
       </View>
       <ChevronRight size={15} color={colors.muted} />

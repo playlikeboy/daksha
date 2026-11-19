@@ -6,7 +6,8 @@
 // Opened as a sheet from the character picker ("Make your own", or "Edit" on a saved face).
 // The server checks every field again (apps/server/src/custom-avatars.ts).
 import { useEffect, useState } from "react";
-import { Pressable, Text, View } from "react-native";
+import { Pressable, View } from "react-native";
+import { Text } from "./text";
 import {
   type AccessoryKind,
   accessoryKinds,

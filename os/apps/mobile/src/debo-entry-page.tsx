@@ -6,7 +6,8 @@
 // conversation. Under each: what Debo learned from it, and similar entries.
 import { ArrowLeft, AudioLines, BookOpen, FileText, Pencil, Phone, RotateCw, Trash2, Video } from "lucide-react-native";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { ActivityIndicator, Platform, Pressable, ScrollView, Text, View } from "react-native";
+import { ActivityIndicator, Platform, Pressable, ScrollView, View } from "react-native";
+import { Text } from "./text";
 import { deboApi, errorText } from "./debo-api";
 import { useAssistantName } from "./debo-character-store";
 import {
@@ -155,7 +156,7 @@ export function EntryPage({ id }: { id: string }) {
           {!!length && <Text style={s.small}>· {length}</Text>}
           {media && <Text style={s.small}>· {formatSize(media.sizeBytes)}</Text>}
         </View>
-        <Text accessibilityRole="header" style={[s.title, { fontSize: fontSize["3xl"], lineHeight: fontSize["3xl"] + spacing[2], letterSpacing: -0.6 }]}>
+        <Text accessibilityRole="header" style={s.pageTitle}>
           {entry.title || kindName(entry.kind)}
         </Text>
         <Text style={s.muted}>Happened on {day}</Text>

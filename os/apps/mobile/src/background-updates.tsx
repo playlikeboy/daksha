@@ -1,6 +1,7 @@
 import { ArrowRight, Bell, X } from "lucide-react-native";
 import { useState } from "react";
-import { Pressable, Text, View } from "react-native";
+import { Pressable, View } from "react-native";
+import { Text } from "./text";
 import { useAgentWorkspace } from "./agent-workspace";
 import { chatUpdates } from "./chat-updates";
 import { Button, Card, colors, ErrorNotice, resultSummary, s, spacing } from "./ui";

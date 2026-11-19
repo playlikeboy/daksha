@@ -3,7 +3,8 @@
 // this device until you press "Save recording".
 import { Circle, Mic, Square, Trash2, Upload, Video } from "lucide-react-native";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { Text, View } from "react-native";
+import { View } from "react-native";
+import { Text } from "./text";
 import { deboApi, errorText } from "./debo-api";
 import {
   type Capture,

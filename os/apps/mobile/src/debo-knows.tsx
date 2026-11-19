@@ -1,6 +1,7 @@
 import { Brain, Pencil, Trash2 } from "lucide-react-native";
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { Text, View } from "react-native";
+import { View } from "react-native";
+import { Text } from "./text";
 import { deboApi, errorText } from "./debo-api";
 import { type DeboStatus, type MemoryView } from "./debo-data";
 import { NotSetUp } from "./debo-journal";

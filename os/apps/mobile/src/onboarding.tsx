@@ -18,7 +18,8 @@ import {
   ShieldCheck,
 } from "lucide-react-native";
 import { useEffect, useMemo, useRef, useState } from "react";
-import { Animated, Linking, Platform, Pressable, ScrollView, Text, View } from "react-native";
+import { Animated, Linking, Platform, Pressable, ScrollView, View } from "react-native";
+import { Text } from "./text";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useAgentWorkspace } from "./agent-workspace";
 import { deboApi, errorText } from "./debo-api";
@@ -37,6 +38,7 @@ import {
   ErrorNotice,
   Field,
   fontSize,
+  typeSize,
   Mascot,
   radius,
   s,
@@ -448,7 +450,10 @@ function Heading({ title, refFor }: { title: string; refFor: React.RefObject<Vie
   return (
     // tabIndex -1: the web can move focus here when a step opens, without adding a tab stop.
     <View ref={refFor} tabIndex={-1} style={{ outlineStyle: "none" } as object}>
-      <Text accessibilityRole="header" style={[s.title, { fontSize: fontSize["3xl"], lineHeight: spacing[9] }]}>
+      <Text
+        accessibilityRole="header"
+        style={[s.pageTitle, { fontSize: typeSize["3xl"], lineHeight: spacing[10], letterSpacing: -0.9 }]}
+      >
         {title}
       </Text>
     </View>
@@ -471,7 +476,7 @@ function Progress({ index, total }: { index: number; total: number }) {
             width: i === index ? spacing[5] : spacing[2],
             height: spacing[2],
             borderRadius: radius.full,
-            backgroundColor: i <= index ? colors.text : colors.lineStrong,
+            backgroundColor: i <= index ? colors.brand : colors.lineStrong,
           }}
         />
       ))}

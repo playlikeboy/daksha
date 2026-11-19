@@ -1,6 +1,7 @@
 import { BookOpen, ChevronRight, Mic, Pencil, RotateCw, Search, Trash2, Video } from "lucide-react-native";
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { ActivityIndicator, Pressable, Text, View } from "react-native";
+import { ActivityIndicator, Pressable, View } from "react-native";
+import { Text } from "./text";
 import { deboApi, errorText } from "./debo-api";
 import { Composer } from "./debo-composer";
 import {

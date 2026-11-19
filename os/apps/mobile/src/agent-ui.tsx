@@ -22,7 +22,8 @@ import {
   SlidersHorizontal,
 } from "lucide-react-native";
 import { useEffect, useRef, useState } from "react";
-import { Image, Linking, Pressable, Text, View } from "react-native";
+import { Image, Linking, Pressable, View } from "react-native";
+import { Text } from "./text";
 import Svg, { Defs, LinearGradient, Rect, Stop } from "react-native-svg";
 import type { Artifact, BrowserSession } from "../../../packages/domain/src";
 import type {

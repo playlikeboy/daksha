@@ -1,5 +1,6 @@
 // Web: the browser's own date picker, which has a calendar and keyboard entry.
-import { Text, View } from "react-native";
+import { View } from "react-native";
+import { Text } from "./text";
 import { todayInput } from "./debo-data";
 import { colors, fontSize, radius, s, spacing } from "./ui";
 

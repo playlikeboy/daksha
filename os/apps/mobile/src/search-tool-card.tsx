@@ -1,6 +1,7 @@
 import { Search } from "lucide-react-native";
 import { useContext, useState } from "react";
-import { ActivityIndicator, Linking, Text, View } from "react-native";
+import { ActivityIndicator, Linking, View } from "react-native";
+import { Text } from "./text";
 import { z } from "zod";
 import { BrowserRunContext } from "./browser-tool-card";
 import { Card, colors, ErrorNotice, s } from "./ui";

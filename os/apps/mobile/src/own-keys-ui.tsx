@@ -5,7 +5,8 @@
 // See apps/server/src/own-keys/.
 import { ChevronDown, ChevronRight } from "lucide-react-native";
 import { useCallback, useEffect, useState } from "react";
-import { Pressable, Text, View } from "react-native";
+import { Pressable, View } from "react-native";
+import { Text } from "./text";
 import { z } from "zod";
 import { errorText } from "./debo-api";
 import { Button, Card, colors, ErrorNotice, Field, s, spacing } from "./ui";

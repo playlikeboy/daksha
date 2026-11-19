@@ -24,10 +24,9 @@ import {
   Linking,
   Platform,
   Pressable,
-  Text,
-  TextInput,
   View,
 } from "react-native";
+import { Text, TextInput } from "./text";
 import type {
   Artifact,
   BrowserSession,

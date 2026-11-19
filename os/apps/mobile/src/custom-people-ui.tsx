@@ -5,7 +5,8 @@
 // again (apps/server/src/custom-people, apps/server/src/voice-clone).
 import { FileUp, MessageCircle, Pencil, Smile, Trash2, UserRoundPlus } from "lucide-react-native";
 import { useCallback, useEffect, useState } from "react";
-import { Pressable, Text, View } from "react-native";
+import { Pressable, View } from "react-native";
+import { Text } from "./text";
 import { type CustomPerson, initials, type PeopleReply, PeopleReplySchema } from "./custom-people-data";
 import { CustomPersonUploadSheet } from "./custom-person-upload";
 import { type AvatarConfig, type CustomAvatar, useCustomAvatars } from "./debo-custom-avatars";

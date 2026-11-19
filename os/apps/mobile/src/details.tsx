@@ -19,7 +19,8 @@ import {
   X,
 } from "lucide-react-native";
 import { useEffect, useState } from "react";
-import { ActivityIndicator, Image, Linking, Platform, Text, View } from "react-native";
+import { ActivityIndicator, Image, Linking, Platform, View } from "react-native";
+import { Text } from "./text";
 import {
   type ActionProposal,
   type Artifact,
