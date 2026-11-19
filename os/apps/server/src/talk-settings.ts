@@ -53,6 +53,15 @@ export const CHARACTER_VOICES: Record<AgentCharacter, string> = {
   mishti: VOICES[0].id,
   // A young man, so the one male voice LiveKit Inference lists.
   kabir: VOICES[3].id,
+  // A face the person made: the voice follows the pronoun they picked (`CUSTOM_VOICES`).
+  custom: VOICES[0].id,
+};
+
+/** The voice a face the person made starts with, by the pronoun they picked for it. */
+export const CUSTOM_VOICES: Record<"she" | "he" | "they", string> = {
+  she: VOICES[0].id,
+  he: VOICES[3].id,
+  they: VOICES[0].id,
 };
 
 export const talkSettingsInput = z.object({
@@ -68,10 +77,20 @@ export const talkSettingsInput = z.object({
     .optional(),
 });
 
-/** The voice and speed a call should use for this person and character. Never throws on odd data. */
-export function voiceFor(settings: Pick<TalkSettings, "voice" | "speed"> | null, character?: string): { voice: string; speed: number } {
+/**
+ * The voice and speed a call should use for this person and character. For a face the
+ * person made, `pronoun` is the one they picked for it. Never throws on odd data.
+ */
+export function voiceFor(
+  settings: Pick<TalkSettings, "voice" | "speed"> | null,
+  character?: string,
+  pronoun?: string,
+): { voice: string; speed: number } {
   const known = VOICES.some((v) => v.id === settings?.voice);
-  const fallback = CHARACTER_VOICES[(agentCharacters as readonly string[]).includes(character ?? "") ? (character as AgentCharacter) : "debo"];
+  const custom = character === "custom" && (pronoun === "she" || pronoun === "he" || pronoun === "they");
+  const fallback = custom
+    ? CUSTOM_VOICES[pronoun as keyof typeof CUSTOM_VOICES]
+    : CHARACTER_VOICES[(agentCharacters as readonly string[]).includes(character ?? "") ? (character as AgentCharacter) : "debo"];
   const speed = typeof settings?.speed === "number" ? Math.min(SPEED_MAX, Math.max(SPEED_MIN, settings.speed)) : 1;
   return { voice: known ? (settings?.voice as string) : fallback, speed };
 }
@@ -124,7 +143,12 @@ export function contextPrompt(s: TalkSettings | null): string {
 }
 
 /** GET/PUT /api/talk-settings. Mount after the owner sign-in check. */
-export function talkSettingsRoutes(store: TalkSettingsStore, character: (owner: string) => Promise<string | undefined>) {
+export function talkSettingsRoutes(
+  store: TalkSettingsStore,
+  character: (owner: string) => Promise<string | undefined>,
+  /** For a face the person made: the pronoun they picked, which sets its starting voice. */
+  pronoun?: (owner: string) => Promise<string | undefined>,
+) {
   const app = new Hono<{ Variables: { owner: string } }>();
   app.get("/", async (c) => {
     const owner = c.get("owner");
@@ -133,7 +157,7 @@ export function talkSettingsRoutes(store: TalkSettingsStore, character: (owner: 
       settings,
       voices: VOICES,
       characterVoices: CHARACTER_VOICES,
-      voice: voiceFor(settings, await character(owner)),
+      voice: voiceFor(settings, await character(owner), await pronoun?.(owner)),
       limits: { contextMax: CONTEXT_MAX, speedMin: SPEED_MIN, speedMax: SPEED_MAX },
     });
   });

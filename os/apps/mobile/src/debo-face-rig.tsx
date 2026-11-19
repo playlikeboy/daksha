@@ -17,6 +17,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { AccessibilityInfo, Animated, AppState, Easing, Platform } from "react-native";
 import Svg from "react-native-svg";
+import type { AvatarConfig } from "../../../packages/domain/src/avatar";
 import { type CharacterId, poseFor } from "./debo-characters";
 import { basePose, type Pose, stillPose } from "./debo-face-poses";
 import type { Mood } from "./debo-mood";
@@ -349,6 +350,8 @@ export type Rig = ReturnType<typeof useFaceRig>;
 export interface ArtProps {
   size: number;
   rig: Rig;
+  /** For a face the person made: what to draw. The built-in characters ignore it. */
+  custom?: AvatarConfig;
 }
 
 /** Style for the Animated.View that carries a character's whole body (or just its head). */

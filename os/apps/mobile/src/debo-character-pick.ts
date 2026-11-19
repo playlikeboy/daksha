@@ -5,28 +5,38 @@
 // character's name, it changes to the new character's name. If the person typed a name of
 // their own, it is never replaced without asking: the app saves the pick, keeps the name,
 // and offers the character's name as a question.
+//
+// A face the person made counts the same way: its name is offered like a character's.
 import type { AgentIdentity } from "../../../packages/domain/src/agent";
 import { type CharacterId, characters, suggestedName } from "./debo-characters";
 
 export interface PickPlan {
   /** The body to send to POST /api/agent/identity. */
-  save: Pick<AgentIdentity, "name" | "tone" | "avatar" | "character" | "showChatUpdates">;
+  save: Pick<AgentIdentity, "name" | "tone" | "avatar" | "character" | "showChatUpdates" | "customAvatar">;
   /** Set when a name of the person's own is kept: the name we may offer instead. */
   offer?: { name: string; keep: string };
 }
 
-export function planPick(saved: AgentIdentity, picked: CharacterId): PickPlan {
-  const { rename, ask } = suggestedName(saved.name, picked);
-  const name = rename ? characters[picked].name : saved.name;
+/** A face the person made: its saved id and the name they gave it. */
+export interface PickedFace {
+  id: string;
+  name: string;
+}
+
+export function planPick(saved: AgentIdentity, picked: CharacterId, face?: PickedFace): PickPlan {
+  const offered = picked === "custom" && face ? face.name.trim() : characters[picked].name;
+  const { rename, ask } = suggestedName(saved.name, picked, offered);
+  const name = rename ? offered : saved.name;
   return {
     save: {
       name,
       tone: saved.tone,
       avatar: saved.avatar ?? "sky",
       character: picked,
+      ...(picked === "custom" && face ? { customAvatar: face.id } : {}),
       showChatUpdates: saved.showChatUpdates !== false,
     },
-    offer: ask ? { name: characters[picked].name, keep: saved.name } : undefined,
+    offer: ask ? { name: offered, keep: saved.name } : undefined,
   };
 }
 

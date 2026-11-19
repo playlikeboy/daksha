@@ -1,4 +1,4 @@
-import { useAssistantName, useDeboCharacter } from "./debo-character-store";
+import { useAssistantName, useCustomAvatar, useDeboCharacter } from "./debo-character-store";
 
 /**
  * How labels talk about the character the person picked: "How fast she speaks",
@@ -49,13 +49,19 @@ const byCharacter: Record<string, Pronouns> = {
   kabir: he,
 };
 
-export function pronounsFor(character: string): Pronouns {
+/**
+ * A face the person made ("custom") uses the pronoun they picked for it in the avatar
+ * builder, `customPronoun`. Anything else, or nothing, is "they".
+ */
+export function pronounsFor(character: string, customPronoun?: string): Pronouns {
+  if (character === "custom") return customPronoun === "she" ? she : customPronoun === "he" ? he : they;
   return byCharacter[character] ?? they;
 }
 
 /** The pronouns of the character the person chose. */
 export function usePronouns(): Pronouns {
-  return pronounsFor(useDeboCharacter());
+  const custom = useCustomAvatar();
+  return pronounsFor(useDeboCharacter(), custom.pronoun);
 }
 
 /** "How Nova talks and what she knows": the name of the talk settings, wherever it is linked. */

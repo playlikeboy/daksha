@@ -1,4 +1,5 @@
-// The face of whoever the person talks to: Debo, Diya, Anaya, Mishti or Kabir.
+// The face of whoever the person talks to: Debo, Diya, Anaya, Mishti, Kabir, or a face
+// the person made themselves.
 //
 // This is the one component every screen uses. It reads the chosen character
 // (debo-character-store.ts) and the shared mood (debo-mood-store.ts), runs the shared
@@ -9,12 +10,14 @@
 // The face is decoration next to text that already says the state, so screen
 // readers skip it unless a `label` is given.
 import { Platform, Pressable, View } from "react-native";
+import type { AvatarConfig } from "../../../packages/domain/src/avatar";
 import { AnayaArt } from "./debo-art-anaya";
+import { CustomArt } from "./debo-art-custom";
 import { DeboArt } from "./debo-art-debo";
 import { DiyaArt } from "./debo-art-diya";
 import { KabirArt } from "./debo-art-kabir";
 import { MishtiArt } from "./debo-art-mishti";
-import { useDeboCharacter } from "./debo-character-store";
+import { useCustomAvatar, useDeboCharacter } from "./debo-character-store";
 import type { CharacterId } from "./debo-characters";
 import { type ArtProps, useFaceRig, useReducedMotion } from "./debo-face-rig";
 import type { Mood } from "./debo-mood";
@@ -28,6 +31,7 @@ const arts: Record<CharacterId, (props: ArtProps) => React.ReactNode> = {
   anaya: AnayaArt,
   mishti: MishtiArt,
   kabir: KabirArt,
+  custom: CustomArt,
 };
 
 export interface DeboFaceProps {
@@ -36,6 +40,8 @@ export interface DeboFaceProps {
   mood?: Mood;
   /** Show this character instead of the chosen one (the picker, the gallery). */
   character?: CharacterId;
+  /** With character "custom": draw this face instead of the one the person talks to. */
+  custom?: AvatarConfig;
   /** Tapping gives a small reaction. */
   interactive?: boolean;
   /** Read by screen readers as an image. Leave off when text already says the state. */
@@ -44,9 +50,18 @@ export interface DeboFaceProps {
   still?: boolean;
 }
 
-export function DeboFace({ size = 120, mood: forced, character: forcedCharacter, interactive, label, still }: DeboFaceProps) {
+export function DeboFace({
+  size = 120,
+  mood: forced,
+  character: forcedCharacter,
+  custom: forcedCustom,
+  interactive,
+  label,
+  still,
+}: DeboFaceProps) {
   const shared = useDeboMood();
   const chosen = useDeboCharacter();
+  const chosenCustom = useCustomAvatar();
   const character = forcedCharacter ?? chosen;
   const mood: Mood = forced ?? shared.mood;
   const rig = useFaceRig(character, mood, size, still);
@@ -63,7 +78,7 @@ export function DeboFace({ size = 120, mood: forced, character: forcedCharacter,
             ...(Platform.OS === "web" ? { "aria-hidden": true } : {}),
           })}
     >
-      <Art size={size} rig={rig} />
+      <Art size={size} rig={rig} custom={forcedCustom ?? chosenCustom} />
     </View>
   );
 
@@ -81,4 +96,12 @@ export function DeboFace({ size = 120, mood: forced, character: forcedCharacter,
       {body}
     </Pressable>
   );
+}
+
+/**
+ * Any made face, anywhere: the builder's preview, a custom person's card. It moves and
+ * shows moods exactly like the face the person talks to.
+ */
+export function CustomFace({ config, ...rest }: Omit<DeboFaceProps, "character" | "custom"> & { config: AvatarConfig }) {
+  return <DeboFace {...rest} character="custom" custom={config} />;
 }

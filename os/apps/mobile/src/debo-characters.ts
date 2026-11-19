@@ -1,4 +1,5 @@
-// The five characters a person can talk to, and how each one shows every mood.
+// The five characters a person can talk to, plus a face they make themselves ("custom",
+// drawn from their own saved avatar: debo-art-custom.tsx), and how each one shows every mood.
 //
 // This file has no drawing code, so tests can read it. The drawings live in
 // debo-art-*.tsx, and each character's colours in debo-paint-*.ts.
@@ -10,10 +11,13 @@
 import { type Pose, poses } from "./debo-face-poses";
 import { allMoods, type Mood } from "./debo-mood";
 
-export type CharacterId = "debo" | "diya" | "anaya" | "mishti" | "kabir";
+export type CharacterId = "debo" | "diya" | "anaya" | "mishti" | "kabir" | "custom";
 
 /** The same list as `agentCharacters` in the shared domain package (a test checks it). */
-export const characterIds: CharacterId[] = ["debo", "diya", "anaya", "mishti", "kabir"];
+export const characterIds: CharacterId[] = ["debo", "diya", "anaya", "mishti", "kabir", "custom"];
+
+/** The ready-made characters the picker shows. A face the person made is listed apart. */
+export const builtInCharacterIds = characterIds.filter((id) => id !== "custom");
 
 /** Everyone who never chose gets this one. */
 export const defaultCharacter: CharacterId = "debo";
@@ -26,8 +30,8 @@ export interface CharacterInfo {
   blurb: string;
   /** For screen readers: what the picture is. */
   looks: string;
-  /** How labels talk about this character: "How she talks" or "How he talks". */
-  pronoun: "she" | "he";
+  /** How labels talk about this character: "How she talks" or "How he talks". A made face uses its own. */
+  pronoun: "she" | "he" | "they";
   /** Extra mood numbers on top of the shared ones. */
   poseTweaks: Partial<Record<Mood, Partial<Pose>>>;
   /** How this character shows each mood, in a few plain words. */
@@ -147,6 +151,30 @@ export const characters: Record<CharacterId, CharacterInfo> = {
     },
     poseTweaks: {},
   },
+  // A face the person made. Its look, name and pronoun come from the saved avatar; these
+  // words describe how any made face shows each mood (they all share the same rig).
+  custom: {
+    id: "custom",
+    name: "Your own",
+    blurb: "A face you made",
+    looks: "a face the person designed",
+    pronoun: "they",
+    poseTweaks: {},
+    expresses: {
+      idle: "Breathes slowly and blinks. Ears, leaves or tufts sway a little.",
+      listening: "Grows a bit taller. Eyes go wide. Ears or leaves lift.",
+      thinking: "Looks up and to the side. Flat mouth. Three dots float up.",
+      speaking: "Mouth opens and closes with the voice.",
+      happy: "Eyes turn into happy arcs. Big open smile. Bounces twice.",
+      proud: "Happy arcs, sparkles, chin up.",
+      shy: "Looks down and away. Cheeks turn deep pink.",
+      curious: "Tilts to one side. Small round mouth.",
+      sleepy: "Eyes almost shut. Yawns now and then.",
+      worried: "Brows bend up in the middle. Wobbly mouth. A drop of sweat.",
+      pouty: "Turns away with eyes shut and a puffed cheek. Peeks with one eye.",
+      angry: "Brows cross. Small frown. Little puffs of steam. Trembles.",
+    },
+  },
 };
 
 export function isCharacterId(value: unknown): value is CharacterId {
@@ -160,7 +188,10 @@ export function characterOrDefault(value: unknown): CharacterId {
 
 /** Words for labels about the assistant, matching the chosen character. */
 export function pronounsFor(id: CharacterId) {
-  return characters[id].pronoun === "he"
+  const pronoun = characters[id].pronoun;
+  if (pronoun === "they")
+    return { subject: "they", Subject: "They", object: "them", possessive: "their", Possessive: "Their", reflexive: "themself" };
+  return pronoun === "he"
     ? { subject: "he", Subject: "He", object: "him", possessive: "his", Possessive: "His", reflexive: "himself" }
     : { subject: "she", Subject: "She", object: "her", possessive: "her", Possessive: "Her", reflexive: "herself" };
 }
@@ -181,10 +212,14 @@ export function missingMoods(id: CharacterId): Mood[] {
  *  - `ask`: the person typed their own name, so ask before replacing it.
  * A name that is just one of the characters' own names counts as "not typed by the
  * person", so it follows the pick. A name the person typed is never replaced silently.
+ * For a face the person made, `offered` is the name they gave it.
  */
-export function suggestedName(currentName: string, picked: CharacterId): { rename: boolean; ask: boolean } {
+export function suggestedName(
+  currentName: string,
+  picked: CharacterId,
+  offered: string = characters[picked].name,
+): { rename: boolean; ask: boolean } {
   const current = currentName.trim();
-  const offered = characters[picked].name;
   if (!current || current === offered) return { rename: !current, ask: false };
   const isCharacterName = (Object.values(characters) as CharacterInfo[]).some((info) => info.name === current);
   return isCharacterName ? { rename: true, ask: false } : { rename: false, ask: true };

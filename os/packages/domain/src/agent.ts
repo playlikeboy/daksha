@@ -118,8 +118,11 @@ export interface AgentNotification {
   createdAt: string;
   read: boolean;
 }
-/** The characters a person can talk to. The drawings live in apps/mobile (debo-characters.ts). */
-export const agentCharacters = ["debo", "diya", "anaya", "mishti", "kabir"] as const;
+/**
+ * The characters a person can talk to. The drawings live in apps/mobile (debo-characters.ts).
+ * "custom" is a face the person designed; which one is `AgentIdentity.customAvatar`.
+ */
+export const agentCharacters = ["debo", "diya", "anaya", "mishti", "kabir", "custom"] as const;
 export type AgentCharacter = (typeof agentCharacters)[number];
 export interface AgentIdentity {
   name: string;
@@ -128,6 +131,8 @@ export interface AgentIdentity {
   avatar?: "sky" | "sand" | "lilac";
   /** Who the person talks to. Missing means the default, Debo. */
   character?: AgentCharacter;
+  /** With character "custom": the id of the saved avatar (records kind `custom-avatars`). */
+  customAvatar?: string;
   showChatUpdates?: boolean;
 }
 export interface AgentWorkspace {

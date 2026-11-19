@@ -3,6 +3,7 @@ import test from "node:test";
 import { agentCharacters, type AgentIdentity } from "../../../packages/domain/src/agent.ts";
 import { planPick, planRename } from "../src/debo-character-pick.ts";
 import {
+  builtInCharacterIds,
   characterIds,
   characterOrDefault,
   characters,
@@ -16,9 +17,11 @@ import {
 import { basePose } from "../src/debo-face-poses.ts";
 import { allMoods } from "../src/debo-mood.ts";
 
-test("the app and the shared domain package know the same five characters", () => {
+test("the app and the shared domain package know the same five characters, plus a made face", () => {
   assert.deepEqual([...characterIds].sort(), [...agentCharacters].sort());
-  assert.equal(characterIds.length, 5);
+  assert.equal(characterIds.length, 6);
+  assert.equal(builtInCharacterIds.length, 5);
+  assert.ok(!(builtInCharacterIds as string[]).includes("custom"), "the picker lists made faces apart");
   assert.equal(defaultCharacter, "debo");
 });
 
@@ -39,17 +42,18 @@ test("every character defines every mood", () => {
 });
 
 test("characters have different names, and none clashes with the sample people", () => {
-  const names = characterIds.map((id) => characters[id].name);
+  const names = builtInCharacterIds.map((id) => characters[id].name);
   assert.deepEqual(names, ["Debo", "Diya", "Anaya", "Mishti", "Kabir"]);
   assert.equal(new Set(names).size, names.length);
   for (const taken of ["Neha", "Aarav", "Meera"]) assert.ok(!names.includes(taken));
 });
 
-test("labels say he for Kabir and she for everyone else", () => {
+test("labels say he for Kabir, she for the other characters, and they for a made face by default", () => {
   assert.equal(pronounsFor("kabir").subject, "he");
   assert.equal(pronounsFor("kabir").Possessive, "His");
   assert.equal(pronounsFor("kabir").object, "him");
-  for (const id of characterIds.filter((id) => id !== "kabir")) assert.equal(pronounsFor(id).subject, "she");
+  for (const id of builtInCharacterIds.filter((id) => id !== "kabir")) assert.equal(pronounsFor(id).subject, "she");
+  assert.equal(pronounsFor("custom").subject, "they");
 });
 
 test("a missing or unknown character means the default, so old accounts get Debo", () => {
@@ -71,6 +75,9 @@ test("a name the person typed is never replaced without asking", () => {
   assert.deepEqual(suggestedName("", "mishti"), { rename: true, ask: false });
   // Already the right name: nothing to do.
   assert.deepEqual(suggestedName("Anaya", "anaya"), { rename: false, ask: false });
+  // A made face offers the name the person gave it.
+  assert.deepEqual(suggestedName("Debo", "custom", "Rani"), { rename: true, ask: false });
+  assert.deepEqual(suggestedName("Nova", "custom", "Rani"), { rename: false, ask: true });
 });
 
 const saved: AgentIdentity = { name: "Debo", tone: "warm" };
@@ -96,4 +103,14 @@ test("picking with a custom name keeps the name and offers the new one", () => {
   const renamed = planRename({ ...saved, name: "Nova", character: "mishti" }, " Mishti ");
   assert.equal(renamed.name, "Mishti");
   assert.equal(renamed.character, "mishti");
+});
+
+test("picking a made face saves its id and offers its name", () => {
+  const plan = planPick(saved, "custom", { id: "face-1", name: "Rani" });
+  assert.deepEqual(plan.save, { name: "Rani", tone: "warm", avatar: "sky", character: "custom", customAvatar: "face-1", showChatUpdates: true });
+  const kept = planPick({ ...saved, name: "Nova" }, "custom", { id: "face-1", name: "Rani" });
+  assert.equal(kept.save.name, "Nova");
+  assert.deepEqual(kept.offer, { name: "Rani", keep: "Nova" });
+  // A built-in pick never carries a face id.
+  assert.equal(planPick(saved, "diya").save.customAvatar, undefined);
 });
