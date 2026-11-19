@@ -10,7 +10,7 @@ export function Shell({ children }: { children: ReactNode }) {
       height="auto"
       header={<SiteHeader />}
       content={
-        <LayoutContent role="main" label="Debo investor pitch" isScrollable={false} padding={0}>
+        <LayoutContent role="main" label="Daksha investor pitch" isScrollable={false} padding={0}>
           {children}
         </LayoutContent>
       }

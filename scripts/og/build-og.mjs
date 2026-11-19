@@ -1,4 +1,4 @@
-// Builds the share image (Open Graph and Twitter card, 1200x630) for every Debo site.
+// Builds the share image (Open Graph and Twitter card, 1200x630) for every Daksha site.
 //   node scripts/og/build-og.mjs            (from the repo root, after `pnpm install`)
 // Renders scripts/og/og.html with Playwright and writes the PNG files listed in OUTPUTS.
 // Playwright is loaded from apps/web, which already depends on it.

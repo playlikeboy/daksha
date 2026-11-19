@@ -57,15 +57,15 @@ const PRIVACY: Qa[] = [
   },
   {
     q: "Open item: Mem0 may train on free plan data",
-    a: "Mem0's privacy policy says it trains its AI models on data from free plan users, and not on paid plan users. We have not yet confirmed which covers Debo's account. Until we do, the privacy page tells people to assume Mem0 may train on what Debo sends it. Confirming the plan, or moving to a paid plan with a data processing addendum, is on our roadmap before inviting real people.",
+    a: "Mem0's privacy policy says it trains its AI models on data from free plan users, and not on paid plan users. We have not yet confirmed which covers Daksha's account. Until we do, the privacy page tells people to assume Mem0 may train on what Daksha sends it. Confirming the plan, or moving to a paid plan with a data processing addendum, is on our roadmap before inviting real people.",
   },
   {
     q: "Open item: voice providers' terms are not verified",
-    a: "We have not yet checked LiveKit's, Deepgram's or Cartesia's terms on training AI and on how long they keep audio. Until we do, the privacy page says to assume they may keep it for a time, and that people who worry should type instead. Debo itself does not record voice during a call. Transcripts are kept only if the person leaves \"Keep voice transcripts\" on.",
+    a: "We have not yet checked LiveKit's, Deepgram's or Cartesia's terms on training AI and on how long they keep audio. Until we do, the privacy page says to assume they may keep it for a time, and that people who worry should type instead. Daksha itself does not record voice during a call. Transcripts are kept only if the person leaves \"Keep voice transcripts\" on.",
   },
   {
     q: "Other limits we state publicly",
-    a: "Debo is not end-to-end encrypted, because the servers must read entries to search them. The database provider may keep backups for a short time and we have not stated the period. Mem0 does not say how long it keeps data after deletion. We have not checked whether Cloudflare keeps a backup copy of a deleted recording. A full privacy policy checked by someone qualified comes before Debo opens fully.",
+    a: "Daksha is not end-to-end encrypted, because the servers must read entries to search them. The database provider may keep backups for a short time and we have not stated the period. Mem0 does not say how long it keeps data after deletion. We have not checked whether Cloudflare keeps a backup copy of a deleted recording. A full privacy policy checked by someone qualified comes before Daksha opens fully.",
   },
   {
     q: "Can a person take their data or delete it?",
@@ -80,11 +80,11 @@ const PRIVACY: Qa[] = [
 const SAFETY: Qa[] = [
   {
     q: "Is the companion persona built?",
-    a: "A first version is live. A person can ask Debo to take a role (a friend, a partner, a coach, a study buddy) in chat or by voice. Debo keeps the role across chats and calls until told to stop, and the person can see and stop it on the Apps screen. The role is stored with the person's account and is exported and deleted with it. It has not been tested with real users yet.",
+    a: "A first version is live. A person can ask Daksha to take a role (a friend, a partner, a coach, a study buddy) in chat or by voice. Daksha keeps the role across chats and calls until told to stop, and the person can see and stop it on the Apps screen. The role is stored with the person's account and is exported and deleted with it. It has not been tested with real users yet.",
   },
   {
     q: "What rules does it follow?",
-    a: "Our product rules already say Debo never pretends to be a person, gives no medical, legal or financial advice, never guesses facts about a person's life, and never acts outside Debo without a clear yes. In a role, Debo is told to: say honestly that it is an AI when sincerely asked; produce no sexually explicit content; drop the role and be caring and direct if the person seems to be a minor or in crisis. Today these rules are instructions to the AI model, so they depend on the model following them; there is no separate filter yet. Still planned: an on-screen reminder that it is an AI, no encouragement of dependence or secrecy, a pointer to local help when a person talks about hurting themselves, and tests of all of this with real people.",
+    a: "Our product rules already say Daksha never pretends to be a person, gives no medical, legal or financial advice, never guesses facts about a person's life, and never acts outside Daksha without a clear yes. In a role, Daksha is told to: say honestly that it is an AI when sincerely asked; produce no sexually explicit content; drop the role and be caring and direct if the person seems to be a minor or in crisis. Today these rules are instructions to the AI model, so they depend on the model following them; there is no separate filter yet. Still planned: an on-screen reminder that it is an AI, no encouragement of dependence or secrecy, a pointer to local help when a person talks about hurting themselves, and tests of all of this with real people.",
   },
   {
     q: "Is any of this checked by an expert?",
@@ -95,7 +95,7 @@ const SAFETY: Qa[] = [
 const RISKS: Qa[] = [
   { q: "Risk: AI cost grows faster than revenue", a: "Hard per-person limits, invite-only growth, a plan priced above its own limits, and provider spend caps. See the go to market and unit economics pages. Voice is the biggest cost, so it is capped first." },
   { q: "Risk: a big platform copies memory", a: "True and likely. Our answer is trust (sources, control, honest limits) and voice for Indian languages, built in from the start. We do not claim a technical secret." },
-  { q: "Risk: a leak or a broken promise", a: "Every database query on user data filters by user id, secrets are never logged, logs hold ids not text, actions outside Debo need an on-screen yes, and the privacy page admits what is unchecked. We have not had an outside security review." },
+  { q: "Risk: a leak or a broken promise", a: "Every database query on user data filters by user id, secrets are never logged, logs hold ids not text, actions outside Daksha need an on-screen yes, and the privacy page admits what is unchecked. We have not had an outside security review." },
   { q: "Risk: wrong answers", a: "Answers come only from the person's own entries, with a source, and say \"I don't have anything about that yet\" when nothing matches. A test set of made-up entries and questions is run before releases. Quality on real, long histories is not yet measured." },
   { q: "Risk: dependence on a few providers", a: "Model calls go through one package, with Anthropic first and a fallback. Speech and memory sit behind small interfaces so another provider can replace them. Mem0 and LiveKit are the least easy to swap." },
   { q: "Risk: one person builds everything", a: "Real. The code is readable, documented, and tested with stand-ins. Funding adds a first engineer. See the team and ask sections of the deck." },
@@ -104,7 +104,7 @@ const RISKS: Qa[] = [
 
 const TECH: Qa[] = [
   { q: "What is it built on?", a: "TypeScript. The app is an Expo and React Native app that runs on the web, iOS and Android; the server is Hono. Data is in Neon Postgres with pgvector for search by meaning. It runs on Cloudflare: Workers, Containers (an API container and a browser container with Chromium) and R2. Answers use Claude Haiku 5.5 through the Vercel AI SDK, with Neon's AI gateway as a fallback. Voice runs on LiveKit Agents. Memory is hosted Mem0. Connected apps go through Composio. The sign-in is Neon Auth." },
-  { q: "Is any of the code from someone else?", a: <>The agent platform in the new app (the "os" folder) started from CopilotKit&rsquo;s open-source OpenFuse template under the MIT licence, recorded in the repository&rsquo;s THIRD_PARTY_NOTICES. Debo does not use its brand, name or mascot. The journal, memory, voice and trust parts are Debo&rsquo;s own. Repository: <Src href={REPO_URL}>github.com/playlikeboy/debo.life</Src>.</> },
+  { q: "Is any of the code from someone else?", a: <>The agent platform in the new app (the "os" folder) started from CopilotKit&rsquo;s open-source OpenFuse template under the MIT licence, recorded in the repository&rsquo;s THIRD_PARTY_NOTICES. Daksha does not use its brand, name or mascot. The journal, memory, voice and trust parts are Daksha&rsquo;s own. Repository: <Src href={REPO_URL}>github.com/playlikeboy/daksha</Src>.</> },
   { q: "What is tested, and what is not?", a: "Typecheck, unit tests with stand-ins, and a recall test set. Several features were run end to end only with a fake bucket and fake speech engine: journal recordings, speaking into text, and voice from the new app. Not yet run for real: Cloudflare R2 and Workers AI, ffmpeg in the container, Whisper quality on Hindi and mixed speech, phone code on a device, a live Gmail account. The documents in the repository list each one." },
 ];
 
@@ -121,7 +121,7 @@ export default function Diligence() {
         <Cards
           min={240}
           items={[
-            { title: "1. The person", body: "The Debo app in a browser or on a phone, at my.debo.life. Draft entries stay on the device until saved." },
+            { title: "1. The person", body: "The Daksha app in a browser or on a phone, at my.daksha.life. Draft entries stay on the device until saved." },
             { title: "2. Cloudflare", body: "A Worker serves the app. The API runs in a small container. A second container runs Chromium for the browser feature. An optional Linux workspace exists but is off." },
             { title: "3. The brain", body: "One answer pipeline: search the person's own entries (words and meaning), check the daily limit, ask the model to answer only from those pieces, return the answer with source ids." },
             { title: "4. Neon", body: "Postgres: accounts, entries, pieces for search, chats, usage counts, the activity record." },
@@ -156,12 +156,12 @@ export default function Diligence() {
       <Band id="legal">
         <Intro id="legal" badge="Company" title="Legal and company status" lead="We do not state any company registration or legal fact here until the founder supplies it." />
         <Placeholder what="Company entity: name, type, country and date of registration (or: not yet registered)" />
-        <Placeholder what="Who owns the code and the Debo name, and any trademark filings" />
+        <Placeholder what="Who owns the code and the Daksha name, and any trademark filings" />
         <Placeholder what="Cap table and any prior funding (or: none)" />
         <Placeholder what="Contact email for investors" />
         <Heading level={3}>Other legal items we know about</Heading>
         <Para>
-          A full privacy policy checked by someone qualified is promised before Debo opens fully. India&rsquo;s data protection law and
+          A full privacy policy checked by someone qualified is promised before Daksha opens fully. India&rsquo;s data protection law and
           rules for taking payments from users have not been reviewed by a lawyer for this site.
         </Para>
       </Band>

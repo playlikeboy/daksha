@@ -26,7 +26,7 @@ export default function Try() {
         />
         <Card variant="muted" padding={6}>
           <VStack gap={3} hAlign="start">
-            <Heading level={3}>Demo sign-in for my.debo.life</Heading>
+            <Heading level={3}>Demo sign-in for my.daksha.life</Heading>
             {hasLogin ? (
               <>
                 <Text as="p" type="large">
@@ -42,7 +42,7 @@ export default function Try() {
               </Text>
             )}
             <HStack gap={3} wrap="wrap">
-              <Button label="Open my.debo.life" variant="primary" size="lg" href={APP_URL} style={TOUCH} />
+              <Button label="Open my.daksha.life" variant="primary" size="lg" href={APP_URL} style={TOUCH} />
             </HStack>
           </VStack>
         </Card>
@@ -59,9 +59,9 @@ export default function Try() {
           items={[
             { title: "1. Open the Journal", body: "Read the made-up entries, then write one of your own. Edit it, then delete it." },
             { title: "2. Ask a question", body: "Try \"What did I plant on the balcony?\" Press the source chip and see the original entry open." },
-            { title: "3. Ask something not in the journal", body: "Debo should say it does not have anything about that yet, instead of guessing." },
-            { title: "4. See what Debo knows", body: "Open the memories page. Every memory has its source. Fix one or forget one." },
-            { title: "5. Talk to Debo", body: "If voice is switched on for the demo, press Start talking and speak in English, Hindi or a mix. Look for the clear line that says whether the microphone is on." },
+            { title: "3. Ask something not in the journal", body: "Daksha should say it does not have anything about that yet, instead of guessing." },
+            { title: "4. See what Daksha knows", body: "Open the memories page. Every memory has its source. Fix one or forget one." },
+            { title: "5. Talk to Daksha", body: "If voice is switched on for the demo, press Start talking and speak in English, Hindi or a mix. Look for the clear line that says whether the microphone is on." },
             { title: "6. Look at Apps", body: "See how apps are connected one at a time, and that anything that sends or changes asks for a yes first." },
           ]}
         />

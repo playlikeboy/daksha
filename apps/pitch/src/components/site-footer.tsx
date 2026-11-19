@@ -12,11 +12,11 @@ export function SiteFooter() {
         <VStack gap={3} width="100%" maxWidth={1120}>
           <HStack gap={2} wrap="wrap">
             <Button label="Open the app" variant="ghost" href={APP_URL} style={TOUCH} />
-            <Button label="About Debo" variant="ghost" href={SITE_URL} style={TOUCH} />
+            <Button label="About Daksha" variant="ghost" href={SITE_URL} style={TOUCH} />
             <Button label="Privacy page" variant="ghost" href={PRIVACY_URL} style={TOUCH} />
           </HStack>
           <Text type="supporting" as="p" color="secondary">
-            This page is for investors and is not listed in search engines. Debo is an early version, built by one
+            This page is for investors and is not listed in search engines. Daksha is an early version, built by one
             founder. Numbers marked as estimates are estimates. Every outside number has its source beside it.
           </Text>
         </VStack>

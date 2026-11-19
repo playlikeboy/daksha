@@ -29,7 +29,7 @@ export const FUNDS: Target[] = [
     kind: "Early-stage fund",
     stage: "Pre-seed and seed",
     cheque: "No fixed range on its page (examples from 150K to 2M, currency not stated)",
-    fit: "Lists consumer as a focus, invests before there are customers, and asks for a link to a working product or a demo rather than a deck. Debo is live.",
+    fit: "Lists consumer as a focus, invests before there are customers, and asks for a link to a working product or a demo rather than a deck. Daksha is live.",
     href: "https://www.indiaquotient.in/",
     hrefLabel: "India Quotient",
   },
@@ -87,7 +87,7 @@ export const FUNDS: Target[] = [
     kind: "Consumer fund",
     stage: "Early stage",
     cheque: "A reported 150 crore rupee fund; cheque size not found",
-    fit: "A consumer-focused fund, per press. Debo is a consumer product.",
+    fit: "A consumer-focused fund, per press. Daksha is a consumer product.",
     href: "https://www.consumerx.vc/",
     hrefLabel: "ConsumerX",
     evidence: { href: "https://www.outlookbusiness.com/corporate/consumerx-ventures-bets-150-cr-on-indias-next-consumer-start-ups", label: "Outlook Business on ConsumerX" },
@@ -178,6 +178,6 @@ export const ANGELS: Target[] = [
 ];
 
 export const CREDITS: Target[] = [
-  { name: "Anthropic startup program", kind: "Credits", stage: "Any", cheque: "Not checked", fit: "Debo's answers run on Claude Haiku. Credits would cover real usage cost directly.", href: "https://www.anthropic.com/startups", hrefLabel: "Anthropic for startups" },
-  { name: "Cloudflare for Startups", kind: "Credits", stage: "Any", cheque: "Not checked", fit: "Debo runs on Cloudflare: Workers, Containers, R2 and Workers AI.", href: "https://www.cloudflare.com/forstartups/", hrefLabel: "Cloudflare for Startups" },
+  { name: "Anthropic startup program", kind: "Credits", stage: "Any", cheque: "Not checked", fit: "Daksha's answers run on Claude Haiku. Credits would cover real usage cost directly.", href: "https://www.anthropic.com/startups", hrefLabel: "Anthropic for startups" },
+  { name: "Cloudflare for Startups", kind: "Credits", stage: "Any", cheque: "Not checked", fit: "Daksha runs on Cloudflare: Workers, Containers, R2 and Workers AI.", href: "https://www.cloudflare.com/forstartups/", hrefLabel: "Cloudflare for Startups" },
 ];

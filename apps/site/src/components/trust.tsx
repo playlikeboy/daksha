@@ -4,7 +4,7 @@ import { ArrowIcon } from "./icons";
 import { Section, SectionHead, stagger } from "./section";
 
 // The four things a person can always do with their data. Each is built:
-// see (What Debo knows, the journal), fix, export (Download my data), delete.
+// see (What Daksha knows, the journal), fix, export (Download my data), delete.
 const CONTROLS = [
   { word: "See", body: `Read every entry, and every memory ${BRAND} made from them, with where it came from.` },
   { word: "Fix", body: `If ${BRAND} got something wrong, correct it, or make ${BRAND} forget it.` },

@@ -637,7 +637,7 @@ p {
   }
 }
 
-/* ---------- Debo, the tomato ---------- */
+/* ---------- Daksha, the tomato ---------- */
 
 .debo-svg {
   width: 100%;
@@ -1563,7 +1563,7 @@ p {
     animation: spin 60s linear infinite;
   }
 
-  /* Debo breathes, blinks and hops when pressed. */
+  /* Daksha breathes, blinks and hops when pressed. */
   .debo-body {
     transform-box: fill-box;
     transform-origin: 50% 100%;

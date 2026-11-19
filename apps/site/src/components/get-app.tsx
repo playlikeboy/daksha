@@ -38,7 +38,7 @@ export function GetApp() {
           </div>
           <h3 className="h3">iPhone</h3>
           <p className="body-lg">
-            The iPhone app is not available yet. {BRAND} works in your phone&rsquo;s browser at my.debo.life. In Safari,
+            The iPhone app is not available yet. {BRAND} works in your phone&rsquo;s browser at my.daksha.life. In Safari,
             tap Share, then Add to Home Screen, and it sits on your home screen like an app.
           </p>
           <div className="btn-row">

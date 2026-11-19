@@ -2,7 +2,7 @@
 
 import { useEffect, useRef } from "react";
 
-// Debo, the red tomato: the same shapes as public/debo.svg (the master drawing
+// Daksha, the red tomato: the same shapes as public/debo.svg (the master drawing
 // is docs/assets/debo.svg), drawn inline so parts of it can move.
 // - The eyes follow the pointer. This is the page's one playful moment.
 // - It breathes, blinks and its leaves sway (site.css).

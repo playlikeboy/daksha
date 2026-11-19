@@ -1,6 +1,6 @@
 // Unit economics. Change a number here and every page that shows it updates.
 // Prices are PUBLIC LIST PRICES read on CHECKED. Everything under USAGE, FIXED and TIERS is an ESTIMATE
-// or a proposal, not a measurement: Debo has no paying users yet.
+// or a proposal, not a measurement: Daksha has no paying users yet.
 
 export const CHECKED = "14 November 2026";
 
@@ -10,7 +10,7 @@ export const PRICES: Price[] = [
   {
     id: "haikuIn", what: "Claude Haiku 5.5, input (prompts up to 100,000 tokens)", value: 0.1, unit: "per million tokens",
     text: "$0.10", source: "https://platform.claude.com/docs/en/about-claude/pricing",
-    note: "The model Debo uses today for answers. Prompts over 100,000 tokens cost more; Debo's prompts are far smaller.",
+    note: "The model Daksha uses today for answers. Prompts over 100,000 tokens cost more; Daksha's prompts are far smaller.",
   },
   {
     id: "haikuOut", what: "Claude Haiku 5.5, output", value: 0.5, unit: "per million tokens",
@@ -50,7 +50,7 @@ export const PRICES: Price[] = [
   {
     id: "cDisk", what: "Cloudflare Containers, disk (200 GB-hours a month included)", value: 0.00000007, unit: "per GB-second",
     text: "$0.00000007", source: "https://developers.cloudflare.com/containers/pricing/",
-    note: "Workers Paid plan, $5 a month, is required. Debo's browser container is standard-1 (1/2 vCPU, 4 GiB, 8 GB disk); its API container is basic (1/4 vCPU, 1 GiB, 4 GB).",
+    note: "Workers Paid plan, $5 a month, is required. Daksha's browser container is standard-1 (1/2 vCPU, 4 GiB, 8 GB disk); its API container is basic (1/4 vCPU, 1 GiB, 4 GB).",
   },
   {
     id: "neonCu", what: "Neon Launch plan, compute", value: 0.106, unit: "per compute-unit hour",
@@ -122,8 +122,8 @@ export const usd = (n: number): string => (n < 0.1 ? `$${n.toFixed(3)}` : `$${n.
 
 export const PROFILES: { name: string; story: string; usage: Usage; billableShare: number }[] = [
   { name: "Light", story: "Writes a little, asks now and then.", usage: { questions: 20, voiceMinutes: 0, transcribeMinutes: 30, storageGb: 0.5, browserHours: 0, toolCalls: 10 }, billableShare: 0 },
-  { name: "Typical", story: "Journals most days, talks to Debo a few times a month.", usage: { questions: 60, voiceMinutes: 15, transcribeMinutes: 60, storageGb: 2, browserHours: 1, toolCalls: 50 }, billableShare: 0 },
-  { name: "Heavy", story: "Talks daily, adds recordings, lets Debo use the browser and apps.", usage: { questions: 300, voiceMinutes: 90, transcribeMinutes: 240, storageGb: 10, browserHours: 6, toolCalls: 300 }, billableShare: 1 },
+  { name: "Typical", story: "Journals most days, talks to Daksha a few times a month.", usage: { questions: 60, voiceMinutes: 15, transcribeMinutes: 60, storageGb: 2, browserHours: 1, toolCalls: 50 }, billableShare: 0 },
+  { name: "Heavy", story: "Talks daily, adds recordings, lets Daksha use the browser and apps.", usage: { questions: 300, voiceMinutes: 90, transcribeMinutes: 240, storageGb: 10, browserHours: 6, toolCalls: 300 }, billableShare: 1 },
 ];
 
 /** Costs that do not grow with each person: the platform bills before the first user. Monthly, upper-bound estimates. */
@@ -140,7 +140,7 @@ export type Tier = { name: string; price: number; line: string; usage: Usage; bi
 /** PROPOSAL, not a decision. docs/BYOK-AND-PLANS.md says prices are not set. Limits are what the price must cover. */
 export const TIERS: Tier[] = [
   { name: "Invited, free", price: 0, line: "By invitation from the waitlist. Text and voice notes only, small caps.", usage: { questions: 100, voiceMinutes: 0, transcribeMinutes: 60, storageGb: 1, browserHours: 0, toolCalls: 20 }, billableShare: 0 },
-  { name: "Founding", price: 6, line: "First paid cohort. Talk to Debo for a few minutes a day, some browser time.", usage: { questions: 300, voiceMinutes: 20, transcribeMinutes: 120, storageGb: 5, browserHours: 2, toolCalls: 100 }, billableShare: 0 },
+  { name: "Founding", price: 6, line: "First paid cohort. Talk to Daksha for a few minutes a day, some browser time.", usage: { questions: 300, voiceMinutes: 20, transcribeMinutes: 120, storageGb: 5, browserHours: 2, toolCalls: 100 }, billableShare: 0 },
   { name: "Plus", price: 15, line: "Everyday use of voice, the browser and connected apps, with fair monthly limits.", usage: { questions: 1000, voiceMinutes: 90, transcribeMinutes: 300, storageGb: 20, browserHours: 8, toolCalls: 500 }, billableShare: 1 },
 ];
 

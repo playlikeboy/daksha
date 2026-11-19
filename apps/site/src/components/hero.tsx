@@ -3,7 +3,7 @@ import { START_URL } from "../links";
 import { DeboTomato } from "./debo-tomato";
 import { ArrowIcon, PlayIcon, SourceIcon } from "./icons";
 
-// The first screen. The question and answer floating by Debo are a real reply
+// The first screen. The question and answer floating by Daksha are a real reply
 // from the demo account (the same one shown in full in the Ask section).
 export function Hero() {
   return (

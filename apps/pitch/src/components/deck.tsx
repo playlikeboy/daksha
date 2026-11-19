@@ -18,7 +18,7 @@ export function DeckHero() {
       <Grid columns={{ minWidth: 320, repeat: "fit" }} gap={8} align="center">
         <VStack gap={6}>
           <HStack gap={3} vAlign="center" wrap="wrap">
-            <img src="/debo.svg" alt="Debo, a small red tomato" width={120} height={120} />
+            <img src="/debo.svg" alt="Daksha, a small red tomato" width={120} height={120} />
             <Badge variant="neutral" label="Pitch deck, November 2026" />
           </HStack>
           <VStack gap={4}>
@@ -26,12 +26,12 @@ export function DeckHero() {
               A friendly assistant that remembers your life
             </Heading>
             <Text type="large" weight="normal" as="p" color="secondary" textWrap="pretty">
-              Debo keeps your journal, voice notes and plans, and answers questions about your own life by text or
+              Daksha keeps your journal, voice notes and plans, and answers questions about your own life by text or
               voice. Every answer shows the entry it came from. You can see, fix and delete everything it knows.
             </Text>
             <Text type="large" weight="normal" as="p" color="secondary" textWrap="pretty">
-              Live today as an early version at my.debo.life. Built by one founder. Raising to pay for the AI that
-              each person uses, and to open Debo up carefully.
+              Live today as an early version at my.daksha.life. Built by one founder. Raising to pay for the AI that
+              each person uses, and to open Daksha up carefully.
             </Text>
           </VStack>
           <HStack gap={3} wrap="wrap">
@@ -48,7 +48,7 @@ export function DeckHero() {
               src="/shots/chat-light.webp"
               width={780}
               height={767}
-              alt="The Debo app. A person asks what they planted on the balcony. Debo answers: basil and mint, with a source chip that reads Journal, 11 November."
+              alt="The Daksha app. A person asks what they planted on the balcony. Daksha answers: basil and mint, with a source chip that reads Journal, 11 November."
               isPriority
             />
           </VStack>
@@ -89,9 +89,9 @@ export function Insight() {
       />
       <Cards
         items={[
-          { title: "No source, no answer", body: "Debo answers only from what the person wrote or said, shows a chip for each entry it used, and says \"I don't have anything about that yet\" when it has nothing." },
-          { title: "Glass box, not black box", body: "A page lists every memory with its source. The person can fix or forget each one, and a record shows what Debo read and did." },
-          { title: "Speak the way you speak", body: "Many people in India mix Hindi and English in one sentence. Debo's voice is built on speech models that handle English, Hindi and a mix. How well they do on real Hinglish is not yet tested." },
+          { title: "No source, no answer", body: "Daksha answers only from what the person wrote or said, shows a chip for each entry it used, and says \"I don't have anything about that yet\" when it has nothing." },
+          { title: "Glass box, not black box", body: "A page lists every memory with its source. The person can fix or forget each one, and a record shows what Daksha read and did." },
+          { title: "Speak the way you speak", body: "Many people in India mix Hindi and English in one sentence. Daksha's voice is built on speech models that handle English, Hindi and a mix. How well they do on real Hinglish is not yet tested." },
         ]}
       />
     </Band>
@@ -110,10 +110,10 @@ export function Solution() {
         items={[
           { title: "Journal and recordings", badge: "Built", badgeVariant: "success", body: "Write entries, or record a voice note or video. The words are written out and kept as an entry. Recordings are built and tested with stand-ins; a first real-world check is still to do." },
           { title: "Ask about your life", badge: "Built", badgeVariant: "success", body: "Ask in plain words, by text. Answers show their source chips." },
-          { title: "Talk to Debo", badge: "Built, partly tested", badgeVariant: "info", body: "Speak in English, Hindi or a mix and hear the answer. Tested in the web app with a fake microphone; not yet on a real phone." },
-          { title: "What Debo knows", badge: "Built", badgeVariant: "success", body: "Every memory, with its source. Fix it or forget it." },
-          { title: "Connected apps and a browser", badge: "Built, needs live tests", badgeVariant: "info", body: "Through Composio, Debo can read from apps such as Gmail. Anything that sends, posts or changes waits for a yes on screen. Voice can never give that yes. Debo can also browse the public web." },
-          { title: "Companion and role-play", badge: "Built, needs live tests", badgeVariant: "info", body: "A warm, playful character for people who want a friend. Asked to take a role, Debo keeps it across chats and voice calls until told to stop. First version is live; safety rules are instructions to the AI model and are not yet tested with real users." },
+          { title: "Talk to Daksha", badge: "Built, partly tested", badgeVariant: "info", body: "Speak in English, Hindi or a mix and hear the answer. Tested in the web app with a fake microphone; not yet on a real phone." },
+          { title: "What Daksha knows", badge: "Built", badgeVariant: "success", body: "Every memory, with its source. Fix it or forget it." },
+          { title: "Connected apps and a browser", badge: "Built, needs live tests", badgeVariant: "info", body: "Through Composio, Daksha can read from apps such as Gmail. Anything that sends, posts or changes waits for a yes on screen. Voice can never give that yes. Daksha can also browse the public web." },
+          { title: "Companion and role-play", badge: "Built, needs live tests", badgeVariant: "info", body: "A warm, playful character for people who want a friend. Asked to take a role, Daksha keeps it across chats and voice calls until told to stop. First version is live; safety rules are instructions to the AI model and are not yet tested with real users." },
         ]}
       />
     </Band>
@@ -121,11 +121,11 @@ export function Solution() {
 }
 
 const SHOTS = [
-  { src: "/shots/journal-light.webp", w: 780, h: 933, title: "Journal", alt: "The Debo journal. Entries from 11 November sit in a list, each with the buttons Change entry and Delete entry.", text: "Write or record. Edit and delete any entry." },
-  { src: "/shots/chat-light.webp", w: 780, h: 767, title: "Ask", alt: "The Debo chat. A person asks what they planted on the balcony and Debo answers with a source chip.", text: "Answers with a chip for every source." },
-  { src: "/shots/knows-light.webp", w: 780, h: 1067, title: "What Debo knows", alt: "The What Debo knows page. A memory with its source chip and the buttons Fix this memory and Forget this memory.", text: "Every memory, with fix and forget." },
-  { src: "/shots/talk-light.webp", w: 780, h: 833, title: "Talk", alt: "The Talk to Debo screen. A status line reads: Microphone off, Debo is not listening. A button says Start talking.", text: "Speak, with a clear microphone light." },
-  { src: "/shots/apps-light.webp", w: 780, h: 1067, title: "Apps", alt: "The Apps screen in Debo, with Gmail and Google Calendar listed as not connected yet.", text: "Connect apps one at a time." },
+  { src: "/shots/journal-light.webp", w: 780, h: 933, title: "Journal", alt: "The Daksha journal. Entries from 11 November sit in a list, each with the buttons Change entry and Delete entry.", text: "Write or record. Edit and delete any entry." },
+  { src: "/shots/chat-light.webp", w: 780, h: 767, title: "Ask", alt: "The Daksha chat. A person asks what they planted on the balcony and Daksha answers with a source chip.", text: "Answers with a chip for every source." },
+  { src: "/shots/knows-light.webp", w: 780, h: 1067, title: "What Daksha knows", alt: "The What Daksha knows page. A memory with its source chip and the buttons Fix this memory and Forget this memory.", text: "Every memory, with fix and forget." },
+  { src: "/shots/talk-light.webp", w: 780, h: 833, title: "Talk", alt: "The Talk to Daksha screen. A status line reads: Microphone off, Daksha is not listening. A button says Start talking.", text: "Speak, with a clear microphone light." },
+  { src: "/shots/apps-light.webp", w: 780, h: 1067, title: "Apps", alt: "The Apps screen in Daksha, with Gmail and Google Calendar listed as not connected yet.", text: "Connect apps one at a time." },
 ];
 
 export function Product() {
@@ -135,7 +135,7 @@ export function Product() {
         id="product"
         badge="4. Product"
         title="What it looks like today"
-        lead="Real screenshots of the app at my.debo.life, with made-up demo entries."
+        lead="Real screenshots of the app at my.daksha.life, with made-up demo entries."
       />
       <Grid columns={{ minWidth: 220, repeat: "fit" }} gap={5} align="start">
         {SHOTS.map((shot) => (
@@ -309,10 +309,10 @@ export function Moat() {
       />
       <Cards
         items={[
-          { title: "Personal memory with sources", body: "The longer someone uses Debo, the more it knows about them, and every fact points to its original. Leaving means leaving that record behind (though they can download it)." },
+          { title: "Personal memory with sources", body: "The longer someone uses Daksha, the more it knows about them, and every fact points to its original. Leaving means leaving that record behind (though they can download it)." },
           { title: "Trust and data control", body: "See, fix, download and delete everything, a public privacy page that admits what is still unchecked, and no ads or selling of data. This is a brand promise that is hard to add late." },
           { title: "Voice in Hindi, English and Hinglish", body: "A voice path built for mixed speech from day one, on providers that handle it. Quality on real speech is still to be measured." },
-          { title: "Approvals before actions", body: "Anything that sends, posts, pays or deletes needs a yes on screen, and voice can never give it. This makes it safe to let Debo do more." },
+          { title: "Approvals before actions", body: "Anything that sends, posts, pays or deletes needs a yes on screen, and voice can never give it. This makes it safe to let Daksha do more." },
         ]}
       />
     </Band>
@@ -326,11 +326,11 @@ export function Traction() {
         id="traction"
         badge="12. Traction"
         title="What is true today, and nothing more"
-        lead="We have not opened Debo to the public. We do not claim users, revenue or testimonials, because there are none to claim."
+        lead="We have not opened Daksha to the public. We do not claim users, revenue or testimonials, because there are none to claim."
       />
       <Cards
         items={[
-          { title: "The product is live", body: <>The early version runs at <Src href={APP_URL}>my.debo.life</Src>, with sign-in.</> },
+          { title: "The product is live", body: <>The early version runs at <Src href={APP_URL}>my.daksha.life</Src>, with sign-in.</> },
           { title: "Built by one founder", body: "Shaswat Raj wrote the whole codebase on his own." },
           { title: "Features shipped", body: "Journal, answers with sources, memories you can fix and forget, activity record, export and delete, voice notes and videos, talking by voice, connected apps with approvals, a browser. Some of these are built and tested with stand-ins and still need a first test against the real services. See the diligence page." },
         ]}
@@ -346,10 +346,10 @@ export function Roadmap() {
       <Intro id="roadmap" badge="13. Roadmap" title="What comes next, in order" lead="From the repository's own roadmap and notes. None of this is promised to a date." />
       <Cards
         items={[
-          { title: "Now: make it safe to invite people", body: "Confirm which Mem0 plan Debo is on, and that it does not train on entries. Check the voice providers' data terms. Run recordings against the real storage and speech services. Measure real cost per person.", badge: "Next", badgeVariant: "info" },
+          { title: "Now: make it safe to invite people", body: "Confirm which Mem0 plan Daksha is on, and that it does not train on entries. Check the voice providers' data terms. Run recordings against the real storage and speech services. Measure real cost per person.", badge: "Next", badgeVariant: "info" },
           { title: "Then: charge fairly", body: "Plans and payments through a hosted checkout, monthly limits shown to the person, a founding paid cohort.", badge: "Next", badgeVariant: "info" },
           { title: "Then: the phone", body: "Recording and speaking inside the phone app, tested on real devices. Hindi and mixed-speech quality tests.", badge: "Planned", badgeVariant: "warning" },
-          { title: "Later: safer companion mode and more", body: "Tested safety rules for the companion character, quick capture from messaging apps, use Debo's memory from other AI tools, on-this-day and weekly look-backs.", badge: "Planned", badgeVariant: "warning" },
+          { title: "Later: safer companion mode and more", body: "Tested safety rules for the companion character, quick capture from messaging apps, use Daksha's memory from other AI tools, on-this-day and weekly look-backs.", badge: "Planned", badgeVariant: "warning" },
         ]}
       />
     </Band>
@@ -363,7 +363,7 @@ export function Team() {
       <Card variant="muted" padding={5}>
         <VStack gap={2}>
           <Heading level={3}>Shaswat Raj, founder</Heading>
-          <Para>Sole author of the Debo codebase.</Para>
+          <Para>Sole author of the Daksha codebase.</Para>
         </VStack>
       </Card>
       <Placeholder what="Founder bio and background" />
@@ -378,7 +378,7 @@ export function Ask() {
       <Intro
         id="ask"
         badge="15. The ask and use of funds"
-        title="Fund the AI behind each person, and open Debo up carefully"
+        title="Fund the AI behind each person, and open Daksha up carefully"
         lead="Because AI costs grow with every active person, money is what lets us invite people at all. These are the things funding pays for, in the order we would spend it."
       />
       <Placeholder what="Amount being raised" />

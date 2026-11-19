@@ -15,7 +15,7 @@ import { SiteHeader } from "../components/site-header";
 import { Trust } from "../components/trust";
 import { YourPeople } from "../components/your-people";
 
-// Structured data for search engines. It says what Debo is and nothing more:
+// Structured data for search engines. It says what Daksha is and nothing more:
 // no ratings, no prices, no counts, because none exist yet.
 const JSON_LD = {
   "@context": "https://schema.org",

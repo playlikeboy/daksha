@@ -4,7 +4,7 @@ import { Badge, Section, SectionHead, stagger } from "./section";
 // The five characters from the app's "Choose who you talk to". Copies of
 // docs/assets/avatar-*.svg. These are the choice inside the app, not the brand.
 const CHARACTERS = [
-  { name: "Debo", src: "/characters/avatar-debo.svg", alt: "Debo, a small round blue creature" },
+  { name: "Daksha", src: "/characters/avatar-debo.svg", alt: "Daksha, a small round blue creature" },
   { name: "Diya", src: "/characters/avatar-diya.svg", alt: "Diya, the red tomato" },
   { name: "Anaya", src: "/characters/avatar-anaya.svg", alt: "Anaya, a cartoon young woman in a teal kurta" },
   { name: "Mishti", src: "/characters/avatar-mishti.svg", alt: "Mishti, a small round orange cat" },

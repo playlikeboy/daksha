@@ -68,7 +68,7 @@ export default function Market() {
           )}
         </Grid>
         <Para>
-          This is a serviceable market for India alone, not a forecast of what Debo will earn. Prices in India are lower than in rich
+          This is a serviceable market for India alone, not a forecast of what Daksha will earn. Prices in India are lower than in rich
           countries, and the first customers may be abroad, among Indians living overseas and anyone who journals. We have not sized
           those groups and do not guess.
         </Para>
@@ -107,35 +107,35 @@ export default function Market() {
             {
               name: "Rewind and Limitless",
               doing: "Recorded and searched what you see and hear. Meta bought Limitless in December 2025 and stopped selling the pendant to new customers; the Rewind Mac app's capture was reported to be turned off in December 2025.",
-              us: "Shows that the need is real and that always-on capture is hard to sustain. Debo records only when the person presses the button, and says so on screen.",
+              us: "Shows that the need is real and that always-on capture is hard to sustain. Daksha records only when the person presses the button, and says so on screen.",
               href: "https://www.neowin.net/amp/meta-acquires-ai-startup-limitless-ending-sales-of-its-popular-pendant-wearable/",
               src: "Neowin",
             },
             {
               name: "Notion AI",
               doing: "AI inside a notes and documents workspace, for people who already keep their notes there.",
-              us: "Built for teams and documents. Debo is for one person's life, with voice, and no setup of pages. We have not compared features in detail.",
+              us: "Built for teams and documents. Daksha is for one person's life, with voice, and no setup of pages. We have not compared features in detail.",
               href: "https://www.notion.com/product/ai",
               src: "notion.com/product/ai",
             },
             {
               name: "Day One",
               doing: "A journaling app. Its site lists audio recordings, photos, an On This Day view and end-to-end encryption. The page we read did not mention AI features.",
-              us: "Day One is strong on privacy and craft. Debo is not end-to-end encrypted, because its servers must read entries to search and answer them. This is a real trade-off and we say so. Debo adds answering questions with sources and voice conversation.",
+              us: "Day One is strong on privacy and craft. Daksha is not end-to-end encrypted, because its servers must read entries to search and answer them. This is a real trade-off and we say so. Daksha adds answering questions with sources and voice conversation.",
               href: "https://www.dayoneapp.com/",
               src: "dayoneapp.com",
             },
             {
               name: "Friend and other companion gadgets",
               doing: "Wearable AI companions. We did not research their features or sales.",
-              us: "Hardware costs and always-on listening raise privacy questions. Debo is software and listens only when the screen says so.",
+              us: "Hardware costs and always-on listening raise privacy questions. Daksha is software and listens only when the screen says so.",
               href: "https://www.friend.com/",
               src: "friend.com",
             },
             {
               name: "Indian companion and Indic-language players",
               doing: "Companion Labs, a Bengaluru consumer AI startup for vernacular entertainment, raised a $2.5 million seed round led by Peak XV's Surge in February 2026. We did not survey others.",
-              us: "Shows investor interest in Indian consumer AI in Indian languages. Companion Labs is about entertainment; Debo is about a personal record.",
+              us: "Shows investor interest in Indian consumer AI in Indian languages. Companion Labs is about entertainment; Daksha is about a personal record.",
               href: "https://entrackr.com/snippets/peak-xv-leads-25-mn-round-in-companion-labs-11157241",
               src: "Entrackr",
             },

@@ -18,7 +18,7 @@ export default function GoToMarket() {
         />
         <Cards
           items={[
-            { title: "What costs money per person", body: "Chat answers, speaking with Debo (the biggest cost), writing out recordings, storing them, browser time and connected-app calls. The unit economics page shows each one with its price and source." },
+            { title: "What costs money per person", body: "Chat answers, speaking with Daksha (the biggest cost), writing out recordings, storing them, browser time and connected-app calls. The unit economics page shows each one with its price and source." },
             { title: "What we do about it", body: "Invite-only waitlist, hard limits per person, a small paid founding group, and a rule that we open a wave only when the monthly bill for it is already covered." },
             { title: "What this is not", body: "It is not a hype launch, and it will not give us a big user number early. We think that trade is right for a product that holds people's private lives." },
           ]}
@@ -94,7 +94,7 @@ export default function GoToMarket() {
             { title: "Daily AI limit per person", badge: "Built", badgeVariant: "success", body: "Each person has a daily token limit on our AI key (default 40,000 tokens, resets at midnight UTC). The person gets a plain message when they reach it." },
             { title: "Recording limits", badge: "Built", badgeVariant: "success", body: "200 MB and 60 minutes per recording; 40 recordings and 4 hours a day. Dictation is limited to 30 clips a minute and 600 a day." },
             { title: "Spending caps with each provider", badge: "To do", badgeVariant: "warning", body: "Set a monthly cap with Anthropic, LiveKit, Cloudflare and Mem0, so a bug or abuse cannot run past the budget." },
-            { title: "Voice minutes counted per person", badge: "To do", badgeVariant: "warning", body: "Voice is the biggest cost and today only LiveKit's dashboard counts the minutes. Debo's own limit counts answer tokens only. Counting minutes per person is on the voice to-do list." },
+            { title: "Voice minutes counted per person", badge: "To do", badgeVariant: "warning", body: "Voice is the biggest cost and today only LiveKit's dashboard counts the minutes. Daksha's own limit counts answer tokens only. Counting minutes per person is on the voice to-do list." },
             { title: "Invitation only", badge: "To do", badgeVariant: "warning", body: "Sign-up is open to anyone today. An invite code or allow-list must gate it before we tell anyone about the product." },
             { title: "Browser stays one shared container", badge: "Note", badgeVariant: "neutral", body: "The browser runs as one shared container for now. Per-person isolation is future work, so it is limited to a few trusted people." },
           ]}
@@ -105,15 +105,15 @@ export default function GoToMarket() {
         <Intro
           id="channels"
           badge="Growth plan"
-          title="How people find Debo once we can afford them"
+          title="How people find Daksha once we can afford them"
           lead="These are plans, in the order we would try them. None has been run yet."
         />
         <Cards
           items={[
             { title: "1. Founder-led and by hand", body: "Personal invitations to people who already journal or send themselves voice notes. Watch them use it, fix what confuses them. Cheapest and most useful early." },
-            { title: "2. Referral invitations", body: "Each person who has used Debo for two weeks gets two invitations. People arrive in pairs, with someone to ask for help, and growth is limited by the number of invitations we choose to issue." },
+            { title: "2. Referral invitations", body: "Each person who has used Daksha for two weeks gets two invitations. People arrive in pairs, with someone to ask for help, and growth is limited by the number of invitations we choose to issue." },
             { title: "3. Communities", body: "Journaling, student and productivity communities, and Hindi-speaking communities for the voice story. Short real demos, not ads." },
-            { title: "4. Family set-up", body: "One person sets Debo up for a parent. The elderly-parent story is a natural source of a second user per household." },
+            { title: "4. Family set-up", body: "One person sets Daksha up for a parent. The elderly-parent story is a natural source of a second user per household." },
             { title: "5. Partnerships and credits", body: (<>Startup programs may offer cloud and AI credits that stretch the pre-funding budget: <Src href="https://www.cloudflare.com/forstartups/">Cloudflare for Startups</Src>, <Src href="https://www.anthropic.com/startups">Anthropic startups</Src>, <Src href="https://startup.google.com/programs/accelerator/india/">Google for Startups Accelerator India</Src>. We have not applied, and have not checked eligibility.</>) },
             { title: "6. Later: paid reach", body: "Paid ads only after the unit economics are measured, and only for a plan that pays back its own cost." },
           ]}

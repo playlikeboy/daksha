@@ -11,22 +11,22 @@ import "@fontsource/figtree/latin-600.css";
 import "@fontsource/figtree/latin-700.css";
 import { Providers } from "./providers";
 
-const PITCH_TITLE = "Debo: investor pitch";
-const PITCH_DESCRIPTION = "The pitch, the numbers and the sources for Debo, a friendly assistant that remembers your life.";
+const PITCH_TITLE = "Daksha: investor pitch";
+const PITCH_DESCRIPTION = "The pitch, the numbers and the sources for Daksha, a friendly assistant that remembers your life.";
 // Made by scripts/og/build-og.mjs. The ?v= changes when the picture changes, so chat apps fetch it again.
-const OG_IMAGE = "https://pitch.debo.life/og.png?v=2";
+const OG_IMAGE = "https://pitch.daksha.life/og.png?v=2";
 const OG_ALT =
-  "Debo, a small red tomato, next to a phone showing the app, with the words: a friendly assistant that remembers your life. Investor pitch.";
+  "Daksha, a small red tomato, next to a phone showing the app, with the words: a friendly assistant that remembers your life. Investor pitch.";
 
 export const metadata: Metadata = {
-  metadataBase: new URL("https://pitch.debo.life"),
-  title: { default: "Debo: investor pitch", template: "%s | Debo pitch" },
-  description: "The pitch, the numbers and the sources for Debo, a friendly assistant that remembers your life.",
-  applicationName: "Debo",
+  metadataBase: new URL("https://pitch.daksha.life"),
+  title: { default: "Daksha: investor pitch", template: "%s | Daksha pitch" },
+  description: "The pitch, the numbers and the sources for Daksha, a friendly assistant that remembers your life.",
+  applicationName: "Daksha",
   openGraph: {
     type: "website",
-    siteName: "Debo",
-    url: "https://pitch.debo.life",
+    siteName: "Daksha",
+    url: "https://pitch.daksha.life",
     title: PITCH_TITLE,
     description: PITCH_DESCRIPTION,
     images: [{ url: OG_IMAGE, width: 1200, height: 630, alt: OG_ALT }],

@@ -9,7 +9,7 @@ const LINKS = [
   { href: "#get-app", label: "Get the app" },
 ];
 
-// Open Debo is also the way to sign in: the app has its own sign-in page.
+// Open Daksha is also the way to sign in: the app has its own sign-in page.
 export function SiteHeader() {
   return (
     <header className="site-header">

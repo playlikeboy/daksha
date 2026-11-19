@@ -48,7 +48,7 @@ export default function Investors() {
         <Banner
           status="warning"
           title="A target list, not current investors"
-          description="These are funds, programs and networks Debo plans to approach. None has invested in Debo, spoken with us or endorsed it. Only public pages are linked. No private contact details."
+          description="These are funds, programs and networks Daksha plans to approach. None has invested in Daksha, spoken with us or endorsed it. Only public pages are linked. No private contact details."
         />
         <Intro
           id="targets"

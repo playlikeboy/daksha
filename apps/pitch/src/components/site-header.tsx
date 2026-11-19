@@ -13,7 +13,7 @@ export function SiteHeader() {
           <HStack gap={2} vAlign="center">
             <img src="/debo.svg" alt="" width={40} height={40} />
             <Text type="large" weight="bold">
-              Debo
+              Daksha
             </Text>
             <Text type="supporting" color="secondary">
               Investor pitch
