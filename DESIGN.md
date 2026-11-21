@@ -16,14 +16,18 @@ A small, round, slightly squat red tomato with a soft highlight, a green leafy t
 
 ### The app (`os/apps/mobile`)
 
-Since the November 2026 refresh the app looks like the landing page, so both feel like one product. The table further below still describes the older `apps/web`.
+Since the November 2026 "Genie" redesign the app is light and airy: pastel glows behind everything, white and glass cards, big greeting type, round icon buttons and pill inputs. Before and after pictures, the full token and contrast tables, and how to retake them are in `os/docs/ui-genie/README.md`. The table further below still describes the older `apps/web`.
 
-- **Colour:** the landing page's warm tokens, kept in `src/brand-tokens.ts` and named for screens in `src/palette.ts`: paper page (`#FBF6EF`), white cards, warm ink (`#221B16`) for text and the primary button, warm secondary text (`#5B5047`), warm lines. Tomato (`#E5392B`) is for small marks only: the active tab's icon, the unread dot, the welcome's progress dots and empty-state icons (tomato ink `#B8281C` where it is text-sized). Sources are leaf green. Astryx Neutral (`src/astryx-tokens.ts`) still gives spacing and the colours the brand file does not name. `test/contrast.test.ts` checks every text pair for WCAG AA.
-- **Type:** Figtree for text and controls, Bricolage Grotesque (700 and 800) for screen titles, sheet titles and section headings (`s.pageTitle`, `s.title`, `s.heading` in `src/ui.tsx`). Every `Text` and `TextInput` comes from `src/text.tsx`, which sets Figtree, so no screen can forget it (a test checks). On the web the fonts are `@font-face` rules in `public/index.html` with `font-display: swap`; on Android and iOS the `expo-font` plugin in `app.json` builds the TTFs in `assets/fonts/` into the app.
-- **Shape:** cards 20px with a soft warm shadow, fields and chips 14px, sheets 28px, pill buttons. Primary buttons are ink, quiet buttons are white with a warm edge that darkens under the pointer.
-- **Focus:** a 3px ink ring on whatever the keyboard is on, and on any text field that has the caret.
-- **Sign-in:** `src/welcome-frame.tsx`. One column on a phone; on a wide screen the hello and three plain lines about what Daksha does sit in a soft panel beside the card.
-- Daksha's face is still the only character on a screen. The app stays light; a dark theme is still deferred (see "Do not").
+- **Colour:** tokens in `src/brand-tokens.ts`, named for screens in `src/palette.ts`. A cool mist page (`#F3F5FA`), white cards, deep ink (`#161A2B`) for text and the primary button, slate secondary text (`#4D5366`), soft blue-grey lines (`#E2E6EF`). Daksha blue (`#3451D1`, white text on it is 6.5:1) marks the active tab, the user's chat bubbles and the send button. Pastels (sky, lilac, blush, mint, butter, peach) fill feature tiles and icon wells; ink and slate text pass AA on every one of them. Lime (`#DDF37A`) is only for "listening" and "done": the Talk button, the listening wave and the toast's check. Tomato (`#E5392B`) is for small marks only, such as the unread dot. Sources stay leaf green. `test/contrast.test.ts` checks every text pair for WCAG AA.
+- **Glows and glass:** the page draws soft radial glows (`Backdrop` in `src/genie.tsx`, an SVG behind the app). Cards that sit on the glows may be glass (`Glass`: white at 78%, with a real backdrop blur on the web). The bottom tabs and the side bar are glass too. On the web, content fades out as it scrolls under the clear top bar (`FadeTop` in `src/chrome.tsx`); on phones the bar is the page colour at 94%.
+- **Type:** Figtree for text and controls, Bricolage Grotesque (700 and 800) for screen titles, sheet titles and section headings (`s.pageTitle`, `s.title`, `s.heading` in `src/ui.tsx`). Screen titles are 34px; Home's greeting title uses the `hero` size (40px). Every `Text` and `TextInput` comes from `src/text.tsx`, which sets Figtree, so no screen can forget it (a test checks). On the web the fonts are `@font-face` rules in `public/index.html` with `font-display: swap`; on Android and iOS the `expo-font` plugin in `app.json` builds the TTFs in `assets/fonts/` into the app.
+- **Shape:** cards 28px, fields 18px, sheets 32px, pills for buttons, chips and the chat box. Icon buttons are round white buttons with a soft shadow. Shadows are soft and blurred (`brandShadow` card, raised, float, button). Primary buttons are ink.
+- **Navigation:** on a phone, a floating glass pill at the bottom with Home, Chat, Journal, Memories and Apps (`BottomNav` in `src/nav.tsx`); it steps aside while the keyboard is up. At 900px and wider, a glass side bar (`SideNav`) with the same places plus Tasks, recent chats and the person's profile.
+- **Home** (`src/home.tsx`, route `/home`, also what `/` opens): "Hi, name! How can I help you?", a big title, an ask box, feature tiles (`Tile` in `src/genie.tsx`, drawn from our own shapes and lucide icons), a Today strip and a news slot (`NewsSection` in `src/news.tsx`, which shows nothing until the server has `/api/news`).
+- **Chat:** an empty chat shows the character's face large (`avatarSize.hero`, 120px) and suggestion chips. Then quick-action chips sit above a pill box with attach, speak, send and a lime Talk button. "Chat activity" in the top bar lists conversations.
+- **Focus:** a 3px ring in Daksha blue on whatever the keyboard is on, and on any text field that has the caret.
+- **Sign-in:** `src/welcome-frame.tsx`. One column on a phone; on a wide screen the hello and three plain lines about what Daksha does sit in a glass panel beside the card.
+- The chosen character's face stands in for an avatar. Only our own art and lucide icons; no pictures copied from other apps. The app stays light; a dark theme is still deferred (see "Do not").
 
 ### The landing page (`apps/site`)
 
@@ -111,7 +115,7 @@ Rules:
 - Ink on sky, paper, butter and mint all pass WCAG AA for body text. Never put white text on butter, mint or blush.
 - Butter belongs to Daksha. Do not use it for buttons, banners or backgrounds.
 - Mint means the person is in control. Do not use it as decoration.
-- No gradients, no glows, no glass effects. One exception in the app: the slim top bar is the page colour, slightly see-through, with a blur behind it on the web, so content can scroll under it without the bar taking space. Nothing else is frosted.
+- No gradients, no glows, no glass effects on `apps/web`. The app (`os/apps/mobile`) is the exception since the Genie redesign: soft pastel glows behind the page and glass cards, tabs and side bar, as described above. Text never sits on a glow without a card or enough contrast.
 - Danger actions use ink with clear words ("Delete this memory"), not a red page.
 
 ## Type
