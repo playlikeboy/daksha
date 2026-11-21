@@ -12,7 +12,8 @@
       "!**/.openfuse",
       "!**/.openmuse",
       "!**/artifacts",
-      "!**/astryx-tokens.ts"
+      "!**/astryx-tokens.ts",
+      "!**/third_party"
     ]
   },
   "formatter": { "enabled": true, "indentStyle": "space", "lineWidth": 100 },

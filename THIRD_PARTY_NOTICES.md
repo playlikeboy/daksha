@@ -1,5 +1,7 @@
 # Third-party notices
 
+Code copied for phone calls, messaging apps, triggers and suggestions (decision 39) is listed in [`third_party/NOTICES-reach.md`](third_party/NOTICES-reach.md). It lives in `os/third_party/` and `apps/voice-agent/third_party/`, each folder with its upstream licence and a `SOURCE.md`.
+
 ## OpenFuse (formerly OpenMuse)
 
 Daksha's agent platform in `os/` started from CopilotKit/openfuse at commit 7771e2db03a4b25d8bc8ee32f7a5c0dddafe3bfc, under the MIT licence below. Its brand, name and mascot are not used by Daksha.

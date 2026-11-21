@@ -74,6 +74,19 @@ import {
   VoiceCopyService,
 } from "./voice-clone/index.ts";
 import { WorkspaceService } from "./workspace.ts";
+import { type PhoneConfig, readPhoneConfig } from "./phone/config.ts";
+import { livekitDialer } from "./phone/dialer.ts";
+import { phoneAgentRoutes, phoneRoutes } from "./phone/routes.ts";
+import { composioEventsFromEnv } from "./connectors/composio-events.ts";
+import { EngineChannelBrain } from "./channels/brain.ts";
+import { readChannelsConfig } from "./channels/config.ts";
+import { channelHookRoutes, channelRoutes } from "./channels/routes.ts";
+import { type ChannelBrain, ChannelService } from "./channels/service.ts";
+import { proposalRoutes } from "./proposals/routes.ts";
+import { ProposalService } from "./proposals/service.ts";
+import { triggerHookRoutes, triggerRoutes } from "./triggers/routes.ts";
+import { type AppEventSource, TriggerService } from "./triggers/service.ts";
+import { type Dialer, PhoneService } from "./phone/service.ts";
 
 export async function createApp(
   db: Store,
@@ -107,6 +120,14 @@ export async function createApp(
     news?: NewsService;
     /** Skills. Tests pass one built on a folder of test skills. */
     skills?: SkillsService;
+    /** Places phone calls. Tests pass a fake; otherwise LiveKit SIP, only when its trunk is set. */
+    phoneDialer?: (config: PhoneConfig) => Dialer;
+    /** Connected-app events for triggers. Defaults to Composio when its key and webhook secret are set. */
+    appEvents?: AppEventSource | null;
+    /** SMS, WhatsApp and Telegram. Defaults to the env keys (channels/config.ts). */
+    channelsEnv?: () => Record<string, string | undefined>;
+    channelBrain?: ChannelBrain;
+    channelFetch?: typeof fetch;
   } = {},
 ) {
   await resolveComputerDeployment(config);
@@ -174,12 +195,21 @@ export async function createApp(
       ...(connectors.configured ? ["use_app_tool"] : []),
     ]);
   agent.skills = skills;
+  // Phone calls to and from the person's own number (docs/PHONE.md). Off without the SIP trunks.
+  const phone = new PhoneService(db, {
+    config: () => readPhoneConfig(options.voiceEnv?.() ?? process.env),
+    tokenKey: auth.purposeKey("phone-call-token"),
+    dialer: options.phoneDialer ?? livekitDialer,
+    ended: (owner) => debo.callEnded(owner),
+  });
   // Reminders, birthdays, the morning check-in and briefing: in-app updates, and a push where it is on.
   const push = options.push ?? new PushService(db, pushKeysFromEnv());
   agent.companion = new CompanionJobs({
     db,
     debo,
     push,
+    // A reminder also rings the person's phone when they turned reminder calls on.
+    call: (owner, title) => phone.reminderCall(owner, title),
     notify: (owner, title, body, key) => agent.notify(owner, title, body, undefined, key),
     briefing: (owner, now) => buildBriefing({ db, news, calendar: calendarFrom(workspace) }, owner, { now }),
   });
@@ -228,8 +258,30 @@ export async function createApp(
     });
   linked.voiceCopy = voiceCopy;
   const threads = new ThreadStore(db);
+  // Schedules, signed webhooks and app events that start a background run (triggers/store.ts).
+  const appEvents = options.appEvents === null ? undefined : (options.appEvents ?? composioEventsFromEnv(process.env));
+  const triggers = new TriggerService({
+    db,
+    createTask: (owner, input, key) => agent.createTask(owner, input, key),
+    hookKey: auth.purposeKey("trigger-webhook"),
+    publicUrl: config.publicUrl,
+    ...(appEvents ? { apps: appEvents } : {}),
+  });
+  agent.triggers = triggers;
+  // Lines worth remembering and skill drafts, saved only when the person says yes (decision 39).
+  const proposals = new ProposalService(db, threads);
+  agent.proposals = proposals;
   const timeZones = new TimeZoneStore(db);
   const runner = new DatabaseAgentRunner(threads);
+  // Text Daksha by SMS, WhatsApp or Telegram once linked. Each is off without its keys.
+  const channelsConfig = () => readChannelsConfig(options.channelsEnv?.() ?? process.env, config.publicUrl);
+  const channels = new ChannelService({
+    db,
+    config: channelsConfig,
+    brain: options.channelBrain ?? new EngineChannelBrain(config, agent, runner, threads),
+    ...(options.channelFetch ? { fetcher: options.channelFetch } : {}),
+  });
+  agent.channels = channels;
   const runtime = makeRuntime(config, agent, auth, runner);
   const app = new Hono<{ Variables: { owner: string } }>();
   const origins = new Set([
@@ -363,6 +415,11 @@ export async function createApp(
       sweep: (owner) => debo.sweepCalls(owner),
     }, (owner) => voiceCopy.callVoice(owner)),
   );
+  // Phone calls: the voice agent checks the caller's code or PIN here. A caller has no session.
+  app.route("/api/voice/phone", phoneAgentRoutes(phone, options.voiceEnv));
+  // Signed webhooks that start triggers: before sign-in, each checks its own signature.
+  app.route("/api/hooks", triggerHookRoutes(triggers));
+  app.route("/api/channels", channelHookRoutes(channels, channelsConfig));
   // Deleting a call also deletes its copy in Chat (same words, same person).
   debo.onCallDeleted = (owner, callId) => threads.remove(owner, `voice-${callId}`);
   // Sample mode only: the in-memory stand-in for the recordings bucket. Its links carry their own one-time token.
@@ -417,6 +474,10 @@ export async function createApp(
         return custom ? { ...chosen, voice: custom } : chosen;
       },
     ));
+  app.route("/api/phone", phoneRoutes(phone));
+  app.route("/api/triggers", triggerRoutes(triggers));
+  app.route("/api/linked-apps", channelRoutes(channels));
+  app.route("/api/proposals", proposalRoutes(proposals));
   app.route("/api/persona", personaRoutes(new PersonaStore(db)));
   // /api/custom-people: the people themselves (custom-people/routes.ts) and, on the same prefix,
   // their voice notes, calls and voice copy (voice-clone/routes.ts, only /:id/audio* and

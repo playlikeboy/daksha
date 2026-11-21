@@ -42,6 +42,8 @@ export interface CompanionJobDeps {
   debo?: DeboService;
   /** Today's briefing for one person (briefing.ts). Without it, no briefing is sent. */
   briefing?: (owner: string, now: Date) => Promise<Briefing>;
+  /** A phone call for a reminder (phone/service.ts). It calls only when the person turned reminder calls on. */
+  call?: (owner: string, title: string) => Promise<unknown>;
 }
 
 /** The check-in brief as two or three plain lines. Never journal text: only counts and names. */
@@ -136,6 +138,7 @@ export class CompanionJobs {
       if (!(await store.markSent(owner, reminder.id, now))) continue;
       const from = reminder.evidence[0]?.title;
       await this.send(owner, reminder.title, from ? `A reminder you asked for, from ${from}.` : "A reminder you asked for.", `reminder:${reminder.id}`);
+      await this.deps.call?.(owner, reminder.title).catch((error) => backgroundFailure("reminder call", error));
     }
   }
 

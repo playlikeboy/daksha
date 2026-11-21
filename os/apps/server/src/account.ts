@@ -56,7 +56,10 @@ export function accountRoutes(
         .map((row) =>
           row.kind === "push-subscriptions" && row.data && typeof row.data === "object"
             ? { ...row, data: { ...(row.data as Record<string, unknown>), keys: undefined } }
-            : row,
+            : // The phone PIN's hash and a linking code are left out; the number and settings stay.
+              row.kind === "phone" && row.data && typeof row.data === "object"
+              ? { ...row, data: { ...(row.data as Record<string, unknown>), pin: undefined, pending: undefined } }
+              : row,
         ),
       journal,
       connectedApps: apps,

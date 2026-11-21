@@ -46,6 +46,10 @@ You can make your own people to talk to, in chat or on a call: a friend, someone
 
 You can also change settings just by asking: "talk a bit slower", "call yourself Riya" or "turn on my morning check-in". Daksha changes it at once and shows what changed. Why and how: decision 33 in [`docs/DECISIONS.md`](./docs/DECISIONS.md).
 
+## More ways to reach Daksha (new, off until set up)
+
+Phone calls to and from your own number, with a PIN on every call. Texts by SMS, WhatsApp or Telegram once you link them. Triggers that start Daksha on a schedule, from an app's event or from a signed webhook. Suggestions of things to remember that wait for your yes. Each one is off until the server has its keys, and none has been run against the real services yet. See [`docs/PHONE.md`](./docs/PHONE.md) and decision 39 in [`docs/DECISIONS.md`](./docs/DECISIONS.md).
+
 ## News and briefings (new, early version)
 
 - **News on topics you follow.** Follow topics like cricket, AI or Bengaluru weather, in settings or by saying "follow cricket". Stories come from the GDELT Project and Hacker News, with one copy of each and a mix of sites. Only the topic word is sent to them, from Daksha's server.

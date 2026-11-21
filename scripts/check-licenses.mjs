@@ -1,6 +1,7 @@
 #!/usr/bin/env node
 // Checks the rules in third_party/README.md:
-//   - every folder in third_party/ has a LICENSE and a SOURCE.md;
+//   - every folder in third_party/, os/third_party/ and apps/voice-agent/third_party/ has a
+//     LICENSE and a SOURCE.md;
 //   - SOURCE.md names the repository, a full 40-character commit SHA and a licence;
 //   - for Apache-2.0 folders, every file listed under "## Changed files" carries the
 //     "Modified by Daksha" line that Apache-2.0 section 4(b) asks for;
@@ -73,15 +74,30 @@ function main() {
   })
     .split("\0")
     .filter((file) => file && existsSync(path.join(root, file)));
-  const inThirdParty = tracked.filter((file) => file.startsWith("third_party/")).map((file) => file.slice(12));
-  const folders = [...new Set(inThirdParty.filter((file) => file.includes("/")).map((file) => file.split("/")[0]))];
-  const read = (file) => readFileSync(path.join(root, "third_party", file), "utf8");
-  const problems = folders.flatMap((name) => checkFolder(name, inThirdParty, read));
+  // Copied code lives in the folder that is built on its own: the repo root, the server (os/)
+  // and the voice agent, which LiveKit builds alone.
+  const roots = ["third_party/", "os/third_party/", "apps/voice-agent/third_party/"];
+  const problems = [];
+  let folderCount = 0;
+  for (const base of roots) {
+    const inThirdParty = tracked.filter((file) => file.startsWith(base)).map((file) => file.slice(base.length));
+    const folders = [...new Set(inThirdParty.filter((file) => file.includes("/")).map((file) => file.split("/")[0]))];
+    folderCount += folders.length;
+    const read = (file) => readFileSync(path.join(root, base, file), "utf8");
+    for (const name of folders) {
+      for (const problem of checkFolder(name, inThirdParty, read)) {
+        problems.push(problem.replace(/^third_party\//, base));
+      }
+    }
+  }
   // Copied content, and the folders that hold code ported from other projects.
   const scanned = tracked.filter(
     (file) =>
-      file.startsWith("third_party/") ||
+      roots.some((base) => file.startsWith(base)) ||
       file.startsWith("os/packages/skills/") ||
+      file.startsWith("os/apps/server/src/channels/") ||
+      file.startsWith("os/apps/server/src/triggers/") ||
+      file.startsWith("os/apps/server/src/proposals/") ||
       file.startsWith("os/apps/server/src/engine/"),
   );
   for (const file of scanned) {
@@ -96,7 +112,7 @@ function main() {
     console.error(`Licence check failed:\n${problems.map((p) => `  - ${p}`).join("\n")}`);
     process.exit(1);
   }
-  console.log(`Licence check passed: ${folders.length} third_party folders, ${scanned.length} files scanned.`);
+  console.log(`Licence check passed: ${folderCount} third_party folders, ${scanned.length} files scanned.`);
 }
 
 if (import.meta.url === pathToFileURL(process.argv[1] ?? "").href) main();

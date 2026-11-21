@@ -345,3 +345,61 @@ Not taken: nothing from OpenMausBot or orca was copied in this round (their usef
 Why: copying keeps the upstream fixes and makes the credit exact. Keeping each upstream in its own folder with its licence and commit means anyone can check what came from where, and CI keeps it that way. Skills off by default and loaded only when used keep the prompt short and keep the person in charge. The guards, compaction and spill change only what the model is sent; the saved chat and every card stay whole.
 
 Check before relying on it: no skill was tried with a live model. The guards' limits and the compaction budget (200,000 characters, cut at 80%, keep at least 16% word for word) are first guesses, not measured against real chats or real model limits. The suggested servers were only checked to answer, not that their tools work. The Skills section was type-checked and its data tested, but not seen on a phone or in a browser.
+
+## 39. More ways to reach Daksha: phone calls, messaging apps, triggers and suggestions, from open-source code
+
+2026-11-21 · decided (the owner's request: reach the person through more channels, copy working open-source code where it fits, buy nothing, and keep phone calls off until the trunks are set)
+
+Choice, in six parts. Each part is off until its keys are set, and none was run against the real service.
+
+- **Phone calls (LiveKit SIP).**
+  - Calls go both ways through the same voice agent: people call Daksha's number, and Daksha calls the person's own verified number.
+  - A caller ID alone opens nothing. A number is linked by calling in and saying a 6-digit code from the app. Every call then asks for a 4 to 8 digit PIN (scrypt, 5 tries, then a 30-minute pause) before the normal agent starts.
+  - The server signs a call token for each call. Outbound calls go only to the verified number, only when asked or for reminder calls the person turned on, at most 3 an hour and 6 a day, and only to allowed country codes.
+  - Transcripts are saved like other calls (decision 27).
+  - Env: `LIVEKIT_SIP_TRUNK_ID`, `LIVEKIT_SIP_OUTBOUND_TRUNK_ID`, `LIVEKIT_SIP_PHONE_NUMBER`, `PHONE_ALLOWED_COUNTRY_CODES`.
+  - Setup, costs, the India carrier note and the TCPA and TRAI rules are in `docs/PHONE.md`.
+- **Triggers** (`os/apps/server/src/triggers/`, records kind `triggers`).
+  - Schedules run from the upkeep loop in the person's time zone, claimed with a compare-and-swap.
+  - Webhooks get a private address and a secret derived from it, never stored. Each call is checked the Standard Webhooks way, within 5 minutes.
+  - Connected-app events come through Composio's signed webhook (`COMPOSIO_WEBHOOK_SECRET`), with plain filters. Gmail is filtered at the source.
+  - Each run is an ordinary background task. The event is fenced as untrusted data by OpenMausBot's event block and prompt (`os/third_party/openmausbot`, Apache-2.0).
+  - Each trigger may have at most 3 runs waiting and 20 runs an hour. Deleted triggers can be put back for 7 days.
+  - Tools: `trigger_info`, `create_trigger`, `delete_trigger`. Making a trigger is inside Daksha, so it saves at once. What a run does outside Daksha still waits for a tap (decision 28).
+- **Messaging apps** (`os/apps/server/src/channels/`): SMS through Twilio, WhatsApp through Meta's Cloud API, and Telegram through the Bot API.
+  - Each webhook checks the service's own signature on the raw body before reading it: Twilio's HMAC-SHA1 with the port variant, Meta's `X-Hub-Signature-256`, and Telegram's secret-token header. Repeats are dropped.
+  - A sender reaches Daksha only after sending `/link CODE` with an 8-character code from Settings (15 minutes; 5 wrong tries an hour per sender). A number or chat can be linked to only one account.
+  - Messages run as a turn of the person's main chat and the reply is sent back. Text only, 60 messages an hour.
+  - The Twilio and WhatsApp handling is ported from Hermes Agent (MIT). The link flow follows suparagent's Telegram bot (Apache-2.0).
+- **Spoken replies and own-key voices.**
+  - Every spoken sentence goes through OpenMausBot's `speakable()`.
+  - The ElevenLabs, OpenAI, Gemini and DeepSeek voice adapters are copied in as optional own-key voices for app calls (`VOICE_TTS_PROVIDER`).
+- **Suggestions, review first** (`os/apps/server/src/proposals/`).
+  - Lines the person said that sound meant to last, and skill drafts from one finished exchange, wait in a Suggestions card.
+  - Nothing is saved to memories or skills until they tap Save.
+  - Secrets are redacted first. A line that held one is never suggested, and a rejected line is never offered again. No model is called.
+  - Rewritten in TypeScript from suparagent's `memory_proposals.py`, `skill_learning.py` and `redact_secrets`.
+- **Parked, copied with a plan.**
+  - OpenMausBot's meeting notes bot (`os/third_party/openmausbot/meetings`): it needs headed Chrome, PulseAudio and ffmpeg on a computer of its own, and a dozen modules Daksha lacks.
+  - Orca's on-device speech module (`os/third_party/orca`): it needs Expo 58.
+
+Where copied code lives: inside the folder that is built on its own. That is `os/third_party/` for the server (the Dockerfile copies it, and `tsconfig.build.json` keeps `os/` as its root) and `apps/voice-agent/third_party/` for the voice agent (LiveKit builds that folder alone). Each folder has the upstream licence and a `SOURCE.md` with the commit, what was copied and what changed. Every changed Apache file says "Changed by Daksha". The linter skips `third_party`. The notice lines are in `third_party/NOTICES-reach.md`.
+
+Not chosen:
+- **A caller-ID-only phone login:** caller ID can be faked.
+- **Inline TwiML replies:** they would hold Twilio's request open while the model runs. Upstream also sends replies through the REST API.
+- **Allow-listing numbers by hand, as Hermes does:** linking from the person's own account is the same proof, and needs no operator.
+- **OpenMausBot's file-based trigger store and routine runner:** Daksha already has records, tasks and the upkeep loop.
+- **Saving suggested memories straight away:** a line said once in passing is not always meant to be kept, so suggestions wait for a yes.
+- **Running the meeting bot inside the browser worker:** it has no audio stack.
+
+Why: each part reaches the person where they already are, without a new app. Copying tested open-source code kept the risky parts, such as signatures, prompt fencing and redaction, close to code that has been used. Keeping every part on the records table meant export and delete covered them from the first write.
+
+Check before relying on it:
+- No real call, text, WhatsApp message, Telegram update or Composio event was sent or received. All tests use fakes.
+- Check the LiveKit SIP flags and dispatch rule, Composio's webhook payload fields (`metadata.id` as the trigger id), the WhatsApp Graph API version, and Telegram's `setWebhook` secret against the live services.
+- The phone PIN is heard through speech-to-text, not keypad tones.
+- The costs in `docs/PHONE.md` are not confirmed.
+- The approved-skill records are saved but not yet read into the prompt.
+- The new Settings cards were type-checked but not run on a phone or in a browser.
+- The linter (Biome) could not run in this environment.

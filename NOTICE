@@ -7,7 +7,9 @@ folder carries its own licence:
   os/                   MIT (os/LICENSE), started from CopilotKit's OpenFuse template
   apps/voice-agent/     MIT (apps/voice-agent/LICENSE), started from LiveKit's agent starter
   third_party/*/        the licence in each folder's LICENSE file
+  os/third_party/*/     the same, for code the server builds
+  apps/voice-agent/third_party/*/  the same, for code the voice agent builds
 
 This product includes software and content made by others. Their names,
-licences and the exact commits copied are listed in THIRD_PARTY_NOTICES.md
-and in each third_party/*/SOURCE.md.
+licences and the exact commits copied are listed in THIRD_PARTY_NOTICES.md, third_party/NOTICES-reach.md
+and in each SOURCE.md beside the copied code.

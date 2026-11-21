@@ -2,6 +2,7 @@ import { type llm, type inference, voice } from "@livekit/agents";
 import type { Room } from "@livekit/rtc-node";
 import { ReadableStream } from "node:stream/web";
 import { type BrainEvent, EMOTIONS, askBrain, readEvents, recentHistory, type Turn } from "./brain.ts";
+import { SpeakableBuffer } from "./speakable-stream.ts";
 
 export type DeboAgentConfig = {
   deboUrl: string;
@@ -115,18 +116,26 @@ export class DeboVoiceAgent extends voice.Agent {
           controller.close();
           return;
         }
+        // Markdown in the reply becomes plain spoken words, a sentence at a time.
+        const plain = new SpeakableBuffer();
+        const say = (piece: string) => {
+          const ready = plain.push(piece);
+          if (ready) controller.enqueue(ready);
+        };
         try {
-          for (const piece of queued) controller.enqueue(piece);
+          for (const piece of queued) say(piece);
           if (events) {
             for (;;) {
               const next = await events.next();
               if (next.done) break;
               const event = next.value;
               if (event.type === "sources") await showSources(event);
-              else if (event.type === "text") controller.enqueue(event.delta);
-              else if (event.type === "say") controller.enqueue(event.text);
+              else if (event.type === "text") say(event.delta);
+              else if (event.type === "say") say(`${event.text} `);
             }
           }
+          const rest = plain.flush();
+          if (rest) controller.enqueue(rest);
           controller.close();
         } catch (error) {
           if (abort.signal.aborted) return;
