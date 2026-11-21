@@ -17,6 +17,7 @@ import { useComputerDraft } from "./computer-drafts";
 import { computerStatus } from "./computer-status";
 import { LinuxWorkspace } from "./computer-workspace";
 import {
+  brandShadow,
   Button,
   Card,
   colors,
@@ -51,10 +52,11 @@ export function ComputerEntry({ compact }: { compact?: boolean } = {}) {
           alignItems: "center",
           justifyContent: "center",
           borderRadius: radius.full,
-          backgroundColor: pressed ? colors.line : "transparent",
+          backgroundColor: pressed ? colors.navSoft : colors.card,
+          boxShadow: brandShadow.card,
         })}
       >
-        <Monitor size={20} strokeWidth={1.8} color={colors.text} />
+        <Monitor size={20} strokeWidth={1.9} color={colors.text} />
         <View
           style={{
             position: "absolute",

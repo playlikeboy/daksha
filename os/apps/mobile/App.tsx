@@ -4,16 +4,17 @@ import {
   BookOpen,
   Brain,
   Check,
-  type LucideIcon,
+  House,
   MessageCircle,
   PanelsTopLeft,
   Shapes,
   X,
 } from "lucide-react-native";
-import { createElement, useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
   ActivityIndicator,
   AppState,
+  Keyboard,
   Linking,
   Platform,
   Pressable,
@@ -50,7 +51,11 @@ import { requestTalkAutoStart } from "./src/debo-talk-consent";
 import { TalkPill } from "./src/debo-talk-pill";
 import { reviewsWaiting } from "./src/debo-talk-call";
 import { stateWords, TalkSessionProvider, useTalkState } from "./src/debo-talk-session";
-import { ChromeContext, topBarHeight } from "./src/chrome";
+import { ChromeContext, FadeTop, topBarHeight } from "./src/chrome";
+import { ChatActivitySheet } from "./src/chat-activity";
+import { Backdrop } from "./src/genie";
+import { HomeScreen, useFirstName } from "./src/home";
+import { BottomNav, type NavItem, SideNav } from "./src/nav";
 import { TopBar } from "./src/top-bar";
 import { Onboarding } from "./src/onboarding";
 import { onboarding, type OnboardingReply, useOnboardingOpen } from "./src/onboarding-store";
@@ -77,7 +82,6 @@ import {
   s,
   screenGap,
   screenPadding,
-  brandShadow,
   Skeleton,
   spacing,
 } from "./src/ui";
@@ -85,13 +89,22 @@ import { entryFocus } from "./src/debo-data";
 import { canonicalSection, parsePath, pathFor, pathFromUrl, type Route, type RouteParams, titleFor } from "./src/routes";
 import { type Detail, useWorkspace, WorkspaceContext } from "./src/workspace";
 
-/** `short` is the word under the icon; `label` is the full name read out by screen readers. */
-const nav: { id: Section; label: string; short: string; icon: LucideIcon }[] = [
+/**
+ * The tabs in the floating bar on a phone. `short` is the word under the icon; `label` is
+ * the full name read out by screen readers. Tasks lives in the side bar and the menu.
+ */
+const nav: NavItem[] = [
+  { id: "home", label: "Home", short: "Home", icon: House },
   { id: "chat", label: "Chat", short: "Chat", icon: MessageCircle },
   { id: "journal", label: "Journal", short: "Journal", icon: BookOpen },
   { id: "knows", label: "What Daksha knows", short: "Memories", icon: Brain },
-  { id: "activity", label: "Tasks", short: "Tasks", icon: PanelsTopLeft },
   { id: "apps", label: "Apps", short: "Apps", icon: Shapes },
+];
+/** The side bar on a wide screen has room for every main place. */
+const sideNav: NavItem[] = [
+  ...nav.slice(0, 4),
+  { id: "activity", label: "Tasks", short: "Tasks", icon: PanelsTopLeft },
+  nav[4] as NavItem,
 ];
 const titles: Partial<Record<Section, { title: string; subtitle: string }>> = {
   talk: { title: "Talk to Daksha", subtitle: "Say it out loud. Daksha answers and shows where it came from." },
@@ -121,9 +134,9 @@ function NotFound() {
       <Text accessibilityRole="header" style={s.pageTitle}>
         That page isn't here
       </Text>
-      <Text style={s.muted}>The link may be old or mistyped. Your chat is one tap away.</Text>
-      <Button primary onPress={() => navigate("chat")}>
-        Go to Chat
+      <Text style={s.muted}>The link may be old or mistyped. Home is one tap away.</Text>
+      <Button primary onPress={() => navigate("home")}>
+        Go to Home
       </Button>
     </View>
   );
@@ -247,7 +260,7 @@ function workspaceError(e: unknown): string {
  */
 function useRouter() {
   const [route, setRoute] = useState<Route | null>(() =>
-    onWeb ? parsePath(window.location.pathname) : { section: "chat" },
+    onWeb ? parsePath(window.location.pathname) : { section: "home" },
   );
   useEffect(() => {
     if (onWeb) document.title = titleFor(route);
@@ -280,7 +293,7 @@ function WorkspaceApp({ token, sessionKey }: { token: string; sessionKey?: strin
   const api = useMemo(() => new FuseApi(token), [token]);
   const [workspace, setWorkspace] = useState<Workspace>();
   const { route, go } = useRouter();
-  const section: Section = route?.section ?? "chat";
+  const section: Section = route?.section ?? "home";
   const [detail, setDetail] = useState<Detail>();
   const [toast, setToast] = useState("");
   const [error, setError] = useState("");
@@ -386,7 +399,7 @@ function WorkspaceShell({
   const talkState = useTalkState();
   useTaskMood(data?.tasks);
   // Talk is a popup over the last screen, so the screen underneath is the last one that was not Talk.
-  const lastScreen = useRef<Section>("chat");
+  const lastScreen = useRef<Section>("home");
   if (current !== "talk") lastScreen.current = current;
   /** The screen underneath; "none" while the address matches no screen. */
   const section: Section | "none" = notFound
@@ -468,7 +481,8 @@ function WorkspaceShell({
         ? "Picking up your next task…"
         : undefined;
   const insets = useSafeAreaInsets();
-  const barHeight = desktop ? topBarHeight.desktop : topBarHeight.phone;
+  const home = section === "home";
+  const barHeight = desktop ? topBarHeight.desktop : home ? topBarHeight.home : topBarHeight.phone;
   // Something shows above the chat (agent offline, a side chat's title, loading or an error),
   // so the chat column starts below the bar instead of scrolling under it.
   const chatNotice =
@@ -476,136 +490,164 @@ function WorkspaceShell({
     !!agentData.error ||
     (richThreads && (threadsLoading || !!threadsError || selection.id !== mainId));
   const [composerHeight, setComposerHeight] = useState(0);
-  const [tabHeight, setTabHeight] = useState(desktop ? 84 : 72);
+  const [chatEmpty, setChatEmpty] = useState(false);
+  const [activityOpen, setActivityOpen] = useState(false);
+  // While the phone's keyboard is up, the floating tabs step aside, so the message box sits
+  // right on the keyboard instead of on top of the tabs.
+  const [keyboardUp, setKeyboardUp] = useState(false);
+  useEffect(() => {
+    if (onWeb) return;
+    const show = Keyboard.addListener(Platform.OS === "ios" ? "keyboardWillShow" : "keyboardDidShow", () => setKeyboardUp(true));
+    const hide = Keyboard.addListener(Platform.OS === "ios" ? "keyboardWillHide" : "keyboardDidHide", () => setKeyboardUp(false));
+    return () => {
+      show.remove();
+      hide.remove();
+    };
+  }, []);
+  const [typing, setTyping] = useState(false);
+  const tabsShown = !desktop && !keyboardUp && !(typing && section === "chat");
+  // Height of the floating tabs plus the gap under them, measured; 0 when they are hidden.
+  const [tabSpace, setTabSpace] = useState(spacing[12] + spacing[8]);
+  const bottomSpace = tabsShown ? tabSpace : 0;
   const chrome = useMemo(
-    () => ({ top: chatNotice ? 0 : barHeight, setComposerHeight }),
-    [chatNotice, barHeight],
+    () => ({ top: chatNotice ? 0 : barHeight, bottom: bottomSpace, setComposerHeight, setChatEmpty, setTyping }),
+    [chatNotice, barHeight, bottomSpace],
   );
   // The floating call bubble sits above the tabs, and above the chat's composer on Chat.
-  const bubbleBottom =
-    insets.bottom + tabHeight + (section === "chat" ? composerHeight : 0) + spacing[3];
-  const title = section === "none" ? undefined : titles[section] || titles.apps;
+  const bubbleBottom = Math.max(insets.bottom, desktop ? spacing[4] : 0) + bottomSpace + (section === "chat" ? composerHeight : 0) + spacing[3];
+  const title = section === "none" || home ? undefined : titles[section] || titles.apps;
   const Screen =
     section === "none"
       ? NotFound
-      : section === "mail"
-      ? MailScreen
-      : section === "calendar"
-        ? CalendarScreen
-        : section === "browser"
-          ? BrowserScreen
-          : section === "files"
-            ? FilesScreen
-            : section === "journal"
-              ? JournalScreen
-              : section === "knows"
-                ? KnowsScreen
-                : section === "activity"
-              ? AgentActivityScreen
-              : section === "ideas"
-                ? IdeasScreen
-                : section === "goals"
-                  ? GoalsScreen
-                  : AppsScreen;
+      : home
+        ? HomeScreen
+        : section === "mail"
+          ? MailScreen
+          : section === "calendar"
+            ? CalendarScreen
+            : section === "browser"
+              ? BrowserScreen
+              : section === "files"
+                ? FilesScreen
+                : section === "journal"
+                  ? JournalScreen
+                  : section === "knows"
+                    ? KnowsScreen
+                    : section === "activity"
+                      ? AgentActivityScreen
+                      : section === "ideas"
+                        ? IdeasScreen
+                        : section === "goals"
+                          ? GoalsScreen
+                          : AppsScreen;
   const utility = ["mail", "calendar", "browser", "files", "ideas", "goals"].includes(section);
+  const isActive = (item: NavItem) => section === item.id || (item.id === "apps" && utility);
+  const firstName = useFirstName();
+  const pad = desktop ? screenPadding.desktop : screenPadding.phone;
+  // Home and the wide screens get more room; reading screens stay a calm column.
+  const columnWidth = home ? 1080 : section === "chat" ? 820 : 880;
   return (
     <>
       <WorkspaceTools />
-      <SafeAreaView style={{ flex: 1, backgroundColor: colors.canvas }} edges={["top", "bottom"]}>
-        <View style={{ flex: 1, width: "100%", maxWidth: 760, alignSelf: "center" }}>
-          <View style={{ flex: 1, minHeight: 0 }}>
+      <Backdrop />
+      <SafeAreaView style={{ flex: 1 }} edges={desktop ? ["top", "bottom"] : ["top"]}>
+        <View style={{ flex: 1, flexDirection: "row" }}>
+          {desktop && (
+            <SideNav items={sideNav} isActive={isActive} onGo={(id) => navigate(id)} onMenu={() => setThreadsOpen(true)} />
+          )}
+          <View style={{ flex: 1, minWidth: 0, width: "100%", maxWidth: columnWidth, alignSelf: "stretch", marginHorizontal: "auto" }}>
             <ChromeContext.Provider value={chrome}>
-            {section !== "chat" && (
-              <ScrollView
-                key={section}
-                showsVerticalScrollIndicator={false}
-                contentContainerStyle={{
-                  paddingHorizontal: desktop ? screenPadding.desktop : screenPadding.phone,
-                  // The first line starts below the see-through bar; the rest scrolls under it.
-                  paddingTop: barHeight + spacing[3],
-                  // Room at the end so the floating call bubble never hides the last row.
-                  paddingBottom: talkBarShown ? spacing[12] + spacing[12] : spacing[8],
-                }}
-                keyboardShouldPersistTaps="handled"
-              >
-                {utility && (
-                  <Button
-                    small
-                    style={{ alignSelf: "flex-start", marginBottom: spacing[4] }}
-                    onPress={() => navigate("apps")}
-                  >
-                    Back to Apps
-                  </Button>
-                )}
-                {title && (
-                  <Text
-                    accessibilityRole="header"
-                    style={[s.pageTitle, { marginBottom: screenGap }]}
-                  >
-                    {title.title}
-                  </Text>
-                )}
-                <ErrorNotice error={error} />
-                <Screen />
-                {section === "apps" && <AccountCard />}
-                {section === "apps" && <ReactionsSetting />}
-                {section === "apps" && <PersonaSetting />}
-                {section === "apps" && <PeopleSetting />}
-              </ScrollView>
-            )}
-            <View
-              style={{
-                display: section === "chat" ? "flex" : "none",
-                flex: 1,
-                paddingHorizontal: desktop ? screenPadding.desktop : screenPadding.phone,
-                // When a notice sits above the chat, it starts below the bar. Otherwise the
-                // chat itself scrolls under the bar (it reads `top` from ChromeContext).
-                paddingTop: chatNotice ? barHeight : 0,
-              }}
-            >
-              <AgentStatus />
-              {richThreads ? (
-                <>
-                  <ErrorNotice error={threadsError} />
-                  {threadsError ? (
-                    <Button onPress={retryThreads}>Retry main chat</Button>
-                  ) : threadsLoading ? (
-                    <View style={{ paddingTop: spacing[4] }}>
-                      <Skeleton label="Loading your conversation" variant="chat" rows={4} />
-                    </View>
-                  ) : null}
-                  {!threadsLoading && selection.id !== mainId && (
-                    <ChatTitle id={selection.id} />
-                  )}
-                  {visited.map((thread) => (
-                    <View
-                      key={thread.id}
-                      style={{ display: selection.id === thread.id ? "flex" : "none", flex: 1 }}
+              {section !== "chat" && (
+                <FadeTop top={barHeight} style={{ flex: 1 }}>
+                <ScrollView
+                  key={section}
+                  showsVerticalScrollIndicator={false}
+                  contentContainerStyle={{
+                    paddingHorizontal: pad,
+                    // The first line starts below the see-through bar; the rest scrolls under it.
+                    paddingTop: barHeight + (home ? spacing[4] : spacing[3]),
+                    // Room at the end for the floating tabs, and for the call bubble when it shows.
+                    paddingBottom: bottomSpace + Math.max(insets.bottom, 0) + (talkBarShown ? spacing[12] + spacing[12] : spacing[8]),
+                  }}
+                  keyboardShouldPersistTaps="handled"
+                >
+                  {utility && (
+                    <Button
+                      small
+                      style={{ alignSelf: "flex-start", marginBottom: spacing[4] }}
+                      onPress={() => navigate("apps")}
                     >
-                      <ChatScreen
-                        thread={thread}
-                        active={section === "chat" && selection.id === thread.id}
-                        prompt={selection.id === thread.id ? prompt : undefined}
-                      />
-                    </View>
-                  ))}
-                </>
-              ) : (
-                <ChatScreen prompt={prompt} active={section === "chat"} />
+                      Back to Apps
+                    </Button>
+                  )}
+                  {title && (
+                    <Text accessibilityRole="header" style={[s.pageTitle, { marginBottom: screenGap }]}>
+                      {title.title}
+                    </Text>
+                  )}
+                  <ErrorNotice error={error} />
+                  <Screen />
+                  {section === "apps" && <AccountCard />}
+                  {section === "apps" && <ReactionsSetting />}
+                  {section === "apps" && <PersonaSetting />}
+                  {section === "apps" && <PeopleSetting />}
+                </ScrollView>
+                </FadeTop>
               )}
-            </View>
+              <FadeTop
+                top={chatNotice ? 0 : barHeight}
+                style={{
+                  display: section === "chat" ? "flex" : "none",
+                  flex: 1,
+                  paddingHorizontal: pad,
+                  // When a notice sits above the chat, it starts below the bar. Otherwise the
+                  // chat itself scrolls under the bar (it reads `top` from ChromeContext).
+                  paddingTop: chatNotice ? barHeight : 0,
+                }}
+              >
+                <AgentStatus />
+                {richThreads ? (
+                  <>
+                    <ErrorNotice error={threadsError} />
+                    {threadsError ? (
+                      <Button onPress={retryThreads}>Retry main chat</Button>
+                    ) : threadsLoading ? (
+                      <View style={{ paddingTop: spacing[4] }}>
+                        <Skeleton label="Loading your conversation" variant="chat" rows={4} />
+                      </View>
+                    ) : null}
+                    {!threadsLoading && selection.id !== mainId && <ChatTitle id={selection.id} />}
+                    {visited.map((thread) => (
+                      <View
+                        key={thread.id}
+                        style={{ display: selection.id === thread.id ? "flex" : "none", flex: 1 }}
+                      >
+                        <ChatScreen
+                          thread={thread}
+                          active={section === "chat" && selection.id === thread.id}
+                          prompt={selection.id === thread.id ? prompt : undefined}
+                        />
+                      </View>
+                    ))}
+                  </>
+                ) : (
+                  <ChatScreen prompt={prompt} active={section === "chat"} />
+                )}
+              </FadeTop>
             </ChromeContext.Provider>
             <TopBar
               height={barHeight}
               wide={desktop}
               name={agentName}
               status={status}
-              showFace={!talkBarShown}
+              showFace={!talkBarShown && !(section === "chat" && chatEmpty)}
               avatar={data?.identity.avatar}
               callOn={talkState.active}
               chat={section === "chat"}
               pending={pending}
+              greeting={home ? { hello: firstName ? `Hi, ${firstName}!` : "Hi there!", ask: "How can I help you?" } : undefined}
               onMenu={() => setThreadsOpen(true)}
+              onActivity={() => setActivityOpen(true)}
               onTalk={() => {
                 deboMood.tap();
                 // A call that is already going (minimised) is just opened again. Otherwise the
@@ -616,107 +658,24 @@ function WorkspaceShell({
               onBell={() => open({ type: "notifications" })}
             />
           </View>
-          <View
-            onLayout={(event) => setTabHeight(event.nativeEvent.layout.height)}
-            style={{
-              paddingHorizontal: screenPadding.phone,
-              paddingTop: spacing[2],
-              paddingBottom: desktop ? spacing[5] : spacing[2],
-              alignItems: "center",
-            }}
-          >
-            <View
-              style={{
-                flexDirection: "row",
-                width: "100%",
-                maxWidth: 420,
-                padding: spacing[1],
-                backgroundColor: colors.card,
-                borderRadius: radius.full,
-                boxShadow: brandShadow.raised,
-                borderWidth: 1,
-                borderColor: colors.line,
-              }}
-            >
-              {nav.map((item) => {
-                // Talk is not a tab: it is a popup over the screen underneath.
-                const active = section === item.id || (item.id === "apps" && utility);
-                const tabStyle = {
-                  flex: 1,
-                  minWidth: 0,
-                  height: spacing[12] + spacing[1],
-                  gap: spacing[0.5],
-                  flexDirection: "column",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  backgroundColor: active ? colors.subtle : "transparent",
-                  borderRadius: radius.chat,
-                } as const;
-                // A visible word under each icon, so no one has to guess what a shape means.
-                const icon = (
-                  <>
-                    <item.icon
-                      size={22}
-                      strokeWidth={active ? 2.2 : 1.8}
-                      color={active ? colors.brandText : colors.muted}
-                    />
-                    <Text
-                      numberOfLines={1}
-                      style={{
-                        fontFamily,
-                        fontSize: fontSize.sm,
-                        lineHeight: spacing[4],
-                        fontWeight: active ? "700" : "500",
-                        color: active ? colors.text : colors.muted,
-                      }}
-                    >
-                      {item.short}
-                    </Text>
-                  </>
-                );
-                // On the web a tab is a real link, so middle-click and "open in new tab" work.
-                if (onWeb)
-                  return createElement(
-                    "a",
-                    {
-                      key: item.id,
-                      href: pathFor(item.id),
-                      "aria-label": item.label,
-                      "aria-current": active ? "page" : undefined,
-                      onClick: (event: MouseEvent) => {
-                        if (event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey)
-                          return;
-                        event.preventDefault();
-                        navigate(item.id);
-                      },
-                      style: { ...tabStyle, display: "flex", textDecoration: "none" },
-                    },
-                    icon,
-                  );
-                return (
-                  <Pressable
-                    key={item.id}
-                    accessibilityRole="tab"
-                    accessibilityLabel={item.label}
-                    accessibilityState={{ selected: active }}
-                    onPress={() => navigate(item.id)}
-                    style={tabStyle}
-                  >
-                    {icon}
-                  </Pressable>
-                );
-              })}
-            </View>
-          </View>
         </View>
+        {tabsShown && (
+          <BottomNav
+            items={nav}
+            isActive={isActive}
+            onGo={(id) => navigate(id)}
+            bottom={Math.max(insets.bottom, spacing[3])}
+            onHeight={setTabSpace}
+          />
+        )}
         {!!toast && (
           <View
             pointerEvents="box-none"
             style={{
               position: "absolute",
               // Above the tabs, and above the composer on Chat, so it never covers the message box.
-              bottom: insets.bottom + tabHeight + (section === "chat" ? composerHeight : 0) + spacing[3],
-              left: spacing[5],
+              bottom: bubbleBottom,
+              left: spacing[5] + (desktop ? 288 : 0),
               // Leave the floating call bubble's corner free.
               right: talkBarShown ? spacing[12] + spacing[12] : spacing[5],
               alignItems: "center",
@@ -733,12 +692,12 @@ function WorkspaceShell({
                   paddingLeft: spacing[4],
                   paddingRight: spacing[1],
                   backgroundColor: colors.ink,
-                  borderRadius: radius.page,
+                  borderRadius: radius.full,
                   maxWidth: 560,
                 },
               ]}
             >
-              <Check size={16} color={colors.blue} />
+              <Check size={16} color={colors.lime} />
               <Text style={{ fontFamily, color: colors.onInk, ...bodyText, flexShrink: 1, paddingVertical: spacing[2] }}>
                 {toast}
               </Text>
@@ -754,12 +713,13 @@ function WorkspaceShell({
           </View>
         )}
         {threadsOpen && <ThreadsSheet onClose={() => setThreadsOpen(false)} />}
+        {activityOpen && <ChatActivitySheet onClose={() => setActivityOpen(false)} />}
         {welcomeOpen && <Onboarding />}
         {current === "talk" && <TalkPopup onClose={() => navigate(lastScreen.current)} />}
         {talkBarShown && (
           <TalkPill
             bottom={bubbleBottom}
-            right={Math.max(spacing[4], (width - 760) / 2 + spacing[4])}
+            right={Math.max(spacing[4], (width - (desktop ? 288 : 0) - columnWidth) / 2 + spacing[4])}
             onExpand={() => navigate("talk")}
             reviews={waitingReviews.length}
             onReview={() => {

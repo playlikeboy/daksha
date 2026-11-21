@@ -1,8 +1,9 @@
-// The slim bar at the top of every screen: menu, who you talk to, and notifications.
-// It floats over the screen and frosts what scrolls under it (see chrome.tsx). The
-// line under the name shows only when something is happening ("Listening", a task),
-// so most of the time the bar is just a small face and a name.
-import { Bell, Menu } from "lucide-react-native";
+// The slim bar at the top of every screen: who you talk to, and round buttons for the
+// chat's history, notifications and the menu. It floats over the screen and frosts what
+// scrolls under it (see chrome.tsx). On Home the name becomes a greeting ("Hi, Alex! How
+// can I help you?"). The line under the name shows only when something is happening
+// ("Listening", a task), so most of the time the bar is just a small face and a name.
+import { Bell, History, Menu } from "lucide-react-native";
 import { Pressable, View } from "react-native";
 import { Text } from "./text";
 import { Frosted, frost } from "./chrome";
@@ -30,26 +31,31 @@ export function TopBar({
   callOn,
   chat,
   pending,
+  greeting,
   onMenu,
   onTalk,
   onBell,
+  onActivity,
 }: {
   height: number;
-  /** On a wide screen the bar has no bottom line: it would stop short of the window edges. */
+  /** On a wide screen the side bar holds the menu, so the bar has no menu button. */
   wide?: boolean;
   name: string;
   /** Only when something is happening. Nothing means no second line. */
   status?: string;
-  /** False while the floating call bubble already shows the face (one face per screen). */
+  /** False while the face shows elsewhere on the screen (one face per screen). */
   showFace: boolean;
   avatar?: "sky" | "sand" | "lilac";
   callOn: boolean;
-  /** On Chat, the computer button sits next to the bell. */
+  /** On Chat, the chat history button (and on a wide screen the computer) sit next to the bell. */
   chat: boolean;
   pending: number;
+  /** On Home: a hello and a question instead of the name. */
+  greeting?: { hello: string; ask: string };
   onMenu: () => void;
   onTalk: () => void;
   onBell: () => void;
+  onActivity?: () => void;
 }) {
   return (
     <Frosted
@@ -61,14 +67,11 @@ export function TopBar({
         height,
         flexDirection: "row",
         alignItems: "center",
-        gap: spacing[1],
-        paddingHorizontal: screenPadding.phone - spacing[2],
+        gap: spacing[2],
+        paddingHorizontal: wide ? screenPadding.desktop : screenPadding.phone,
         backgroundColor: frost,
-        borderBottomWidth: wide ? 0 : 1,
-        borderBottomColor: colors.line,
       }}
     >
-      <IconButton icon={Menu} label="Open conversations and menu" onPress={onMenu} quiet />
       <Pressable
         accessibilityRole="button"
         accessibilityLabel={
@@ -84,32 +87,52 @@ export function TopBar({
           minHeight: spacing[11],
           flexDirection: "row",
           alignItems: "center",
-          gap: spacing[2],
-          paddingHorizontal: spacing[1],
+          gap: spacing[3],
           borderRadius: radius.full,
           opacity: pressed ? 0.65 : 1,
         })}
       >
         {showFace && (
           <View importantForAccessibility="no-hide-descendants" accessibilityElementsHidden>
-            <Mascot size={avatarSize.sm} variant={avatar} />
+            <Mascot size={greeting ? avatarSize.md : avatarSize.sm + spacing[1]} variant={avatar} />
           </View>
         )}
         <View style={{ flex: 1, minWidth: 0 }}>
-          <Text
-            numberOfLines={1}
-            style={{
-              fontFamily: headingFamily,
-              fontSize: typeSize.lg,
-              lineHeight: spacing[6],
-              fontWeight: "700",
-              letterSpacing: -0.2,
-              color: colors.text,
-            }}
-          >
-            {name}
-          </Text>
-          {!!status && (
+          {greeting ? (
+            <>
+              <Text numberOfLines={1} style={{ fontSize: typeSize.md, lineHeight: spacing[5], color: colors.muted }}>
+                {greeting.hello}
+              </Text>
+              <Text
+                numberOfLines={1}
+                style={{
+                  fontFamily: headingFamily,
+                  fontSize: typeSize.lg,
+                  lineHeight: spacing[6],
+                  fontWeight: "700",
+                  letterSpacing: -0.4,
+                  color: colors.text,
+                }}
+              >
+                {greeting.ask}
+              </Text>
+            </>
+          ) : (
+            <Text
+              numberOfLines={1}
+              style={{
+                fontFamily: headingFamily,
+                fontSize: typeSize.lg,
+                lineHeight: spacing[6],
+                fontWeight: "700",
+                letterSpacing: -0.2,
+                color: colors.text,
+              }}
+            >
+              {name}
+            </Text>
+          )}
+          {!!status && !greeting && (
             <Text
               numberOfLines={1}
               accessibilityLiveRegion="polite"
@@ -120,29 +143,32 @@ export function TopBar({
           )}
         </View>
       </Pressable>
-      {chat && <ComputerEntry compact />}
+      {chat && onActivity && <IconButton icon={History} label="Chat activity" onPress={onActivity} />}
+      {chat && wide && <ComputerEntry compact />}
       <View>
         <IconButton
           icon={Bell}
           label={pending ? `Notifications, ${pending} unread or waiting` : "Notifications, none new"}
           onPress={onBell}
-          quiet
         />
         {pending > 0 && (
           <View
             pointerEvents="none"
             style={{
-              width: spacing[2],
-              height: spacing[2],
+              width: spacing[2] + spacing[0.5],
+              height: spacing[2] + spacing[0.5],
               borderRadius: radius.full,
               position: "absolute",
               top: spacing[2],
               right: spacing[2],
+              borderWidth: 2,
+              borderColor: colors.card,
               backgroundColor: colors.brand,
             }}
           />
         )}
       </View>
+      {!wide && <IconButton icon={Menu} label="Open conversations and menu" onPress={onMenu} />}
     </Frosted>
   );
 }

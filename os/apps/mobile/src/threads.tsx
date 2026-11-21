@@ -5,6 +5,7 @@ import {
   FileText,
   MessageCircle,
   Monitor,
+  PanelsTopLeft,
   Plus,
   RefreshCw,
   Settings2,
@@ -145,7 +146,7 @@ export function ThreadsSheet({ onClose }: { onClose: () => void }) {
       setError(e instanceof Error ? e.message : String(e));
     }
   }
-  function go(section: "calendar" | "files" | "apps") {
+  function go(section: "calendar" | "files" | "apps" | "activity") {
     onClose();
     navigate(section);
   }
@@ -169,6 +170,7 @@ export function ThreadsSheet({ onClose }: { onClose: () => void }) {
           <>
             <LinkRow
               icon={MessageCircle}
+              tint={colors.navSoft}
               title="Main chat"
               detail="Your ongoing conversation"
               onPress={() => {
@@ -319,6 +321,7 @@ export function ThreadsSheet({ onClose }: { onClose: () => void }) {
         <View style={s.divider} />
         <LinkRow
           icon={Plus}
+          tint={colors.mint}
           title="Ask Daksha to do a task"
           detail="A plan, a document or a spending summary"
           onPress={() => {
@@ -328,6 +331,7 @@ export function ThreadsSheet({ onClose }: { onClose: () => void }) {
         />
         <LinkRow
           icon={Monitor}
+          tint={colors.sky}
           title="Daksha's computer"
           detail="A browser and files Daksha can use"
           onPress={() => {
@@ -335,10 +339,12 @@ export function ThreadsSheet({ onClose }: { onClose: () => void }) {
             open({ type: "computer" });
           }}
         />
-        <LinkRow icon={CalendarDays} title="Calendar" onPress={() => go("calendar")} />
-        <LinkRow icon={FileText} title="Files" onPress={() => go("files")} />
+        <LinkRow icon={PanelsTopLeft} tint={colors.yellow} title="Tasks" detail="Plans, progress and results" onPress={() => go("activity")} />
+        <LinkRow icon={CalendarDays} tint={colors.pink} title="Calendar" onPress={() => go("calendar")} />
+        <LinkRow icon={FileText} tint={colors.orange} title="Files" onPress={() => go("files")} />
         <LinkRow
           icon={SlidersHorizontal}
+          tint={colors.lavender}
           title="Voice, personality and notes"
           detail={talkSettingsName}
           onPress={() => {
@@ -346,7 +352,7 @@ export function ThreadsSheet({ onClose }: { onClose: () => void }) {
             open({ type: "talk-settings" });
           }}
         />
-        <LinkRow icon={Settings2} title="Apps & settings" onPress={() => go("apps")} />
+        <LinkRow icon={Settings2} tint={colors.subtle} title="Apps & settings" onPress={() => go("apps")} />
         <LinkRow
           icon={Sparkles}
           title="Show the welcome again"
