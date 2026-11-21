@@ -46,6 +46,11 @@ You can make your own people to talk to, in chat or on a call: a friend, someone
 
 You can also change settings just by asking: "talk a bit slower", "call yourself Riya" or "turn on my morning check-in". Daksha changes it at once and shows what changed. Why and how: decision 33 in [`docs/DECISIONS.md`](./docs/DECISIONS.md).
 
+## News and briefings (new, early version)
+
+- **News on topics you follow.** Follow topics like cricket, AI or Bengaluru weather, in settings or by saying "follow cricket". Stories come from the GDELT Project and Hacker News, with one copy of each and a mix of sites. Only the topic word is sent to them, from Daksha's server.
+- **A briefing way of talking.** Pick "Briefing: crisp and calm" for short, calm answers, and say "brief me" for your day: calendar, reminders, birthdays, tasks and two stories. A morning briefing notification is there if you turn it on. Why and how: decision 37.
+
 ## Where it lives
 
 | What | Address |
@@ -161,6 +166,7 @@ From [the privacy page](https://daksha.life/privacy), which is the place to read
 - **Cloudflare** runs the websites, sends sign-in emails, stores voice notes and videos in a private bucket, and writes out their words (Workers AI, Whisper). For a custom person's videos it writes out the words the same way, and for their voice notes and calls it tells the voices apart (Workers AI, Deepgram Nova-3). The raw files are deleted after reading, and the other speakers' words are thrown away.
 - **LiveKit** carries a voice call; it uses Deepgram to turn speech into text and Cartesia to turn Daksha's answer into speech. The terms of those three on training and keeping audio have not been checked yet.
 - **Cartesia** also keeps a copy of a custom person's voice, only if you choose to make one, until you delete it (or the person, or your account).
+- **The GDELT Project** and **Hacker News search (Algolia)** get only the topic words you follow for news, from Daksha's server, never anything about you.
 
 Daksha does not sell your data, show ads, or train AI on it. It is not end-to-end encrypted. Rules for how data is handled: [`docs/PRIVACY-AND-TRUST.md`](./docs/PRIVACY-AND-TRUST.md).
 
