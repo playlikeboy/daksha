@@ -43,6 +43,7 @@ import {
 } from "../talk-settings.ts";
 import { personalityFor, voiceStyle } from "./personality.ts";
 import type { AgentService } from "./service.ts";
+import { readToolResultTool, spillIfLarge } from "./spill.ts";
 import { tanstackAgent } from "./tanstack-agent.ts";
 
 function clipCalendarText(text: string, limit: number) {
@@ -475,6 +476,8 @@ export class ConversationAgent extends AbstractAgent {
         },
       }),
     ];
+    // A long result from a tool without a card is saved; the model reads more with read_tool_result.
+    tools.push(readToolResultTool(this.service.spill, this.owner, browserAbort.signal));
     // Skills: only those whose tools this chat has. The prompt lists them; load_skill reads one.
     const toolNames = tools.map((tool) => tool.name);
     const skills = usable(ctx.skills ?? [], toolNames);
@@ -488,6 +491,7 @@ export class ConversationAgent extends AbstractAgent {
       stepLimitNote:
         "I reached my step limit for this reply before finishing. Say “continue” and I’ll pick up where I left off.",
       tools,
+      keepResult: (name, result) => spillIfLarge(this.service.spill, this.owner, name, result),
       prompt:
         personalityFor(assistantName) +
         (this.channel === "voice" ? voiceStyle : "") +

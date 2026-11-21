@@ -51,6 +51,7 @@ import {
   pageLines,
   withoutRelativeTimes,
 } from "./page-diff.ts";
+import { SpillStore } from "./spill.ts";
 import { LostLeaseError, type TaskContext, TaskWorker } from "./worker.ts";
 
 const hash = (text: string) => createHash("sha256").update(text).digest("hex");
@@ -81,6 +82,9 @@ export class AgentService {
   skills?: SkillsService;
   readonly worker: TaskWorker;
   readonly search: SearchService;
+  /** Long tool results, saved so the model sees only their start and end. */
+  readonly spill: SpillStore;
+  private lastSpillSweep = 0;
   private maintenance?: ReturnType<typeof setInterval>;
   private refreshing = false;
   constructor(
@@ -93,6 +97,7 @@ export class AgentService {
     readonly computer: ComputerService = new ComputerService(db, config),
   ) {
     this.search = new SearchService(db);
+    this.spill = new SpillStore(db);
     this.worker = new TaskWorker(db, (owner, task, context) => this.execute(owner, task, context), {
       settled: (owner, task) => this.publishOutcome(owner, task),
     });
@@ -121,6 +126,11 @@ export class AgentService {
       await this.customPeople?.sweep().catch((error) => backgroundFailure("custom people upkeep", error));
       // News feeds: a few old ones fetched again. It returns at once and works behind.
       await this.news?.tick().catch((error) => backgroundFailure("news upkeep", error));
+      // Long tool results saved for the model (engine/spill.ts) go after 7 days. Once an hour.
+      if (Date.now() - this.lastSpillSweep > 3_600_000) {
+        this.lastSpillSweep = Date.now();
+        await this.spill.sweep().catch((error) => backgroundFailure("tool result upkeep", error));
+      }
       // Recover publications if the process exited after committing an outcome.
       for (const { owner, value } of await this.db.scan<AgentTask>("tasks"))
         await this.publishOutcome(owner, value);

@@ -24,6 +24,7 @@ import {
 import { map, mergeMap, type Observable } from "rxjs";
 import { z } from "zod";
 import { MODEL_MAX_RETRIES } from "../config.ts";
+import { compactMessages } from "./compaction.ts";
 import { RepeatToolGuard, timeoutFor, withNotice, withTimeout } from "./guards.ts";
 
 /** OpenRouter speaks the OpenAI Chat Completions format: https://openrouter.ai/docs */
@@ -183,7 +184,9 @@ export function tanstackAgent(options: {
       };
       return chat({
         adapter: adapter(options.model, options.apiKey),
-        messages: converted.messages,
+        // Long chats: old tool results keep their head and tail, and the oldest turns may be left
+        // out with a note (engine/compaction.ts). The saved chat keeps everything.
+        messages: compactMessages(converted.messages).messages,
         systemPrompts: system ? [system] : [],
         tools: [
           ...converted.tools,
