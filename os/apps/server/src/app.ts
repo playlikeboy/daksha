@@ -54,6 +54,7 @@ import { PeopleStore, peopleRoutes } from "./people.ts";
 import { CustomAvatarStore, customAvatarRoutes, voiceCharacterOf } from "./custom-avatars.ts";
 import { PersonaStore, personaRoutes } from "./persona.ts";
 import { OnboardingStore, onboardingRoutes } from "./onboarding.ts";
+import { hermesCatalog, SkillsService, skillRoutes } from "./skills/index.ts";
 import { TalkSettingsStore, talkSettingsRoutes, voiceFor } from "./talk-settings.ts";
 import { neonAuthProxy } from "./neon-auth-proxy.ts";
 import { rateLimit } from "./rate-limit.ts";
@@ -104,6 +105,8 @@ export async function createApp(
     voiceCopy?: VoiceCopyService;
     /** The news feed. Tests pass one with a fake network; nothing reaches a real news service. */
     news?: NewsService;
+    /** Skills. Tests pass one built on a folder of test skills. */
+    skills?: SkillsService;
   } = {},
 ) {
   await resolveComputerDeployment(config);
@@ -161,6 +164,16 @@ export async function createApp(
       },
     });
   agent.news = news;
+  // Skills (third_party/hermes-skills): shared content; each person turns them on in Apps.
+  const skills =
+    options.skills ??
+    new SkillsService(db, await hermesCatalog(), async (owner) => [
+      ...(config.webSearchEnabled ? ["search_web"] : []),
+      ...(config.workerUrl && config.workerToken ? ["browse_web"] : []),
+      ...((await workspace.connected(owner).catch(() => false)) ? ["search_mail"] : []),
+      ...(connectors.configured ? ["use_app_tool"] : []),
+    ]);
+  agent.skills = skills;
   // Reminders, birthdays, the morning check-in and briefing: in-app updates, and a push where it is on.
   const push = options.push ?? new PushService(db, pushKeysFromEnv());
   agent.companion = new CompanionJobs({
@@ -415,6 +428,7 @@ export async function createApp(
   app.route("/api/checkin", checkinRoutes({ db, debo }));
   app.route("/api/companion", companionRoutes(db));
   app.route("/api/news", newsRoutes(news));
+  app.route("/api/skills", skillRoutes(skills));
   app.route("/api/push", pushRoutes(push));
   const talkSettings = new TalkSettingsStore(db);
   const characterOf = async (owner: string) =>

@@ -32,6 +32,8 @@ import { TimeZoneStore, todayPrompt } from "../time-zone.ts";
 import { settingsInstructions, settingsTools } from "../settings-tools.ts";
 import { briefingInstructions, briefingTools, calendarFrom } from "../briefing.ts";
 import { newsInstructions, newsTools } from "../news/tools.ts";
+import type { SkillSummary } from "../../../../packages/skills/src/index.ts";
+import { skillsPrompt, skillTools, usable } from "../skills/index.ts";
 import {
   briefingVoiceStyle,
   contextPrompt,
@@ -195,10 +197,13 @@ export class ConversationAgent extends AbstractAgent {
           this.service.ownKeys?.chatChoice(this.owner, this.config.model).catch(() => undefined) ??
             Promise.resolve(undefined),
           this.service.images?.canMake(this.owner).catch(() => false) ?? Promise.resolve(false),
+          // Skills the person turned on: names and one line each. Their text loads on demand.
+          this.service.skills?.enabled(this.owner).catch((): SkillSummary[] => []) ??
+            Promise.resolve([] as SkillSummary[]),
         ]),
       ),
     ).pipe(
-      mergeMap(([role, legacyGoogle, apps, servers, talk, people, timeZone, ownModel, pictures]) =>
+      mergeMap(([role, legacyGoogle, apps, servers, talk, people, timeZone, ownModel, pictures, skills]) =>
         // The assistant answers to the name the person gave it in "About Daksha".
         from(this.assistantName()).pipe(
           mergeMap((name) =>
@@ -209,7 +214,7 @@ export class ConversationAgent extends AbstractAgent {
               jev,
               latestText,
               role,
-              { legacyGoogle, apps, servers, talk, people, timeZone, ownModel, pictures },
+              { legacyGoogle, apps, servers, talk, people, timeZone, ownModel, pictures, skills },
               name,
             ),
           ),
@@ -245,6 +250,8 @@ export class ConversationAgent extends AbstractAgent {
       ownModel?: ChatChoice;
       /** Whether make_image can work for this person. */
       pictures?: boolean;
+      /** Skills the person turned on (names and descriptions only). */
+      skills?: SkillSummary[];
     },
     assistantName?: string,
   ): Observable<BaseEvent> {
@@ -468,6 +475,11 @@ export class ConversationAgent extends AbstractAgent {
         },
       }),
     ];
+    // Skills: only those whose tools this chat has. The prompt lists them; load_skill reads one.
+    const toolNames = tools.map((tool) => tool.name);
+    const skills = usable(ctx.skills ?? [], toolNames);
+    if (skills.length && this.service.skills)
+      tools.push(...skillTools(this.service.skills, this.owner, () => toolNames, browserAbort.signal));
     const agent = tanstackAgent({
       model: ctx.ownModel?.spec ?? this.config.model ?? "openai/unconfigured",
       apiKey: ctx.ownModel?.apiKey,
@@ -512,7 +524,8 @@ export class ConversationAgent extends AbstractAgent {
         (ctx.servers.length ? mcpInstructions(ctx.servers) : "") +
         (ctx.pictures ? makeImageInstructions : "") +
         computerInstructions(this.config.computerProvider) +
-        (this.config.webSearchEnabled ? searchInstructions : ""),
+        (this.config.webSearchEnabled ? searchInstructions : "") +
+        skillsPrompt(skills),
     });
     return this.expireOnUserTurn(
       new Observable((subscriber) => {

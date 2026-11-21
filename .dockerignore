@@ -1,8 +1,10 @@
 # Docker builds that use the repo root as context (os/infra/cloudflare/api/Dockerfile).
-# Send only what the API image needs: os/ (minus build output) and packages/.
+# Send only what the API image needs: os/ (minus build output), packages/ and third_party/
+# (the skill folders).
 *
 !os
 !packages
+!third_party
 **/node_modules
 **/dist
 **/.expo

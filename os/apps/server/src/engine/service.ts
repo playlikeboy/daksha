@@ -38,6 +38,7 @@ import type { ImageService } from "../images/service.ts";
 import type { CustomPeopleService } from "../custom-people/index.ts";
 import type { OwnKeysService } from "../own-keys/service.ts";
 import type { NewsService } from "../news/service.ts";
+import type { SkillsService } from "../skills/service.ts";
 import type { DeboService } from "../debo/service.ts";
 import type { WorkspaceService } from "../workspace.ts";
 import { assistantNameOf, BRAND } from "./brand.ts";
@@ -76,6 +77,8 @@ export class AgentService {
   customPeople?: CustomPeopleService;
   /** The news feed on topics the person follows. Its upkeep works behind the loop. Set by createApp. */
   news?: NewsService;
+  /** Skills the person turned on (load_skill). Set by createApp. */
+  skills?: SkillsService;
   readonly worker: TaskWorker;
   readonly search: SearchService;
   private maintenance?: ReturnType<typeof setInterval>;

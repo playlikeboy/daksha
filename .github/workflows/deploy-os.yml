@@ -31,7 +31,7 @@ name: Deploy OS
 on:
   push:
     branches: [main]
-    paths: ["os/**", "packages/**", ".github/workflows/deploy-os.yml", ".dockerignore"]
+    paths: ["os/**", "packages/**", "third_party/hermes-skills/**", ".github/workflows/deploy-os.yml", ".dockerignore"]
   workflow_dispatch:
 
 concurrency:

@@ -25,6 +25,11 @@ FROM node:22.22.0-bookworm-slim
 WORKDIR /app
 ENV NODE_ENV=production HOST=0.0.0.0 PORT=8787 DATA_DIR=/app/data
 COPY --from=build --chown=node:node /repo/os/dist/server.mjs ./server.mjs
+# Skills are Markdown folders read at run time (third_party/hermes-skills). Only the text is
+# needed; their scripts are never run, so they are left out of the image.
+COPY --chown=node:node third_party/hermes-skills ./skills
+ENV DAKSHA_SKILLS_DIR=/app/skills
+RUN find ./skills -type d \( -name scripts -o -name tests \) -prune -exec rm -rf {} +
 # ffmpeg turns a voice note or video into the small sound file the speech service takes
 # (the picture is dropped). It only ever reads a temporary copy, deleted when the work ends.
 RUN apt-get update && apt-get install -y --no-install-recommends ffmpeg \
