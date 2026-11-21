@@ -11,6 +11,7 @@ import { useAssistantName } from "./debo-character-store";
 import { PeopleSetting } from "./debo-people-setting";
 import { RemindersSetting } from "./debo-reminders-setting";
 import { NewsTopicsSetting } from "./news-topics-setting";
+import { LinkedAppsSetting } from "./linked-apps-setting";
 import { PhoneSetting } from "./phone-setting";
 import { SuggestionsSetting, TriggersSetting } from "./triggers-setting";
 import { PersonaSetting } from "./debo-persona-setting";
@@ -319,6 +320,7 @@ export function TalkSettingsSheet() {
         <NewsTopicsSetting />
 
         <PhoneSetting />
+        <LinkedAppsSetting />
         <TriggersSetting />
         <SuggestionsSetting />
 

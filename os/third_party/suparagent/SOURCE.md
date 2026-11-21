@@ -11,6 +11,7 @@
 |---|---|---|
 | `apps/server/src/proposals/redact.ts` | `backend/app/services/agent_memory.py` (`redact_secrets` and its patterns), `backend/app/services/agent_skills.py` (skill warnings) | The secret patterns, the labelled-value patterns, the private-key block, and the three skill warnings. Python's `(?i)` became the `i` flag. |
 | `apps/server/src/proposals/service.ts` (memory suggestions) | `backend/app/services/memory_proposals.py` | Only the person's own messages are read, after the chat has been quiet; the "lasting statement" patterns; questions skipped; quoted words, never rewritten; secrets mean no suggestion; a rejected line is never offered again; caps per chat and in total. |
+| `apps/server/src/channels/service.ts`, `channels/transports.ts` (Telegram) | `backend/app/telegram_bot.py` | Linking a chat with `/link <code>` from a code the app shows (and `/start <code>` from a deep link); the "that code isn't valid / expired, make a new one" replies; after linking, plain text is a request. |
 | `apps/server/src/proposals/service.ts` (skill drafts) | `backend/app/services/skill_learning.py` | One finished request and reply become a draft with fixed sections; redaction before the cut; byte limits; the "read before reuse" reference section; the warnings. |
 
 ## What is different

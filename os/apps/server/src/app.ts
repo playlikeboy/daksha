@@ -77,6 +77,10 @@ import { type PhoneConfig, readPhoneConfig } from "./phone/config.ts";
 import { livekitDialer } from "./phone/dialer.ts";
 import { phoneAgentRoutes, phoneRoutes } from "./phone/routes.ts";
 import { composioEventsFromEnv } from "./connectors/composio-events.ts";
+import { EngineChannelBrain } from "./channels/brain.ts";
+import { readChannelsConfig } from "./channels/config.ts";
+import { channelHookRoutes, channelRoutes } from "./channels/routes.ts";
+import { type ChannelBrain, ChannelService } from "./channels/service.ts";
 import { proposalRoutes } from "./proposals/routes.ts";
 import { ProposalService } from "./proposals/service.ts";
 import { triggerHookRoutes, triggerRoutes } from "./triggers/routes.ts";
@@ -117,6 +121,10 @@ export async function createApp(
     phoneDialer?: (config: PhoneConfig) => Dialer;
     /** Connected-app events for triggers. Defaults to Composio when its key and webhook secret are set. */
     appEvents?: AppEventSource | null;
+    /** SMS, WhatsApp and Telegram. Defaults to the env keys (channels/config.ts). */
+    channelsEnv?: () => Record<string, string | undefined>;
+    channelBrain?: ChannelBrain;
+    channelFetch?: typeof fetch;
   } = {},
 ) {
   await resolveComputerDeployment(config);
@@ -252,6 +260,15 @@ export async function createApp(
   agent.proposals = proposals;
   const timeZones = new TimeZoneStore(db);
   const runner = new DatabaseAgentRunner(threads);
+  // Text Daksha by SMS, WhatsApp or Telegram once linked. Each is off without its keys.
+  const channelsConfig = () => readChannelsConfig(options.channelsEnv?.() ?? process.env, config.publicUrl);
+  const channels = new ChannelService({
+    db,
+    config: channelsConfig,
+    brain: options.channelBrain ?? new EngineChannelBrain(config, agent, runner, threads),
+    ...(options.channelFetch ? { fetcher: options.channelFetch } : {}),
+  });
+  agent.channels = channels;
   const runtime = makeRuntime(config, agent, auth, runner);
   const app = new Hono<{ Variables: { owner: string } }>();
   const origins = new Set([
@@ -389,6 +406,7 @@ export async function createApp(
   app.route("/api/voice/phone", phoneAgentRoutes(phone, options.voiceEnv));
   // Signed webhooks that start triggers: before sign-in, each checks its own signature.
   app.route("/api/hooks", triggerHookRoutes(triggers));
+  app.route("/api/channels", channelHookRoutes(channels, channelsConfig));
   // Deleting a call also deletes its copy in Chat (same words, same person).
   debo.onCallDeleted = (owner, callId) => threads.remove(owner, `voice-${callId}`);
   // Sample mode only: the in-memory stand-in for the recordings bucket. Its links carry their own one-time token.
@@ -445,6 +463,7 @@ export async function createApp(
     ));
   app.route("/api/phone", phoneRoutes(phone));
   app.route("/api/triggers", triggerRoutes(triggers));
+  app.route("/api/linked-apps", channelRoutes(channels));
   app.route("/api/proposals", proposalRoutes(proposals));
   app.route("/api/persona", personaRoutes(new PersonaStore(db)));
   // /api/custom-people: the people themselves (custom-people/routes.ts) and, on the same prefix,
