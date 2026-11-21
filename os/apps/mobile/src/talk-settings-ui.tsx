@@ -10,6 +10,7 @@ import { errorText } from "./debo-api";
 import { useAssistantName } from "./debo-character-store";
 import { PeopleSetting } from "./debo-people-setting";
 import { RemindersSetting } from "./debo-reminders-setting";
+import { NewsTopicsSetting } from "./news-topics-setting";
 import { PersonaSetting } from "./debo-persona-setting";
 import { CustomPeopleSetting } from "./custom-people-ui";
 import { capital, usePronouns, useTalkSettingsName } from "./debo-pronouns";
@@ -28,12 +29,15 @@ type Settings = {
   length?: "short" | "balanced" | "detailed";
   language?: "match" | "english" | "hindi" | "hinglish";
   context?: string;
+  style?: "friendly" | "briefing";
+  callMe?: string;
 };
 type Reply = {
   settings: Settings | null;
   voices: Voice[];
   voice: { voice: string; speed: number };
-  limits: { contextMax: number };
+  limits: { contextMax: number; callMeMax?: number };
+  briefingVoice?: string;
 };
 
 const SPEEDS = [
@@ -55,6 +59,10 @@ const LENGTHS = [
   { id: "short", label: "Talks less" },
   { id: "balanced", label: "In between" },
   { id: "detailed", label: "Talks more" },
+] as const;
+const STYLES = [
+  { id: "friendly", label: "Friendly" },
+  { id: "briefing", label: "Briefing: crisp and calm" },
 ] as const;
 const LANGUAGES = [
   { id: "match", label: "Match me" },
@@ -96,6 +104,7 @@ export function TalkSettingsSheet() {
   const settingsName = useTalkSettingsName();
   const [reply, setReply] = useState<Reply>();
   const [context, setContext] = useState("");
+  const [callMe, setCallMe] = useState("");
   const [saved, setSaved] = useState("");
   const [error, setError] = useState("");
   const [busy, setBusy] = useState(false);
@@ -107,6 +116,7 @@ export function TalkSettingsSheet() {
       const next = await api.request<Reply>("/api/talk-settings");
       setReply(next);
       setContext(next.settings?.context ?? "");
+      setCallMe(next.settings?.callMe ?? "");
     } catch (e) {
       setError(errorText(e));
     }
@@ -247,6 +257,44 @@ export function TalkSettingsSheet() {
           <Choices label={`${capital(p.their)} mood`} options={MOODS} value={s1?.mood ?? "balanced"} onPick={(id) => void save({ mood: id }, "Saved.")} />
           <Choices label={`How much ${p.they} ${p.verb("say")}`} options={LENGTHS} value={s1?.length ?? "balanced"} onPick={(id) => void save({ length: id }, "Saved.")} />
           <Choices label="Language" options={LANGUAGES} value={s1?.language ?? "match"} onPick={(id) => void save({ language: id }, "Saved.")} />
+          <Choices
+            label="Style"
+            options={STYLES}
+            value={s1?.style ?? "friendly"}
+            onPick={(id) =>
+              void save(
+                { style: id },
+                id === "briefing"
+                  ? `Briefing style on: short, calm answers, and ${p.they} ${p.verb("offer")} the next step.`
+                  : "Friendly style on.",
+              )
+            }
+          />
+          {s1?.style === "briefing" && (
+            <Text style={s.small}>
+              Short spoken replies like "Done." and a calm voice ({reply?.voices.find((v) => v.id === reply.briefingVoice)?.name ?? "Robyn"})
+              unless you picked one. {capital(p.they)} still {p.verb("ask")} before anything leaves Daksha.
+            </Text>
+          )}
+          <View style={{ flexDirection: "row", gap: spacing[2], alignItems: "flex-end" }}>
+            <View style={{ flex: 1 }}>
+              <Field
+                label={`What ${name} should call you`}
+                value={callMe}
+                onChangeText={setCallMe}
+                maxLength={reply?.limits.callMeMax ?? 40}
+                placeholder="Your first name"
+              />
+            </View>
+            <Button
+              small
+              busy={busy}
+              disabled={callMe.trim() === (s1?.callMe ?? "")}
+              onPress={() => void save({ callMe: callMe.trim() }, callMe.trim() ? `${name} will call you ${callMe.trim()}.` : "Name removed.")}
+            >
+              Save name
+            </Button>
+          </View>
           <LinkRow
             icon={UserRound}
             title="Name, face and colour"
@@ -265,6 +313,8 @@ export function TalkSettingsSheet() {
         <PeopleSetting />
 
         <RemindersSetting />
+
+        <NewsTopicsSetting />
 
         <Card style={{ gap: spacing[3] }}>
           <SectionHeading title={`What ${name} should always know`} />
