@@ -332,7 +332,7 @@ test("the tools: follow, unfollow, the feed and a one-off search", async () => {
   const one = await run("get_news", { topic: "tennis" });
   assert.equal(one.topic, "tennis");
   assert.deepEqual((await run("unfollow_topic", { topic: "SPACE" })).status, "saved");
-  assert.equal((await run("unfollow_topic", { topic: "space" })).status, "unchanged");
+  assert.deepEqual((await run("unfollow_topic", { topic: "space" })).changed, []);
 });
 
 test("the background pass refreshes old feeds behind the loop, and never twice at once", async () => {

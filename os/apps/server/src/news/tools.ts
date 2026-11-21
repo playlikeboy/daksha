@@ -114,7 +114,8 @@ export function newsTools(news: NewsService, owner: string, options: { channel?:
           const { topic } = topicInput.parse(args);
           const { row, removed } = await news.topics.unfollow(owner, topic);
           return {
-            status: removed ? "saved" : "unchanged",
+            status: "saved",
+            ...(removed ? {} : { unchanged: true }),
             kind: "news-topics",
             changed: removed ? [`Stopped following: ${topic}`] : [],
             topics: row.topics.map((t) => t.keyword),
