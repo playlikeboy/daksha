@@ -10,6 +10,7 @@ export type Route = RouteParams & { section: Section };
 
 /** Screens that have an address. "today" and "connections" are old names and are not listed. */
 const PATHS: Partial<Record<Section, string>> = {
+  home: "home",
   chat: "chat",
   talk: "talk",
   journal: "journal",
@@ -81,6 +82,7 @@ export function threadIdFrom(part: string): string {
 
 /** What the page title says for each screen, as in "Journal · Daksha". */
 const NAMES: Partial<Record<Section, string>> = {
+  home: "Home",
   chat: "Chat",
   talk: "Talk",
   journal: "Journal",
@@ -122,10 +124,10 @@ function cleanPath(path: string): string[] {
     });
 }
 
-/** Turns an address into a route, or null when no screen lives there. "/" means Chat. */
+/** Turns an address into a route, or null when no screen lives there. "/" means Home. */
 export function parsePath(path: string): Route | null {
   const parts = cleanPath(path);
-  if (parts.length === 0) return { section: "chat" };
+  if (parts.length === 0) return { section: "home" };
   const section = SECTIONS.get((parts[0] ?? "").toLowerCase());
   if (!section || parts.length > 2) return null;
   const id = parts[1];

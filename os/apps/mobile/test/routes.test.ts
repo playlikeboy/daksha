@@ -4,6 +4,7 @@ import type { Section } from "../../../packages/domain/src/index.ts";
 import { parsePath, pathFor, pathFromUrl, titleFor } from "../src/routes.ts";
 
 const all: Section[] = [
+  "home",
   "chat",
   "talk",
   "journal",
@@ -32,9 +33,11 @@ test("a conversation and a journal entry get their own address", () => {
   assert.deepEqual(parsePath("/journal/e_1"), { section: "journal", entryId: "e_1" });
   assert.equal(pathFor("talk", { threadId: "x" }), "/talk");
 });
-test("the home address and old section names go to Chat or Apps", () => {
-  assert.deepEqual(parsePath("/"), { section: "chat" });
-  assert.deepEqual(parsePath(""), { section: "chat" });
+test("the home address opens Home, and old section names go to Chat or Apps", () => {
+  assert.deepEqual(parsePath("/"), { section: "home" });
+  assert.deepEqual(parsePath(""), { section: "home" });
+  assert.equal(pathFor("home"), "/home");
+  assert.equal(titleFor({ section: "home" }), "Home · Daksha");
   assert.equal(pathFor("today"), "/chat");
   assert.equal(pathFor("connections"), "/apps");
 });
