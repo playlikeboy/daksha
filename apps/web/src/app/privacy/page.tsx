@@ -588,6 +588,69 @@ export default function PrivacyPage() {
         />
       </Section>
 
+      <Section id="reach" title="Phone calls, messaging apps and triggers (new app, optional)">
+        <p>
+          These are off unless Daksha&rsquo;s server has the keys for them, and each one is off for you until you turn it
+          on in Settings. If you never use them, none of this applies.
+        </p>
+        <List
+          items={[
+            <>
+              <strong>Phone calls.</strong> You can call Daksha&rsquo;s number, and Daksha can call your own number when you
+              ask, or for reminders you turned on. The call goes over the normal phone network through a phone carrier
+              (the company that provides Daksha&rsquo;s number, for example Twilio or Telnyx) and LiveKit&rsquo;s phone
+              service, then works like any other Daksha call (LiveKit, Deepgram and Cartesia, above). The carrier sees your
+              phone number and the call&rsquo;s time and length, like any phone call. Daksha keeps your number and a hash
+              of your PIN. It never keeps your PIN itself or the audio. The call is saved as text like your other calls.
+              &ldquo;Remove my number&rdquo; deletes your number and PIN.
+            </>,
+            <>
+              <strong>Text messages (SMS).</strong> If you link your number, your texts to Daksha and its replies go
+              through Twilio (Twilio Inc.) and your mobile carrier. Twilio sees your number and the text of each message.
+            </>,
+            <>
+              <strong>WhatsApp.</strong> If you link WhatsApp, your messages and Daksha&rsquo;s replies go through
+              Meta&rsquo;s WhatsApp Business Platform (Meta Platforms, Inc.). Meta sees your WhatsApp number and the
+              messages, which are not end-to-end encrypted between you and Daksha in the way chats between people are.
+            </>,
+            <>
+              <strong>Telegram.</strong> If you link Telegram, your messages and Daksha&rsquo;s replies go through
+              Telegram&rsquo;s Bot API. Telegram sees your chat id and the messages. Bot chats
+              are not end-to-end encrypted.
+            </>,
+            <>
+              A message from any of these lands in your main Daksha chat, and the reply goes to the AI that writes
+              Daksha&rsquo;s answers (Anthropic), like anything you type in the app. Anything that sends, pays, changes or
+              deletes still waits for your tap in the app. Daksha&rsquo;s logs never keep the text of these messages. Don&rsquo;t
+              send passwords this way. &ldquo;Unlink&rdquo; in Settings stops it. Deleting your account removes every link.
+            </>,
+            <>
+              <strong>Triggers.</strong> You can ask Daksha to do something on a schedule, or when an app you connected has
+              news (through Composio, above), or when another service calls a private web address. Composio is told which
+              kind of event to watch for you, such as &ldquo;new email&rdquo;, and the filter you gave. It sends each matching
+              event back to Daksha. What a trigger receives is handled as information, never as instructions, and anything
+              that leaves Daksha still waits for your tap.
+            </>,
+            <>
+              <strong>Suggestions.</strong> Daksha may suggest saving something you said, like &ldquo;I am
+              vegetarian&rdquo;, or turning a finished request into a skill. This is done on Daksha&rsquo;s server without
+              any AI service, from your own messages only. Nothing is saved until you tap Save, and what looks like a
+              password or key is removed first.
+            </>,
+            <>
+              <strong>Meeting notes.</strong> A bot that joins online meetings is not offered yet. When it is, it will be off
+              by default, need you to confirm everyone knows the meeting is being recorded, announce itself in the
+              meeting, and keep the notes, not the audio. This page will list who handles the meeting audio before it
+              starts.
+            </>,
+            <>
+              We have not yet checked Twilio&rsquo;s, Meta&rsquo;s, Telegram&rsquo;s or the phone carrier&rsquo;s terms on
+              keeping messages and on training AI.
+            </>,
+          ]}
+        />
+      </Section>
+
       <Section id="tool-servers" title="Your own tool servers (new app, optional)">
         <p>
           In the new app you can also add a tool server of your own (an &ldquo;MCP&rdquo; server) by giving Daksha its
