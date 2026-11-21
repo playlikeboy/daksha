@@ -17,6 +17,8 @@ RUN pnpm install --frozen-lockfile --filter "openfuse..."
 COPY os/tsconfig.json os/tsconfig.build.json ./
 COPY os/scripts ./scripts
 COPY os/apps/server ./apps/server
+# Copied open-source code the server imports (os/third_party/*/SOURCE.md).
+COPY os/third_party ./third_party
 COPY os/packages ./packages
 # One self-contained file: dist/server.mjs. No node_modules are needed at run time.
 RUN node scripts/bundle-server.mjs
