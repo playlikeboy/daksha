@@ -37,7 +37,7 @@ export default function PrivacyPage() {
       </a>
 
       <h1 className="h-section mt-8">How Daksha handles your data</h1>
-      <p className="mt-4 text-[1.125rem] text-ink-soft">Last updated 19 November 2026.</p>
+      <p className="mt-4 text-[1.125rem] text-ink-soft">Last updated 21 November 2026.</p>
 
       <div className="mt-8 max-w-[40rem] rounded-[24px] border-2 border-ink bg-paper p-6">
         <p>
@@ -373,6 +373,50 @@ export default function PrivacyPage() {
               safety filter. You can make up to 20 pictures a day on Daksha&rsquo;s service.
             </>,
             <>You can delete a picture, which removes the file too. &ldquo;Delete my data&rdquo; removes them all.</>,
+          ]}
+        />
+        <h3 className="mt-6 font-semibold">News on topics you follow</h3>
+        <p>
+          In the new app you can follow topics, like cricket, AI or Bengaluru weather, and see news about them. If you
+          follow no topics, none of the below applies.
+        </p>
+        <List
+          items={[
+            <>
+              The only thing sent to a news service is the topic word you follow or ask about. Never your entries, your
+              notes, names of people in your life, or anything else about you. Daksha refuses a topic that holds a name
+              you saved, words like &ldquo;my&rdquo; or &ldquo;mum&rdquo;, an email, a web address or a long number.
+            </>,
+            <>
+              The news services are the GDELT Project (api.gdeltproject.org) for any topic, and Hacker News search, run by
+              Algolia (hn.algolia.com), for technology topics. Daksha&rsquo;s server asks them, not your device, so they see
+              the server&rsquo;s address, never yours. They do not learn who asked: topic answers are shared across
+              everyone who follows the same topic for half an hour.
+            </>,
+            <>
+              Pictures on story cards load from the news site, and a story you open loads from the news site, like any
+              link. Those sites then see your device&rsquo;s address, as with any web page.
+            </>,
+            <>
+              Topic suggestions are worked out on Daksha&rsquo;s server from your own entries, by matching a fixed list of
+              common topics. Your entries are not sent anywhere for this, and a suggestion is only followed when you tap
+              Follow.
+            </>,
+            <>
+              If you turn on the short &ldquo;why it may interest you&rdquo; lines, the headline and the topic word go to
+              Anthropic (or to your own Anthropic key, if you set one), which writes one line per story. They are marked
+              as written by AI. This is off until you turn it on.
+            </>,
+            <>
+              Daksha keeps your topics and the stories it found for you for a few hours. Both are in &ldquo;Download my
+              data&rdquo; and deleted with your account. You can stop following a topic at any time.
+            </>,
+            <>
+              The morning briefing, if you turn it on, is built on Daksha&rsquo;s server from your reminders, your
+              calendar (if Google is connected), birthdays, tasks and the stories already found. It sends nothing to a
+              news service by itself. A notification on your device shows only &ldquo;Good morning&rdquo; and the name
+              you asked Daksha to call you.
+            </>,
           ]}
         />
         <h3 className="mt-6 font-semibold">People you make</h3>
