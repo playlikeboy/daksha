@@ -18,7 +18,7 @@ import { useSettingsChanged } from "./settings-events";
 import { Button, Card, CheckRow, ErrorNotice, Field, s, spacing } from "./ui";
 import { useWorkspace } from "./workspace";
 
-type Settings = { specialDays: boolean; checkin: boolean; checkinAt: string };
+type Settings = { specialDays: boolean; checkin: boolean; checkinAt: string; briefing?: boolean; briefingAt?: string };
 type Reminder = { id: string; title: string; at: string; status: "scheduled" | "sent" };
 
 const when = (iso: string) =>
@@ -28,6 +28,7 @@ export function RemindersSetting() {
   const { api } = useWorkspace();
   const [settings, setSettings] = useState<Settings>();
   const [time, setTime] = useState("08:00");
+  const [briefingTime, setBriefingTime] = useState("07:30");
   const [reminders, setReminders] = useState<Reminder[]>([]);
   const [push, setPush] = useState<{ configured: boolean; publicKey: string | null }>({ configured: false, publicKey: null });
   const [deviceOn, setDeviceOn] = useState(false);
@@ -44,6 +45,7 @@ export function RemindersSetting() {
       ]);
       setSettings(chosen.settings);
       setTime(chosen.settings.checkinAt);
+      setBriefingTime(chosen.settings.briefingAt ?? "07:30");
       setReminders(mine.reminders.filter((r) => r.status === "scheduled"));
       setPush(pushInfo);
       const on = await deviceRemindersOn();
@@ -129,6 +131,31 @@ export function RemindersSetting() {
             busy={busy}
             disabled={time.trim() === settings.checkinAt}
             onPress={() => void save({ checkinAt: time.trim() }, `The check-in comes at ${time.trim()}.`)}
+          >
+            Save time
+          </Button>
+        </View>
+      )}
+      <CheckRow
+        label="Morning briefing: your day and news on topics you follow, in a few lines"
+        checked={Boolean(settings.briefing)}
+        onPress={() =>
+          void save(
+            { briefing: !settings.briefing, briefingAt: briefingTime },
+            settings.briefing ? "The morning briefing is off." : "The morning briefing is on.",
+          )
+        }
+      />
+      {settings.briefing && (
+        <View style={{ flexDirection: "row", gap: spacing[2], alignItems: "flex-end" }}>
+          <View style={{ flex: 1 }}>
+            <Field label="Briefing time (24-hour, for example 07:30)" value={briefingTime} onChangeText={setBriefingTime} />
+          </View>
+          <Button
+            small
+            busy={busy}
+            disabled={briefingTime.trim() === (settings.briefingAt ?? "07:30")}
+            onPress={() => void save({ briefingAt: briefingTime.trim() }, `The briefing comes at ${briefingTime.trim()}.`)}
           >
             Save time
           </Button>

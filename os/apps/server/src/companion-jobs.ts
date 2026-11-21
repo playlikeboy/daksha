@@ -6,6 +6,8 @@
 //   Morning check-in            "Good morning" with a short brief, at the time the person picks.
 //                               Off unless the person turns it on.
 //   Reminders                   The ones the person asked for, at their time.
+//   Morning briefing            "Good morning, Riya" with today's calendar, reminders, tasks and
+//                               news on topics they follow (briefing.ts). Off unless turned on.
 //
 // Each goes out once (an idempotent key per day and per thing) as an in-app update, and also
 // as a push (title only) to devices where the person turned that on. Nothing is sent between
@@ -13,6 +15,7 @@
 import { createHash } from "node:crypto";
 import type { Store } from "./db.ts";
 import type { DeboService } from "./debo/index.ts";
+import type { Briefing } from "./briefing.ts";
 import { buildCheckin, type Checkin } from "./companion.ts";
 import { backgroundFailure } from "./log.ts";
 import { PeopleStore, type Person } from "./people.ts";
@@ -37,6 +40,8 @@ export interface CompanionJobDeps {
   notify: Notify;
   push?: Pick<PushService, "send">;
   debo?: DeboService;
+  /** Today's briefing for one person (briefing.ts). Without it, no briefing is sent. */
+  briefing?: (owner: string, now: Date) => Promise<Briefing>;
 }
 
 /** The check-in brief as two or three plain lines. Never journal text: only counts and names. */
@@ -62,6 +67,7 @@ export class CompanionJobs {
     const [zones, settings] = await Promise.all([allTimeZones(this.deps.db), new CompanionSettingsStore(this.deps.db).all()]);
     await this.specialDays(now, zones, settings).catch((error) => backgroundFailure("special-day reminders", error));
     await this.checkins(now, zones, settings).catch((error) => backgroundFailure("morning check-in", error));
+    await this.briefings(now, zones, settings).catch((error) => backgroundFailure("morning briefing", error));
     await this.reminders(now, zones).catch((error) => backgroundFailure("reminders", error));
   }
 
@@ -102,6 +108,23 @@ export class CompanionJobs {
       if (await this.alreadySent(owner, key)) continue;
       const brief = await buildCheckin({ db: this.deps.db, debo: this.deps.debo }, owner, { timeZone: zone, now });
       await this.send(owner, "Good morning", checkinBody(brief), key);
+    }
+  }
+
+  private async briefings(now: Date, zones: Map<string, string>, settings: Map<string, typeof DEFAULT_SETTINGS>) {
+    if (!this.deps.briefing) return;
+    for (const [owner, chosen] of settings) {
+      if (!chosen.briefing) continue;
+      const zone = zones.get(owner);
+      const local = localClock(now, zone);
+      const start = minutesOf(chosen.briefingAt ?? "07:30");
+      if (quiet(local.minutes) || local.minutes < start || local.minutes >= start + CHECKIN_WINDOW_MINUTES) continue;
+      const key = `briefing:${local.day}`;
+      if (await this.alreadySent(owner, key)) continue;
+      const brief = await this.deps.briefing(owner, now);
+      // The notification's title is the greeting with the name the person chose. The lines
+      // stay in the in-app update; a push carries only the title.
+      await this.send(owner, brief.greeting.replace(/\.$/, ""), brief.lines.join(" "), key);
     }
   }
 

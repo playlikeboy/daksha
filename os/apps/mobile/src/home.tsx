@@ -32,7 +32,7 @@ import { requestTalkAutoStart } from "./debo-talk-consent";
 import { deboMood } from "./debo-mood-store";
 import { Glass, Tile, type TileArtKind } from "./genie";
 import { useAccount } from "./neon-gate";
-import { NewsSection } from "./news";
+import { NewsSection } from "./news-section";
 import { Text, TextInput } from "./text";
 import { brandShadow, colors, headingFamily, radius, s, Skeleton, spacing, typeSize } from "./ui";
 import { useWorkspace } from "./workspace";
@@ -368,7 +368,7 @@ export function HomeScreen() {
         )}
       </View>
 
-      <NewsSection />
+      <NewsSection limit={6} onOpenTopics={() => open({ type: "talk-settings" })} />
     </View>
   );
 }

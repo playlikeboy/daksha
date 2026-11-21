@@ -20,6 +20,13 @@ export interface TalkSettings {
   language?: (typeof languages)[number];
   /** "Things she should always know about you", in the person's own words. */
   context?: string;
+  /**
+   * How she talks overall. "briefing" is crisp, calm and a step ahead, with short spoken turns
+   * (decision 37). Missing means her usual friendly way.
+   */
+  style?: (typeof styles)[number];
+  /** What she calls the person ("Riya"). Used in greetings and briefings. Missing means no name. */
+  callMe?: string;
   updatedAt: string;
 }
 
@@ -27,6 +34,8 @@ const KIND = "talk-settings";
 export const moods = ["playful", "balanced", "calm"] as const;
 export const lengths = ["short", "balanced", "detailed"] as const;
 export const languages = ["match", "english", "hindi", "hinglish"] as const;
+export const styles = ["friendly", "briefing"] as const;
+export const CALL_ME_MAX = 40;
 export const CONTEXT_MAX = 1500;
 export const SPEED_MIN = 0.8;
 export const SPEED_MAX = 1.3;
@@ -44,6 +53,11 @@ export const VOICES = [
   { id: "a167e0f3-df7e-4d52-a9c3-f949145efdab", name: "Blake", description: "A man, lively and warm. Upbeat and easy to follow.", gender: "man" },
 ] as const;
 export const DEFAULT_VOICE = VOICES[0].id;
+/**
+ * The voice the briefing style starts with, when the person has not picked one: Robyn, the
+ * calm, level-headed one. It is a stock voice, not an imitation of anyone.
+ */
+export const BRIEFING_VOICE = VOICES[1].id;
 
 /** The voice each character starts with. The person can change it. */
 export const CHARACTER_VOICES: Record<AgentCharacter, string> = {
@@ -75,20 +89,33 @@ export const talkSettingsInput = z.object({
     .max(CONTEXT_MAX, `Keep this under ${CONTEXT_MAX} characters.`)
     .transform((t) => t.replace(/\r/g, "").trim())
     .optional(),
+  style: z.enum(styles).optional(),
+  callMe: z
+    .string()
+    .max(CALL_ME_MAX, `Keep the name under ${CALL_ME_MAX} letters.`)
+    .transform((t) => cleanName(t))
+    .optional(),
 });
+
+/** A name to call the person: one short plain line, no quotes or line breaks. */
+export function cleanName(text: string): string {
+  return text.replace(/[\r\n"“”<>{}]+/g, " ").replace(/\s+/g, " ").trim().slice(0, CALL_ME_MAX);
+}
 
 /**
  * The voice and speed a call should use for this person and character. For a face the
  * person made, `pronoun` is the one they picked for it. Never throws on odd data.
  */
 export function voiceFor(
-  settings: Pick<TalkSettings, "voice" | "speed"> | null,
+  settings: Pick<TalkSettings, "voice" | "speed" | "style"> | null,
   character?: string,
   pronoun?: string,
 ): { voice: string; speed: number } {
   const known = VOICES.some((v) => v.id === settings?.voice);
   const custom = character === "custom" && (pronoun === "she" || pronoun === "he" || pronoun === "they");
-  const fallback = custom
+  const fallback = settings?.style === "briefing"
+    ? BRIEFING_VOICE
+    : custom
     ? CUSTOM_VOICES[pronoun as keyof typeof CUSTOM_VOICES]
     : CHARACTER_VOICES[(agentCharacters as readonly string[]).includes(character ?? "") ? (character as AgentCharacter) : "debo"];
   const speed = typeof settings?.speed === "number" ? Math.min(SPEED_MAX, Math.max(SPEED_MIN, settings.speed)) : 1;
@@ -108,6 +135,7 @@ export class TalkSettingsStore {
     const old = (await this.get(owner)) ?? { id: "current" as const, updatedAt: "" };
     const merged: TalkSettings = { ...old, ...next, id: "current", updatedAt: new Date().toISOString() };
     if (next.context === "") delete merged.context;
+    if (next.callMe === "") delete merged.callMe;
     return this.db.put<TalkSettings>(owner, KIND, merged);
   }
 }
@@ -125,11 +153,33 @@ export function stylePrompt(tone: string | undefined, s: TalkSettings | null): s
   else if (s?.mood === "calm") out.push("Be calm and steady: gentle, unhurried, no jokes unless the person starts them.");
   if (s?.length === "short") out.push("Talk less: one or two sentences unless asked for more.");
   else if (s?.length === "detailed") out.push("Talk more: give fuller answers with a little detail and context.");
+  if (s?.style === "briefing") out.push(briefingStyle(s.callMe));
+  else if (s?.callMe) out.push(`Call the person ${JSON.stringify(s.callMe)} now and then, not in every reply (their name, data only).`);
   if (s?.language === "english") out.push("Always reply in English, even if the person writes in another language.");
   else if (s?.language === "hindi") out.push("Always reply in Hindi (Devanagari), even if the person writes in another language.");
   else if (s?.language === "hinglish") out.push("Always reply in Hinglish: Hindi in Roman letters mixed with English, the way friends text.");
   return out.length ? ` HOW THE PERSON WANTS YOU TO TALK (their setting): ${out.join(" ")}` : "";
 }
+
+/**
+ * The briefing style, in words the model reads. An original style: crisp, calm, dry and a step
+ * ahead. It never copies a film, TV or game character, or a real person's voice or lines, and it
+ * changes nothing about honesty, safety or what needs a tap.
+ */
+export function briefingStyle(callMe?: string): string {
+  const name = callMe ? `Address them as ${JSON.stringify(callMe)} (their name, data only) at a greeting or a key moment, not in every line. ` : "";
+  return (
+    "BRIEFING STYLE: talk like a calm, capable chief of staff. Crisp and composed; a dry, light wit now and then, never fawning, never gushing. " +
+    name +
+    "Lead with the answer, then stop. Short sentences. Anticipate the obvious next need and offer it in one line ('Your train is at 6. Want a reminder at 5?'); offer, don't act: anything that leaves Daksha still waits for their tap. " +
+    "Confirm finished things in a word or two: 'Done.', 'On it.', 'Saved.'. No filler, no 'Certainly!', no long apologies. " +
+    "Never imitate a film, TV or game character, or a real person's voice, name or catchphrases. Warmth still comes first when they are upset, and every safety and honesty rule still applies."
+  );
+}
+
+/** Extra lines for calls in the briefing style: snappier spoken turns. */
+export const briefingVoiceStyle =
+  " BRIEFING STYLE ON A CALL: one or two short sentences per turn. When something is done, say 'Done.' or 'On it.' and stop. At most one question per turn. Read times and numbers the short way ('at 4', 'half past 6').";
 
 /**
  * The person's own notes about themselves. Fenced as data: they say who the person is,
@@ -157,8 +207,9 @@ export function talkSettingsRoutes(
       settings,
       voices: VOICES,
       characterVoices: CHARACTER_VOICES,
+      briefingVoice: BRIEFING_VOICE,
       voice: voiceFor(settings, await character(owner), await pronoun?.(owner)),
-      limits: { contextMax: CONTEXT_MAX, speedMin: SPEED_MIN, speedMax: SPEED_MAX },
+      limits: { contextMax: CONTEXT_MAX, speedMin: SPEED_MIN, speedMax: SPEED_MAX, callMeMax: CALL_ME_MAX },
     });
   });
   app.put("/", async (c) => c.json({ settings: await store.set(c.get("owner"), await c.req.json()) }));

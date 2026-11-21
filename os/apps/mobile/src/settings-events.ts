@@ -3,7 +3,7 @@
 // its values again, so what the person sees always matches what is saved.
 import { useEffect, useRef } from "react";
 
-export type SettingsKind = "talk-settings" | "identity" | "reminders";
+export type SettingsKind = "talk-settings" | "identity" | "reminders" | "news-topics";
 
 const listeners = new Set<(kind: SettingsKind) => void>();
 

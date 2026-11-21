@@ -5,7 +5,7 @@
 //                        as a push to devices where the person turned that on.
 //   companion-settings   One row per person: birthday and special-day reminders (on unless the
 //                        person turns them off), the morning check-in (off unless turned on) and
-//                        its time.
+//                        its time, and the morning briefing (off unless turned on) and its time.
 //
 // Both are the person's own rows in the records table: exported and deleted with the account.
 // Nothing is sent between 22:00 and 07:00 in the person's own time zone.
@@ -57,6 +57,13 @@ export interface CompanionSettings {
   checkin: boolean;
   /** "HH:MM", local time. */
   checkinAt: string;
+  /**
+   * The spoken-style morning briefing (decision 37): reminders, calendar, tasks and news on topics
+   * the person follows. Off unless the person turns it on. Missing on rows written before it.
+   */
+  briefing?: boolean;
+  /** "HH:MM", local time. */
+  briefingAt?: string;
   updatedAt?: string;
 }
 
@@ -65,6 +72,8 @@ export const DEFAULT_SETTINGS: CompanionSettings = {
   specialDays: true,
   checkin: false,
   checkinAt: "08:00",
+  briefing: false,
+  briefingAt: "07:30",
 };
 
 const clock = z
@@ -77,6 +86,8 @@ export const settingsInput = z
     specialDays: z.boolean(),
     checkin: z.boolean(),
     checkinAt: clock.refine((value) => !quiet(minutesOf(value)), "Pick a time between 07:00 and 22:00."),
+    briefing: z.boolean(),
+    briefingAt: clock.refine((value) => !quiet(minutesOf(value)), "Pick a time between 07:00 and 22:00."),
   })
   .partial();
 

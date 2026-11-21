@@ -91,14 +91,7 @@ Type size `hero` is 40px (Home's title); screen titles are 34px. Radius: field 1
 
 ## News on Home
 
-`NewsSection` (`src/news.tsx`) is already on Home. It shows nothing until Daksha's server answers `GET /api/news?limit=n` (signed in, Bearer token) with:
-
-```json
-{ "items": [{ "id": "…", "title": "…", "summary": "…", "source": "…", "url": "https://…", "publishedAt": "2026-11-21T08:00:00Z", "reason": "optional", "imageUrl": "optional" }] }
-```
-
-- A 404 or 501 means "not built yet" and shows nothing. An empty list shows nothing. A wrong shape or another error shows one quiet line.
-- The shape and the parser (`readNews`) are in `src/news-data.ts`. Pass `limit` as a prop to show more or fewer.
+Home shows `NewsSection` from `src/news-section.tsx`, the news feed built in decision 37. It asks `GET /api/news?limit=6` and shows the stories from the topics the person follows. Its "Topics" link opens the talk settings sheet, where the "Topics I follow" card lives. With no topics yet, it invites the person to pick some. The data shapes are in `src/news-data.ts`.
 
 ## Taking the pictures again
 
@@ -121,4 +114,4 @@ node scripts/ui-genie-shots.mjs ~/tmp/genie after
 - Live answers with source chips (the demo has no model).
 - A live Talk call and the listening wave (needs LiveKit and a microphone).
 - Speak-to-type in the chat against a real server.
-- The news slot with real news.
+- The news feed with real stories from GDELT and Hacker News.

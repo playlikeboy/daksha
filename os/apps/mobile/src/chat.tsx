@@ -194,7 +194,13 @@ export function WorkspaceTools() {
       render: ({ result, status }) => <CustomPersonToolCard name={name} result={result} loading={status !== "complete"} />,
     });
   // Settings changed by asking, and a button that opens a screen (settings-tool-card.tsx).
-  for (const name of ["update_talk_settings", "update_identity", "update_reminders"] as const)
+  for (const name of [
+    "update_talk_settings",
+    "update_identity",
+    "update_reminders",
+    "follow_topic",
+    "unfollow_topic",
+  ] as const)
     useRenderTool({
       name,
       description: "Show a setting Daksha changed",

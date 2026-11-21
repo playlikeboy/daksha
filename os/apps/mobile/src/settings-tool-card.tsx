@@ -15,7 +15,7 @@ import { useWorkspace } from "./workspace";
 
 const Saved = z.object({
   status: z.literal("saved"),
-  kind: z.enum(["talk-settings", "identity", "reminders"]),
+  kind: z.enum(["talk-settings", "identity", "reminders", "news-topics"]),
   changed: z.array(z.string()).default([]),
   screen: z.string().optional(),
 });
