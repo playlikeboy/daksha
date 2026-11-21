@@ -67,6 +67,21 @@ const textPairs: Pair[] = [
   ["text", "brandSoft"],
   ["muted", "yellow"],
   ["muted", "pink"],
+  // The pastel system: words on Daksha blue, on the soft blue bubble and on every tile pastel.
+  ["onNav", "nav"],
+  ["text", "navSoft"],
+  ["muted", "navSoft"],
+  ["blueText", "canvas"],
+  ["blueText", "navSoft"],
+  ["blueText", "subtle"],
+  ["text", "sky"],
+  ["muted", "sky"],
+  ["text", "mint"],
+  ["muted", "mint"],
+  ["text", "lime"],
+  ["onInk", "ink"],
+  ["onStop", "stop"],
+  ["success", "mint"],
 ];
 
 // Icons and component edges: WCAG 1.4.11 needs 3:1.
@@ -85,6 +100,18 @@ const nonTextPairs: Pair[] = [
   ["inputBorder", "canvas"],
   ["brandText", "subtle"],
   ["text", "subtle"],
+  // The filled active tab and the send button against the page and white.
+  ["nav", "canvas"],
+  ["nav", "card"],
+  ["onNav", "nav"],
+  // Icons on every tile pastel and on the lime voice button.
+  ["text", "lavender"],
+  ["text", "pink"],
+  ["text", "orange"],
+  ["text", "yellow"],
+  ["text", "lime"],
+  // The focus ring (Daksha blue) on the page, white and the quiet fill.
+  ["nav", "subtle"],
 ];
 
 for (const [fg, bg] of textPairs) {

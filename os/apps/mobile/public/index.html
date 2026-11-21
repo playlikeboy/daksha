@@ -12,13 +12,13 @@
       }
     </script>
     <meta httpEquiv="X-UA-Compatible" content="IE=edge" />
-    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no, viewport-fit=cover, interactive-widget=resizes-content" />
     <title>%WEB_TITLE%</title>
     <meta name="description" content="A friendly assistant that remembers your life. Ask about your own life and see where every answer came from." />
 
     <!-- Install as an app. The manifest makes Chrome open Daksha in its own window, with no address bar. -->
     <link rel="manifest" href="/manifest.webmanifest" />
-    <meta name="theme-color" content="#FBF6EF" />
+    <meta name="theme-color" content="#F3F5FA" />
     <meta name="application-name" content="Daksha" />
     <meta name="mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
@@ -160,18 +160,18 @@
       }
     </style>
     <!-- Daksha's own browser details (DESIGN.md, accessibility floor). Colours are the brand
-         tokens in src/brand-tokens.ts: ink #221B16, paper #FBF6EF, tomato wash #FDE3DC. -->
+         tokens in src/brand-tokens.ts: ink #161A2B, mist #F3F5FA, Daksha blue #3451D1, blue wash #E2E8FF. -->
     <style id="debo-base">
       html,
       body {
-        background: #fbf6ef;
-        color: #221b16;
+        background: #f3f5fa;
+        color: #161a2b;
         -webkit-font-smoothing: antialiased;
         -moz-osx-font-smoothing: grayscale;
       }
       /* A clear ring on whatever the keyboard is on, and none for mouse or touch. */
       :focus-visible {
-        outline: 3px solid #221b16;
+        outline: 3px solid #3451d1;
         outline-offset: 3px;
       }
       :focus:not(:focus-visible) {
@@ -180,19 +180,19 @@
       /* A text field shows the ring whenever it has the caret, however it was reached. */
       input:focus,
       textarea:focus {
-        outline: 3px solid #221b16;
+        outline: 3px solid #3451d1;
         outline-offset: 2px;
       }
       input,
       textarea {
-        caret-color: #b8281c;
+        caret-color: #3451d1;
       }
       ::selection {
-        background: #fde3dc;
-        color: #221b16;
+        background: #e2e8ff;
+        color: #161a2b;
       }
       * {
-        scrollbar-color: #d4c5b2 transparent;
+        scrollbar-color: #cdd2e0 transparent;
       }
       /* Reduce motion: stop CSS transitions and animations too, not only the drawn ones. */
       @media (prefers-reduced-motion: reduce) {
