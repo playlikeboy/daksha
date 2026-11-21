@@ -39,6 +39,7 @@ import type {
 import { useAgentWorkspace } from "./agent-workspace";
 import { ConnectAppsSection } from "./connectors-ui";
 import { ToolServersSection } from "./mcp-ui";
+import { SkillsSection } from "./skills-ui";
 import { deboCharacter } from "./debo-character-store";
 import { type CustomAvatar, useCustomAvatars } from "./debo-custom-avatars";
 import { type PickPlan, planPick, planRename } from "./debo-character-pick";
@@ -1893,6 +1894,7 @@ export function AppsScreen() {
       />
       <ConnectionsScreen query={query} />
       <ConnectAppsSection query={query} />
+      <SkillsSection query={query} />
       <ToolServersSection />
       <Text style={s.heading}>More from Daksha</Text>
       <Card style={{ paddingVertical: spacing[1], backgroundColor: colors.subtle }}>
