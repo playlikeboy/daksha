@@ -38,8 +38,8 @@ export { colors };
 export { fontSize, shadow, sizeElement, spacing, textStyle, typeSize, brandShadow };
 
 /**
- * Corner radii. Astryx's scale, with Daksha's softer field (14) and card (20) corners from
- * the landing page. `full` is a pill or circle.
+ * Corner radii. Astryx's scale, with Daksha's generous field (18), card (28) and sheet (32)
+ * corners. `full` is a pill or circle.
  */
 export const radius = {
   ...astryxRadius,
@@ -62,7 +62,7 @@ export const headingFamily = fontFace.heading;
 export const bodyText = { fontSize: typeSize.md, fontWeight: "400", lineHeight: spacing[6] } as const;
 
 /** The only sizes the character is drawn at, so it is the same size wherever it shows. */
-export const avatarSize = { sm: 36, md: 48, lg: 64, xl: 96 } as const;
+export const avatarSize = { sm: 36, md: 48, lg: 64, xl: 96, hero: 120 } as const;
 
 /** One gap between blocks on a screen, and one side padding for phone and desktop. */
 export const screenGap = spacing[5];
@@ -79,10 +79,10 @@ export const s = StyleSheet.create({
   pageTitle: {
     ...headingFace,
     color: colors.text,
-    fontSize: typeSize["2xl"],
-    lineHeight: spacing[8] + spacing[1],
+    fontSize: typeSize["3xl"],
+    lineHeight: spacing[10],
     fontWeight: "800",
-    letterSpacing: -0.6,
+    letterSpacing: -0.9,
   },
   /** Sheet titles and large card titles. */
   title: {
@@ -137,7 +137,7 @@ export const s = StyleSheet.create({
     borderRadius: radius.full,
   },
   primary: { backgroundColor: colors.accent, boxShadow: brandShadow.card },
-  // White on the warm page, with a soft edge, so a quiet button reads as a button anywhere.
+  // White on the mist page, with a soft edge, so a quiet button reads as a button anywhere.
   secondary: { backgroundColor: colors.card, borderWidth, borderColor: colors.lineStrong },
   buttonText: { ...face, fontSize: typeSize.md, lineHeight: spacing[5], fontWeight: "600" },
   chip: {
@@ -151,7 +151,7 @@ export const s = StyleSheet.create({
   iconBox: {
     width: spacing[11],
     height: spacing[11],
-    borderRadius: radius.container,
+    borderRadius: radius.full,
     justifyContent: "center",
     alignItems: "center",
     backgroundColor: colors.subtle,
@@ -274,30 +274,46 @@ export function IconButton({
   label,
   onPress,
   quiet,
+  filled,
+  expanded,
 }: {
   icon: LucideIcon;
   label: string;
   onPress: () => void;
-  /** No fill until pressed, for buttons on a see-through bar. */
+  /** No fill until pressed, for a button inside a card or a field. */
   quiet?: boolean;
+  /** Daksha blue with a white icon: the one round button that matters most here. */
+  filled?: boolean;
+  /** For a button that opens and closes a panel. */
+  expanded?: boolean;
 }) {
   return (
     <Pressable
       accessibilityRole="button"
       accessibilityLabel={label}
+      accessibilityState={expanded === undefined ? undefined : { expanded }}
       onPress={onPress}
-      style={({ pressed }) => [
+      style={({ pressed, hovered }: { pressed: boolean; hovered?: boolean }) => [
         {
           width: spacing[11],
           height: spacing[11],
           alignItems: "center",
           justifyContent: "center",
           borderRadius: radius.full,
-          backgroundColor: pressed ? colors.line : quiet ? "transparent" : colors.card,
+          backgroundColor: filled
+            ? colors.nav
+            : pressed || expanded
+              ? colors.navSoft
+              : quiet
+                ? hovered
+                  ? colors.subtle
+                  : "transparent"
+                : colors.card,
+          boxShadow: filled ? brandShadow.button : quiet ? undefined : brandShadow.card,
         },
       ]}
     >
-      <Icon size={20} strokeWidth={1.8} color={colors.text} />
+      <Icon size={20} strokeWidth={1.9} color={filled ? colors.onNav : colors.text} />
     </Pressable>
   );
 }
@@ -339,7 +355,7 @@ export function Segmented<T extends string>({
         gap: spacing[1],
         // Still a pill on one line; a soft panel when the choices wrap on a narrow phone.
         borderRadius: radius.page,
-        backgroundColor: colors.line,
+        backgroundColor: colors.subtle,
       }}
     >
       {options.map((option) => {
@@ -420,12 +436,12 @@ export function Empty({
             width: spacing[12] + spacing[4],
             height: spacing[12] + spacing[4],
             borderRadius: radius.full,
-            backgroundColor: colors.brandSoft,
+            backgroundColor: colors.navSoft,
             marginBottom: spacing[1],
           },
         ]}
       >
-        <Icon size={26} strokeWidth={1.8} color={colors.brandText} />
+        <Icon size={26} strokeWidth={1.8} color={colors.nav} />
       </View>
       <Text accessibilityRole="header" style={[s.title, { textAlign: "center" }]}>{title}</Text>
       <Text style={[s.muted, { textAlign: "center", maxWidth: 360 }]}>{detail}</Text>
@@ -611,8 +627,7 @@ export function Sheet({
               s.between,
               {
                 padding: compact ? spacing[5] : spacing[6],
-                borderBottomWidth: borderWidth,
-                borderBottomColor: colors.line,
+                paddingBottom: compact ? spacing[3] : spacing[4],
               },
             ]}
           >
@@ -624,7 +639,11 @@ export function Sheet({
           </View>
           <ScrollView
             keyboardShouldPersistTaps="handled"
-            contentContainerStyle={{ padding: compact ? spacing[5] : spacing[6] }}
+            contentContainerStyle={{
+              paddingHorizontal: compact ? spacing[5] : spacing[6],
+              paddingTop: spacing[1],
+              paddingBottom: compact ? spacing[5] : spacing[6],
+            }}
           >
             {children}
           </ScrollView>
@@ -711,8 +730,14 @@ export function LinkRow({
       onPress={onPress}
       style={({ pressed }) => [
         s.row,
-        { paddingVertical: spacing[3], gap: spacing[3], borderRadius: radius.element },
-        pressed && { backgroundColor: colors.canvas },
+        {
+          paddingVertical: spacing[2],
+          paddingHorizontal: spacing[2],
+          marginHorizontal: -spacing[2],
+          gap: spacing[3],
+          borderRadius: radius.container,
+        },
+        pressed && { backgroundColor: colors.subtle },
       ]}
     >
       <View style={[s.iconBox, { backgroundColor: tint || colors.subtle }]}>
