@@ -32,7 +32,8 @@ import { hasAgreedToTalk, rememberAgreedToTalk, takeTalkAutoStart } from "./debo
 import { TalkApprovals } from "./debo-talk-approvals";
 import { deboLevels, deboMood } from "./debo-mood-store";
 import { spokenStatus, stateWords, type TalkLine, useTalkCall, useTalkState } from "./debo-talk-session";
-import { Button, Card, Chip, colors, ErrorNotice, Field, fontSize, radius, s, spacing } from "./ui";
+import { Backdrop } from "./genie";
+import { brandShadow, Button, Card, Chip, colors, ErrorNotice, Field, fontSize, IconButton, radius, s, spacing } from "./ui";
 import { useWorkspace } from "./workspace";
 
 export function TalkPopup({ onClose }: { onClose: () => void }) {
@@ -265,46 +266,46 @@ export function TalkPopup({ onClose }: { onClose: () => void }) {
             transform: [{ translateY: slide }],
           }}
         >
+          <Backdrop />
           <View style={{ flex: 1, width: "100%", maxWidth: 560, paddingHorizontal: spacing[5] }}>
             {/* Top: grab handle, and the transcript button. */}
             <View style={[s.between, { minHeight: spacing[11] }]}>
-              <Pressable
-                accessibilityRole="button"
-                accessibilityLabel={
+              <IconButton
+                icon={ChevronDown}
+                label={
                   active
                     ? "Minimise. The conversation keeps going and the microphone stays as it is."
                     : "Close"
                 }
                 onPress={requestClose}
-                style={{ width: spacing[11], height: spacing[11], alignItems: "center", justifyContent: "center" }}
-              >
-                <ChevronDown size={24} color={colors.muted} strokeWidth={1.8} />
-              </Pressable>
-              <View
-                style={{ width: 40, height: 4, borderRadius: radius.full, backgroundColor: colors.lineStrong }}
               />
-              <Pressable
-                accessibilityRole="button"
-                accessibilityLabel={`How ${assistant} talks: voice, personality and notes`}
-                onPress={() => open({ type: "talk-settings" })}
-                style={{ width: spacing[11], height: spacing[11], alignItems: "center", justifyContent: "center" }}
-              >
-                <SlidersHorizontal size={22} color={colors.muted} strokeWidth={1.8} />
-              </Pressable>
-              {live || shown.length > 0 ? (
+              <Text style={[s.heading, { flex: 1, textAlign: "center" }]} numberOfLines={1}>
+                {assistant}
+              </Text>
+              {(live || shown.length > 0) && (
                 <Pressable
                   accessibilityRole="button"
                   accessibilityState={{ expanded: transcript }}
                   onPress={() => setTranscript(!transcript)}
-                  style={{ minHeight: spacing[11], justifyContent: "center", paddingHorizontal: spacing[2] }}
+                  style={({ pressed }) => ({
+                    minHeight: spacing[11],
+                    justifyContent: "center",
+                    paddingHorizontal: spacing[4],
+                    borderRadius: radius.full,
+                    backgroundColor: pressed ? colors.navSoft : colors.card,
+                    boxShadow: brandShadow.card,
+                  })}
                 >
-                  <Text style={[s.small, { color: colors.blueDark, fontWeight: "600" }]}>
+                  <Text style={[s.small, { color: colors.text, fontWeight: "600" }]}>
                     {transcript ? "Hide transcript" : "Show transcript"}
                   </Text>
                 </Pressable>
-              ) : (
-                <View style={{ width: spacing[11] }} />
               )}
+              <IconButton
+                icon={SlidersHorizontal}
+                label={`How ${assistant} talks: voice, personality and notes`}
+                onPress={() => open({ type: "talk-settings" })}
+              />
             </View>
 
             {/* The orb: Daksha, a halo that follows her voice, and a ring that follows yours. */}
@@ -329,7 +330,7 @@ export function TalkPopup({ onClose }: { onClose: () => void }) {
                     width: orb,
                     height: orb,
                     borderRadius: radius.full,
-                    backgroundColor: colors.blue,
+                    backgroundColor: colors.glowSky,
                     opacity: agentState === "speaking" ? 0.9 : 0.55,
                     transform: [{ scale: reduceMotion ? 1.1 : haloScale }],
                   }}
@@ -342,7 +343,7 @@ export function TalkPopup({ onClose }: { onClose: () => void }) {
                     height: orb * 1.08,
                     borderRadius: radius.full,
                     borderWidth: 2,
-                    borderColor: colors.blueDark,
+                    borderColor: colors.nav,
                     opacity: listening && youActive ? 0.45 : 0,
                     transform: [{ scale: reduceMotion ? 1.12 : ringScale }],
                   }}
@@ -359,7 +360,11 @@ export function TalkPopup({ onClose }: { onClose: () => void }) {
                 accessibilityLabel={spoken}
                 style={{ alignItems: "center", gap: spacing[2] }}
               >
-                <Text style={[s.title, { textAlign: "center" }]}>{words}</Text>
+                {listening ? (
+                  <ListeningWave words={words} still={reduceMotion} />
+                ) : (
+                  <Text style={[s.title, { textAlign: "center" }]}>{words}</Text>
+                )}
                 <View style={[s.row, { gap: spacing[1.5] }]} importantForAccessibility="no-hide-descendants" accessibilityElementsHidden>
                   {listening ? (
                     <Mic size={14} color={colors.blueDark} />
@@ -611,7 +616,7 @@ function RoundButton({
   checked?: boolean;
   expanded?: boolean;
 }) {
-  const tint = danger ? colors.onStop : colors.text;
+  const tint = danger ? colors.onStop : checked ? colors.onInk : colors.text;
   return (
     <View style={{ alignItems: "center", gap: spacing[1.5], width: 72, opacity: disabled ? 0.45 : 1 }}>
       <Pressable
@@ -626,7 +631,9 @@ function RoundButton({
           borderRadius: radius.full,
           alignItems: "center",
           justifyContent: "center",
-          backgroundColor: danger ? colors.stop : checked || expanded ? colors.blue : colors.subtle,
+          // A switched-on microphone is the big dark circle; the rest are white glass.
+          backgroundColor: danger ? colors.stop : checked ? colors.ink : expanded ? colors.navSoft : colors.card,
+          boxShadow: brandShadow.float,
           transform: [{ scale: pressed ? 0.94 : 1 }],
         })}
       >
@@ -637,6 +644,54 @@ function RoundButton({
         />
       </Pressable>
       <Text style={[s.small, { color: colors.text, textAlign: "center" }]}>{caption}</Text>
+    </View>
+  );
+}
+
+/**
+ * "Listening": the state words in a soft pill, with a lime wave on each side that moves
+ * with the person's voice. With reduce motion on, the wave holds still.
+ */
+function ListeningWave({ words, still }: { words: string; still: boolean }) {
+  const bars = [0.35, 0.6, 0.9, 0.55, 1, 0.7, 0.4];
+  const side = (flip: boolean) => (
+    <View
+      style={[s.row, { gap: spacing[1], height: spacing[12] }]}
+      importantForAccessibility="no-hide-descendants"
+      accessibilityElementsHidden
+    >
+      {(flip ? [...bars].reverse() : bars).map((weight, i) => (
+        <Animated.View
+          key={i}
+          style={{
+            width: spacing[1.5],
+            height: spacing[12] * weight,
+            borderRadius: radius.full,
+            backgroundColor: colors.lime,
+            borderWidth: 1,
+            borderColor: colors.card,
+            transform: still ? [] : [{ scaleY: deboLevels.you.interpolate({ inputRange: [0, 1], outputRange: [0.35, 1.1] }) }],
+          }}
+        />
+      ))}
+    </View>
+  );
+  return (
+    <View style={[s.row, { gap: spacing[2], justifyContent: "center" }]}>
+      {side(false)}
+      <View
+        style={{
+          paddingHorizontal: spacing[5],
+          minHeight: spacing[11],
+          justifyContent: "center",
+          borderRadius: radius.full,
+          backgroundColor: colors.card,
+          boxShadow: brandShadow.card,
+        }}
+      >
+        <Text style={[s.text, { fontWeight: "600" }]}>{words}</Text>
+      </View>
+      {side(true)}
     </View>
   );
 }

@@ -7,13 +7,14 @@ import type { ReactNode } from "react";
 import { ScrollView, useWindowDimensions, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Text } from "./text";
+import { Backdrop, Glass } from "./genie";
 import { avatarSize, colors, Mascot, radius, s, spacing, typeSize } from "./ui";
 
 /** Only what the app really does today (AGENTS.md: be honest about it). */
-const points: { icon: LucideIcon; text: string }[] = [
-  { icon: BookOpen, text: "Write or talk about your day." },
-  { icon: MessageCircle, text: "Ask about your own life, and see where each answer came from." },
-  { icon: Check, text: "See, fix or forget anything Daksha knows." },
+const points: { icon: LucideIcon; text: string; tint: string }[] = [
+  { icon: BookOpen, text: "Write or talk about your day.", tint: colors.yellow },
+  { icon: MessageCircle, text: "Ask about your own life, and see where each answer came from.", tint: colors.sky },
+  { icon: Check, text: "See, fix or forget anything Daksha knows.", tint: colors.mint },
 ];
 
 export function WelcomeFrame({ subtitle, children }: { subtitle: string; children: ReactNode }) {
@@ -62,6 +63,7 @@ export function WelcomeFrame({ subtitle, children }: { subtitle: string; childre
   );
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: colors.canvas }}>
+      <Backdrop />
       <ScrollView
         keyboardShouldPersistTaps="handled"
         contentContainerStyle={{
@@ -73,10 +75,9 @@ export function WelcomeFrame({ subtitle, children }: { subtitle: string; childre
       >
         {wide ? (
           <View style={{ width: "100%", maxWidth: 1040, flexDirection: "row", gap: spacing[10], alignItems: "stretch" }}>
-            <View
+            <Glass
               style={{
                 flex: 1,
-                backgroundColor: colors.subtle,
                 borderRadius: radius.sheet,
                 padding: spacing[12],
                 justifyContent: "center",
@@ -85,25 +86,25 @@ export function WelcomeFrame({ subtitle, children }: { subtitle: string; childre
             >
               {hello}
               <View style={{ gap: spacing[4] }}>
-                {points.map(({ icon: Icon, text }) => (
+                {points.map(({ icon: Icon, text, tint }) => (
                   <View key={text} style={[s.row, { gap: spacing[3] }]}>
                     <View
                       style={{
-                        width: spacing[9],
-                        height: spacing[9],
+                        width: spacing[10],
+                        height: spacing[10],
                         borderRadius: radius.full,
-                        backgroundColor: colors.card,
+                        backgroundColor: tint,
                         alignItems: "center",
                         justifyContent: "center",
                       }}
                     >
-                      <Icon size={18} strokeWidth={2} color={colors.brandText} />
+                      <Icon size={18} strokeWidth={2} color={colors.text} />
                     </View>
                     <Text style={[s.text, { flex: 1, fontWeight: "500" }]}>{text}</Text>
                   </View>
                 ))}
               </View>
-            </View>
+            </Glass>
             <View style={{ width: 420, justifyContent: "center", gap: spacing[5] }}>
               {children}
               {privacy}
