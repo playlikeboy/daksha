@@ -1,0 +1,22 @@
+// Anaya, the young woman: her own paint (see debo-paint-diya.ts for why raw colours live here).
+export const anayaPaint = {
+  skin: "#eab088",
+  skinShade: "#d4936b",
+  hair: "#2b1b17",
+  kurta: "#2f9a8c",
+  trim: "#fff0d6",
+  lip: "#a8404c",
+  iris: "#3b2218",
+  lash: "#1f130f",
+  highlight: "#ffffff",
+  blush: "#ff8a80",
+  mouthInside: "#6e1f2c",
+  tongue: "#f07a86",
+  petal: "#ffb703",
+  petalCentre: "#e85d04",
+  sweat: "#8ed0ff",
+  steam: "#ffc2ba",
+  spark: "#ffd23f",
+  dots: "#1f130f",
+  shadow: "#1f130f",
+} as const;
