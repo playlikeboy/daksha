@@ -20,3 +20,5 @@ The list of suggested tool servers in the app (`os/apps/mobile/src/mcp-suggestio
 - `unreal-engine`: a server on the person's own computer over plain http.
 - `asana`: its sign-in needs a client id and secret registered by hand.
 - `paypal`, `square`: they only speak the older SSE way, which Daksha does not support yet.
+- `robinhood`: it places stock trades. Too risky to suggest to everyone, even with a yes for each change.
+- `rentahuman`: it hires and pays real people. Same reason.

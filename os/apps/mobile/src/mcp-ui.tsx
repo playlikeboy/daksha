@@ -21,6 +21,7 @@ import {
   startToolServerSignIn,
   type ToolServer,
 } from "./mcp-data";
+import { suggestToolServers, type ToolServerSuggestion } from "./mcp-suggestions";
 import { dropSignInWindow, openSignInPage, reserveSignInWindow } from "./open-connect-link";
 import { Button, Card, CheckRow, Chip, colors, ErrorNotice, Field, relativeDate, s, Skeleton, spacing } from "./ui";
 import { useWorkspace } from "./workspace";
@@ -359,6 +360,12 @@ export function ToolServersSection() {
               every change waits for your yes.
             </Text>
           </View>
+          <SuggestedServers
+            query={form.name}
+            onPick={(pick) =>
+              setForm({ ...emptyForm, name: pick.name, url: pick.url, signIn: pick.auth === "sign-in" })
+            }
+          />
           <Field
             label="Name"
             value={form.name}
@@ -512,5 +519,31 @@ function ComposioCard(props: {
         </View>
       )}
     </Card>
+  );
+}
+
+/**
+ * Known tool servers (from Hermes Agent's list) that fill in the form when picked. Typing in the
+ * Name box narrows the list. Picking one only fills the form; the warning above still applies.
+ */
+function SuggestedServers({ query, onPick }: { query: string; onPick: (pick: ToolServerSuggestion) => void }) {
+  const picks = suggestToolServers(query, 8);
+  if (!picks.length) return null;
+  return (
+    <View style={{ gap: spacing[2] }} accessibilityLabel="Suggested tool servers">
+      <Text style={s.small}>Known servers. Pick one to fill in its address, or type your own below.</Text>
+      <View style={[s.row, { gap: spacing[2], flexWrap: "wrap" }]}>
+        {picks.map((pick) => (
+          <Button
+            key={pick.id}
+            small
+            accessibilityLabel={`${pick.name}: ${pick.about}${pick.auth === "sign-in" ? " Needs a sign-in." : ""}`}
+            onPress={() => onPick(pick)}
+          >
+            {pick.name}
+          </Button>
+        ))}
+      </View>
+    </View>
   );
 }
