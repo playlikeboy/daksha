@@ -76,6 +76,11 @@ import { WorkspaceService } from "./workspace.ts";
 import { type PhoneConfig, readPhoneConfig } from "./phone/config.ts";
 import { livekitDialer } from "./phone/dialer.ts";
 import { phoneAgentRoutes, phoneRoutes } from "./phone/routes.ts";
+import { composioEventsFromEnv } from "./connectors/composio-events.ts";
+import { proposalRoutes } from "./proposals/routes.ts";
+import { ProposalService } from "./proposals/service.ts";
+import { triggerHookRoutes, triggerRoutes } from "./triggers/routes.ts";
+import { type AppEventSource, TriggerService } from "./triggers/service.ts";
 import { type Dialer, PhoneService } from "./phone/service.ts";
 
 export async function createApp(
@@ -110,6 +115,8 @@ export async function createApp(
     news?: NewsService;
     /** Places phone calls. Tests pass a fake; otherwise LiveKit SIP, only when its trunk is set. */
     phoneDialer?: (config: PhoneConfig) => Dialer;
+    /** Connected-app events for triggers. Defaults to Composio when its key and webhook secret are set. */
+    appEvents?: AppEventSource | null;
   } = {},
 ) {
   await resolveComputerDeployment(config);
@@ -230,6 +237,19 @@ export async function createApp(
     });
   linked.voiceCopy = voiceCopy;
   const threads = new ThreadStore(db);
+  // Schedules, signed webhooks and app events that start a background run (triggers/store.ts).
+  const appEvents = options.appEvents === null ? undefined : (options.appEvents ?? composioEventsFromEnv(process.env));
+  const triggers = new TriggerService({
+    db,
+    createTask: (owner, input, key) => agent.createTask(owner, input, key),
+    hookKey: auth.purposeKey("trigger-webhook"),
+    publicUrl: config.publicUrl,
+    ...(appEvents ? { apps: appEvents } : {}),
+  });
+  agent.triggers = triggers;
+  // Lines worth remembering and skill drafts, saved only when the person says yes (decision 38).
+  const proposals = new ProposalService(db, threads);
+  agent.proposals = proposals;
   const timeZones = new TimeZoneStore(db);
   const runner = new DatabaseAgentRunner(threads);
   const runtime = makeRuntime(config, agent, auth, runner);
@@ -367,6 +387,8 @@ export async function createApp(
   );
   // Phone calls: the voice agent checks the caller's code or PIN here. A caller has no session.
   app.route("/api/voice/phone", phoneAgentRoutes(phone, options.voiceEnv));
+  // Signed webhooks that start triggers: before sign-in, each checks its own signature.
+  app.route("/api/hooks", triggerHookRoutes(triggers));
   // Deleting a call also deletes its copy in Chat (same words, same person).
   debo.onCallDeleted = (owner, callId) => threads.remove(owner, `voice-${callId}`);
   // Sample mode only: the in-memory stand-in for the recordings bucket. Its links carry their own one-time token.
@@ -422,6 +444,8 @@ export async function createApp(
       },
     ));
   app.route("/api/phone", phoneRoutes(phone));
+  app.route("/api/triggers", triggerRoutes(triggers));
+  app.route("/api/proposals", proposalRoutes(proposals));
   app.route("/api/persona", personaRoutes(new PersonaStore(db)));
   // /api/custom-people: the people themselves (custom-people/routes.ts) and, on the same prefix,
   // their voice notes, calls and voice copy (voice-clone/routes.ts, only /:id/audio* and

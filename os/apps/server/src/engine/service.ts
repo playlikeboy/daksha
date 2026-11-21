@@ -38,6 +38,8 @@ import type { ImageService } from "../images/service.ts";
 import type { CustomPeopleService } from "../custom-people/index.ts";
 import type { OwnKeysService } from "../own-keys/service.ts";
 import type { NewsService } from "../news/service.ts";
+import type { ProposalService } from "../proposals/service.ts";
+import type { TriggerService } from "../triggers/service.ts";
 import type { DeboService } from "../debo/service.ts";
 import type { WorkspaceService } from "../workspace.ts";
 import { assistantNameOf, BRAND } from "./brand.ts";
@@ -76,6 +78,10 @@ export class AgentService {
   customPeople?: CustomPeopleService;
   /** The news feed on topics the person follows. Its upkeep works behind the loop. Set by createApp. */
   news?: NewsService;
+  /** Schedules, webhooks and app events that start Daksha. Set by createApp. */
+  triggers?: TriggerService;
+  /** Lines the person said that may be worth remembering, waiting for their yes. Set by createApp. */
+  proposals?: ProposalService;
   readonly worker: TaskWorker;
   readonly search: SearchService;
   private maintenance?: ReturnType<typeof setInterval>;
@@ -118,6 +124,8 @@ export class AgentService {
       await this.customPeople?.sweep().catch((error) => backgroundFailure("custom people upkeep", error));
       // News feeds: a few old ones fetched again. It returns at once and works behind.
       await this.news?.tick().catch((error) => backgroundFailure("news upkeep", error));
+      // Triggers: schedules that are due start their runs; long-deleted ones are forgotten.
+      await this.triggers?.tick().catch((error) => backgroundFailure("trigger upkeep", error));
       // Recover publications if the process exited after committing an outcome.
       for (const { owner, value } of await this.db.scan<AgentTask>("tasks"))
         await this.publishOutcome(owner, value);

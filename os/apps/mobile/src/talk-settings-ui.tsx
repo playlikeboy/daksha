@@ -12,6 +12,7 @@ import { PeopleSetting } from "./debo-people-setting";
 import { RemindersSetting } from "./debo-reminders-setting";
 import { NewsTopicsSetting } from "./news-topics-setting";
 import { PhoneSetting } from "./phone-setting";
+import { SuggestionsSetting, TriggersSetting } from "./triggers-setting";
 import { PersonaSetting } from "./debo-persona-setting";
 import { CustomPeopleSetting } from "./custom-people-ui";
 import { capital, usePronouns, useTalkSettingsName } from "./debo-pronouns";
@@ -318,6 +319,8 @@ export function TalkSettingsSheet() {
         <NewsTopicsSetting />
 
         <PhoneSetting />
+        <TriggersSetting />
+        <SuggestionsSetting />
 
         <Card style={{ gap: spacing[3] }}>
           <SectionHeading title={`What ${name} should always know`} />
