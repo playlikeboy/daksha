@@ -73,6 +73,10 @@ import {
   VoiceCopyService,
 } from "./voice-clone/index.ts";
 import { WorkspaceService } from "./workspace.ts";
+import { type PhoneConfig, readPhoneConfig } from "./phone/config.ts";
+import { livekitDialer } from "./phone/dialer.ts";
+import { phoneAgentRoutes, phoneRoutes } from "./phone/routes.ts";
+import { type Dialer, PhoneService } from "./phone/service.ts";
 
 export async function createApp(
   db: Store,
@@ -104,6 +108,8 @@ export async function createApp(
     voiceCopy?: VoiceCopyService;
     /** The news feed. Tests pass one with a fake network; nothing reaches a real news service. */
     news?: NewsService;
+    /** Places phone calls. Tests pass a fake; otherwise LiveKit SIP, only when its trunk is set. */
+    phoneDialer?: (config: PhoneConfig) => Dialer;
   } = {},
 ) {
   await resolveComputerDeployment(config);
@@ -161,12 +167,21 @@ export async function createApp(
       },
     });
   agent.news = news;
+  // Phone calls to and from the person's own number (docs/PHONE.md). Off without the SIP trunks.
+  const phone = new PhoneService(db, {
+    config: () => readPhoneConfig(options.voiceEnv?.() ?? process.env),
+    tokenKey: auth.purposeKey("phone-call-token"),
+    dialer: options.phoneDialer ?? livekitDialer,
+    ended: (owner) => debo.callEnded(owner),
+  });
   // Reminders, birthdays, the morning check-in and briefing: in-app updates, and a push where it is on.
   const push = options.push ?? new PushService(db, pushKeysFromEnv());
   agent.companion = new CompanionJobs({
     db,
     debo,
     push,
+    // A reminder also rings the person's phone when they turned reminder calls on.
+    call: (owner, title) => phone.reminderCall(owner, title),
     notify: (owner, title, body, key) => agent.notify(owner, title, body, undefined, key),
     briefing: (owner, now) => buildBriefing({ db, news, calendar: calendarFrom(workspace) }, owner, { now }),
   });
@@ -350,6 +365,8 @@ export async function createApp(
       sweep: (owner) => debo.sweepCalls(owner),
     }, (owner) => voiceCopy.callVoice(owner)),
   );
+  // Phone calls: the voice agent checks the caller's code or PIN here. A caller has no session.
+  app.route("/api/voice/phone", phoneAgentRoutes(phone, options.voiceEnv));
   // Deleting a call also deletes its copy in Chat (same words, same person).
   debo.onCallDeleted = (owner, callId) => threads.remove(owner, `voice-${callId}`);
   // Sample mode only: the in-memory stand-in for the recordings bucket. Its links carry their own one-time token.
@@ -404,6 +421,7 @@ export async function createApp(
         return custom ? { ...chosen, voice: custom } : chosen;
       },
     ));
+  app.route("/api/phone", phoneRoutes(phone));
   app.route("/api/persona", personaRoutes(new PersonaStore(db)));
   // /api/custom-people: the people themselves (custom-people/routes.ts) and, on the same prefix,
   // their voice notes, calls and voice copy (voice-clone/routes.ts, only /:id/audio* and
