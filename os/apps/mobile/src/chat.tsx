@@ -7,7 +7,23 @@ import {
   useRenderTool,
   useRenderToolCall,
 } from "@copilotkit/react-native/headless";
-import { ArrowDown, ArrowUp, FileText, Mic, RotateCcw, Square, X } from "lucide-react-native";
+import {
+  ArrowDown,
+  ArrowUp,
+  AudioLines,
+  BellRing,
+  CalendarDays,
+  FileText,
+  ImageIcon,
+  Mic,
+  MicOff,
+  PenLine,
+  Plus,
+  RotateCcw,
+  Sparkles,
+  Square,
+  X,
+} from "lucide-react-native";
 import { useCallback, useEffect, useRef, useState, useSyncExternalStore } from "react";
 import {
   ActivityIndicator,
@@ -16,6 +32,7 @@ import {
   Platform,
   Pressable,
   ScrollView,
+  type TextInput as NativeTextInput,
   type TextStyle,
   View,
 } from "react-native";
@@ -54,7 +71,28 @@ import { FileThreadCard, TaskThreadCard } from "./thread-artifacts";
 import { TypingDots } from "./typing-dots";
 import { type Selection, useFuseThread } from "./threads";
 import { useChrome } from "./chrome";
-import { Button, Card, CheckRow, colors, ErrorNotice, fontSize, radius, s, shadow, Skeleton, spacing } from "./ui";
+import { chatDraft } from "./chat-draft";
+import { deboApi } from "./debo-api";
+import { requestTalkAutoStart } from "./debo-talk-consent";
+import { dictationPromise, useDictation } from "./dictation";
+import { ChipButton, Glass } from "./genie";
+import {
+  avatarSize,
+  brandShadow,
+  Button,
+  Card,
+  CheckRow,
+  colors,
+  ErrorNotice,
+  fontSize,
+  IconButton,
+  Mascot,
+  radius,
+  s,
+  Skeleton,
+  spacing,
+  typeSize,
+} from "./ui";
 import { useWorkspace } from "./workspace";
 
 const displayParameters = z.record(z.string(), z.unknown());
@@ -327,9 +365,10 @@ export function ChatScreen({
 
   useEffect(() => {
     if (Platform.OS !== "android") return;
+    // The floating tabs step aside while the keyboard is up (App.tsx), so the box moves up
+    // by the whole keyboard and sits right on it.
     const onShow = (e: { endCoordinates: { height: number } }) => {
-      const bottomNavHeight = 74;
-      setKeyboardPadding(Math.max(0, e.endCoordinates.height - bottomNavHeight));
+      setKeyboardPadding(Math.max(0, e.endCoordinates.height));
     };
     const onHide = () => setKeyboardPadding(0);
     const showSub = Keyboard.addListener("keyboardDidShow", onShow);
@@ -568,14 +607,80 @@ export function ChatScreen({
   const assistantName = useAssistantName();
   const chrome = useChrome();
   useChatMood({ active, running: replying, messages, error });
+  const empty = listState(loaded, visible.length) === "empty";
+  const { setChatEmpty, setTyping } = chrome;
+  useEffect(() => {
+    if (active) setChatEmpty?.(empty);
+  }, [active, empty, setChatEmpty]);
+  useEffect(() => {
+    if (active) setTyping?.(focused);
+  }, [active, focused, setTyping]);
+  // Back on this chat: start at the newest message.
+  useEffect(() => {
+    if (!active || !visible.length) return;
+    followLatest.current = true;
+    setAwayFromLatest(false);
+    const timer = setTimeout(() => list.current?.scrollToEnd({ animated: false }), 60);
+    return () => clearTimeout(timer);
+    // Only when the chat comes on screen, not on every new message (onContentSizeChange does that).
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [active]);
+  const input = useRef<NativeTextInput>(null);
+  // Words from Home or a quick action ("Make a picture of ") go into the box, unsent.
+  useEffect(() => {
+    if (!active) return;
+    const put = (text?: string) => {
+      if (!text) return;
+      setDraft(text);
+      setTimeout(() => input.current?.focus(), 80);
+    };
+    put(chatDraft.take());
+    return chatDraft.subscribe(() => put(chatDraft.take()));
+  }, [active]);
+  // Speak instead of typing: the words go into the box, and the person sends them.
+  const [speaking, setSpeaking] = useState<boolean>();
+  useEffect(() => {
+    let live = true;
+    void deboApi(api)
+      .status()
+      .then((status) => live && setSpeaking(status.configured && status.speaking))
+      .catch(() => {});
+    return () => {
+      live = false;
+    };
+  }, [api]);
+  const dictation = useDictation(
+    api,
+    (words) => setDraft((current) => (current.trim() ? `${current.replace(/\s+$/, "")} ${words}` : words)),
+    speaking,
+  );
+  const prefill = (text: string) => {
+    setDraft(text);
+    setTimeout(() => input.current?.focus(), 50);
+  };
+  const quickActions = [
+    { text: "Write entry", icon: PenLine, action: () => navigate("journal") },
+    { text: "Make an image", icon: ImageIcon, action: () => prefill("Make a picture of ") },
+    { text: "What's on today", icon: CalendarDays, action: () => enqueue("What's on today?") },
+    { text: "Remind me", icon: BellRing, action: () => prefill("Remind me to ") },
+    { text: "My week", icon: Sparkles, action: () => enqueue("What did I do last week?") },
+  ];
+  const lastVisible = visible.at(-1);
+  // The dots show until the first words of a reply arrive; after that the words themselves move.
+  const waitingFirstWords =
+    replying &&
+    (!lastVisible ||
+      lastVisible.role === "user" ||
+      (typeof lastVisible.content === "string" && !lastVisible.content.trim() && !("toolCalls" in lastVisible && lastVisible.toolCalls?.length)));
+  const canSend = !!draft.trim() && loaded && isReady;
   return (
     <View style={{ flex: 1 }}>
       <ScrollView
         ref={list}
         showsVerticalScrollIndicator={false}
-        contentContainerStyle={{ gap: spacing[3], paddingTop: chrome.top + spacing[4], paddingBottom: spacing[5], flexGrow: 1 }}
+        contentContainerStyle={{ gap: spacing[4], paddingTop: chrome.top + spacing[4], paddingBottom: spacing[6], flexGrow: 1 }}
         onScroll={({ nativeEvent: { contentOffset, contentSize, layoutMeasurement } }) => {
-          const nearEnd = contentSize.height - contentOffset.y - layoutMeasurement.height < 100;
+          const nearEnd = contentSize.height - contentOffset.y - layoutMeasurement.height < 120;
           followLatest.current = nearEnd;
           setAwayFromLatest(visible.length > 0 && !nearEnd);
         }}
@@ -597,42 +702,58 @@ export function ChatScreen({
         {listState(loaded, visible.length) === "loading" && !historyError && (
           <Skeleton label="Loading conversation" variant="chat" rows={4} />
         )}
-        {listState(loaded, visible.length) === "empty" ? (
+        {empty ? (
           <View
             style={{
               flexGrow: 1,
               flexShrink: 0,
               justifyContent: "center",
               alignItems: "center",
-              paddingVertical: spacing[8],
-              gap: spacing[4],
+              paddingVertical: spacing[6],
+              gap: spacing[3],
             }}
           >
+            <Pressable
+              accessibilityRole="button"
+              accessibilityLabel={`Talk to ${assistantName}`}
+              accessibilityHint="Opens Talk and starts a voice conversation"
+              onPress={() => {
+                deboMood.tap();
+                requestTalkAutoStart();
+                navigate("talk");
+              }}
+              style={{ padding: spacing[3], borderRadius: radius.full, backgroundColor: colors.glass, boxShadow: brandShadow.raised }}
+            >
+              <Mascot size={avatarSize.hero} />
+            </Pressable>
             <Text
               accessibilityRole="header"
-              style={[s.pageTitle, { textAlign: "center", maxWidth: 350 }]}
+              style={[s.pageTitle, { textAlign: "center", maxWidth: 380, marginTop: spacing[3] }]}
             >
               Hi, I&apos;m {assistantName}.
             </Text>
-            <Text style={[s.muted, { maxWidth: 320, textAlign: "center" }]}>
+            <Text style={[s.muted, { maxWidth: 360, textAlign: "center" }]}>
               I keep your journal and remember what is in it. Ask me about your days, and I will
               show you which entry each answer came from.
             </Text>
-            <Text style={[s.small, { maxWidth: 320, textAlign: "center" }]}>
-              Type below, or tap my face at the top to talk out loud.
-            </Text>
-            <View style={{ width: "100%", maxWidth: 360, marginTop: spacing[3], gap: spacing[2] }}>
+            <View
+              style={{
+                flexDirection: "row",
+                flexWrap: "wrap",
+                justifyContent: "center",
+                maxWidth: 480,
+                marginTop: spacing[3],
+                gap: spacing[2],
+              }}
+            >
               {[
+                { text: "What did I do last week?", action: () => enqueue("What did I do last week?") },
                 { text: "Write in my journal", action: () => navigate("journal") },
-                {
-                  text: "What did I do last week?",
-                  action: () => enqueue("What did I do last week?"),
-                },
                 { text: `See what ${assistantName} knows`, action: () => navigate("knows") },
               ].map((item) => (
-                <Button key={item.text} onPress={item.action}>
+                <ChipButton key={item.text} onPress={item.action}>
                   {item.text}
-                </Button>
+                </ChipButton>
               ))}
             </View>
           </View>
@@ -654,24 +775,35 @@ export function ChatScreen({
                 key={message.id}
                 style={{
                   alignSelf: user ? "flex-end" : "flex-start",
-                  maxWidth: user ? "85%" : "95%",
-                  width: toolCalls.length ? "95%" : undefined,
+                  maxWidth: user ? "82%" : "100%",
+                  width: toolCalls.length ? "100%" : undefined,
                   gap: spacing[2],
                 }}
               >
                 {!!text && (
                   <View
-                    style={{
-                      paddingHorizontal: spacing[4],
-                      paddingVertical: spacing[3],
-                      borderRadius: radius.page,
-                      borderBottomRightRadius: user ? radius.inner : radius.page,
-                      borderBottomLeftRadius: user ? radius.page : radius.inner,
-                      backgroundColor: user ? colors.blue : colors.subtle,
-                    }}
+                    style={[
+                      {
+                        paddingHorizontal: spacing[4] + spacing[0.5],
+                        paddingVertical: spacing[3],
+                        borderRadius: radius.page - spacing[1],
+                        flexShrink: 1,
+                      },
+                      user
+                        ? {
+                            backgroundColor: colors.nav,
+                            borderBottomRightRadius: spacing[1.5],
+                            boxShadow: brandShadow.button,
+                          }
+                        : {
+                            backgroundColor: colors.card,
+                            borderBottomLeftRadius: spacing[1.5],
+                            boxShadow: brandShadow.card,
+                          },
+                    ]}
                   >
                     {user ? (
-                      <Text selectable style={[s.text, { fontSize: fontSize.lg, lineHeight: 24 }]}>
+                      <Text selectable style={[s.text, { color: colors.onNav }]}>
                         {text}
                       </Text>
                     ) : (
@@ -746,7 +878,7 @@ export function ChatScreen({
               !!agentWorkspace?.artifacts.length) && (
               <Button
                 small
-                style={{ alignSelf: "flex-start", marginTop: 6 }}
+                style={{ alignSelf: "flex-start", marginTop: spacing[1.5] }}
                 onPress={() => setShowResults(!showResults)}
               >
                 {showResults ? "Hide recent results" : "Recent results"}
@@ -783,9 +915,7 @@ export function ChatScreen({
             )}
           </>
         )}
-        {(busy || agent.isRunning) && (
-          <TypingDots />
-        )}
+        {waitingFirstWords && <TypingDots />}
         <ErrorNotice error={error} />
         {!!error && (
           <Button
@@ -804,28 +934,47 @@ export function ChatScreen({
           </Button>
         )}
       </ScrollView>
-      {awayFromLatest && (
-        <Button
-          small
-          icon={ArrowDown}
-          style={{ alignSelf: "center", marginBottom: 10 }}
-          onPress={() => {
-            followLatest.current = true;
-            setAwayFromLatest(false);
-            list.current?.scrollToEnd({ animated: true });
-          }}
-        >
-          Latest messages
-        </Button>
-      )}
       <KeyboardAvoidingView
         onLayout={(event) => {
           // Only the chat on screen moves the floating call bubble.
           if (active) chrome.setComposerHeight?.(event.nativeEvent.layout.height);
+          // A card that appears above the box (an update, the queue) must not hide the newest message.
+          if (active && visible.length > 0 && followLatest.current)
+            setTimeout(() => list.current?.scrollToEnd({ animated: false }), 30);
         }}
         behavior={Platform.OS === "ios" ? "padding" : undefined}
-        style={keyboardPadding > 0 ? { paddingBottom: keyboardPadding } : undefined}
+        style={{
+          paddingTop: spacing[2],
+          paddingBottom: keyboardPadding > 0 ? keyboardPadding + spacing[2] : (chrome.bottom ?? 0) + spacing[3],
+          gap: spacing[2],
+        }}
       >
+        {awayFromLatest && (
+          <View pointerEvents="box-none" style={{ position: "absolute", top: -(spacing[12] + spacing[2]), left: 0, right: 0, alignItems: "center" }}>
+            <Pressable
+              accessibilityRole="button"
+              accessibilityLabel="Latest messages"
+              onPress={() => {
+                followLatest.current = true;
+                setAwayFromLatest(false);
+                list.current?.scrollToEnd({ animated: true });
+              }}
+              style={({ pressed }) => ({
+                width: spacing[11],
+                height: spacing[11],
+                borderRadius: radius.full,
+                alignItems: "center",
+                justifyContent: "center",
+                backgroundColor: pressed ? colors.navSoft : colors.card,
+                borderWidth: 1,
+                borderColor: colors.line,
+                boxShadow: brandShadow.float,
+              })}
+            >
+              <ArrowDown size={20} strokeWidth={2} color={colors.text} />
+            </Pressable>
+          </View>
+        )}
         {/* Above the composer, not in the timeline, so a new reply never lands above it. */}
         {(!richThreads || selection.id === mainId) && <BackgroundUpdates />}
         <ErrorNotice error={saveError} />
@@ -841,12 +990,12 @@ export function ChatScreen({
           </Button>
         )}
         {!!outbox.pending.length && (
-          <View style={{ padding: 12, gap: 6 }}>
+          <Glass style={{ padding: spacing[3], gap: spacing[1.5], backgroundColor: colors.card }}>
             <Text style={s.small}>
               {outbox.paused ? "Messages on hold" : "Up next"} · Keep the app open until sent
             </Text>
             {outbox.pending.map((message) => (
-              <View key={message.id} style={[s.row, { gap: 8 }]}>
+              <View key={message.id} style={[s.row, { gap: spacing[2] }]}>
                 <Text numberOfLines={2} style={[s.muted, { flex: 1 }]}>
                   {displayJevUserMessage(message.text, messages)}
                 </Text>
@@ -879,10 +1028,10 @@ export function ChatScreen({
                 Send queued messages
               </Button>
             )}
-          </View>
+          </Glass>
         )}
         {picking && (
-          <Card style={{ marginBottom: 12, padding: 15 }}>
+          <Card style={{ padding: spacing[4] }}>
             <Text style={s.heading}>Add a document</Text>
             <ScrollView style={{ maxHeight: 230 }} keyboardShouldPersistTaps="handled">
               {w.files.length ? (
@@ -907,174 +1056,229 @@ export function ChatScreen({
             <Button
               small
               onPress={() => setPicking(false)}
-              style={{ alignSelf: "flex-end", marginTop: 8 }}
+              style={{ alignSelf: "flex-end", marginTop: spacing[2] }}
             >
               Done
             </Button>
           </Card>
         )}
-        <View
-          style={{
-            backgroundColor: colors.card,
-            borderRadius: radius.chat,
-            borderWidth: 1,
-            borderColor: focused ? colors.blueDark : colors.inputBorder,
-            padding: 8,
-            boxShadow: focused ? shadow.med : shadow.low,
-          }}
-        >
-          {attachments.length > 0 && (
-            <View style={[s.row, { gap: spacing[2], flexWrap: "wrap", padding: spacing[2] }]}>
-              {w.files
-                .filter((f) => attachments.includes(f.id))
-                .map((f) => (
-                  <Pressable
-                    key={f.id}
-                    accessibilityRole="button"
-                    accessibilityLabel={`Remove attachment: ${f.name}`}
-                    onPress={() => setAttachments((ids) => ids.filter((id) => id !== f.id))}
-                    style={[
-                      s.row,
-                      {
-                        gap: spacing[2],
-                        maxWidth: "100%",
-                        minHeight: spacing[11],
-                        backgroundColor: colors.sky,
-                        borderRadius: radius.container,
-                        paddingHorizontal: spacing[3],
-                        paddingVertical: spacing[2],
-                      },
-                    ]}
-                  >
-                    <FileText size={14} color={colors.blueDark} />
-                    <Text
-                      numberOfLines={1}
-                      style={{ flexShrink: 1, fontSize: fontSize.base, color: colors.text }}
-                    >
-                      {f.name}
-                    </Text>
-                    <X size={13} color={colors.muted} />
-                  </Pressable>
-                ))}
+        {dictation.asking && (
+          <Card style={{ padding: spacing[4], gap: spacing[3] }}>
+            <Text style={s.text}>{dictationPromise}</Text>
+            <View style={[s.row, { gap: spacing[2], flexWrap: "wrap" }]}>
+              {/* Two equal buttons: "Not now" is never smaller or greyer than the yes (DESIGN.md). */}
+              <Button icon={Mic} onPress={dictation.agree}>
+                Start listening
+              </Button>
+              <Button onPress={dictation.decline}>Not now</Button>
             </View>
-          )}
-          <View style={[s.row, { gap: 7, alignItems: "flex-end" }]}>
+          </Card>
+        )}
+        <ErrorNotice error={dictation.error} />
+        {dictation.listening && (
+          <View
+            accessibilityRole="alert"
+            accessibilityLiveRegion="polite"
+            style={[
+              s.row,
+              {
+                alignSelf: "center",
+                gap: spacing[2],
+                paddingLeft: spacing[4],
+                paddingRight: spacing[1],
+                minHeight: spacing[11],
+                borderRadius: radius.full,
+                backgroundColor: colors.lime,
+              },
+            ]}
+          >
+            <AudioLines size={18} color={colors.text} />
+            <Text style={[s.text, { fontWeight: "600" }]}>
+              {dictation.writing ? "Listening. Writing it out…" : "Listening. Speak now."}
+            </Text>
             <Pressable
               accessibilityRole="button"
-              accessibilityLabel="Attach a document"
-              accessibilityState={{ expanded: picking }}
-              onPress={() => setPicking(!picking)}
-              style={({ pressed }) => ({
-                width: 44,
-                height: 44,
-                alignItems: "center",
-                justifyContent: "center",
-                borderRadius: radius.page,
-                backgroundColor: picking || pressed ? colors.sky : "transparent",
-              })}
+              accessibilityLabel="Stop listening"
+              onPress={() => void dictation.stop()}
+              style={{ width: spacing[10], height: spacing[10], borderRadius: radius.full, backgroundColor: colors.card, alignItems: "center", justifyContent: "center" }}
             >
-              <Text
-                style={{
-                  color: colors.text,
-                  fontSize: fontSize["2xl"],
-                  fontWeight: "300",
-                  lineHeight: 32,
-                }}
-              >
-                +
-              </Text>
-            </Pressable>
-            <TextInput
-              accessibilityLabel={`Message ${assistantName}`}
-              value={draft}
-              onChangeText={setDraft}
-              onContentSizeChange={(event) =>
-                // An empty box is one line, even if the browser measured it before it had its width.
-                setInputHeight(draft ? Math.max(44, Math.min(140, event.nativeEvent.contentSize.height)) : 44)
-              }
-              placeholder={
-                !isReady
-                  ? "Connecting…"
-                  : !loaded
-                    ? historyError
-                      ? "Conversation unavailable"
-                      : "Loading conversation…"
-                    : "Message…"
-              }
-              placeholderTextColor={colors.muted}
-              selectionColor={colors.blueDark}
-              onFocus={() => setFocused(true)}
-              onBlur={() => setFocused(false)}
-              style={{
-                flex: 1,
-                color: colors.text,
-                height: inputHeight,
-                minHeight: 44,
-                maxHeight: 140,
-                fontSize: fontSize.lg,
-                lineHeight: 24,
-                paddingHorizontal: 2,
-                paddingTop: 10,
-                paddingBottom: 10,
-                ...noFocusRing,
-              }}
-              multiline
-              editable
-              onKeyPress={
-                Platform.OS === "web"
-                  ? (event) => {
-                      if (
-                        event.nativeEvent.key === "Enter" &&
-                        !("shiftKey" in event.nativeEvent && event.nativeEvent.shiftKey)
-                      ) {
-                        event.preventDefault();
-                        send();
-                      }
-                    }
-                  : undefined
-              }
-            />
-            <Pressable
-              accessibilityRole="button"
-              accessibilityLabel={`Talk to ${assistantName}`}
-              onPress={() => navigate("talk")}
-              style={({ pressed }) => ({
-                width: 44,
-                height: 44,
-                alignItems: "center",
-                justifyContent: "center",
-                borderRadius: radius.page,
-                backgroundColor: pressed ? colors.sky : "transparent",
-              })}
-            >
-              <Mic size={22} strokeWidth={1.8} color={colors.text} />
-            </Pressable>
-            <Pressable
-              accessibilityRole="button"
-              accessibilityLabel={replying ? "Stop reply" : "Send message"}
-              disabled={!replying && (!draft.trim() || !loaded || !isReady)}
-              onPress={replying ? () => void stop() : send}
-              style={({ pressed }) => ({
-                width: 44,
-                height: 44,
-                borderRadius: radius.page,
-                backgroundColor: replying || draft.trim() ? colors.blue : colors.subtle,
-                alignItems: "center",
-                justifyContent: "center",
-                transform: [{ scale: pressed ? 0.94 : 1 }],
-              })}
-            >
-              {replying ? (
-                <Square size={18} fill={colors.text} strokeWidth={0} />
-              ) : (
-                <ArrowUp
-                  size={25}
-                  strokeWidth={1.8}
-                  color={draft.trim() ? colors.text : colors.disabled}
-                />
-              )}
+              <Square size={14} fill={colors.text} strokeWidth={0} />
             </Pressable>
           </View>
+        )}
+        {!empty && loaded && (
+          <ScrollView
+            horizontal
+            showsHorizontalScrollIndicator={false}
+            keyboardShouldPersistTaps="handled"
+            accessibilityLabel="Quick actions"
+            contentContainerStyle={{ gap: spacing[2], paddingVertical: spacing[1], paddingHorizontal: spacing[0.5] }}
+          >
+            {quickActions.map((item) => (
+              <ChipButton key={item.text} icon={item.icon} onPress={item.action}>
+                {item.text}
+              </ChipButton>
+            ))}
+          </ScrollView>
+        )}
+        <View style={[s.row, { gap: spacing[2], alignItems: "flex-end" }]}>
+          <View
+            style={{
+              flex: 1,
+              minWidth: 0,
+              backgroundColor: colors.card,
+              borderRadius: radius.page,
+              borderWidth: 1.5,
+              borderColor: focused ? colors.nav : colors.line,
+              padding: spacing[1.5],
+              boxShadow: brandShadow.float,
+            }}
+          >
+            {attachments.length > 0 && (
+              <View style={[s.row, { gap: spacing[2], flexWrap: "wrap", padding: spacing[2] }]}>
+                {w.files
+                  .filter((f) => attachments.includes(f.id))
+                  .map((f) => (
+                    <Pressable
+                      key={f.id}
+                      accessibilityRole="button"
+                      accessibilityLabel={`Remove attachment: ${f.name}`}
+                      onPress={() => setAttachments((ids) => ids.filter((id) => id !== f.id))}
+                      style={[
+                        s.row,
+                        {
+                          gap: spacing[2],
+                          maxWidth: "100%",
+                          minHeight: spacing[11],
+                          backgroundColor: colors.sky,
+                          borderRadius: radius.full,
+                          paddingHorizontal: spacing[3],
+                          paddingVertical: spacing[2],
+                        },
+                      ]}
+                    >
+                      <FileText size={14} color={colors.blueDark} />
+                      <Text
+                        numberOfLines={1}
+                        style={{ flexShrink: 1, fontSize: fontSize.base, color: colors.text }}
+                      >
+                        {f.name}
+                      </Text>
+                      <X size={13} color={colors.muted} />
+                    </Pressable>
+                  ))}
+              </View>
+            )}
+            <View style={[s.row, { gap: spacing[1], alignItems: "flex-end" }]}>
+              <IconButton
+                icon={Plus}
+                label="Attach a document"
+                quiet
+                expanded={picking}
+                onPress={() => setPicking(!picking)}
+              />
+              <TextInput
+                ref={input}
+                accessibilityLabel={`Message ${assistantName}`}
+                value={draft}
+                onChangeText={setDraft}
+                onContentSizeChange={(event) =>
+                  // An empty box is one line, even if the browser measured it before it had its width.
+                  setInputHeight(draft ? Math.max(44, Math.min(160, event.nativeEvent.contentSize.height)) : 44)
+                }
+                placeholder={
+                  !isReady
+                    ? "Connecting…"
+                    : !loaded
+                      ? historyError
+                        ? "Conversation unavailable"
+                        : "Loading conversation…"
+                      : "Ask anything…"
+                }
+                placeholderTextColor={colors.muted}
+                selectionColor={colors.nav}
+                onFocus={() => setFocused(true)}
+                onBlur={() => setFocused(false)}
+                style={{
+                  flex: 1,
+                  color: colors.text,
+                  height: inputHeight,
+                  minHeight: 44,
+                  maxHeight: 160,
+                  fontSize: typeSize.md,
+                  lineHeight: spacing[6],
+                  paddingHorizontal: spacing[1],
+                  paddingTop: 10,
+                  paddingBottom: 10,
+                  ...noFocusRing,
+                }}
+                multiline
+                editable
+                onKeyPress={
+                  Platform.OS === "web"
+                    ? (event) => {
+                        if (
+                          event.nativeEvent.key === "Enter" &&
+                          !("shiftKey" in event.nativeEvent && event.nativeEvent.shiftKey)
+                        ) {
+                          event.preventDefault();
+                          send();
+                        }
+                      }
+                    : undefined
+                }
+              />
+              <IconButton
+                icon={dictation.listening ? MicOff : Mic}
+                label={dictation.listening ? "Stop listening" : "Speak instead of typing"}
+                quiet
+                onPress={() => void (dictation.listening ? dictation.stop() : dictation.start())}
+              />
+              <Pressable
+                accessibilityRole="button"
+                accessibilityLabel={replying ? "Stop reply" : "Send message"}
+                accessibilityState={{ disabled: !replying && !canSend }}
+                disabled={!replying && !canSend}
+                onPress={replying ? () => void stop() : send}
+                style={({ pressed }) => ({
+                  width: 44,
+                  height: 44,
+                  borderRadius: radius.full,
+                  backgroundColor: replying ? colors.ink : canSend ? colors.nav : colors.subtle,
+                  boxShadow: canSend && !replying ? brandShadow.button : undefined,
+                  alignItems: "center",
+                  justifyContent: "center",
+                  transform: [{ scale: pressed ? 0.94 : 1 }],
+                })}
+              >
+                {replying ? (
+                  <Square size={16} fill={colors.onInk} strokeWidth={0} />
+                ) : (
+                  <ArrowUp size={22} strokeWidth={2.2} color={canSend ? colors.onNav : colors.muted} />
+                )}
+              </Pressable>
+            </View>
+          </View>
+          <Pressable
+            accessibilityRole="button"
+            accessibilityLabel={`Talk to ${assistantName}`}
+            accessibilityHint="Opens Talk and starts a voice conversation"
+            onPress={() => navigate("talk")}
+            style={({ pressed }) => ({
+              width: spacing[12] + spacing[2],
+              height: spacing[12] + spacing[2],
+              borderRadius: radius.full,
+              alignItems: "center",
+              justifyContent: "center",
+              backgroundColor: colors.lime,
+              borderWidth: 1,
+              borderColor: colors.card,
+              boxShadow: brandShadow.float,
+              transform: [{ scale: pressed ? 0.94 : 1 }],
+            })}
+          >
+            <AudioLines size={24} strokeWidth={2} color={colors.text} />
+          </Pressable>
         </View>
       </KeyboardAvoidingView>
     </View>

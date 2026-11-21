@@ -18,26 +18,11 @@ import { DayField } from "./debo-day-field";
 import { readStoredDraft, writeStoredDraft } from "./debo-draft-store";
 import { Recorder } from "./debo-recorder";
 import { RecordingPanel } from "./debo-recording-panel";
+import { dictationConsentGiven as consentGiven, dictationPromise, rememberDictationConsent as rememberConsent } from "./dictation";
 import { Button, Card, colors, ErrorNotice, fontSize, radius, s, spacing } from "./ui";
 import { useWorkspace } from "./workspace";
 
 const MIN_HEIGHT = spacing[12] * 3;
-const CONSENT_KEY = "debo.dictation.ok.v1";
-
-function consentGiven(): boolean {
-  try {
-    return (globalThis as { localStorage?: Storage }).localStorage?.getItem(CONSENT_KEY) === "1";
-  } catch {
-    return false;
-  }
-}
-function rememberConsent() {
-  try {
-    (globalThis as { localStorage?: Storage }).localStorage?.setItem(CONSENT_KEY, "1");
-  } catch {
-    // Without storage the question is simply asked again next time.
-  }
-}
 
 export function Composer({ status, onSaved }: { status: DeboStatus; onSaved: () => Promise<void> }) {
   const { api, notify } = useWorkspace();
@@ -257,8 +242,7 @@ export function Composer({ status, onSaved }: { status: DeboStatus; onSaved: () 
         {asking && (
           <View accessibilityRole="alert" style={{ gap: spacing[2], padding: spacing[3], borderRadius: radius.container, backgroundColor: colors.subtle }}>
             <Text style={s.text}>
-              Speak sends short clips of your voice to Daksha, which uses Cloudflare's speech service to write them out as text.
-              Nothing is kept. The microphone is only on while you see “Listening”.
+              {dictationPromise}
             </Text>
             <View style={[s.row, { gap: spacing[2], flexWrap: "wrap" }]}>
               {/* Two equal buttons: "Not now" is never smaller or greyer than the yes (DESIGN.md). */}

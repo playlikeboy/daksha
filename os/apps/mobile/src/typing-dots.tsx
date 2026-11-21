@@ -3,7 +3,7 @@ import { Animated, Easing, Platform, View } from "react-native";
 import { duration } from "./astryx-tokens";
 import { useAssistantName } from "./debo-character-store";
 import { useReducedMotion } from "./debo-face";
-import { colors, radius, s, spacing } from "./ui";
+import { brandShadow, colors, radius, s, spacing } from "./ui";
 
 /**
  * Three dots in a reply bubble while the assistant works. Each dot rises and darkens in
@@ -37,8 +37,9 @@ export function TypingDots() {
           gap: spacing[1.5],
           paddingHorizontal: spacing[5],
           paddingVertical: spacing[4],
-          backgroundColor: colors.subtle,
-          borderRadius: radius.chat,
+          backgroundColor: colors.card,
+          boxShadow: brandShadow.card,
+          borderRadius: radius.page - spacing[1],
         },
       ]}
     >
@@ -59,7 +60,7 @@ export function TypingDots() {
               width: spacing[2],
               height: spacing[2],
               borderRadius: radius.full,
-              backgroundColor: colors.muted,
+              backgroundColor: colors.nav,
               opacity,
               transform: [{ translateY }],
             }}
