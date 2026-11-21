@@ -107,6 +107,9 @@ importers:
       web-push:
         specifier: 3.6.7
         version: 3.6.7(supports-color@8.1.1)
+      yaml:
+        specifier: 2.9.1
+        version: 2.9.1
       zod:
         specifier: ^4.1.0
         version: 4.6.5
