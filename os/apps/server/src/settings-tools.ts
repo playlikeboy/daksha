@@ -30,8 +30,11 @@ import {
   CONTEXT_MAX,
   languages,
   lengths,
+  CALL_ME_MAX,
+  cleanName,
   moods,
   SPEED_MAX,
+  styles,
   SPEED_MIN,
   type TalkSettings,
   TalkSettingsStore,
@@ -39,7 +42,7 @@ import {
 } from "./talk-settings.ts";
 
 export const settingsInstructions =
-  " CHANGING SETTINGS BY ASKING: when the person asks you to change how you talk (voice, speed, mood, how much you say, language), your name, your tone or which character you are (a face they made counts: update_identity with customAvatar), or their birthday reminders and morning check-in, change it at once with update_talk_settings, update_identity or update_reminders. Change only what they asked for, then say in one short sentence what changed. If a tool returns an error, say what went wrong in plain words. Never say a setting changed unless the tool returned status saved. " +
+  " CHANGING SETTINGS BY ASKING: when the person asks you to change how you talk (voice, speed, mood, how much you say, language), the name to call them, the briefing style, your name, your tone or which character you are (a face they made counts: update_identity with customAvatar), or their birthday reminders, morning check-in and morning briefing, change it at once with update_talk_settings, update_identity or update_reminders. Change only what they asked for, then say in one short sentence what changed. If a tool returns an error, say what went wrong in plain words. Never say a setting changed unless the tool returned status saved. " +
   "When they want something only the app can do (build a face, add chats, photos or recordings, connect an app, see what you know, tidy their notes, delete something), or ask where a setting is, call open_screen with the closest screen. In chat a card with a button appears. On a call they can't tap it, so tell them where to find it in a few words.";
 
 /** The name each built-in character offers. Any other character keeps the person's name. */
@@ -98,6 +101,8 @@ export const talkChangeInput = z
     length: z.enum(lengths).optional(),
     language: z.enum(languages).optional(),
     addContext: z.string().trim().min(1).max(CONTEXT_MAX).optional(),
+    style: z.enum(styles).optional(),
+    callMe: z.string().trim().min(1).max(CALL_ME_MAX, `Keep the name under ${CALL_ME_MAX} letters.`).optional(),
   })
   .refine((v) => Object.values(v).some((x) => x !== undefined), "Say what to change.");
 
@@ -167,6 +172,8 @@ export const remindersChangeInput = z
     specialDays: z.boolean().optional(),
     checkin: z.boolean().optional(),
     checkinAt: z.string().trim().optional(),
+    briefing: z.boolean().optional(),
+    briefingAt: z.string().trim().optional(),
   })
   .refine((v) => Object.values(v).some((x) => x !== undefined), "Say what to change.");
 
@@ -187,7 +194,7 @@ export function settingsTools(
   return [
     defineTool({
       name: "update_talk_settings",
-      description: `Change how you talk, for this person, at once. Only the fields sent change. voice: a voice name (${VOICES.map((v) => v.name).join(", ")}). speed: for calls, ${SPEED_MIN} (slowest) to ${SPEED_MAX} (fastest), 1 is normal, 0.9 is a bit slower, 1.15 a bit faster. mood: ${moods.join(", ")}. length (how much you say): ${lengths.join(", ")}. language: ${languages.join(", ")} (match means reply in the person's own language). addContext: one short thing to add to the person's notes about themselves (what to call them, their city); it never replaces or deletes the notes.`,
+      description: `Change how you talk, for this person, at once. Only the fields sent change. voice: a voice name (${VOICES.map((v) => v.name).join(", ")}). speed: for calls, ${SPEED_MIN} (slowest) to ${SPEED_MAX} (fastest), 1 is normal, 0.9 is a bit slower, 1.15 a bit faster. mood: ${moods.join(", ")}. length (how much you say): ${lengths.join(", ")}. language: ${languages.join(", ")} (match means reply in the person's own language). addContext: one short thing to add to the person's notes about themselves (their city, what they do); it never replaces or deletes the notes. style: friendly (your usual warm way) or briefing (crisp, calm, a step ahead, short spoken turns; its voice is Robyn unless they picked one). callMe: the name they want to be called.`,
       parameters: talkChangeInput,
       execute: async (args) => {
         signal?.throwIfAborted();
@@ -205,7 +212,16 @@ export function settingsTools(
           }
           const saved = await talk.set(
             owner,
-            defined({ voice: voice?.id, speed: ask.speed, mood: ask.mood, length: ask.length, language: ask.language, context }),
+            defined({
+              voice: voice?.id,
+              speed: ask.speed,
+              mood: ask.mood,
+              length: ask.length,
+              language: ask.language,
+              context,
+              style: ask.style,
+              callMe: ask.callMe === undefined ? undefined : cleanName(ask.callMe) || undefined,
+            }),
           );
           return {
             status: "saved",
@@ -255,7 +271,7 @@ export function settingsTools(
     defineTool({
       name: "update_reminders",
       description:
-        "Change what Daksha sends the person on her own, at once. specialDays: birthday and special-day reminders from People in your life, on or off. checkin: the morning check-in, on or off. checkinAt: its time as HH:MM in 24 hours, between 07:00 and 22:00 (nothing is sent at night). Adding or removing a single reminder is not done here.",
+        "Change what Daksha sends the person on her own, at once. specialDays: birthday and special-day reminders from People in your life, on or off. checkin: the morning check-in, on or off. checkinAt: its time as HH:MM in 24 hours, between 07:00 and 22:00 (nothing is sent at night). briefing: the morning briefing (reminders, calendar, tasks and news on topics they follow), on or off. briefingAt: its time, HH:MM, between 07:00 and 22:00. Adding or removing a single reminder is not done here.",
       parameters: remindersChangeInput,
       execute: async (args) => {
         signal?.throwIfAborted();
@@ -266,12 +282,20 @@ export function settingsTools(
             ...(ask.specialDays !== undefined ? [`Birthday reminders: ${ask.specialDays ? "on" : "off"}`] : []),
             ...(ask.checkin !== undefined ? [`Morning check-in: ${ask.checkin ? "on" : "off"}`] : []),
             ...(ask.checkinAt !== undefined ? [`Check-in time: ${saved.checkinAt}`] : []),
+            ...(ask.briefing !== undefined ? [`Morning briefing: ${ask.briefing ? "on" : "off"}`] : []),
+            ...(ask.briefingAt !== undefined ? [`Briefing time: ${saved.briefingAt}`] : []),
           ];
           return {
             status: "saved",
             kind: "reminders",
             changed,
-            settings: { specialDays: saved.specialDays, checkin: saved.checkin, checkinAt: saved.checkinAt },
+            settings: {
+              specialDays: saved.specialDays,
+              checkin: saved.checkin,
+              checkinAt: saved.checkinAt,
+              briefing: saved.briefing,
+              briefingAt: saved.briefingAt,
+            },
             screen: "reminders",
             note: "Saved. These come as updates in the app, and as notifications on devices where the person turned reminders on. Nothing is sent between 22:00 and 07:00.",
           };
@@ -317,11 +341,13 @@ function talkChanges(ask: z.infer<typeof talkChangeInput>, voiceName?: string): 
     ...(ask.length ? [`How much I say: ${lengthWords[ask.length]}`] : []),
     ...(ask.language ? [`Language: ${languageWords[ask.language]}`] : []),
     ...(ask.addContext ? ["Added a line to your notes"] : []),
+    ...(ask.style ? [`Style: ${ask.style === "briefing" ? "briefing (crisp and calm)" : "friendly"}`] : []),
+    ...(ask.callMe ? [`I'll call you ${cleanName(ask.callMe)}`] : []),
   ];
 }
 
 /** The saved talk settings without the notes text, which the model already has in its prompt. */
 function shownTalk(s: TalkSettings) {
   const voice = VOICES.find((v) => v.id === s.voice);
-  return defined({ voice: voice?.name, speed: s.speed, mood: s.mood, length: s.length, language: s.language });
+  return defined({ voice: voice?.name, speed: s.speed, mood: s.mood, length: s.length, language: s.language, style: s.style, callMe: s.callMe });
 }
