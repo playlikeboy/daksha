@@ -1,7 +1,8 @@
 # Run every check on a branch before it reaches main.
 #
 # The deploy workflows only typecheck the part they deploy. This one runs the whole set:
-# the brand check (no old brand name left, see docs/RENAME.md), the root typecheck, and the os/
+# the brand check (no old brand name left, see docs/RENAME.md), the licence check
+# (third_party/README.md), the root typecheck, and the os/
 # workspace's typecheck and tests. Push a branch
 # (for example debo-os) and wait for this to pass before fast-forwarding main.
 name: Check
@@ -34,6 +35,10 @@ jobs:
           package-manager-cache: false
       # Fails if the old brand name or an old address is outside the allowlist in docs/RENAME.md.
       - run: node scripts/check-brand.mjs
+      # Fails if a third_party/ folder lacks its LICENSE or SOURCE.md, a changed Apache-2.0 file
+      # lacks its "Modified by Daksha" line, or copied code carries copyleft licence text.
+      - run: node scripts/check-licenses.mjs
+      - run: node --test scripts/check-licenses.test.mjs
 
   root:
     runs-on: ubuntu-latest

@@ -70,11 +70,11 @@ Check before relying on it: limits on step duration for long audio; Trigger.dev 
 Choice: `@fontsource-variable` packages for Bricolage Grotesque and Figtree.
 Why: no requests to an outside font service, which fits the privacy stance and makes builds work offline.
 
-## 9. No licence chosen yet
-2026-11-10 · open
+## 9. The repo is under Apache-2.0
+2026-11-10 · open; 2026-11-21 · decided (the owner chose Apache-2.0)
 
-Choice: none. The repo is public with all rights reserved until the owner picks one.
-Why: open source versus closed is a business decision for the owner.
+Choice: the root `LICENSE` is the Apache License 2.0, copyright Shaswat Raj, with a root `NOTICE`. Folders that came from elsewhere keep their own licence: `os/` stays MIT (it started from OpenFuse), `apps/voice-agent` stays MIT (LiveKit's starter), and each folder in `third_party/` keeps its upstream licence (see decision 38).
+Why: Apache-2.0 lets anyone use and build on Daksha, and it adds a patent grant and a clear rule for marking changed files, which MIT does not. Until 21 November 2026 the repo was public with all rights reserved.
 
 ## 10. Landing page is a static export on Cloudflare Workers
 2026-11-10 · replaced by 11

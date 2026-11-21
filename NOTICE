@@ -1,0 +1,13 @@
+Daksha
+Copyright 2026 Shaswat Raj
+
+Licensed under the Apache License, Version 2.0 (see LICENSE), except where a
+folder carries its own licence:
+
+  os/                   MIT (os/LICENSE), started from CopilotKit's OpenFuse template
+  apps/voice-agent/     MIT (apps/voice-agent/LICENSE), started from LiveKit's agent starter
+  third_party/*/        the licence in each folder's LICENSE file
+
+This product includes software and content made by others. Their names,
+licences and the exact commits copied are listed in THIRD_PARTY_NOTICES.md
+and in each third_party/*/SOURCE.md.
