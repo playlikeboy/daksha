@@ -43,6 +43,10 @@ import { Files } from "./files.ts";
 import { GoogleAuth } from "./google-auth.ts";
 import { checkinRoutes } from "./companion.ts";
 import { CompanionJobs } from "./companion-jobs.ts";
+import { buildBriefing, calendarFrom } from "./briefing.ts";
+import { NewsService } from "./news/service.ts";
+import { newsRoutes } from "./news/routes.ts";
+import { newsWhyFor } from "./news/why.ts";
 import { PromiseFinder } from "./promises.ts";
 import { PushService, pushKeysFromEnv, pushRoutes } from "./push.ts";
 import { companionRoutes } from "./reminders.ts";
@@ -98,6 +102,8 @@ export async function createApp(
     customPeople?: CustomPeopleService;
     /** Voice notes and calls of custom people, and voice copies. Tests pass one with fakes. */
     voiceCopy?: VoiceCopyService;
+    /** The news feed. Tests pass one with a fake network; nothing reaches a real news service. */
+    news?: NewsService;
   } = {},
 ) {
   await resolveComputerDeployment(config);
@@ -135,20 +141,40 @@ export async function createApp(
   agent.debo = debo;
   agent.connectors = connectors;
   agent.mcp = mcp;
-  // Reminders, birthdays and the morning check-in: in-app updates, and a push where it is on.
+  // A person's own AI keys (used below by the news "why" lines too).
+  const ownKeys = options.ownKeys ?? new OwnKeysService(db, { encryptionKey: config.encryptionKey });
+  // News on topics the person follows. Only the topic keywords go to the news services, and
+  // the server makes the call. Topic suggestions are read from their own entries here.
+  const people = new PeopleStore(db);
+  const news =
+    options.news ??
+    new NewsService({
+      db,
+      why: newsWhyFor(process.env, (owner) => ownKeys.secret(owner, "anthropic")),
+      names: async (owner) => (await people.list(owner)).map((p) => p.name),
+      texts: async (owner) => {
+        const memories = (await db.list<{ text?: string }>(owner, "memories")).map((m) => m.text ?? "");
+        const entries = debo.status().configured
+          ? (await debo.listEntries(owner, { limit: 50 }).catch(() => [])).map((e) => e.text)
+          : [];
+        return [...entries, ...memories];
+      },
+    });
+  agent.news = news;
+  // Reminders, birthdays, the morning check-in and briefing: in-app updates, and a push where it is on.
   const push = options.push ?? new PushService(db, pushKeysFromEnv());
   agent.companion = new CompanionJobs({
     db,
     debo,
     push,
     notify: (owner, title, body, key) => agent.notify(owner, title, body, undefined, key),
+    briefing: (owner, now) => buildBriefing({ db, news, calendar: calendarFrom(workspace) }, owner, { now }),
   });
   // Promises in a saved entry become suggestions; deleting the entry takes them away.
   const promises = new PromiseFinder(db, debo);
   agent.promises = promises;
   debo.onEntryChange = (owner, change) => promises.onEntryChange(owner, change);
   // A person's own AI keys, and the pictures Daksha makes (kept in the recordings bucket).
-  const ownKeys = options.ownKeys ?? new OwnKeysService(db, { encryptionKey: config.encryptionKey });
   agent.ownKeys = ownKeys;
   debo.ownAnthropicKey = (owner) => ownKeys.secret(owner, "anthropic");
   const images =
@@ -388,6 +414,7 @@ export async function createApp(
   app.route("/api/people", peopleRoutes(new PeopleStore(db)));
   app.route("/api/checkin", checkinRoutes({ db, debo }));
   app.route("/api/companion", companionRoutes(db));
+  app.route("/api/news", newsRoutes(news));
   app.route("/api/push", pushRoutes(push));
   const talkSettings = new TalkSettingsStore(db);
   const characterOf = async (owner: string) =>

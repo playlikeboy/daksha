@@ -37,6 +37,7 @@ import type { McpService } from "../mcp/service.ts";
 import type { ImageService } from "../images/service.ts";
 import type { CustomPeopleService } from "../custom-people/index.ts";
 import type { OwnKeysService } from "../own-keys/service.ts";
+import type { NewsService } from "../news/service.ts";
 import type { DeboService } from "../debo/service.ts";
 import type { WorkspaceService } from "../workspace.ts";
 import { assistantNameOf, BRAND } from "./brand.ts";
@@ -73,6 +74,8 @@ export class AgentService {
   images?: ImageService;
   /** Custom people the person made, and the upkeep that deletes leftover uploads. Set by createApp. */
   customPeople?: CustomPeopleService;
+  /** The news feed on topics the person follows. Its upkeep works behind the loop. Set by createApp. */
+  news?: NewsService;
   readonly worker: TaskWorker;
   readonly search: SearchService;
   private maintenance?: ReturnType<typeof setInterval>;
@@ -113,6 +116,8 @@ export class AgentService {
       await this.companion?.tick().catch((error) => backgroundFailure("companion upkeep", error));
       // Custom people: raw uploads never stay past 24 hours, and stuck readings are ended.
       await this.customPeople?.sweep().catch((error) => backgroundFailure("custom people upkeep", error));
+      // News feeds: a few old ones fetched again. It returns at once and works behind.
+      await this.news?.tick().catch((error) => backgroundFailure("news upkeep", error));
       // Recover publications if the process exited after committing an outcome.
       for (const { owner, value } of await this.db.scan<AgentTask>("tasks"))
         await this.publishOutcome(owner, value);
