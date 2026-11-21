@@ -12,7 +12,10 @@ Copied on 21 November 2026. The `LICENSE` here is the repository's MIT licence (
 |---|---|
 | `packages/skill/skill-filesystem/src/index.ts` (frontmatter parsing, root discovery, invocation fields) | `os/packages/skills/src/loader.ts` |
 | `packages/skill/skill/src/index.ts` (`isSkillName`, `renderSkillContent`, `escapeText`) | `os/packages/skills/src/loader.ts` |
+| `packages/guard/repeat-tool-reminder/src/index.ts` (reminder texts, canonical arguments, thresholds, include and exclude patterns) | `os/apps/server/src/engine/guards.ts` |
+| `packages/guard/timeout-policy/src/index.ts` (per-tool budget, the `TOOL_TIMEOUT` result) | `os/apps/server/src/engine/guards.ts` |
 
 ## Changed
 
 - Skills: the Cordis plugin, `ctx.fs`, file watchers and project/user skill roots are gone. Roots are a fixed list, every read must stay inside its root after symlinks, skill files over 256 KB are skipped, frontmatter is checked with zod, and the skill's text keeps its `<` and `>` (only the framing tags are neutralised).
+- Guards: one guard object per model run instead of a Cordis plugin per agent (a new user message starts a new run, which is the upstream reset). The repeat reminder is added to the tool result as `guardNotice` instead of an extra user message. Daksha's tools do not take a per-call signal, so a timed-out call is left to finish on its own and the model is told not to repeat it blindly; the computer tools have no limit here because they keep their own. The time limits are Daksha's own.

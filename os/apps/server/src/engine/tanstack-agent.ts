@@ -24,6 +24,7 @@ import {
 import { map, mergeMap, type Observable } from "rxjs";
 import { z } from "zod";
 import { MODEL_MAX_RETRIES } from "../config.ts";
+import { RepeatToolGuard, timeoutFor, withNotice, withTimeout } from "./guards.ts";
 
 /** OpenRouter speaks the OpenAI Chat Completions format: https://openrouter.ai/docs */
 export const OPENROUTER_BASE_URL = "https://openrouter.ai/api/v1";
@@ -143,6 +144,10 @@ export function tanstackAgent(options: {
   shouldContinue?: () => boolean;
   /** Said when the step limit, not the model, ends a run; otherwise the reply just stops. */
   stepLimitNote?: string;
+  /** Per-tool time limits; defaults to TOOL_TIMEOUTS in guards.ts. */
+  timeouts?: Readonly<Record<string, number | null>>;
+  /** Runs on every tool result before the model sees it, for example to spill a large one. */
+  keepResult?: (toolName: string, result: unknown) => Promise<unknown>;
 }) {
   const agent = new BuiltInAgent({
     type: "tanstack",
@@ -160,6 +165,22 @@ export function tanstackAgent(options: {
         !(typeof input.state === "object" && Object.keys(input.state).length === 0)
       )
         system += `\n## Application State\nThis is state from the application that you can edit by calling AGUISendStateSnapshot or AGUISendStateDelta.\n\`\`\`json\n${JSON.stringify(input.state, null, 2)}\n\`\`\`\n`;
+      // Guards for this run (engine/guards.ts): a reminder on the 3rd, 5th and 8th identical call
+      // in a row, and a time limit per tool. A new user message starts a new run and a new chain.
+      const repeat = new RepeatToolGuard();
+      const byName = new Map([...options.tools, ...stateTools].map((tool) => [tool.name, tool]));
+      const guarded = async (name: string, args: unknown) => {
+        const tool = byName.get(name);
+        if (!tool) throw new Error(`Unknown tool ${name}`);
+        const notice = repeat.observe(name, args);
+        const result = await withTimeout(
+          name,
+          async () => (tool.execute as (args: unknown) => Promise<unknown>)(args),
+          timeoutFor(name, options.timeouts),
+        );
+        const kept = options.keepResult ? await options.keepResult(name, result) : result;
+        return notice ? withNotice(kept, notice) : kept;
+      };
       return chat({
         adapter: adapter(options.model, options.apiKey),
         messages: converted.messages,
@@ -171,7 +192,7 @@ export function tanstackAgent(options: {
               name: tool.name,
               description: tool.description,
               inputSchema: tool.parameters as SchemaInput,
-            }).server((args) => (tool.execute as (args: unknown) => Promise<unknown>)(args)),
+            }).server((args) => guarded(tool.name, args)),
           ),
         ],
         agentLoopStrategy: (state) =>
