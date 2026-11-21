@@ -630,6 +630,30 @@ export default function PrivacyPage() {
               &ldquo;Delete my data&rdquo; removes every server you added. &ldquo;Download my data&rdquo; lists each
               server&rsquo;s name, address and tools, never its secret or sign-in.
             </>,
+            <>
+              The form suggests some known servers by name. A suggestion is a fixed list in the app: picking one only fills
+              in the form, and nothing is sent to that server until you add it.
+            </>,
+          ]}
+        />
+      </Section>
+
+      <Section id="skills-long-results" title="Skills and long results (new app)">
+        <List
+          items={[
+            <>
+              Skills are ready-made instructions that ship with the app (most come from the Hermes Agent project). They
+              are off until you turn one on. Daksha keeps only the list of skills you turned on. A skill runs nothing of
+              its own: it only tells the AI how to use the tools you already have.
+            </>,
+            <>
+              When a tool sends back a very long result, such as a long page of data from one of your own tool servers,
+              Daksha keeps the whole result in your own records for 7 days so the AI can read more of it, and sends the AI
+              only its start and end. Results the app shows as cards (mail, web search, the browser, pictures) are not
+              kept this way. These saved results are deleted after 7 days, are in &ldquo;Download my data&rdquo;, and are
+              removed with &ldquo;Delete my data&rdquo;. Very long chats are shortened only in what is sent to the AI;
+              your saved chat keeps every message.
+            </>,
           ]}
         />
       </Section>

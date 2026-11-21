@@ -51,6 +51,12 @@ You can also change settings just by asking: "talk a bit slower", "call yourself
 - **News on topics you follow.** Follow topics like cricket, AI or Bengaluru weather, in settings or by saying "follow cricket". Stories come from the GDELT Project and Hacker News, with one copy of each and a mix of sites. Only the topic word is sent to them, from Daksha's server.
 - **A briefing way of talking.** Pick "Briefing: crisp and calm" for short, calm answers, and say "brief me" for your day: calendar, reminders, birthdays, tasks and two stories. A morning briefing notification is there if you turn it on. Why and how: decision 37.
 
+## Skills and steadier long chats (new, early version)
+
+- **Skills you can turn on.** In Apps, Skills, turn on ready-made ways of working, such as a weekly review, meeting action items, inbox triage or answers with sources. They come from the Hermes Agent project by Nous Research (MIT), with credits kept, and are off until you turn them on.
+- **Suggested tool servers.** The "Add a tool server" form suggests known servers to connect. Adding one still waits for your yes.
+- **Steadier long chats.** Daksha reminds the model when it repeats the same step, stops a step that takes too long, and keeps very long chats and very long results small for the model, while your saved chat keeps everything. These parts are adapted from DeepSeek Harness (MIT). What came from where: decision 38.
+
 ## Where it lives
 
 | What | Address |

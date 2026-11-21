@@ -182,3 +182,11 @@ test("in a run, a long tool result reaches the model as a preview, and a long ch
   assert.ok(!body.includes("question 0 "), "the oldest turn was left out");
   assert.ok(body.includes("read it"));
 });
+
+test("spill: saved results go with the account", async () => {
+  const store = new SpillStore(db);
+  await store.save("eve", "find_app_tools", "x");
+  assert.equal((await db.list("eve", SPILL_KIND)).length, 1);
+  await db.removeOwner("eve");
+  assert.equal((await db.list("eve", SPILL_KIND)).length, 0);
+});

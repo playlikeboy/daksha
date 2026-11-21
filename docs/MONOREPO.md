@@ -23,7 +23,13 @@ daksha.life/   (the new app is in os/apps/mobile, served at my.daksha.life)
     llm/            @debo/llm       Model calls, key choice, usage counting
     ui/             @debo/ui        Shared components and tokens
     recall/         @debo/recall    Recall test set (tooling, never imported by apps)
+  third_party/      Code and skills copied from other open-source projects, one folder each,
+                    with the upstream LICENSE and a SOURCE.md (see third_party/README.md)
+  os/               The new app, its own workspace (apps/server, apps/mobile, packages/domain,
+                    packages/skills: the skill loader, which reads third_party/hermes-skills)
 ```
+
+How the two workspaces may grow into one, and other later moves, are in [STRUCTURE.md](./STRUCTURE.md).
 
 Planned folders hold only a README today. A folder becomes a real package when it gets a `package.json`.
 
