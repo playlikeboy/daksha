@@ -425,7 +425,7 @@ export async function createApp(
   );
   app.route("/api/custom-avatars", customAvatarRoutes(new CustomAvatarStore(db)));
   app.route("/api/account", accountRoutes(db, files, debo, connectors, mcp, ownKeys, images, customPeople, voiceCopy));
-  app.route("/api/connectors", connectorRoutes(connectors));
+  app.route("/api/connectors", connectorRoutes(connectors, (url) => publicUrlFor(config, url)));
   app.route("/api/mcp", mcpRoutes(mcp));
   app.route("/api/own-keys", ownKeyRoutes(ownKeys));
   app.route("/api/images", imageRoutes(images));

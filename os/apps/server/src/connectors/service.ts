@@ -280,7 +280,12 @@ export class ConnectorService {
     return { configured: true as const, connections, curated };
   }
 
-  async connect(owner: string, toolkit: string, to: "web" | "native" = "web") {
+  /**
+   * Starts connecting an app. `publicUrl` is the API address the app called through (one of
+   * PUBLIC_API_URL and its aliases), so the person comes back to the same address. Composio's
+   * return address is not registered anywhere; it is only where its page sends people after.
+   */
+  async connect(owner: string, toolkit: string, to: "web" | "native" = "web", publicUrl?: string) {
     this.limit(this.links, owner, "link");
     if (!SLUG.test(toolkit)) throw new AppError("I don't know that app.", 404);
     const info = (await this.catalogue()).find((item) => item.slug === toolkit);
@@ -298,7 +303,7 @@ export class ConnectorService {
       );
     // Old unfinished attempts only clutter the list. Remove them before starting a fresh one.
     for (const stale of mine) await this.backend.deleteAccount(stale.id).catch(() => undefined);
-    const callback = new URL("/api/connectors/callback", this.options.publicUrl);
+    const callback = new URL("/api/connectors/callback", publicUrl ?? this.options.publicUrl);
     callback.searchParams.set("toolkit", toolkit);
     callback.searchParams.set("to", to);
     try {

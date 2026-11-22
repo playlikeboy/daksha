@@ -1,8 +1,12 @@
 /**
  * The API answers on more than one address: api.daksha.life, and api.debo.life from before
  * the rename (see docs/DOMAINS.md). PUBLIC_API_URL is the one other services keep on file:
- * the Google, Composio and tool server callbacks, and signed file links, always use it. It
- * stays https://api.debo.life until those callbacks are registered on api.daksha.life.
+ * the Google and tool server callbacks, and signed file links, always use it. It stays
+ * https://api.debo.life until those callbacks are registered on api.daksha.life.
+ *
+ * Composio's return address is not kept on file anywhere: it is sent with each connect link.
+ * So, like sign-in, it follows the address the app called, and a person on my.daksha.life
+ * comes back to api.daksha.life.
  *
  * Sign-in is different. Its cookie belongs to the API address the app called through,
  * and a browser only keeps sending it when that address is the same site as the app.

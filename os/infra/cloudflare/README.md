@@ -118,7 +118,7 @@ Deploy the browser first: the API config has a service binding to it. The workfl
 
 ## Moving the callbacks to api.daksha.life later
 
-The app and its sign-in already use `api.daksha.life`. Only the callbacks still use `api.debo.life`. To move them: add `https://api.daksha.life/api/google/callback` to the Google OAuth client and `https://api.daksha.life/api/connectors/callback` to Composio (if it keeps an allowlist), then in `deploy-os.yml` swap them: `PUBLIC_API_URL=https://api.daksha.life` and `PUBLIC_API_URL_ALIASES=https://api.debo.life`. Tool servers (MCP) register themselves again for the new callback the next time a person signs in to one. Keep the `api.debo.life` route either way: installed phone apps use it.
+The app, its sign-in and the Composio return page already use `api.daksha.life`. Only the Google and tool server callbacks still use `api.debo.life`. To move them: add `https://api.daksha.life/api/google/callback` to the Google OAuth client, then in `deploy-os.yml` swap them: `PUBLIC_API_URL=https://api.daksha.life` and `PUBLIC_API_URL_ALIASES=https://api.debo.life`. Tool servers (MCP) register themselves again for the new callback the next time a person signs in to one. Keep the `api.debo.life` route either way: installed phone apps use it.
 
 ## Voice notes and videos
 

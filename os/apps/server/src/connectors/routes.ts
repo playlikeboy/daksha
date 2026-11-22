@@ -6,7 +6,11 @@ import type { ConnectorService } from "./service.ts";
  * Signed-in routes. The owner always comes from the session (`c.get("owner")`), never from
  * the request, so one person cannot name another person's connections.
  */
-export function connectorRoutes(service: ConnectorService) {
+export function connectorRoutes(
+  service: ConnectorService,
+  /** The public API address for a request (the alias it came in on, or PUBLIC_API_URL). */
+  publicUrlFor?: (requestUrl: string) => string,
+) {
   const app = new Hono<{ Variables: { owner: string } }>();
   app.get("/", async (c) => c.json(await service.overview(c.get("owner"))));
   app.get("/search", async (c) => {
@@ -30,7 +34,12 @@ export function connectorRoutes(service: ConnectorService) {
     const body = z
       .object({ to: z.enum(["web", "native"]).optional() })
       .parse(await c.req.json().catch(() => ({})));
-    const link = await service.connect(c.get("owner"), c.req.param("toolkit"), body.to);
+    const link = await service.connect(
+      c.get("owner"),
+      c.req.param("toolkit"),
+      body.to,
+      publicUrlFor?.(c.req.url),
+    );
     return c.json(link, 201);
   });
   app.delete("/:id", async (c) => {

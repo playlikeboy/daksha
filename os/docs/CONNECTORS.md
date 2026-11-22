@@ -50,7 +50,7 @@ Each Daksha person is exactly one Composio user: their **owner id** (a Neon Auth
 | `GET /api/connectors/search?q=&category=&offset=&limit=` | Search or browse the whole catalogue. Apps that can be connected come first. Returns `items`, `total`, `nextOffset` (null at the end) and, on the first page, `categories`. `limit` is 1 to 50 (default 20). With no `q` it is every app. |
 | `POST /api/connectors/:toolkit/connect` | Starts a connection. Returns Composio's hosted link. Body `{ "to": "web" \| "native" }`. |
 | `DELETE /api/connectors/:id` | Disconnects and really deletes the connected account at Composio. |
-| `GET /api/connectors/callback` | Public. Where Composio sends people after sign-in. Fixed words only; changes nothing. |
+| `GET /api/connectors/callback` | Public. Where Composio sends people after sign-in, on the API address the app called. Fixed words only; changes nothing. |
 | `DELETE /api/account` | Also deletes every connected account the person has at Composio, before anything else is removed. |
 | `GET /api/account/export` | Adds `connectedApps`: app, state and date. Never a token. |
 
@@ -103,7 +103,7 @@ Composio bills the project (Daksha), not each person. Sources: [composio.dev/pri
 
 1. In the [Composio dashboard](https://dashboard.composio.dev) open Platform, choose the project, and copy the project API key (`COMPOSIO_API_KEY`). Set it as a GitHub secret named `COMPOSIO_API_KEY`. It is optional: if the secret is empty the deploy still works and the feature says it is not set up.
 2. No auth configs are needed for the 128 managed apps. For anything else, add an auth config with your own OAuth app, then expect the new app to appear as connectable only after Daksha is changed to look for it. Today Daksha lists only managed apps as connectable.
-3. **Callback address.** Daksha asks Composio to send people back to `https://api.daksha.life/api/connectors/callback` (it is `PUBLIC_API_URL` plus that path). If the dashboard has a list of allowed redirect or callback URLs for the project, add that address.
+3. **Callback address.** Composio keeps no return address on file: Daksha sends one with each connect link. It is the API address the app called plus `/api/connectors/callback`, so the app at `my.daksha.life` sends people back to `https://api.daksha.life/api/connectors/callback`, and older phone apps to `https://api.debo.life/api/connectors/callback` (`PUBLIC_API_URL`, and its aliases in `PUBLIC_API_URL_ALIASES`; any other host gets `PUBLIC_API_URL`). Composio's docs describe no allowlist. If the dashboard ever shows a list of allowed redirect or callback URLs for the project, add both addresses.
 4. For phones, the in-app browser returns to `debo://connectors`. The app scheme `debo` is already set in `app.json`. Adding `expo-web-browser` needs a new native build.
 5. Optional: Composio's Firewall (blocks prompt injection in tool results) is a paid-plan feature and is not used; Daksha's own wrapper and review flow do the work.
 6. Privacy page: `apps/web/src/app/privacy/page.tsx` says what Composio holds. Keep it true if the setup changes.

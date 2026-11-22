@@ -87,8 +87,9 @@ jobs:
           # The address built into the app, and where it signs in.
           echo "api=https://api.daksha.life" >> "$GITHUB_OUTPUT"
           echo "app=https://my.daksha.life" >> "$GITHUB_OUTPUT"
-          # PUBLIC_API_URL stays on api.debo.life for now: the Google, Composio and tool server
-          # callbacks are built from it and are registered with those services on that address.
+          # PUBLIC_API_URL stays on api.debo.life for now: the Google and tool server callbacks are
+          # built from it and are registered with those services on that address. (Composio's return
+          # page follows the address the app called, so the app gets api.daksha.life.)
           # api.debo.life also keeps serving the phone apps that were installed before the rename.
           echo "callback_api=https://api.debo.life" >> "$GITHUB_OUTPUT"
           # The app's address from before the rename. Its Worker sends every request on to
