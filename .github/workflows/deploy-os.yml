@@ -104,6 +104,10 @@ jobs:
         working-directory: os
         env:
           EXPO_PUBLIC_API_URL: ${{ steps.urls.outputs.api }}
+          # Tried when the main address does not answer (the same API on its old address).
+          EXPO_PUBLIC_API_URL_FALLBACK: ${{ steps.urls.outputs.callback_api }}
+          # People sign in with Neon Auth here: never show the access-key screen for local installs.
+          EXPO_PUBLIC_AUTH_MODE: neon
         run: |
           pnpm build:web
           # Guard: the API address must be inside the exported JavaScript (a stale cache would hide it).

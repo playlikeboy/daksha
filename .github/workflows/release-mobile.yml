@@ -54,6 +54,10 @@ permissions:
 env:
   # The API address is baked into the app at build time.
   EXPO_PUBLIC_API_URL: https://api.daksha.life
+  # Tried when the main address does not answer (the same API on its old address).
+  EXPO_PUBLIC_API_URL_FALLBACK: https://api.debo.life
+  # People sign in with Neon Auth: never show the access-key screen meant for local installs.
+  EXPO_PUBLIC_AUTH_MODE: neon
 
 jobs:
   android:

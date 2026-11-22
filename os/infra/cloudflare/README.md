@@ -31,7 +31,7 @@ The API imports TypeScript source from the repo root (`@debo/db`, `@debo/llm`, `
 
 ## Sign-in: Neon Auth
 
-The API runs with `AUTH_MODE=neon`. It needs `NEON_AUTH_BASE_URL` and `NEON_AUTH_JWKS_URL`, the same values the web app uses. The shared access key (`OPENFUSE_ACCESS_KEY`) is not used. The app does not need its own Neon variable: it asks `GET /api/health` for the Neon Auth address. The Expo web build needs only `EXPO_PUBLIC_API_URL`, which the workflow sets.
+The API runs with `AUTH_MODE=neon`. It needs `NEON_AUTH_BASE_URL` and `NEON_AUTH_JWKS_URL`, the same values the web app uses. The shared access key (`OPENFUSE_ACCESS_KEY`) is not used. The app does not need its own Neon variable: it asks `GET /api/health` for the Neon Auth address. The Expo web build needs `EXPO_PUBLIC_API_URL`, and the workflow also sets `EXPO_PUBLIC_API_URL_FALLBACK` (tried when the first address does not answer) and `EXPO_PUBLIC_AUTH_MODE=neon` (never show the access-key screen).
 
 **Owner step, before anyone can sign in:** add the app's origin, `https://debo-os-app.<account>.workers.dev`, to the trusted origins of Daksha's Neon Auth project (Neon console, the project's Auth settings). Without it, the browser's sign-in call is refused. Do the same for any custom domain later. See `os/docs/AUTH.md`.
 
