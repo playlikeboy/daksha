@@ -33,8 +33,8 @@ export function More() {
     <Section id="more" tone="band">
       <SectionHead
         id="more"
-        title={`And a few more things ${BRAND} does`}
-        lead="These parts are new. They work in the app today, but have had little real-world testing."
+        title={`Even more to make your days easier`}
+        lead="New, and already working in the app today. They are still early, so expect a few rough edges."
       />
       <div className="bento">
         <Tile id="apps" className="tile--apps" icon={<PlugIcon />} title="Connect your apps" index={0}>

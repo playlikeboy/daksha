@@ -37,7 +37,7 @@ Daksha is early. Do not treat any feature as finished until you have checked it 
 
 ## Custom people (new, early version)
 
-You can make your own people to talk to, in chat or on a call: a friend, someone in your family, someone you miss, or a character you invent. This part is new and has had little real-world testing.
+You can make up to ten people of your own to talk to, in chat or on a call: a friend, someone in your family, someone you miss, or a character you invent. It works in three steps: import their words or describe them, shape their face and voice, then talk any time. You can use it to practise a hard conversation or a pitch, to have a friendly companion, to keep a loved one's way of talking close, to practise a language, as a study buddy or coach, for invented characters, and for a gentle bedtime storyteller that a parent uses with their child. This part is new and has had little real-world testing.
 
 - **Build them from a description, or from your own files.** Add a WhatsApp chat export, photos, videos, voice notes and call recordings. Daksha separates who is speaking in recordings (Cloudflare Workers AI, Deepgram Nova-3) and keeps only that person's words.
 - **Copy their voice, if you choose.** Only with their permission, or if you are close family and they have died. Never a public figure. A copied voice is made with Cartesia and, for now, needs a Cartesia key.

@@ -1,16 +1,12 @@
 import type { Metadata, Viewport } from "next";
 import type { ReactNode } from "react";
-// Fonts are served from our own domain (self-hosted through Next), so a
-// visitor's browser makes no request to Google. Bricolage Grotesque sets the
-// headings; Figtree sets everything else.
-import "@fontsource-variable/bricolage-grotesque/index.css";
-import "@fontsource/figtree/latin-400.css";
-import "@fontsource/figtree/latin-500.css";
-import "@fontsource/figtree/latin-600.css";
-import "@fontsource/figtree/latin-700.css";
 import "./site.css";
 import { BRAND, SITE_URL } from "../brand";
 import { RevealScript, ThemeScript } from "../components/scripts";
+// Fonts are served from our own domain (self-hosted through Next), so a
+// visitor's browser makes no request to Google. Bricolage Grotesque sets the
+// headings; Figtree sets everything else. See fonts.ts.
+import { bricolage, figtree } from "./fonts";
 
 const TITLE = `${BRAND}: a friendly assistant that remembers your life`;
 const DESCRIPTION = `Write things down or say them out loud. Ask ${BRAND} about your own life and see the source of every answer. You can see, fix, download and delete everything.`;
@@ -46,8 +42,8 @@ export const viewport: Viewport = {
   width: "device-width",
   initialScale: 1,
   themeColor: [
-    { media: "(prefers-color-scheme: light)", color: "#fbf6ef" },
-    { media: "(prefers-color-scheme: dark)", color: "#15110e" },
+    { media: "(prefers-color-scheme: light)", color: "#f3f5fa" },
+    { media: "(prefers-color-scheme: dark)", color: "#0f1222" },
   ],
 };
 
@@ -55,7 +51,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
   return (
     // The theme script sets data-theme and the "js" class before React runs,
     // so React must not warn that <html> changed.
-    <html lang="en" suppressHydrationWarning>
+    <html lang="en" className={`${figtree.variable} ${bricolage.variable}`} suppressHydrationWarning>
       <head>
         <ThemeScript />
       </head>

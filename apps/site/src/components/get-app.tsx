@@ -10,7 +10,7 @@ export function GetApp() {
         id="get-app"
         align="center"
         title="Get the app"
-        lead={`${BRAND} works in any web browser, on a computer or a phone. There is also an early app for Android phones.`}
+        lead={`${BRAND} works in any web browser, on a computer or a phone. Android phones can try an early app too.`}
       />
       <div className="platforms">
         <article className="platform" data-reveal="" style={stagger(0)}>
@@ -20,7 +20,8 @@ export function GetApp() {
           <h3 className="h3">Android</h3>
           <p className="body-lg">
             Download the app file and open it on your phone. Android will ask you to allow installs from your browser.
-            It is not on Google Play yet, and nobody has tried it on a real phone yet, so expect rough edges.
+            It is an early test build: not on Google Play yet, and not yet tried on a real phone, so expect a few rough
+            edges.
           </p>
           <div className="btn-row">
             <a className="btn btn--primary" href={ANDROID_APK_URL}>
@@ -38,7 +39,7 @@ export function GetApp() {
           </div>
           <h3 className="h3">iPhone</h3>
           <p className="body-lg">
-            The iPhone app is not available yet. {BRAND} works in your phone&rsquo;s browser at my.daksha.life. In Safari,
+            There is no iPhone app yet, but {BRAND} works in your phone&rsquo;s browser at my.daksha.life. In Safari,
             tap Share, then Add to Home Screen, and it sits on your home screen like an app.
           </p>
           <div className="btn-row">

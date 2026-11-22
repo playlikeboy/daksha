@@ -12,11 +12,12 @@ export function Closing() {
           Start with one line about today
         </h2>
         <p className="lead">
-          Write it down. Ask about it later. {BRAND} will show you where the answer came from. It is free to start.
+          Write one line today. Ask about it next week, or next year, and {BRAND} will show you exactly where the answer
+          came from. It is free to start.
         </p>
         <div className="btn-row">
           <a className="btn btn--primary" href={START_URL}>
-            Open {BRAND}
+            Start free
             <ArrowIcon />
           </a>
           <a className="btn btn--secondary" href="#get-app">

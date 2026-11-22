@@ -5,7 +5,7 @@ import { Section, SectionHead } from "./section";
 export const QUESTIONS = [
   {
     q: `Is ${BRAND} finished?`,
-    a: `No. ${BRAND} is an early version. Accounts, the journal, asking about your life, memories and talking out loud work today. Voice and video notes, connecting your apps, reminders, pictures and your own keys work too, but they are new and have had little real-world testing.`,
+    a: `Not yet. ${BRAND} is an early version. Accounts, the journal, asking about your life, memories and talking out loud work today. Voice and video notes, connecting your apps, reminders, pictures, your own people and your own keys work too, but they are new and have had little real-world testing.`,
   },
   {
     q: "Is it free?",

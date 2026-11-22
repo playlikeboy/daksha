@@ -29,8 +29,8 @@ export function Trust() {
     <Section id="trust">
       <SectionHead
         id="trust"
-        title="It is your life. You stay in charge of it."
-        lead={`${BRAND} keeps personal things, so here is what happens to them, in plain words.`}
+        title="Your life, your data. You stay in charge."
+        lead={`${BRAND} keeps personal things, so here is exactly what happens to them, in plain words.`}
       />
       <ul className="controls" role="list">
         {CONTROLS.map((control, index) => (
@@ -49,12 +49,12 @@ export function Trust() {
         ))}
       </div>
       <div className="limits" data-reveal="">
-        <h3 className="h3">Honest limits</h3>
+        <h3 className="h3">Honest about the limits</h3>
         <p className="body-lg" style={{ color: "var(--ink)", maxWidth: "68ch" }}>
-          {BRAND} is an early version. It is not end-to-end encrypted, because its servers have to read your entries
-          to search them. We do not sell your data, show ads, or train AI on it ourselves. Some companies that help{" "}
-          {BRAND} may keep data for a time, and we have not yet confirmed all of their rules. The privacy page says
-          which.
+          {BRAND} is new, and we would rather be clear than clever. We never sell your data, show ads, or train AI on
+          it ourselves. Your entries are not end-to-end encrypted, because {BRAND}&rsquo;s servers read them to search
+          and answer. Some companies that help {BRAND} may keep data for a time, and we have not yet confirmed all of
+          their rules. The privacy page names each one.
         </p>
         <a className="btn btn--primary" href={PRIVACY_URL}>
           Read how {BRAND} handles your data

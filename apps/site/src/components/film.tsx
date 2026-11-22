@@ -14,7 +14,7 @@ export function Film() {
         id="film"
         badge={<Badge>About a minute</Badge>}
         title={`See ${BRAND} in a minute`}
-        lead={`A short animated film. You write down a day, ask about your own life and see the entries each answer came from. Then you fix what ${BRAND} knows, talk to it, and say yes before anything changes in your apps. It has music and sound effects but no speech.`}
+        lead={`A short animated film: write down a day, ask about it, and see where each answer came from. Then fix what ${BRAND} knows, talk out loud, and say yes before anything changes in your apps. Music and sound, no speech.`}
       />
       {/* Older links point at #demo. */}
       <span id="demo" />

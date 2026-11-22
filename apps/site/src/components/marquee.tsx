@@ -8,6 +8,7 @@ const THINGS = [
   "Ask about your past",
   "See every source",
   "Talk out loud",
+  "Make your own people",
   "Fix a memory",
   "Forget a memory",
   "Get birthday reminders",
