@@ -21,7 +21,8 @@ const { chromium } = require("playwright");
 
 const out = resolve(process.argv[2] ?? join(root, "artifacts/site-media"));
 const what = process.argv[3] ?? "all";
-const dist = join(root, "apps/mobile/dist/web");
+// UI_SHOTS_DIST points at another exported build.
+const dist = resolve(process.env.UI_SHOTS_DIST ?? join(root, "apps/mobile/dist/web"));
 if (!existsSync(join(dist, "index.html")))
   throw new Error("Export the web app first: see docs/UI-AUDIT.md, 'Screenshots with made-up content'.");
 
@@ -65,7 +66,8 @@ async function open(path, { keepWelcome = false } = {}) {
     permissions: ["microphone", "camera"],
   });
   const page = await context.newPage();
-  await page.goto(`http://127.0.0.1:${port}${path}`, { waitUntil: "networkidle" });
+  // Some screens keep asking the demo API (Apps), so the network may never go quiet.
+  await page.goto(`http://127.0.0.1:${port}${path}`, { waitUntil: "networkidle", timeout: 20_000 }).catch(() => {});
   await page.waitForTimeout(2500);
   if (!keepWelcome) {
     const skip = page.getByRole("button", { name: /^skip the welcome$/i }).first();
@@ -129,6 +131,7 @@ async function fillPerson(page) {
 
 const shots = [
   { name: "welcome", path: "/chat", keepWelcome: true },
+  { name: "home", path: "/home" },
   { name: "chat", path: "/chat" },
   { name: "journal", path: "/journal" },
   { name: "journal-list", path: "/journal", steps: (p) => wheel(p, 560) },
@@ -253,6 +256,38 @@ const clips = [
     keepWelcome: true,
     run: async (p, r) => {
       await r.hold(2.4);
+    },
+  },
+  {
+    name: "home",
+    path: "/home",
+    run: async (p, r) => {
+      await blur(p);
+      await r.hold(1.8);
+      await r.scroll(520, 30);
+      await r.hold(1.6);
+    },
+  },
+  {
+    name: "chat",
+    path: "/chat",
+    run: async (p, r) => {
+      await blur(p);
+      await r.hold(1.2);
+      await p.getByRole("textbox", { name: /^Message / }).last().click({ timeout: 6000 });
+      await r.hold(0.3);
+      await r.type("What did I plan with Sam for Sunday?", 2);
+      await r.hold(1.8);
+    },
+  },
+  {
+    name: "apps",
+    path: "/apps",
+    run: async (p, r) => {
+      await blur(p);
+      await r.hold(1.6);
+      await r.scroll(420, 28);
+      await r.hold(1.8);
     },
   },
   {
