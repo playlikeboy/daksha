@@ -6,7 +6,7 @@ November 2026. The app in `os/apps/mobile` moved from the warm paper look to a l
 
 ## Pictures
 
-All pictures use the made-up demo content, light only. Phone is 390x844, desktop is 1440x900.
+All pictures use the made-up demo content, light only. Phone is 390x844, small phone 360x780, desktop is 1440x900.
 
 | Screen | Before | After |
 |---|---|---|
@@ -37,6 +37,30 @@ All pictures use the made-up demo content, light only. Phone is 390x844, desktop
 - **Journal, Memories, Tasks, Apps, People.** Pick up the new cards, buttons, titles (34px) and glows through the shared pieces in `src/ui.tsx`.
 - **Sign-in.** Glows behind it; on a wide screen the three plain lines about Daksha sit in a glass panel with pastel icon wells.
 - **Toast.** A pill with a lime check.
+
+## Less padding on phones (November 2026)
+
+A phone screenshot from the owner showed the talk settings sheet at about 360px wide: the sheet's padding, then a card's padding, then an inner card's padding, so the words ran in a narrow column with wide empty margins, the consent check box sat in the middle of a long label, and the sheet header took a lot of height. This is fixed in the shared pieces in `src/ui.tsx`, so every screen and sheet gets it:
+
+- **Phone gutter.** `screenPadding.phone` is 16px (was 20). On a phone a `Card` has 12px sides and 16px top and bottom (was 20 all round), so card text starts 28px from the edge of the screen. `usePhone()` (below 600px) says which layout applies.
+- **No card in a card.** `Card` knows where it is drawn (a small context set by `Sheet` and by `Card` itself). A card inside another card, and a section card inside a sheet on a phone, drops its fill, shadow and side padding and becomes a plain section with a line on top (`s.cardFlat`). In a sheet on a phone, text now starts 16px from the edge, however deep it is. A nested card that has its own fill (a note or a warning) keeps it, as a small 12px box (`s.cardTinted`). `Card flat` asks for the plain look anywhere. On a wide screen sheet sections stay raised cards; only cards inside cards go flat.
+- **Sheets.** On a phone the header is short: 18px title, the subtitle in small print, 16px sides, and the close button lined up with the first line. The content has 16px sides (was 20).
+- **Check boxes.** `CheckRow` puts the box on the first line of a long label, with a 10px gap, instead of in the middle of it.
+- **Section headings** have 8px under them (was 20), so a card's heading sits with its content.
+- **Bottom tabs.** Screens already end with room for the floating tabs. On the web the screen also sets `scroll-padding` to the tabs' height and the top bar's height, so a button the browser scrolls to (with Tab, or when it appears) stops above the tabs, not behind them. The Apps load error's "Try again" is the case that showed it.
+- Also: sign-in and the entry page use the phone card padding, and the chat box's gaps are tighter so "Ask anything…" stays on one line at 360px.
+
+| Screen | Before (390) | After (390) |
+|---|---|---|
+| Talk settings, a person's call recording | [before](before-talk-settings-people-phone.webp) | [after](after-talk-settings-people-phone.webp) |
+| Talk settings, top | [before](before-talk-settings-phone.webp) | [after](after-talk-settings-phone.webp) |
+| Talk settings at 360 | [before](before-talk-settings-people-small.webp) | [after](after-talk-settings-people-small.webp) |
+| Talk settings, desktop | [before](before-talk-settings-desktop.webp) | [after](after-talk-settings-desktop.webp) |
+| Menu | [before](before-menu-tight-phone.webp) | [after](after-menu-tight-phone.webp) |
+| Apps, list can't load, at 360, after the browser scrolls to "Try again" | [before](before-apps-error-small.webp) | [after](after-apps-error-small.webp) |
+| What Daksha knows at 360 | [before](before-knows-small.webp) | [after](after-knows-small.webp) |
+
+The call recording in those pictures is made up: the shot script answers the recordings request in the browser, because the demo API cannot take recordings.
 
 ## Tokens
 
@@ -101,7 +125,8 @@ Follow "Screenshots with made-up content" in `os/docs/UI-AUDIT.md` (demo API, th
 node scripts/ui-genie-shots.mjs ~/tmp/genie after
 ```
 
-- `SHOTS=home,chat` takes only those screens; `SIZES=phone` only one size.
+- `SHOTS=home,chat` takes only those screens; `SIZES=phone,small` only those sizes (`small` is 360x780).
+- `talk-settings-people` makes a person called Coach Sam, so restart the demo before taking it again. `apps-error` makes the Apps list fail in the browser only.
 - `UI_SHOTS_DIST=/path/to/older/dist/web` photographs another build, for "before" pictures.
 - `UI_SHOTS_PORT` changes the local port (default 8091). `UI_SHOTS_CHROMIUM` points at a browser if Playwright has none.
 - Restart the demo between full runs, and keep `chat-messages` last: the scripted agent's open requests can slow the next screen.
