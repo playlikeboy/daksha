@@ -10,38 +10,50 @@
 
 /* ---------- Tokens ---------- */
 
+/* The app's pastel look (os/apps/mobile, the "Genie" redesign): a cool mist page,
+   white and glass cards, deep ink text, Daksha blue for the main action, and soft
+   pastel glows behind the hero. Ink and slate text pass AA on every pastel. */
 :root {
   color-scheme: light;
-  --bg: #fbf6ef;
-  --bg-band: #f4ece1;
+  --bg: #f3f5fa;
+  --bg-band: #e9edf7;
   --surface: #ffffff;
-  --surface-2: #fdfaf5;
-  --ink: #221b16;
-  --ink-2: #5b5047;
-  --line: #e7dccd;
-  --line-strong: #d4c5b2;
+  --surface-2: #f8f9fd;
+  --glass: rgb(255 255 255 / 0.78);
+  --ink: #161a2b;
+  --ink-2: #4d5366;
+  --line: #e2e6ef;
+  --line-strong: #c9d0e0;
+  --blue: #3451d1; /* Daksha blue: white on it is 6.5:1, and as text on --bg it is 6.3:1 */
+  --blue-soft: #e3e9ff;
   --tomato: #e5392b;
-  --tomato-ink: #b8281c; /* tomato for text and small marks: 5.6:1 on --bg */
-  --tomato-soft: #fde3dc;
+  --tomato-ink: #b8281c; /* tomato for text and small marks: 5.9:1 on --bg */
+  --tomato-soft: #ffe4ea;
   --leaf: #2f7d33;
-  --leaf-soft: #e2f1dc;
-  --leaf-ink: #22612a;
-  --sky-soft: #e4ecfb;
-  --sun-soft: #fdf0c8;
-  --btn: #221b16;
-  --btn-ink: #fbf6ef;
-  --shadow-1: 0 1px 2px rgb(60 40 20 / 0.06), 0 8px 24px -12px rgb(60 40 20 / 0.18);
-  --shadow-2: 0 2px 6px rgb(60 40 20 / 0.06), 0 30px 60px -28px rgb(60 40 20 / 0.35);
-  --focus: #1d4ed8;
+  --leaf-soft: #dcf4e6;
+  --leaf-ink: #1f5f27;
+  --sky-soft: #e3e9ff;
+  --sun-soft: #fff3c9;
+  --lilac-soft: #ece6ff;
+  --peach-soft: #ffe8da;
+  --glow-1: #c3d1ff;
+  --glow-2: #e2d4ff;
+  --glow-3: #ffd6e2;
+  --glow-4: #c9f0dc;
+  --btn: #3451d1;
+  --btn-ink: #ffffff;
+  --shadow-1: 0 1px 2px rgb(22 26 43 / 0.06), 0 8px 24px -12px rgb(22 26 43 / 0.2);
+  --shadow-2: 0 2px 6px rgb(22 26 43 / 0.06), 0 30px 60px -28px rgb(22 26 43 / 0.32);
+  --focus: #3451d1;
 
-  --font-display: "Bricolage Grotesque Variable", "Figtree", ui-sans-serif, system-ui, sans-serif;
-  --font-body: "Figtree", ui-sans-serif, system-ui, sans-serif;
+  --font-display: var(--font-bricolage), ui-sans-serif, system-ui, sans-serif;
+  --font-body: var(--font-figtree), ui-sans-serif, system-ui, sans-serif;
 
   --max: 1180px;
   --gutter: clamp(16px, 4vw, 40px);
   --radius-s: 12px;
   --radius-m: 20px;
-  --radius-l: 32px;
+  --radius-l: 28px;
   --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
   --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
 }
@@ -49,53 +61,71 @@
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme="light"]) {
     color-scheme: dark;
-    --bg: #15110e;
-    --bg-band: #1c1713;
-    --surface: #231d18;
-    --surface-2: #1f1a16;
-    --ink: #f7efe5;
-    --ink-2: #c2b5a7;
-    --line: #362d26;
-    --line-strong: #4a3f36;
+    --bg: #0f1222;
+    --bg-band: #141831;
+    --surface: #1b2039;
+    --surface-2: #171b31;
+    --glass: rgb(27 32 57 / 0.74);
+    --ink: #eef1fa;
+    --ink-2: #b0b6cb;
+    --line: #2a3152;
+    --line-strong: #3b4469;
+    --blue: #a9b8ff;
+    --blue-soft: #222b55;
     --tomato: #ff6a55;
     --tomato-ink: #ff8f7e;
-    --tomato-soft: #3a1d18;
+    --tomato-soft: #3a2230;
     --leaf: #7cc47f;
-    --leaf-soft: #1d3220;
+    --leaf-soft: #1b3328;
     --leaf-ink: #a6dca8;
-    --sky-soft: #1c2433;
-    --sun-soft: #33291a;
-    --btn: #f7efe5;
-    --btn-ink: #15110e;
+    --sky-soft: #1f2850;
+    --sun-soft: #352f1c;
+    --lilac-soft: #2a2350;
+    --peach-soft: #3a2822;
+    --glow-1: #24326c;
+    --glow-2: #382865;
+    --glow-3: #45223d;
+    --glow-4: #173d37;
+    --btn: #a9b8ff;
+    --btn-ink: #0f1222;
     --shadow-1: 0 1px 2px rgb(0 0 0 / 0.4), 0 8px 24px -12px rgb(0 0 0 / 0.6);
     --shadow-2: 0 2px 6px rgb(0 0 0 / 0.35), 0 30px 60px -28px rgb(0 0 0 / 0.8);
-    --focus: #93b4ff;
+    --focus: #a9b8ff;
   }
 }
 
 :root[data-theme="dark"] {
   color-scheme: dark;
-  --bg: #15110e;
-  --bg-band: #1c1713;
-  --surface: #231d18;
-  --surface-2: #1f1a16;
-  --ink: #f7efe5;
-  --ink-2: #c2b5a7;
-  --line: #362d26;
-  --line-strong: #4a3f36;
+  --bg: #0f1222;
+  --bg-band: #141831;
+  --surface: #1b2039;
+  --surface-2: #171b31;
+  --glass: rgb(27 32 57 / 0.74);
+  --ink: #eef1fa;
+  --ink-2: #b0b6cb;
+  --line: #2a3152;
+  --line-strong: #3b4469;
+  --blue: #a9b8ff;
+  --blue-soft: #222b55;
   --tomato: #ff6a55;
   --tomato-ink: #ff8f7e;
-  --tomato-soft: #3a1d18;
+  --tomato-soft: #3a2230;
   --leaf: #7cc47f;
-  --leaf-soft: #1d3220;
+  --leaf-soft: #1b3328;
   --leaf-ink: #a6dca8;
-  --sky-soft: #1c2433;
-  --sun-soft: #33291a;
-  --btn: #f7efe5;
-  --btn-ink: #15110e;
+  --sky-soft: #1f2850;
+  --sun-soft: #352f1c;
+  --lilac-soft: #2a2350;
+  --peach-soft: #3a2822;
+  --glow-1: #24326c;
+  --glow-2: #382865;
+  --glow-3: #45223d;
+  --glow-4: #173d37;
+  --btn: #a9b8ff;
+  --btn-ink: #0f1222;
   --shadow-1: 0 1px 2px rgb(0 0 0 / 0.4), 0 8px 24px -12px rgb(0 0 0 / 0.6);
   --shadow-2: 0 2px 6px rgb(0 0 0 / 0.35), 0 30px 60px -28px rgb(0 0 0 / 0.8);
-  --focus: #93b4ff;
+  --focus: #a9b8ff;
 }
 
 /* ---------- Base ---------- */
@@ -164,8 +194,8 @@ a {
 }
 
 ::selection {
-  background: var(--tomato);
-  color: #fff;
+  background: var(--blue);
+  color: var(--btn-ink);
 }
 
 :focus-visible {
@@ -503,7 +533,7 @@ p {
   }
 }
 
-@media (max-width: 860px) {
+@media (max-width: 1040px) {
   .site-nav__links {
     display: none;
   }
@@ -513,25 +543,40 @@ p {
 
 .hero {
   position: relative;
-  padding-block: clamp(28px, 6vw, 72px) clamp(56px, 8vw, 104px);
+  isolation: isolate;
+  padding-block: clamp(20px, 5vw, 64px) clamp(56px, 8vw, 104px);
   overflow: clip;
+}
+
+/* Soft pastel glows behind the hero, like the app's backdrop. Text sits on
+   them only where ink still passes AA (ink on the lightest pastel is over 14:1). */
+.hero__glow {
+  position: absolute;
+  inset: 0; /* no percentage offsets: they would move with the hero's height and count as layout shift */
+  z-index: -1;
+  background:
+    radial-gradient(38% 46% at 78% 30%, var(--glow-1), transparent 70%),
+    radial-gradient(30% 40% at 96% 74%, var(--glow-3), transparent 70%),
+    radial-gradient(34% 40% at 54% 86%, var(--glow-4), transparent 72%),
+    radial-gradient(40% 50% at 8% 8%, var(--glow-2), transparent 70%);
+  opacity: 0.9;
 }
 
 .hero__grid {
   display: grid;
-  grid-template-columns: minmax(0, 1.1fr) minmax(0, 0.9fr);
+  grid-template-columns: minmax(0, 1.12fr) minmax(0, 0.88fr);
   align-items: center;
   gap: clamp(24px, 5vw, 72px);
 }
 
 .hero__copy {
   display: grid;
-  gap: 28px;
+  gap: 24px;
   justify-items: start;
 }
 
 .hero__title {
-  font-size: clamp(2.875rem, 8vw, 6rem);
+  font-size: clamp(2.5rem, 10.5vw, 4.75rem);
   line-height: 0.98;
   letter-spacing: -0.035em;
   font-weight: 800;
@@ -541,9 +586,61 @@ p {
   display: block;
 }
 
-.hero__title em {
-  font-style: normal;
-  color: var(--tomato-ink);
+.hero__title-accent {
+  color: var(--blue);
+}
+
+.hero__sub {
+  max-width: 40ch;
+  font-size: clamp(1.125rem, 1.7vw, 1.375rem);
+  line-height: 1.5;
+  color: var(--ink-2);
+}
+
+.hero__actions {
+  margin-top: 4px;
+}
+
+.btn--large {
+  min-height: 56px;
+  padding: 0 28px;
+  font-size: 1.125rem;
+}
+
+/* Short labels never wrap, so the page does not jump when the web font
+   (narrower than the fallback) arrives. */
+.site-nav .btn,
+.hero__actions .btn {
+  white-space: nowrap;
+}
+
+.hero__promises {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.hero__promises li {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 36px;
+  padding: 4px 14px 4px 10px;
+  border-radius: 999px;
+  background: var(--glass);
+  border: 1px solid var(--line);
+  color: var(--ink);
+  font-size: 0.9375rem;
+  font-weight: 600;
+  -webkit-backdrop-filter: blur(12px);
+  backdrop-filter: blur(12px);
+}
+
+.hero__promises svg {
+  width: 18px;
+  height: 18px;
+  flex: none;
+  color: var(--blue);
 }
 
 .hero__note {
@@ -552,66 +649,92 @@ p {
 }
 
 .hero__note a {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 44px;
   font-weight: 600;
+  color: var(--ink);
   text-underline-offset: 3px;
+  vertical-align: middle;
 }
 
+.hero__note svg {
+  width: 18px;
+  height: 18px;
+}
+
+/* The app, in a phone. The frame holds the screenshot's shape (780x1688), so
+   nothing moves while the picture loads. */
 .hero__art {
   position: relative;
-  display: grid;
-  place-items: center;
-  aspect-ratio: 1;
   width: 100%;
-  max-width: 520px;
+  max-width: 500px;
   justify-self: center;
+  padding: 24px 0 32px;
 }
 
-.hero__disc {
-  position: absolute;
-  inset: 6%;
-  border-radius: 50%;
-  background: var(--tomato-soft);
+.hero__phone.phone {
+  width: min(320px, 68%);
+  margin-inline: auto;
+  rotate: 3deg;
 }
 
-.hero__ring {
-  position: absolute;
-  inset: 0;
-  border-radius: 50%;
-  border: 1.5px dashed var(--line-strong);
+.hero__screen {
+  border-radius: 34px;
+  overflow: hidden;
+  aspect-ratio: 780 / 1688;
+  background: var(--bg);
 }
 
-.hero__debo {
-  position: relative;
-  width: 64%;
+.hero__screen img {
+  width: 100%;
+  height: 100%;
+  border-radius: 0;
+  object-fit: cover;
+  background: transparent;
 }
 
 .float {
   position: absolute;
   z-index: 2;
-  max-width: min(280px, 70%);
+  max-width: min(260px, 62%);
   padding: 14px 16px;
   border-radius: var(--radius-m);
-  background: var(--surface);
+  background: var(--glass);
+  border: 1px solid color-mix(in srgb, var(--surface) 60%, transparent);
+  -webkit-backdrop-filter: saturate(1.4) blur(16px);
+  backdrop-filter: saturate(1.4) blur(16px);
   box-shadow: var(--shadow-2);
   font-size: 0.9375rem;
   line-height: 1.45;
+  color: var(--ink);
 }
 
 .float--question {
-  top: 4%;
-  left: -2%;
+  top: 14%;
+  left: 0;
   background: var(--btn);
   color: var(--btn-ink);
+  border-color: transparent;
   border-bottom-right-radius: 6px;
   font-weight: 600;
 }
 
 .float--answer {
-  right: -4%;
-  bottom: 6%;
+  right: 0;
+  bottom: 22%;
   display: grid;
   gap: 10px;
   border-bottom-left-radius: 6px;
+}
+
+.hero__debo {
+  position: absolute;
+  z-index: 3;
+  left: 4%;
+  bottom: 2%;
+  width: clamp(84px, 22%, 112px);
 }
 
 @media (max-width: 900px) {
@@ -619,21 +742,51 @@ p {
     grid-template-columns: 1fr;
   }
   .hero__art {
-    max-width: 400px;
-    margin-top: 8px;
-  }
-  .float--question {
-    left: 0;
-  }
-  .float--answer {
-    right: 0;
+    max-width: 420px;
+    padding-top: 8px;
   }
 }
 
-@media (max-width: 420px) {
+@media (max-width: 480px) {
+  .hero__copy {
+    gap: 20px;
+  }
+  .btn--large {
+    padding: 0 20px;
+  }
+  .hero__actions {
+    gap: 10px;
+  }
+  .hero__phone.phone {
+    width: 62%;
+  }
+  /* On a phone the promises are a quiet line, not three pills. */
+  .hero__promises {
+    gap: 4px 16px;
+  }
+  .hero__promises li {
+    min-height: 28px;
+    padding: 0;
+    background: none;
+    border: 0;
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
+  }
   .float {
+    max-width: 58%;
     font-size: 0.875rem;
     padding: 10px 12px;
+  }
+  .float--question {
+    top: 8%;
+  }
+  .float .chip {
+    font-size: 0.8125rem;
+    white-space: normal;
+  }
+  .hero__debo {
+    width: 76px;
+    left: 0;
   }
 }
 
@@ -743,7 +896,7 @@ p {
   width: 100%;
   padding: 10px;
   border-radius: 44px;
-  background: #1b1714;
+  background: #161a2b;
   box-shadow: var(--shadow-2);
 }
 
@@ -791,7 +944,7 @@ p {
   border-radius: 16px;
   background: var(--surface);
   border: 1px solid var(--line);
-  color: var(--tomato-ink);
+  color: var(--blue);
 }
 
 .step__icon svg {
@@ -897,7 +1050,7 @@ p {
 
 .showcase__dots span.is-active {
   width: 28px;
-  background: var(--tomato);
+  background: var(--blue);
 }
 
 /* The step being read lights up its icon, in step with the phone. */
@@ -910,9 +1063,9 @@ p {
 
 @media (min-width: 901px) {
   .step.is-active .step__icon {
-    background: var(--tomato);
+    background: var(--blue);
     border-color: transparent;
-    color: #fff;
+    color: var(--btn-ink);
     transform: scale(1.08) rotate(-4deg);
   }
 }
@@ -1087,6 +1240,254 @@ p {
   }
 }
 
+/* ---------- Your people ---------- */
+
+.people {
+  position: relative;
+  isolation: isolate;
+}
+
+.people__glow {
+  position: absolute;
+  inset: -80px 0 auto;
+  height: 720px;
+  z-index: -1;
+  background:
+    radial-gradient(36% 50% at 86% 18%, var(--glow-2), transparent 70%),
+    radial-gradient(30% 44% at 12% 62%, var(--glow-3), transparent 70%),
+    radial-gradient(32% 40% at 56% 92%, var(--glow-1), transparent 72%);
+  opacity: 0.7;
+  pointer-events: none;
+}
+
+.people__steps {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  padding: 0;
+  border-radius: var(--radius-l);
+  background: var(--glass);
+  border: 1px solid var(--line);
+  box-shadow: var(--shadow-1);
+  -webkit-backdrop-filter: saturate(1.3) blur(18px);
+  backdrop-filter: saturate(1.3) blur(18px);
+}
+
+.people__step {
+  display: grid;
+  align-content: start;
+  gap: 12px;
+  padding: clamp(24px, 3vw, 36px);
+}
+
+.people__step + .people__step {
+  border-left: 1px solid var(--line);
+}
+
+.people__step-top {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 4px;
+}
+
+.people__num {
+  display: inline-grid;
+  place-items: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 999px;
+  background: var(--btn);
+  color: var(--btn-ink);
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: 1.125rem;
+}
+
+.people__step-icon {
+  display: inline-grid;
+  place-items: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 999px;
+  background: var(--blue-soft);
+  color: var(--blue);
+}
+
+.people__step-icon svg {
+  width: 22px;
+  height: 22px;
+}
+
+.people__uses-title {
+  margin-top: clamp(56px, 8vw, 96px);
+  margin-bottom: 24px;
+  font-size: clamp(1.75rem, 3.2vw, 2.5rem);
+  letter-spacing: -0.03em;
+}
+
+.uses {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 16px;
+}
+
+.use {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 10px;
+  padding: clamp(22px, 2.6vw, 28px);
+  border-radius: 24px;
+  background: var(--sky-soft);
+  color: var(--ink);
+}
+
+.use p {
+  color: var(--ink-2);
+}
+
+.use p + p.use__try {
+  margin-top: auto;
+}
+
+.use--wide p:not(.use__try) {
+  max-width: 52ch;
+}
+
+.use--wide {
+  grid-column: span 2;
+}
+
+.use--sky {
+  background: var(--sky-soft);
+}
+.use--blush {
+  background: var(--tomato-soft);
+}
+.use--lilac {
+  background: var(--lilac-soft);
+}
+.use--mint {
+  background: var(--leaf-soft);
+}
+.use--butter {
+  background: var(--sun-soft);
+}
+.use--peach {
+  background: var(--peach-soft);
+}
+
+.use__icon {
+  display: inline-grid;
+  place-items: center;
+  width: 48px;
+  height: 48px;
+  border-radius: 999px;
+  background: var(--surface);
+  color: var(--ink);
+  box-shadow: var(--shadow-1);
+  margin-bottom: 6px;
+}
+
+.use__icon svg {
+  width: 24px;
+  height: 24px;
+}
+
+.use__title {
+  margin: 0;
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 1.375rem;
+  line-height: 1.15;
+  letter-spacing: -0.02em;
+  text-wrap: balance;
+}
+
+/* An example of what you might type, drawn like your own message in the app. */
+.use p.use__try {
+  align-self: flex-end;
+  max-width: 34ch;
+  margin-top: auto;
+  padding: 10px 16px;
+  border-radius: 20px 20px 6px 20px;
+  background: var(--btn);
+  color: var(--btn-ink);
+  font-weight: 500;
+  font-size: 1rem;
+  line-height: 1.45;
+}
+
+.people__promise {
+  display: grid;
+  grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr);
+  gap: clamp(24px, 4vw, 56px);
+  margin-top: 16px;
+  padding: clamp(24px, 4vw, 48px);
+  border-radius: var(--radius-l);
+  background: var(--surface);
+  border: 1px solid var(--line);
+}
+
+.people__promise-head {
+  display: grid;
+  align-content: start;
+  justify-items: start;
+  gap: 14px;
+}
+
+.people__promise-head .btn {
+  margin-top: 8px;
+}
+
+.people__promises {
+  display: grid;
+  gap: 14px;
+}
+
+.people__promises li {
+  display: grid;
+  grid-template-columns: 28px minmax(0, 1fr);
+  gap: 12px;
+  align-items: start;
+  font-size: 1.0625rem;
+  color: var(--ink);
+}
+
+.people__promises svg {
+  width: 28px;
+  height: 28px;
+  padding: 5px;
+  border-radius: 999px;
+  background: var(--leaf-soft);
+  color: var(--leaf-ink);
+}
+
+@media (max-width: 900px) {
+  .people__steps {
+    grid-template-columns: 1fr;
+  }
+  .people__step + .people__step {
+    border-left: 0;
+    border-top: 1px solid var(--line);
+  }
+  .uses {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .people__promise {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 600px) {
+  .uses {
+    grid-template-columns: 1fr;
+  }
+  .use--wide {
+    grid-column: auto;
+  }
+}
+
 /* ---------- More (bento) ---------- */
 
 .bento {
@@ -1251,7 +1652,7 @@ p {
 }
 
 .film-player__skin {
-  --media-accent-color: var(--tomato);
+  --media-accent-color: var(--blue);
   --media-accent-text-color: var(--btn-ink);
   --media-font-family: var(--font-body);
   --media-border-radius: var(--radius-l);
@@ -1530,7 +1931,7 @@ p {
 }
 
 .faq details[open] .faq__icon {
-  background: var(--tomato-soft);
+  background: var(--blue-soft);
 }
 
 .faq details[open] .faq__icon::after {
@@ -1557,7 +1958,11 @@ p {
   gap: 24px;
   padding: clamp(48px, 8vw, 96px) clamp(20px, 5vw, 64px);
   border-radius: clamp(28px, 4vw, 48px);
-  background: var(--tomato-soft);
+  background:
+    radial-gradient(60% 80% at 10% 0%, var(--glow-2), transparent 70%),
+    radial-gradient(50% 70% at 100% 100%, var(--glow-3), transparent 70%),
+    radial-gradient(60% 80% at 80% 10%, var(--glow-1), transparent 70%),
+    var(--surface);
   text-align: center;
   overflow: hidden;
 }
@@ -1623,31 +2028,37 @@ p {
 @media (prefers-reduced-motion: no-preference) {
   /* The hero title rises line by line when the page opens. */
   .hero__title .line {
-    animation: line-in 900ms var(--ease-out) both;
+    animation: line-in 800ms var(--ease-out) both;
   }
   .hero__title .line:nth-child(2) {
-    animation-delay: 120ms;
+    animation-delay: 110ms;
   }
   .hero__copy > :not(h1) {
-    animation: fade-up 800ms var(--ease-out) both;
-    animation-delay: 320ms;
+    animation: fade-up 700ms var(--ease-out) both;
+    animation-delay: 240ms;
   }
-  .hero__art {
-    animation: pop-in 1000ms var(--ease-spring) both;
-    animation-delay: 150ms;
+  /* The phone rises into place, then the question and answer pop in beside it. */
+  .hero__phone {
+    animation: phone-in 1100ms var(--ease-out) 120ms both;
   }
   .float--question {
     animation:
-      pop-in 700ms var(--ease-spring) 700ms both,
+      pop-in 700ms var(--ease-spring) 650ms both,
       bob 7s ease-in-out 1.4s infinite;
   }
   .float--answer {
     animation:
-      pop-in 700ms var(--ease-spring) 1000ms both,
+      pop-in 700ms var(--ease-spring) 950ms both,
       bob 8s ease-in-out 1.7s infinite reverse;
   }
-  .hero__ring {
-    animation: spin 60s linear infinite;
+  .hero__debo {
+    animation: pop-in 700ms var(--ease-spring) 1200ms both;
+  }
+  .btn--primary svg {
+    transition: translate 200ms var(--ease-out);
+  }
+  .btn--primary:hover svg:last-child {
+    translate: 3px 0;
   }
 
   /* Daksha breathes, blinks and hops when pressed. */
@@ -1716,17 +2127,28 @@ p {
      browser supports scroll-linked animation. Elsewhere they just stay put. */
   @supports (animation-timeline: scroll()) {
     .hero__art {
-      animation:
-        pop-in 1000ms var(--ease-spring) 150ms both,
-        drift-slow linear both;
-      animation-timeline: auto, scroll(root);
-      animation-range: normal, 0 100vh;
+      animation: drift-slow linear both;
+      animation-timeline: scroll(root);
+      animation-range: 0 100vh;
     }
     .closing img {
       animation: tilt linear both;
       animation-timeline: view();
       animation-range: entry 0% cover 60%;
     }
+  }
+}
+
+@keyframes phone-in {
+  from {
+    opacity: 0;
+    transform: translateY(48px);
+    rotate: 0deg;
+  }
+  to {
+    opacity: 1;
+    transform: none;
+    rotate: 3deg;
   }
 }
 
