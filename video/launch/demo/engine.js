@@ -30,13 +30,15 @@ async function init() {
   await Promise.all(["500", "700", "800"].map((w) => document.fonts.load(`${w} 40px Figtree`)));
 
   const PX = 1360, PY = 540, S = 0.555;
-  // Title card background, under everything else: red, then a paper circle opens from the phone.
+  // Title card background: the pastel page with its glows under everything, the Daksha blue
+  // title card over it, then a circle of the pastel page opens from the phone.
+  el("div", "glows", stage);
   const red = el("div", "wipe", stage);
-  const paper = el("div", "wipe", stage); paper.style.background = "var(--paper)";
+  const paper = el("div", "glows", stage);
   const blob = el("div", "circle", stage);
-  Object.assign(blob.style, { width: "1000px", height: "1000px", left: PX - 500 + "px", top: PY + 20 - 500 + "px", background: "var(--blush)" });
+  Object.assign(blob.style, { width: "1000px", height: "1000px", left: PX - 500 + "px", top: PY + 20 - 500 + "px", background: "radial-gradient(circle, rgba(196,217,255,.95) 0%, rgba(220,208,255,.5) 45%, rgba(220,208,255,0) 70%)", opacity: 0 });
   const dot = el("div", "circle", stage);
-  Object.assign(dot.style, { width: "300px", height: "300px", left: "1690px", top: "760px", background: "var(--peach)", opacity: 0.55 });
+  Object.assign(dot.style, { width: "300px", height: "300px", left: "1690px", top: "760px", background: "radial-gradient(circle, rgba(255,211,225,.9) 0%, rgba(255,211,225,0) 70%)", opacity: 0 });
 
   const bug = el("div", "", stage); bug.id = "bug"; bug.innerHTML = TOMATO.replace('class="tomato-svg"', "") + "<span>Daksha</span>";
 
@@ -58,15 +60,15 @@ async function init() {
   under.decoding = over.decoding = "sync";
   const speed = el("div", "", stage); speed.id = "speed";
 
-  // Intro and end cards, on red.
+  // The intro card is on Daksha blue; the end card is on the pastel page.
   const intro = el("div", "card", stage);
   const ih = el("h1", "", intro); ih.style.fontSize = "120px"; const iws = words(ih, "Daksha, a quick look");
   const ip = el("p", "", intro, "Recorded from the app, with made-up sample entries. Typing is sped up."); ip.style.fontSize = "50px"; ip.style.marginTop = "30px";
-  const endRed = el("div", "wipe", stage);
+  const endRed = el("div", "glows", stage);
   const big = el("div", "tomato", stage); big.innerHTML = TOMATO;
   Object.assign(big.style, { width: "360px", height: "360px", left: (1920 - 360) / 2 + "px", top: "120px" });
   const bigSvg = big.querySelector("svg"); bigSvg.style.width = "100%"; bigSvg.style.height = "100%";
-  const end = el("div", "card", stage);
+  const end = el("div", "card", stage); end.style.color = "var(--ink)";
   const eh = el("h1", "", end); eh.style.fontSize = "150px"; const ews = words(eh, "Daksha");
   const ep = el("p", "", end, "A friendly assistant that remembers your life."); ep.style.fontSize = "50px"; ep.style.marginTop = "26px";
   const eu = el("div", "", end); eu.style.marginTop = "56px"; const url = el("span", "url", eu, "my.daksha.life");

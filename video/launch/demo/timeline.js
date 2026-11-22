@@ -11,14 +11,14 @@ function buildDemo() {
 
   // Clips, in order. `step` is the caption on the left.
   const raw = [
-    { clip: "welcome", dur: 3.0, step: 0 },
-    { clip: "write", dur: 9.0, step: 1, taps: [1.0, 4.8] },
-    { clip: "entry", dur: 5.4, step: 2 },
-    { clip: "knows", dur: 5.4, step: 3 },
-    { clip: "record", dur: 5.8, step: 4, taps: [1.0] },
-    { clip: "talk", dur: 4.0, step: 5 },
-    { clip: "tasks", dur: 4.6, step: 5 },
-    { clip: "face", dur: 4.8, step: 6, taps: [1.2, 1.9, 2.6, 3.3] },
+    { clip: "home", dur: 5.2, step: 0 },
+    { clip: "chat", dur: 6.0, step: 1 },
+    { clip: "write", dur: 9.0, step: 2, taps: [1.0, 4.8] },
+    { clip: "entry", dur: 5.0, step: 3 },
+    { clip: "knows", dur: 5.0, step: 3 },
+    { clip: "talk", dur: 4.0, step: 4 },
+    { clip: "tasks", dur: 4.4, step: 4 },
+    { clip: "apps", dur: 5.4, step: 5 },
     { clip: "people", dur: 5.0, step: 6 },
     { clip: "reminders", dur: 3.4, step: 6 },
   ];
@@ -33,13 +33,13 @@ function buildDemo() {
 
   // `calm` marks the step where the beat rests.
   const stepText = [
-    { title: "Say hello", sub: "Daksha shows you around the first time you open it." },
+    { title: "Start at Home", sub: "Ask anything, or pick what you want to do today." },
+    { title: "Ask in plain words", sub: "Type a question about your life, or tap a suggestion." },
     { title: "Write a day", sub: "A few lines about what happened. It is saved when you press Save entry." },
-    { title: "Open any entry", sub: "See what Daksha learned from it, and the entries like it." },
-    { title: "See what Daksha knows", sub: "Every memory shows the entry it came from. Fix it or forget it." },
-    { title: "Record a voice note", sub: "The screen shows when the microphone is on." },
-    { title: "Daksha asks before it acts", sub: "Anything that leaves Daksha waits for your yes.", calm: true },
-    { title: "Make it yours", sub: "Make a face, make someone to talk to, and pick your reminders." },
+    { title: "See what Daksha knows", sub: "Open any entry to see what Daksha learned. Every memory shows where it came from." },
+    { title: "Talk, and say yes first", sub: "Anything that leaves Daksha waits for your yes.", calm: true },
+    { title: "Connect your apps", sub: "Mail and calendar show example data in this demo." },
+    { title: "Make it yours", sub: "Make someone to talk to, and pick your reminders." },
   ];
   const steps = stepText.map((s, i) => {
     const mine = segs.filter((g) => g.step === i);
