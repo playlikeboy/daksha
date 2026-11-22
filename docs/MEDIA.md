@@ -6,19 +6,23 @@ How to take the app screenshots on the landing page (`apps/site`) and the pitch 
 
 | File | Shows | Used by |
 |---|---|---|
+| `apps/site/public/shots/home.webp` | Home: the greeting, the ask box and the tiles | Landing page hero |
+| `apps/site/public/shots/journal.webp` | Journal, the writing box (the same picture as `journal-light.webp`) | Landing page hero |
 | `apps/site/public/shots/journal-light.webp` | Journal, the writing box | Landing page, "How it works", step 1 |
 | `apps/site/public/shots/chat-light.webp` | Chat before you ask anything | Landing page, step 2 |
 | `apps/site/public/shots/knows-light.webp` | What Daksha knows | Landing page, step 3, and the share picture |
 | `apps/site/public/shots/talk-light.webp` | Talk, before a call, with a card waiting for a yes | Landing page, step 4 |
 | `apps/site/public/shots/apps-light.webp` | Apps | Not on the page today; kept with the set |
-| `apps/pitch/public/shots/*.webp` | Crops of the same screens (journal list, knows, talk, apps) | Pitch site, "Product" |
-| `apps/pitch/public/shots/chat-light.webp` | A real answer with a source chip | Pitch site hero and "Product". Not retaken (see below) |
+| `apps/pitch/public/shots/*.webp` | Crops of the same screens (journal list, empty chat, knows, talk, apps) | Pitch site hero and "Product" |
 | `og.png` in `apps/site`, `apps/web`, `apps/pitch`, `os/apps/mobile` | The share picture, with the knows screenshot | Link previews |
 | `apps/site/public/daksha-demo.mp4`, `.webm`, `-poster.webp`, `.en.vtt` | The walkthrough film | Landing page, `src/media.ts`, README |
+| `apps/site/public/daksha-launch.mp4`, `-vertical.mp4`, `.webm`, `-poster.webp`, `.en.vtt` | The launch film, drawn (see `video/launch/README.md`) | Landing page, pitch site, README |
+| `apps/pitch/public/daksha-pitch-deck.pdf` | The pitch site printed, with these pictures | Pitch site download |
 | `os/apps/mobile/public/screenshots/*` | The install pictures: copies of the chat, journal and knows shots, and the three side by side | The app's `manifest.webmanifest` |
 
 - Landing page shots are 780x1688: the phone size 390x844 at 2x. Keep that size; the page reserves that shape, so a new size would make the page jump.
 - Pitch shots are 780 wide crops with fixed heights (journal 933, knows 1067, talk 833, apps 1067, chat 767). `deck.tsx` lists the sizes.
+- The files keep their names, so links stay the same. When they change, raise the `?v=` number after them: films in `apps/site/src/media.ts`, the pitch film in `apps/pitch/src/config.ts`, the install pictures in `os/apps/mobile/public/manifest.webmanifest`, the README links, and `og.png` (see below).
 - Both sites use WebP only.
 - Change the `alt` text in `showcase.tsx` and `deck.tsx` with the picture. It must say what the picture really shows.
 
@@ -38,7 +42,7 @@ node scripts/site-media.mjs artifacts/site-media shots
 node scripts/site-media.mjs artifacts/site-media clips
 ```
 
-- `shots/` gets one PNG per screen: welcome, chat, journal, journal-list, journal-entry, recorder, knows, talk, tasks, apps, reminders, custom-people, avatar-builder. `SHOTS=knows,talk` takes only those.
+- `shots/` gets one PNG per screen: welcome, home, chat, journal, journal-list, journal-entry, recorder, knows, talk, tasks, apps, reminders, custom-people, avatar-builder. `SHOTS=knows,talk` takes only those.
 - `clips/` gets the short recordings for the film, and `clips.json` says how long each frame stays on screen. `CLIPS=write` records only that one.
 - The browser has a fake microphone, so the recorder shows a recording in progress. Reduce motion is on, so pictures are steady.
 - The only things typed are made up: a journal entry about coffee with Sam, and a person called Coach Sam.
@@ -53,9 +57,11 @@ ffmpeg -y -i shots/journal-list.png -vf crop=780:933:0:360  -c:v libwebp -qualit
 ffmpeg -y -i shots/knows.png        -vf crop=780:1067:0:112 -c:v libwebp -quality 82 $P/knows-light.webp
 ffmpeg -y -i shots/talk.png         -vf crop=780:833:0:86   -c:v libwebp -quality 82 $P/talk-light.webp
 ffmpeg -y -i shots/apps.png         -vf crop=780:1067:0:112 -c:v libwebp -quality 82 $P/apps-light.webp
+ffmpeg -y -i shots/chat.png         -vf crop=780:767:0:620  -c:v libwebp -quality 82 $P/chat-light.webp
+for n in home journal; do ffmpeg -y -i shots/$n.png -c:v libwebp -quality 82 -compression_level 6 $S/$n.webp; done
 ```
 
-Then the share picture, from the repo root: `node scripts/og/build-og.mjs`. `node scripts/icons/build-icons.mjs` copies the new shots into the app's install pictures (it also redraws the icons, which come out the same). Raise the `?v=` number after `og.png` (in the site, pitch and web layouts, `apps/site/src/app/page.tsx` and `os/apps/mobile/public/index.html`) so link previews fetch the new one.
+Then the share picture (drawn in the app's pastel colours, `scripts/og/og.html`), from the repo root: `node scripts/og/build-og.mjs`. `node scripts/icons/build-icons.mjs` copies the new shots into the app's install pictures (it also redraws the icons, which come out the same). Raise the `?v=` number after `og.png` (in the site, pitch and web layouts, `apps/site/src/app/page.tsx` and `os/apps/mobile/public/index.html`) so link previews fetch the new one.
 
 ## 4. Make the walkthrough film
 
@@ -72,12 +78,17 @@ ffmpeg -ss 23 -i apps/site/public/daksha-demo.mp4 -frames:v 1 -vf scale=1280:-1 
 ```
 
 - `--only 8,30` renders just those seconds, for checking. A contact sheet is a quick check by eye: `ffmpeg -i apps/site/public/daksha-demo.mp4 -vf "fps=0.5,scale=320:-1,tile=6x5" -frames:v 1 sheet.jpg`.
-- Keep each file under 20 MB (Cloudflare serves static files up to 25 MiB). The November 2026 film is about 4.9 MB.
+- Keep each file under 20 MB (Cloudflare serves static files up to 25 MiB). The 22 November 2026 walkthrough (60 seconds, pastel app) is about 6.4 MB as mp4 and 4.8 MB as webm.
+- `UI_SHOTS_CHROMIUM` also works for `render.mjs`, `scripts/og/build-og.mjs`, `scripts/icons/build-icons.mjs` and `apps/pitch/scripts/make-pdf.mjs`. `site-media.mjs` takes `UI_SHOTS_DIST` for another exported build. If `apps/web` has no `playwright` package, run `make-pdf.mjs` with `PW_FROM=$PWD/os/apps/worker/package.json`.
 - Before the rename the films were published as `debo-*.mp4` and so on. Those names answer with a 307 to the `daksha-*` file (`apps/site/src/host-redirect.ts`), so old links keep working.
 - If a clip's length or a caption changes, change `public/daksha-demo.en.vtt` (only the words on screen, with times from `timeline.js`) and the walkthrough entry in `apps/site/src/media.ts`: `description`, `seconds` and `uploaded`.
 
+## 5. The pitch deck PDF
+
+After the pitch pictures change, print the deck again: build and start the pitch site, then `node apps/pitch/scripts/make-pdf.mjs http://localhost:3000` (see the top of that file).
+
 ## What demo mode cannot show
 
-- **A chat answer with sources.** The demo agent does not call a model, so it cannot answer from the journal. The landing page shows the empty chat, and the pitch site keeps its older real answer (`chat-light.webp`). Retake both when a demo with a model is safe to run.
+- **A chat answer with sources.** The demo agent does not call a model, so it cannot answer from the journal. The landing page, the pitch site and the walkthrough show the empty chat (the walkthrough types a question but does not send it). Retake them when a demo with a model is safe to run.
 - **A live voice call and the call bubble.** These need LiveKit and a microphone that speaks.
 - **Connected apps.** Gmail and Calendar show example data only.

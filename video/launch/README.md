@@ -1,12 +1,13 @@
 # Daksha launch video
 
-The site shows the second launch film (`film2/`, 72 seconds, 1920x1080 plus a 1080x1920 cut): an animation with no screen recordings. There is also the first launch film (`src/`, 69 seconds, cut from screen recordings) and a 58 second app walkthrough (`demo/`, 1920x1080). All have music and sound effects, and no speech.
+The site shows the second launch film (`film2/`, 72 seconds, 1920x1080 plus a 1080x1920 cut): an animation with no screen recordings. There is also the first launch film (`src/`, 69 seconds, cut from screen recordings) and a 60 second app walkthrough (`demo/`, 1920x1080). All have music and sound effects, and no speech.
 
 ## The second launch film (film2)
 
-Bright white screen, a soft blue glow at the bottom, words that build one at a time with small icons between them, and cards rebuilt from the app (not screenshots) that float, tilt and stack. A line comes back between the cards: "Daksha remembers your days", "Daksha answers from your journal", "Daksha shows you what it knows", "Daksha talks with you", "Daksha remembers your people", "Daksha asks before it acts", and it ends on "Daksha keeps you in control", then the tomato, the name and www.daksha.life.
+Bright white screen, a soft pastel glow at the bottom (the app's sky, lilac and blush), words that build one at a time with small icons between them, and cards rebuilt from the app (not screenshots) that float, tilt and stack. A line comes back between the cards: "Daksha remembers your days", "Daksha answers from your journal", "Daksha shows you what it knows", "Daksha talks with you", "Daksha remembers your people", "Daksha asks before it acts", and it ends on "Daksha keeps you in control", then the tomato, the name and www.daksha.life.
 
 - `film2/timeline.js` holds every time: the word blocks, the card scenes and the sound cues.
+- The cards use the app's pastel ("Genie") colours: ink text and ink primary buttons, Daksha blue (`#3451D1`) for the user's chat bubble and highlights, and leaf green source chips (see `os/docs/ui-genie/README.md`). They were moved to these colours in November 2026; the words and timings did not change.
 - `film2/engine.js` draws a frame for any time t. The card text uses the app's real words ("Looking through your journal…", "Waiting for your yes", "Approve", "Not now", "Fix this memory", "Forget this memory", "Journal, 12 November").
 - The characters are `docs/assets/avatar-*.svg` and the end card logo is `docs/assets/debo.svg`. App icons are simple drawings of our own, not brand logos.
 - Everything on screen is something the app does today (see `os/docs/FEATURES.md`). The names and entries are the made-up sample text used in the demo. If a card's feature changes, change the card.
@@ -43,7 +44,7 @@ The footage is recorded fresh from the live app, so the video can be remade when
 
 ## Remake it
 
-You need Node 22, ffmpeg (with libx264 and libvpx-vp9), and the Playwright that ships with `apps/web` (`pnpm install` at the repo root).
+You need Node 22, ffmpeg (with libx264 and libvpx-vp9), and the Playwright that ships with `apps/web` (`pnpm install` at the repo root). If that Playwright has no browser of its own, set `UI_SHOTS_CHROMIUM` to a Chromium binary.
 
 1. Record the app clips (the demo account only; the sample journal entry is deleted at the end):
 
@@ -99,7 +100,7 @@ Both cuts of the film share one edit, so they share one sound track.
 
 ## The demo walkthrough
 
-The walkthrough plays short clips recorded from the app in demo mode, with made-up sample entries, in a phone on the right, with a caption for each step on the left and a chip that says "Sample entries". The clips are stop-motion: `os/scripts/site-media.mjs` takes a 780x1688 screenshot after each small step (a few letters typed, a little scroll) and notes how long each frame stays on screen. `demo/timeline.js` lists the clips and how long each is shown; the last frame of a clip stays if it is shown longer. How to record the clips and make the published files is in `docs/MEDIA.md`.
+The walkthrough plays short clips recorded from the app in demo mode, with made-up sample entries, in a phone on the right, on the app's pastel page with its glows (the title card is Daksha blue), with a caption for each step on the left and a chip that says "Sample entries". The clips are stop-motion: `os/scripts/site-media.mjs` takes a 780x1688 screenshot after each small step (a few letters typed, a little scroll) and notes how long each frame stays on screen. `demo/timeline.js` lists the clips and how long each is shown; the last frame of a clip stays if it is shown longer. How to record the clips and make the published files is in `docs/MEDIA.md`.
 
 ## Rules the edit keeps
 
