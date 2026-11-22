@@ -1,5 +1,5 @@
 import { ArrowUpRight, Check, ChevronRight, type LucideIcon, RotateCw, X } from "lucide-react-native";
-import { Component, type ReactNode, useEffect, useRef, useState } from "react";
+import { Component, createContext, type ReactNode, useContext, useEffect, useRef, useState } from "react";
 import {
   ActivityIndicator,
   Animated,
@@ -64,9 +64,17 @@ export const bodyText = { fontSize: typeSize.md, fontWeight: "400", lineHeight: 
 /** The only sizes the character is drawn at, so it is the same size wherever it shows. */
 export const avatarSize = { sm: 36, md: 48, lg: 64, xl: 96, hero: 120 } as const;
 
-/** One gap between blocks on a screen, and one side padding for phone and desktop. */
+/**
+ * One gap between blocks on a screen, and one side padding for phone and desktop. On a
+ * phone it is 16px from the edge of the screen to the first letter; a card adds 12px more.
+ */
 export const screenGap = spacing[5];
-export const screenPadding = { phone: spacing[5], desktop: spacing[10] } as const;
+export const screenPadding = { phone: spacing[4], desktop: spacing[10] } as const;
+/** Below this width the app is laid out for a phone: tighter cards, bottom sheets. */
+export const phoneWidth = 600;
+export function usePhone() {
+  return useWindowDimensions().width < phoneWidth;
+}
 
 export const s = StyleSheet.create({
   row: { flexDirection: "row", alignItems: "center" },
@@ -109,6 +117,19 @@ export const s = StyleSheet.create({
     borderColor: colors.line,
     padding: spacing[5],
     boxShadow: brandShadow.card,
+  },
+  /** A card drawn as a plain section: no fill, corners, shadow or side padding, a line on top. */
+  cardFlat: {
+    borderTopWidth: borderWidth,
+    borderColor: colors.line,
+    paddingTop: spacing[4],
+    paddingBottom: 0,
+    paddingHorizontal: 0,
+  },
+  /** A card inside a card that keeps its own fill: a small soft box, no shadow. */
+  cardTinted: {
+    borderRadius: radius.container,
+    padding: spacing[3],
   },
   divider: { height: borderWidth, backgroundColor: colors.line, marginVertical: spacing[4] },
   input: {
@@ -317,8 +338,49 @@ export function IconButton({
     </Pressable>
   );
 }
-export function Card({ children, style }: { children: ReactNode; style?: ViewStyle }) {
-  return <View style={[s.card, style]}>{children}</View>;
+/**
+ * Where a card is drawn: inside a sheet or not, and how many cards it sits in. `Card` reads
+ * it so padding never stacks up: a card inside a card, or a section card in a sheet on a
+ * phone, drops its fill and padding and becomes a plain section with a line on top.
+ */
+type Surface = { sheet: boolean; depth: number };
+const SurfaceContext = createContext<Surface>({ sheet: false, depth: 0 });
+
+export function Card({
+  children,
+  style,
+  flat,
+}: {
+  children: ReactNode;
+  style?: ViewStyle;
+  /** Always a plain section with a line on top, never a raised card. */
+  flat?: boolean;
+}) {
+  const surface = useContext(SurfaceContext);
+  const phone = usePhone();
+  const nested = surface.depth > 0;
+  const plain = flat || nested || (surface.sheet && phone);
+  const own = StyleSheet.flatten(style) ?? {};
+  // A card given its own fill (a note, a warning) keeps it, as a smaller box.
+  const tinted = !!own.backgroundColor;
+  // On a phone a card's sides are 12px, unless it asks for less (a list that runs edge to edge).
+  const side = own.paddingHorizontal ?? own.padding;
+  const phoneSides = phone && (side === undefined || (typeof side === "number" && side > spacing[3]));
+  const look = !plain
+    ? [
+        s.card,
+        phone && own.padding === undefined && own.paddingVertical === undefined && { paddingVertical: spacing[4] },
+        style,
+        phoneSides && { paddingHorizontal: spacing[3] },
+      ]
+    : tinted
+      ? [style, s.cardTinted]
+      : [style, s.cardFlat, nested && { paddingTop: spacing[3] }];
+  return (
+    <SurfaceContext.Provider value={{ sheet: surface.sheet, depth: surface.depth + 1 }}>
+      <View style={look}>{children}</View>
+    </SurfaceContext.Provider>
+  );
 }
 export function Chip({ children, tint }: { children: ReactNode; tint?: string }) {
   return (
@@ -622,30 +684,37 @@ export function Sheet({
               }}
             />
           )}
+          {/* On a phone the header is short: a smaller title, small print under it, and the
+              same 16px side edge as the content, so more of the sheet is left for the content. */}
           <View
             style={[
               s.between,
-              {
-                padding: compact ? spacing[5] : spacing[6],
-                paddingBottom: compact ? spacing[3] : spacing[4],
-              },
+              { alignItems: "flex-start", gap: spacing[3] },
+              compact
+                ? { paddingHorizontal: spacing[4], paddingTop: spacing[2], paddingBottom: spacing[2] }
+                : { padding: spacing[6], paddingBottom: spacing[4] },
             ]}
           >
-            <View style={{ flex: 1, gap: spacing[1] }}>
-              <Text accessibilityRole="header" style={s.title}>{title}</Text>
-              {!!subtitle && <Text style={s.muted}>{subtitle}</Text>}
+            <View style={{ flex: 1, gap: compact ? 0 : spacing[1], paddingTop: compact ? spacing[1] : spacing[2] }}>
+              <Text
+                accessibilityRole="header"
+                style={[s.title, compact && { fontSize: typeSize.lg, lineHeight: spacing[6] }]}
+              >
+                {title}
+              </Text>
+              {!!subtitle && <Text style={compact ? s.small : s.muted}>{subtitle}</Text>}
             </View>
             <IconButton icon={X} label={`Close ${title}`} onPress={onClose} />
           </View>
           <ScrollView
             keyboardShouldPersistTaps="handled"
             contentContainerStyle={{
-              paddingHorizontal: compact ? spacing[5] : spacing[6],
+              paddingHorizontal: compact ? spacing[4] : spacing[6],
               paddingTop: spacing[1],
               paddingBottom: compact ? spacing[5] : spacing[6],
             }}
           >
-            {children}
+            <SurfaceContext.Provider value={{ sheet: true, depth: 0 }}>{children}</SurfaceContext.Provider>
           </ScrollView>
         </View>
       </View>
@@ -666,10 +735,13 @@ export function CheckRow({
       accessibilityRole="checkbox"
       accessibilityState={{ checked }}
       onPress={onPress}
-      style={[s.row, { gap: spacing[3], paddingVertical: spacing[2], minHeight: spacing[11] }]}
+      // The box sits on the first line of a long label, at the content's left edge, with a
+      // small gap, so the words are not pushed into a narrow, centred column.
+      style={[s.row, { alignItems: "flex-start", gap: spacing[2] + spacing[0.5], paddingVertical: spacing[2], minHeight: spacing[11] }]}
     >
       <View
         style={{
+          marginTop: spacing[0.5],
           width: spacing[5],
           height: spacing[5],
           borderRadius: radius.inner,
@@ -696,7 +768,7 @@ export function SectionHeading({
   onPress?: () => void;
 }) {
   return (
-    <View style={[s.between, { marginBottom: spacing[5] }]}>
+    <View style={[s.between, { marginBottom: spacing[2] }]}>
       <Text accessibilityRole="header" style={s.heading}>{title}</Text>
       {action && onPress && (
         <Pressable

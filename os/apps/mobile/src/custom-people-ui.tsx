@@ -391,7 +391,7 @@ export function CustomPeopleSetting() {
   const people = data?.people ?? [];
   const max = typeof data?.limits.people === "number" ? data.limits.people : 10;
   return (
-    <Card style={{ marginTop: spacing[5], gap: spacing[3] }}>
+    <Card style={{ gap: spacing[3] }}>
       <SectionHeading title="People you made" />
       <Text style={s.muted}>
         Make someone to talk to in chat and on calls: a friend, family, a partner, someone you miss, or a made-up character.
