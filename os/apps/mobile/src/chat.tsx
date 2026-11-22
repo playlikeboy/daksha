@@ -1175,7 +1175,7 @@ export function ChatScreen({
                   ))}
               </View>
             )}
-            <View style={[s.row, { gap: spacing[1], alignItems: "flex-end" }]}>
+            <View style={[s.row, { gap: spacing[0.5], alignItems: "flex-end" }]}>
               <IconButton
                 icon={Plus}
                 label="Attach a document"
@@ -1213,7 +1213,7 @@ export function ChatScreen({
                   maxHeight: 160,
                   fontSize: typeSize.md,
                   lineHeight: spacing[6],
-                  paddingHorizontal: spacing[1],
+                  paddingHorizontal: spacing[0.5], // with the tight gaps, keeps "Ask anything…" on one line at 360px
                   paddingTop: 10,
                   paddingBottom: 10,
                   ...noFocusRing,

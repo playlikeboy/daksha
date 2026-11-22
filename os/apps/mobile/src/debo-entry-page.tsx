@@ -28,7 +28,7 @@ import { deboMood } from "./debo-mood-store";
 import { EntryPlayer, type PlayerControl } from "./debo-player";
 import { downloadName } from "./debo-player-types";
 import { entryNameOf, pathFor, rememberEntryName, titleFor } from "./routes";
-import { avatarSize, Button, colors, Empty, ErrorNotice, Field, fontSize, Mascot, radius, s, screenGap, Skeleton, spacing } from "./ui";
+import { avatarSize, Button, Card, colors, Empty, ErrorNotice, Field, fontSize, Mascot, radius, s, screenGap, Skeleton, spacing } from "./ui";
 import { useWorkspace } from "./workspace";
 
 type Kind = EntryView["kind"];
@@ -294,9 +294,9 @@ function WrittenBody({ entry, onChanged, onDeleted }: { entry: EntryView; onChan
           onCancel={() => setEditing(false)}
         />
       ) : (
-        <View style={[s.card, { padding: spacing[6] }]}>
+        <Card style={{ padding: spacing[6] }}>
           <Reading text={bodyAfterTitle(entry.text, entry.title)} />
-        </View>
+        </Card>
       )}
       <ErrorNotice error={actions.error} />
       {!editing && !confirming && (
@@ -413,8 +413,8 @@ function RecordingBody({ entry, wide, onChanged, onDeleted }: { entry: EntryView
         </View>
       ) : (
         <>
-          <View style={[s.card, { padding: video ? spacing[3] : spacing[5] }]}>{player}</View>
-          <View style={[s.card, { padding: spacing[5] }]}>{words}</View>
+          <Card style={{ padding: video ? spacing[3] : spacing[5] }}>{player}</Card>
+          <Card style={{ padding: spacing[5] }}>{words}</Card>
         </>
       )}
       <ErrorNotice error={actions.error} />

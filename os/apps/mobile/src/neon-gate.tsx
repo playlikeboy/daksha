@@ -28,7 +28,7 @@ import {
 } from "./neon-auth";
 import { forgetDeviceReminders } from "./debo-device-reminders";
 import { clearSessionToken, loadSessionToken, saveSessionToken } from "./session-store";
-import { Button, Card, colors, ErrorNotice, Field, s, spacing } from "./ui";
+import { Button, Card, colors, ErrorNotice, Field, s, spacing, usePhone } from "./ui";
 import { WelcomeFrame } from "./welcome-frame";
 
 interface Account {
@@ -71,9 +71,10 @@ export function useAuthInfo(): { info: AuthInfo | undefined; retry: () => void }
 
 /** Shown by a Neon build when no Daksha address answers. Plain words and one button. */
 export function CantReach({ onRetry }: { onRetry: () => void }) {
+  const phone = usePhone();
   return (
     <Frame>
-      <Card style={{ width: "100%", padding: spacing[6], gap: spacing[3] }}>
+      <Card style={{ width: "100%", gap: spacing[3], ...(phone ? null : { padding: spacing[6] }) }}>
         <Text accessibilityRole="header" style={s.title}>
           Can't reach Daksha right now
         </Text>
@@ -234,6 +235,8 @@ function AuthScreen({
   notice: string;
   onSignedIn: (sessionToken: string) => Promise<void>;
 }) {
+  // On a phone the card keeps its usual small padding, so the fields get the width.
+  const phone = usePhone();
   const [mode, setMode] = useState<"sign-in" | "sign-up">("sign-in");
   const [codeFor, setCodeFor] = useState<string>();
   const [name, setName] = useState("");
@@ -289,7 +292,7 @@ function AuthScreen({
 
   if (codeFor)
     return (
-      <Card style={{ width: "100%", padding: spacing[6] }}>
+      <Card style={{ width: "100%", ...(phone ? null : { padding: spacing[6] }) }}>
         <Text accessibilityRole="header" style={[s.title, { marginBottom: spacing[2] }]}>
           Confirm your email
         </Text>
@@ -329,7 +332,7 @@ function AuthScreen({
     );
 
   return (
-    <Card style={{ width: "100%", padding: spacing[6] }}>
+    <Card style={{ width: "100%", ...(phone ? null : { padding: spacing[6] }) }}>
       <Text accessibilityRole="header" style={[s.title, { marginBottom: spacing[5] }]}>
         {mode === "sign-up" ? "Create your account" : "Sign in"}
       </Text>

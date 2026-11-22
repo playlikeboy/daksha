@@ -70,7 +70,7 @@ export function WelcomeFrame({ subtitle, children }: { subtitle: string; childre
           flexGrow: 1,
           justifyContent: "center",
           alignItems: "center",
-          padding: wide ? spacing[10] : spacing[5],
+          padding: wide ? spacing[10] : spacing[4],
         }}
       >
         {wide ? (
