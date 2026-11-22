@@ -516,6 +516,16 @@ function WorkspaceShell({
   // Height of the floating tabs plus the gap under them, measured; 0 when they are hidden.
   const [tabSpace, setTabSpace] = useState(spacing[12] + spacing[8]);
   const bottomSpace = tabsShown ? tabSpace : 0;
+  // On the web, a button reached with Tab or scrolled to by the browser stops above the
+  // floating tabs and below the top bar, not behind them.
+  const screenScroll = useRef<ScrollView>(null);
+  useEffect(() => {
+    if (!onWeb) return;
+    const node = (screenScroll.current as unknown as { getScrollableNode?: () => HTMLElement } | null)?.getScrollableNode?.();
+    if (!node?.style) return;
+    node.style.setProperty("scroll-padding-bottom", `${bottomSpace + spacing[3]}px`);
+    node.style.setProperty("scroll-padding-top", `${barHeight}px`);
+  }, [bottomSpace, barHeight, section]);
   const chrome = useMemo(
     () => ({ top: chatNotice ? 0 : barHeight, bottom: bottomSpace, setComposerHeight, setChatEmpty, setTyping }),
     [chatNotice, barHeight, bottomSpace],
@@ -567,6 +577,7 @@ function WorkspaceShell({
               {section !== "chat" && (
                 <FadeTop top={barHeight} style={{ flex: 1 }}>
                 <ScrollView
+                  ref={screenScroll}
                   key={section}
                   showsVerticalScrollIndicator={false}
                   contentContainerStyle={{
