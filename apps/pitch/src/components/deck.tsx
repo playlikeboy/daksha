@@ -48,7 +48,7 @@ export function DeckHero() {
               src="/shots/chat-light.webp"
               width={780}
               height={767}
-              alt="The Daksha app. A person asks what they planted on the balcony. Daksha answers: basil and mint, with a source chip that reads Journal, 11 November."
+              alt="The Daksha chat before you ask anything. Daksha says: Hi, I'm Daksha. I keep your journal and remember what is in it, and I will show you which entry each answer came from. Below are three suggestions: What did I do last week?, Write in my journal and See what Daksha knows."
               isPriority
             />
           </VStack>
@@ -121,10 +121,10 @@ export function Solution() {
 }
 
 const SHOTS = [
-  { src: "/shots/journal-light.webp", w: 780, h: 933, title: "Journal", alt: "The Daksha journal. A box to find an entry, then entries from 19 and 18 November, each with the buttons Change entry and Delete entry.", text: "Write or record. Edit and delete any entry." },
-  { src: "/shots/chat-light.webp", w: 780, h: 767, title: "Ask", alt: "The Daksha chat. A person asks what they planted on the balcony and Daksha answers with a source chip.", text: "Answers with a chip for every source." },
-  { src: "/shots/knows-light.webp", w: 780, h: 1067, title: "What Daksha knows", alt: "The What Daksha knows page. Each memory shows its source chip, like Journal, 19 November, and the buttons Fix this and Forget this.", text: "Every memory, with fix and forget." },
-  { src: "/shots/talk-light.webp", w: 780, h: 833, title: "Talk", alt: "The Talk screen in Daksha. Above Daksha's face, a card waiting for your yes: Create Coffee with Jamie, Daksha will change your calendar, with the buttons Approve and Not now.", text: "Talk, and say yes before anything changes." },
+  { src: "/shots/journal-light.webp", w: 780, h: 933, title: "Journal", alt: "The Daksha journal. A box to find an entry, then the entry Long walk by the lake after work from 22 November, with the buttons Change entry and Delete entry.", text: "Write or record. Edit and delete any entry." },
+  { src: "/shots/chat-light.webp", w: 780, h: 767, title: "Ask", alt: "The Daksha chat before you ask anything: Hi, I'm Daksha, with three suggestions to start.", text: "Ask in plain words. Answers show their sources." },
+  { src: "/shots/knows-light.webp", w: 780, h: 1067, title: "What Daksha knows", alt: "The What Daksha knows page. Each memory shows its source chip, like Journal, 22 November, and the buttons Fix this and Forget this.", text: "Every memory, with fix and forget." },
+  { src: "/shots/talk-light.webp", w: 780, h: 833, title: "Talk", alt: "The Talk screen in Daksha. Above Daksha's face, a card waiting for your yes: Create Coffee with Jamie, Daksha will change your calendar in alex@example.com, with the buttons Approve and Not now.", text: "Talk, and say yes before anything changes." },
   { src: "/shots/apps-light.webp", w: 780, h: 1067, title: "Apps", alt: "The Apps screen in Daksha. Gmail and Google Calendar show example data, and Daksha's computer is not connected yet.", text: "Connect apps one at a time." },
 ];
 
