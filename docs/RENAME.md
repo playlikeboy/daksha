@@ -164,6 +164,10 @@ os/apps/mobile/src/api-address.ts | debo\.life
 os/apps/mobile/test/api-address.test.ts | debo\.life
 os/apps/server/src/public-address.ts | debo\.life
 os/tests/public-address.test.ts | debo\.life
+os/apps/mobile/test/api-health.test.ts | debo\.life
+os/tests/connectors.test.ts | debo\.life
+os/docs/CONNECTORS.md | debo\.life
+.github/workflows/release-mobile.yml | debo\.life
 os/infra/cloudflare/README.md | debo\.life
 os/docs/AUTH.md | debo\.life
 os/tests/brand-rename.test.ts
