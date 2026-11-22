@@ -17,7 +17,8 @@ import {
   View,
 } from "react-native";
 import { Text } from "./text";
-import { API_URL, FuseApi } from "./api";
+import { API_CANDIDATES, EXPECTS_NEON, FuseApi, setApiAddress } from "./api";
+import { type AuthInfo, authAfterProbe, findApi } from "./api-health";
 import {
   AuthProblem,
   type JwtSession,
@@ -40,31 +41,52 @@ const AccountContext = createContext<Account | null>(null);
 /** The signed-in person, or null when this install uses the shared access key. */
 export const useAccount = () => useContext(AccountContext);
 
-export interface AuthInfo {
-  mode: "neon" | "access-key";
-  neonAuthUrl?: string;
-}
+export type { AuthInfo } from "./api-health";
 
 /**
- * Asks the API which sign-in it uses. Undefined while asking. If the API cannot be
- * reached it answers "access-key", whose screen already explains a missing server.
+ * Asks the API which sign-in it uses. Undefined while asking. It tries the built-in address
+ * and then the fallback a few times (see api-health.ts), and keeps the one that answers for
+ * the whole session. A local or demo install that finds no server shows the access-key screen,
+ * which explains a missing server. A Neon build shows "can't reach Daksha" instead.
+ * `retry` asks again, for the Try again button.
  */
-export function useAuthInfo(): AuthInfo | undefined {
+export function useAuthInfo(): { info: AuthInfo | undefined; retry: () => void } {
   const [info, setInfo] = useState<AuthInfo>();
+  const [attempt, setAttempt] = useState(0);
   useEffect(() => {
     let live = true;
-    fetch(`${API_URL}/api/health`)
-      .then((response) => response.json())
-      .then((body: { auth?: AuthInfo }) => {
-        const neon = body.auth?.mode === "neon" && body.auth.neonAuthUrl;
-        if (live) setInfo(neon ? body.auth : { mode: "access-key" });
-      })
-      .catch(() => live && setInfo({ mode: "access-key" }));
+    setInfo(undefined);
+    void findApi(API_CANDIDATES, EXPECTS_NEON).then((found) => {
+      if (!live) return;
+      if (found) setApiAddress(found.base);
+      setInfo(authAfterProbe(found, EXPECTS_NEON));
+    });
     return () => {
       live = false;
     };
-  }, []);
-  return info;
+  }, [attempt]);
+  const retry = useCallback(() => setAttempt((n) => n + 1), []);
+  return { info, retry };
+}
+
+/** Shown by a Neon build when no Daksha address answers. Plain words and one button. */
+export function CantReach({ onRetry }: { onRetry: () => void }) {
+  return (
+    <Frame>
+      <Card style={{ width: "100%", padding: spacing[6], gap: spacing[3] }}>
+        <Text accessibilityRole="header" style={s.title}>
+          Can't reach Daksha right now
+        </Text>
+        <Text style={s.text}>
+          Daksha didn't answer, which usually means the internet dropped or Daksha is
+          restarting. Check your connection, then press Try again.
+        </Text>
+        <Button primary onPress={onRetry} style={{ minHeight: spacing[12] }}>
+          Try again
+        </Button>
+      </Card>
+    </Frame>
+  );
 }
 
 type Phase ="loading" | "offline" | "out" | "in";

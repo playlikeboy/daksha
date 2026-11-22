@@ -33,7 +33,7 @@ import {
   IdeasScreen,
 } from "./src/agent-ui";
 import { AgentWorkspaceProvider, useAgentWorkspace } from "./src/agent-workspace";
-import { API_URL, createSession, FuseApi } from "./src/api";
+import { apiUrl, createSession, FuseApi } from "./src/api";
 import { ChatScreen, WorkspaceTools } from "./src/chat";
 import { onCopilotError } from "./src/conversation-run";
 import { timeZoneHeaders } from "./src/time-zone";
@@ -64,7 +64,7 @@ import { JournalScreen } from "./src/debo-journal";
 import { KnowsScreen } from "./src/debo-knows";
 import { Details } from "./src/details";
 import { BrowserScreen, CalendarScreen, FilesScreen, MailScreen } from "./src/screens";
-import { AccountCard, NeonGate, useAuthInfo } from "./src/neon-gate";
+import { AccountCard, CantReach, NeonGate, useAuthInfo } from "./src/neon-gate";
 import { WelcomeFrame } from "./src/welcome-frame";
 import { ThreadsProvider, ThreadsSheet, useFuseThread } from "./src/threads";
 import {
@@ -146,7 +146,7 @@ function NotFound() {
  * sign-in. A local or demo install keeps the shared access key screen.
  */
 export default function App() {
-  const info = useAuthInfo();
+  const { info, retry } = useAuthInfo();
   if (!info)
     return (
       <SafeAreaProvider>
@@ -155,14 +155,21 @@ export default function App() {
         </View>
       </SafeAreaProvider>
     );
-  if (info.mode === "neon" && info.neonAuthUrl)
+  if (info.mode === "unreachable")
+    return (
+      <SafeAreaProvider>
+        <StatusBar style="dark" />
+        <CantReach onRetry={retry} />
+      </SafeAreaProvider>
+    );
+  if (info.mode === "neon")
     return (
       <SafeAreaProvider>
         <StatusBar style="dark" />
         <NeonGate baseUrl={info.neonAuthUrl}>
           {(token, sessionKey) => (
             <CopilotKitProvider
-              runtimeUrl={`${API_URL}/api/copilotkit`}
+              runtimeUrl={`${apiUrl()}/api/copilotkit`}
               headers={{ Authorization: `Bearer ${token}`, ...timeZoneHeaders() }}
               onError={onCopilotError}
             >
@@ -207,7 +214,7 @@ function AccessKeyApp() {
       <StatusBar style="dark" />
       {token ? (
         <CopilotKitProvider
-          runtimeUrl={`${API_URL}/api/copilotkit`}
+          runtimeUrl={`${apiUrl()}/api/copilotkit`}
           headers={{ Authorization: `Bearer ${token}`, ...timeZoneHeaders() }}
           onError={onCopilotError}
         >
@@ -232,7 +239,7 @@ function AccessKeyApp() {
               </Button>
               <Text style={[s.small, { marginTop: spacing[4] }]}>
                 Local workspaces open without a key. Make sure your Daksha server is running at{" "}
-                {API_URL}.
+                {apiUrl()}.
               </Text>
             </Card>
           )}
