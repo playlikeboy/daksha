@@ -20,7 +20,9 @@ import {
   NOT_SET_UP,
   wrapAppData,
 } from "../apps/server/src/connectors/index.ts";
+import { within } from "../apps/server/src/connectors/composio.ts";
 import { createStore } from "../apps/server/src/db.ts";
+import { publicUrlFor } from "../apps/server/src/public-address.ts";
 import { ConversationAgent } from "../apps/server/src/engine/conversation.ts";
 import type { ActionProposal } from "../packages/domain/src/index.ts";
 import { modelFixture } from "./helpers/model.ts";
@@ -470,6 +472,40 @@ test("connecting hands back the hosted link with a callback, refuses repeats, an
   const state = (await f.service.connections(A)).find((c) => c.toolkit === "notion");
   assert.equal(state?.state, "expired");
   assert.match(state?.statusText ?? "", /ran out/);
+});
+
+test("the person comes back to the API address the app called, never to a made-up host", async (t) => {
+  const f = await fixture(t);
+  const config = {
+    publicUrl: "https://api.debo.life",
+    publicUrlAliases: ["https://api.daksha.life"],
+  };
+  const app = routeApp((c) => c.req.header("x-test-owner") ?? "");
+  app.route("/api/connectors", connectorRoutes(f.service, (url) => publicUrlFor(config, url)));
+  const start = async (host: string, owner: string) => {
+    const response = await app.request(`https://${host}/api/connectors/slack/connect`, {
+      method: "POST",
+      headers: { "content-type": "application/json", "x-test-owner": owner },
+      body: JSON.stringify({ to: "web" }),
+    });
+    assert.equal(response.status, 201);
+    return new URL(((await response.json()) as { url: string }).url);
+  };
+  // my.daksha.life calls api.daksha.life, so the callback is there too.
+  const viaNew = await start("api.daksha.life", A);
+  assert.equal(viaNew.origin + viaNew.pathname, "https://api.daksha.life/api/connectors/callback");
+  assert.equal(viaNew.searchParams.get("to"), "web");
+  // Older apps call api.debo.life; any other Host gets PUBLIC_API_URL.
+  assert.equal((await start("api.debo.life", B)).origin, "https://api.debo.life");
+  const C = "33333333-3333-4333-8333-333333333333";
+  assert.equal((await start("evil.example", C)).origin, "https://api.debo.life");
+});
+
+test("a provider call that hangs fails after a time limit instead of waiting forever", async () => {
+  const started = Date.now();
+  await assert.rejects(within(new Promise(() => {}), 30), /timed out/);
+  assert.ok(Date.now() - started < 1000);
+  assert.equal(await within(Promise.resolve("done"), 30), "done");
 });
 
 test("the callback page says what happened in plain words and changes nothing for real providers", async () => {

@@ -44,6 +44,21 @@ function plainProviderError(error: unknown): string {
   return "That app could not do it just now. Try again in a moment.";
 }
 
+/** How long one call to the provider may take before it counts as failed. */
+const CALL_TIMEOUT_MS = 25_000;
+
+/**
+ * Gives up on a provider call that hangs, so a request to Daksha fails with a plain message
+ * instead of waiting until the browser or the hosting gives up. The call itself is not stopped.
+ */
+export function within<T>(work: Promise<T>, ms = CALL_TIMEOUT_MS): Promise<T> {
+  let timer: ReturnType<typeof setTimeout> | undefined;
+  const late = new Promise<never>((_, reject) => {
+    timer = setTimeout(() => reject(new Error("The provider timed out")), ms);
+  });
+  return Promise.race([work, late]).finally(() => clearTimeout(timer));
+}
+
 export class ComposioBackend implements ConnectorBackend {
   private sdk?: Promise<Composio>;
   constructor(
@@ -52,11 +67,17 @@ export class ComposioBackend implements ConnectorBackend {
   ) {}
 
   private client() {
-    this.sdk ??= import("@composio/core").then(
-      ({ Composio }) =>
-        // allowTracking is off: no usage analytics leave this server through the SDK.
-        new Composio({ apiKey: this.apiKey, allowTracking: false }),
-    );
+    this.sdk ??= import("@composio/core")
+      .then(
+        ({ Composio }) =>
+          // allowTracking is off: no usage analytics leave this server through the SDK.
+          new Composio({ apiKey: this.apiKey, allowTracking: false }),
+      )
+      .catch((error: unknown) => {
+        // Try loading again next time instead of failing every call until a restart.
+        this.sdk = undefined;
+        throw error;
+      });
     return this.sdk;
   }
 
@@ -99,11 +120,13 @@ export class ComposioBackend implements ConnectorBackend {
 
   async link(userId: string, toolkit: string, callbackUrl: string) {
     const composio = await this.client();
-    const session = await composio.create(userId, {
-      toolkits: [toolkit],
-      manageConnections: { enable: false },
-    });
-    const request = await session.authorize(toolkit, { callbackUrl });
+    const session = await within(
+      composio.create(userId, {
+        toolkits: [toolkit],
+        manageConnections: { enable: false },
+      }),
+    );
+    const request = await within(session.authorize(toolkit, { callbackUrl }));
     if (!request.redirectUrl) throw new AppError("That app could not start connecting.", 502);
     return { id: request.id, url: request.redirectUrl };
   }
@@ -113,11 +136,13 @@ export class ComposioBackend implements ConnectorBackend {
     const out: BackendAccount[] = [];
     let cursor: string | undefined;
     for (let page = 0; page < 20; page++) {
-      const result = await composio.connectedAccounts.list({
-        userIds: [userId],
-        limit: 100,
-        ...(cursor ? { cursor } : {}),
-      });
+      const result = await within(
+        composio.connectedAccounts.list({
+          userIds: [userId],
+          limit: 100,
+          ...(cursor ? { cursor } : {}),
+        }),
+      );
       for (const item of result.items)
         // Only these four fields leave this function. The provider's own record can hold more.
         out.push({
@@ -134,7 +159,7 @@ export class ComposioBackend implements ConnectorBackend {
 
   async deleteAccount(id: string) {
     const composio = await this.client();
-    await composio.connectedAccounts.delete(id);
+    await within(composio.connectedAccounts.delete(id));
   }
 
   private async hints(slugs: string[]): Promise<Map<string, ToolMeta>> {
