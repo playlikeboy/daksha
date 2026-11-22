@@ -19,7 +19,7 @@ export function Characters() {
         align="center"
         badge={<Badge tone="new">New, early version</Badge>}
         title="Choose who you talk to"
-        lead={`Pick one of five characters to be your ${BRAND}, or make your own, and give it the name you like. Its face moves while you talk.`}
+        lead={`Pick one of five friendly characters to be your ${BRAND}, or make your own, and call it whatever you like. Its face comes alive while you talk.`}
       />
       <ul className="cast" role="list">
         {CHARACTERS.map((character, index) => (

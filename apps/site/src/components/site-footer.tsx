@@ -6,7 +6,7 @@ export function SiteFooter() {
     <footer className="site-footer">
       <div className="wrap site-footer__inner">
         <p className="small">
-          {BRAND} is an early version. Made to be a kind, honest place for your memories.
+          A kind, honest home for your memories. {BRAND} is an early version.
         </p>
         <nav aria-label="Footer">
           <ul role="list">

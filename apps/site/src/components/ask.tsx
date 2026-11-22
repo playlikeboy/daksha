@@ -21,12 +21,12 @@ export function Ask() {
           <SectionHead
             id="sources"
             title="Every answer shows where it came from"
-            lead={`Under every answer is a source for each entry ${BRAND} used, with the date. Press it to open the original.`}
+            lead={`Under every answer is a source for each entry ${BRAND} used, with the date. One press opens the original, so you can always check.`}
           />
           <div className="ask__promise" data-reveal="" style={stagger(2)}>
             <h3 className="h3">No source, no guess</h3>
             <p className="body-lg">
-              If {BRAND} cannot find it, or the entry is unclear, it says so instead of making something up.
+              If {BRAND} can&rsquo;t find it, or the entry is unclear, it tells you honestly instead of guessing.
             </p>
           </div>
         </div>
