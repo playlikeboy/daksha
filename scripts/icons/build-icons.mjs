@@ -25,7 +25,8 @@ const svgUrl = "data:image/svg+xml;base64," + Buffer.from(svgText).toString("bas
 const shotDir = path.join(root, "apps/site/public/shots");
 const app = path.join(root, "os/apps/mobile/public");
 
-const browser = await chromium.launch();
+// UI_SHOTS_CHROMIUM points at a browser when Playwright has none of its own (see docs/MEDIA.md).
+const browser = await chromium.launch(process.env.UI_SHOTS_CHROMIUM ? { executablePath: process.env.UI_SHOTS_CHROMIUM } : {});
 
 /** Draws the tomato at `scale` of the square (1 = edge to edge) on `background`, and returns PNG bytes. */
 async function tomato(size, scale, background) {

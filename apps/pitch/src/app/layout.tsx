@@ -14,7 +14,7 @@ import { Providers } from "./providers";
 const PITCH_TITLE = "Daksha: investor pitch";
 const PITCH_DESCRIPTION = "The pitch, the numbers and the sources for Daksha, a friendly assistant that remembers your life.";
 // Made by scripts/og/build-og.mjs. The ?v= changes when the picture changes, so chat apps fetch it again.
-const OG_IMAGE = "https://pitch.daksha.life/og.png?v=4";
+const OG_IMAGE = "https://pitch.daksha.life/og.png?v=5";
 const OG_ALT =
   "Daksha, a small red tomato, next to a phone showing the app, with the words: a friendly assistant that remembers your life. Investor pitch.";
 

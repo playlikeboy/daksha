@@ -27,7 +27,8 @@ const template = readFileSync(path.join(root, "scripts/og/og.html"), "utf8")
   .replace("TOMATO", tomato)
   .replace("SHOT", shot);
 
-const browser = await chromium.launch();
+// UI_SHOTS_CHROMIUM points at a browser when Playwright has none of its own (see docs/MEDIA.md).
+const browser = await chromium.launch(process.env.UI_SHOTS_CHROMIUM ? { executablePath: process.env.UI_SHOTS_CHROMIUM } : {});
 const page = await browser.newPage({ viewport: { width: 1200, height: 630 }, deviceScaleFactor: 1 });
 const htmlPath = path.join(root, "scripts/og/.render.html");
 for (const out of OUTPUTS) {

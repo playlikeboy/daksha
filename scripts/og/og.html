@@ -2,17 +2,17 @@
 <html lang="en">
 <head>
 <meta charset="utf-8" />
-<!-- Source of the share image (1200x630). Rendered to PNG by build-og.mjs. Colours are the Astryx Neutral
-     light tokens used by the app (os/apps/mobile/src/astryx-tokens.ts). The script swaps the upper-case words in the font urls and the two img tags
+<!-- Source of the share image (1200x630). Rendered to PNG by build-og.mjs. Colours are the app's pastel
+     ("Genie") tokens (os/apps/mobile/src/brand-tokens.ts): mist page, deep ink, slate and soft glows. The script swaps the upper-case words in the font urls and the two img tags
      for file addresses before rendering. -->
 <style>
   :root {
-    --body: #F1F1F1;      /* backgroundBody */
-    --ink: #1B1B1B;       /* accent, the near-black */
-    --text: #000000;      /* textPrimary */
-    --muted: #474747;     /* textSecondary */
-    --blue-soft: #B9D7FF; /* infoMuted */
-    --blue-ink: #003978;  /* onInfoMuted */
+    --body: #F3F5FA;      /* paper, the mist page */
+    --ink: #161A2B;       /* ink */
+    --text: #161A2B;      /* ink */
+    --muted: #4D5366;     /* ink2, slate */
+    --blue-soft: #E2E8FF; /* blueSoft */
+    --blue-ink: #3451D1;  /* blue */
   }
   @font-face { font-family: Figtree; font-weight: 500; src: url("FONT_DIR/figtree-latin-500-normal.woff2"); }
   @font-face { font-family: Figtree; font-weight: 600; src: url("FONT_DIR/figtree-latin-600-normal.woff2"); }
@@ -22,9 +22,12 @@
   body {
     font-family: Figtree, system-ui, sans-serif;
     color: var(--text);
-    /* backgroundRed (#FFC4BE) as a soft glow behind the phone */
+    /* The app's backdrop glows: sky top left, lilac behind the phone, blush and mint low down */
     background:
-      radial-gradient(620px 520px at 945px 280px, rgba(255, 196, 190, 0.75), rgba(255, 196, 190, 0) 70%),
+      radial-gradient(620px 520px at 945px 260px, rgba(220, 208, 255, 0.85), rgba(220, 208, 255, 0) 70%),
+      radial-gradient(560px 420px at 60px 40px, rgba(196, 217, 255, 0.9), rgba(196, 217, 255, 0) 70%),
+      radial-gradient(520px 380px at 1150px 640px, rgba(255, 211, 225, 0.7), rgba(255, 211, 225, 0) 70%),
+      radial-gradient(520px 380px at 40px 640px, rgba(200, 238, 218, 0.6), rgba(200, 238, 218, 0) 70%),
       var(--body);
     position: relative;
   }
@@ -37,7 +40,7 @@
   .chip { margin-top: 34px; align-self: flex-start; font-size: 25px; font-weight: 600; color: var(--blue-ink);
           background: var(--blue-soft); padding: 8px 20px; border-radius: 999px; }
   .phone { position: absolute; left: 800px; top: 56px; width: 308px; height: 640px; background: var(--ink);
-           border-radius: 50px; padding: 11px; box-shadow: 0 30px 60px rgba(27, 27, 27, 0.22), 0 6px 14px rgba(27, 27, 27, 0.12); }
+           border-radius: 50px; padding: 11px; box-shadow: 0 30px 60px rgba(22, 26, 43, 0.22), 0 6px 14px rgba(22, 26, 43, 0.12); }
   .phone .screen { width: 100%; height: 100%; border-radius: 40px; overflow: hidden; background: var(--body); }
   .phone img { width: 100%; display: block; }
 </style>
