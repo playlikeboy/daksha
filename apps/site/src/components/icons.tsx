@@ -126,3 +126,94 @@ export const SunIcon = (p: IconProps) => (
     <path d="M12 2.5v2M12 19.5v2M2.5 12h2M19.5 12h2M5.3 5.3l1.4 1.4M17.3 17.3l1.4 1.4M5.3 18.7l1.4-1.4M17.3 6.7l1.4-1.4" />
   </Icon>
 );
+
+export const CheckIcon = (p: IconProps) => (
+  <Icon {...p}>
+    <path d="m5 12.5 4.5 4.5L19 7.5" />
+  </Icon>
+);
+
+export const ShieldIcon = (p: IconProps) => (
+  <Icon {...p}>
+    <path d="M12 3.5 5 6v5.5c0 4.3 2.9 7.6 7 9 4.1-1.4 7-4.7 7-9V6l-7-2.5Z" />
+    <path d="m9 12 2.2 2.2L15.5 10" />
+  </Icon>
+);
+
+export const GiftIcon = (p: IconProps) => (
+  <Icon {...p}>
+    <path d="M4.5 10.5h15V20h-15zM3.5 7h17v3.5h-17zM12 7v13" />
+    <path d="M12 7C10.5 4 7 3.5 7 5.8 7 7 9.5 7 12 7Zm0 0c1.5-3 5-3.5 5-1.2C17 7 14.5 7 12 7Z" />
+  </Icon>
+);
+
+export const UploadIcon = (p: IconProps) => (
+  <Icon {...p}>
+    <path d="M12 16V4M7 8.5l5-5 5 5M5 20h14" />
+  </Icon>
+);
+
+export const FaceIcon = (p: IconProps) => (
+  <Icon {...p}>
+    <circle cx="12" cy="12" r="8.5" />
+    <path d="M9 10v.5M15 10v.5M8.5 14.5c1.9 2 5.1 2 7 0" />
+  </Icon>
+);
+
+export const ChatIcon = (p: IconProps) => (
+  <Icon {...p}>
+    <path d="M4.5 5.5h15v10h-9L6 19.5v-4H4.5v-10Z" />
+  </Icon>
+);
+
+export const BriefcaseIcon = (p: IconProps) => (
+  <Icon {...p}>
+    <path d="M3.5 8h17v11h-17zM9 8V5.5h6V8M3.5 13h17" />
+  </Icon>
+);
+
+export const HeartIcon = (p: IconProps) => (
+  <Icon {...p}>
+    <path d="M12 19.5s-7.5-4.3-7.5-9.6A4.2 4.2 0 0 1 12 7.6a4.2 4.2 0 0 1 7.5 2.3c0 5.3-7.5 9.6-7.5 9.6Z" />
+  </Icon>
+);
+
+export const FlowerIcon = (p: IconProps) => (
+  <Icon {...p}>
+    <circle cx="12" cy="8.5" r="2.5" />
+    <path d="M12 6c-.8-3 3.2-3.4 2.4-.2M14.5 8.5c3-.8 3.4 3.2.2 2.4M12 11c.8 3-3.2 3.4-2.4.2M9.5 8.5c-3 .8-3.4-3.2-.2-2.4M12 11v9.5M12 17c-2-2.3-4.5-2.3-5.5-1.3 1.2 1.6 3.3 2.1 5.5 1.3Z" />
+  </Icon>
+);
+
+export const GlobeIcon = (p: IconProps) => (
+  <Icon {...p}>
+    <circle cx="12" cy="12" r="8.5" />
+    <path d="M3.5 12h17M12 3.5c2.4 2.5 3.5 5.3 3.5 8.5s-1.1 6-3.5 8.5c-2.4-2.5-3.5-5.3-3.5-8.5S9.6 6 12 3.5Z" />
+  </Icon>
+);
+
+export const ChartIcon = (p: IconProps) => (
+  <Icon {...p}>
+    <path d="M4 4.5v15h16" />
+    <path d="m7.5 14.5 3.5-4 3 2.5 5-6" />
+  </Icon>
+);
+
+export const BookIcon = (p: IconProps) => (
+  <Icon {...p}>
+    <path d="M4.5 5.5c2.8-1 5.3-.7 7.5 1v13c-2.2-1.7-4.7-2-7.5-1v-13ZM19.5 5.5c-2.8-1-5.3-.7-7.5 1v13c2.2-1.7 4.7-2 7.5-1v-13Z" />
+  </Icon>
+);
+
+export const WandIcon = (p: IconProps) => (
+  <Icon {...p}>
+    <path d="m4.5 19.5 9-9M14 4.5l1.2 2.3 2.3 1.2-2.3 1.2L14 11.5l-1.2-2.3-2.3-1.2 2.3-1.2L14 4.5Z" />
+  </Icon>
+);
+
+export const StarMoonIcon = (p: IconProps) => (
+  <Icon {...p}>
+    <path d="M19 15A7.5 7.5 0 0 1 9 5a7.5 7.5 0 1 0 10 10Z" />
+    <path d="M17 3.5v3M15.5 5h3" />
+  </Icon>
+);
