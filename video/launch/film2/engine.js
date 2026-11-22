@@ -41,11 +41,11 @@ const G = {
   sun: '<circle cx="12" cy="12" r="4"/><path d="M12 2.5v2M12 19.5v2M2.5 12h2M19.5 12h2M5.3 5.3l1.4 1.4M17.3 17.3l1.4 1.4M5.3 18.7l1.4-1.4M17.3 6.7l1.4-1.4"/>',
 };
 const GC = {
-  pen: ["#ffb36b", "#ff8a3d"], chat: ["#6aa8ff", "#3d7be6"], search: ["#6aa8ff", "#3d7be6"], eye: ["#b39bff", "#8a6cf0"],
-  mic: ["#ff8fb0", "#f2668f"], cake: ["#ff9a8a", "#f36b5a"], shield: ["#5fd6a0", "#22b273"], check: ["#6aa8ff", "#3d7be6"],
-  calendar: ["#ff8a80", "#ef5b4f"], mail: ["#6aa8ff", "#3d7be6"], book: ["#ffc65c", "#f5a524"], doc: ["#6aa8ff", "#3a6fd8"],
+  pen: ["#ffb36b", "#ff8a3d"], chat: ["#6aa8ff", "#3451d1"], search: ["#6aa8ff", "#3451d1"], eye: ["#b39bff", "#8a6cf0"],
+  mic: ["#ff8fb0", "#f2668f"], cake: ["#ff9a8a", "#f36b5a"], shield: ["#5fd6a0", "#22b273"], check: ["#6aa8ff", "#3451d1"],
+  calendar: ["#ff8a80", "#ef5b4f"], mail: ["#6aa8ff", "#3451d1"], book: ["#ffc65c", "#f5a524"], doc: ["#6aa8ff", "#3a6fd8"],
   folder: ["#ffd36b", "#f2b233"], list: ["#5fd6a0", "#22b273"], note: ["#ffc65c", "#f5a524"], grid: ["#5fd6a0", "#1f9e63"],
-  video: ["#b39bff", "#8a6cf0"], heart: ["#ff8fb0", "#f2668f"], bag: ["#6aa8ff", "#3d7be6"], sun: ["#ffc65c", "#f5a524"],
+  video: ["#b39bff", "#8a6cf0"], heart: ["#ff8fb0", "#f2668f"], bag: ["#6aa8ff", "#3451d1"], sun: ["#ffc65c", "#f5a524"],
 };
 const svg = (name, size, extra = "") => `<svg viewBox="0 0 24 24" width="${size}" height="${size}" ${extra}>${G[name]}</svg>`;
 const gtile = (parent, name, size, radius = 0.28) => {
@@ -71,7 +71,7 @@ async function init() {
 
   // Soft colour drifting in the gradient at the bottom.
   const bg = document.getElementById("bg");
-  const blobs = [["#b9d4ff", 900, 0.55], ["#d9ccff", 700, 0.35], ["#bfe8ff", 800, 0.4]].map(([c, s, o]) => {
+  const blobs = [["#c4d9ff", 900, 0.55], ["#dcd0ff", 700, 0.4], ["#ffd3e1", 800, 0.35]].map(([c, s, o]) => {
     const b = el("div", "blob", bg); css(b, { width: s + "px", height: s * 0.6 + "px", background: c, opacity: o }); return { b, s };
   });
 
@@ -180,14 +180,14 @@ async function init() {
   const J = scene("journal");
   const jW = lay(1000, 900), jH = lay(500, 520);
   const jc = el("div", "abs card", J.r); css(jc, { overflow: "hidden" });
-  const jPlus = el("div", "abs", jc, '<svg viewBox="0 0 24 24" width="76" height="76" fill="none" stroke="#111a2b" stroke-width="2.2" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>');
+  const jPlus = el("div", "abs", jc, '<svg viewBox="0 0 24 24" width="76" height="76" fill="none" stroke="#161a2b" stroke-width="2.2" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>');
   css(jPlus, { left: "50%", top: "50%" });
   const jIn = el("div", "", jc); css(jIn, { position: "absolute", left: 0, top: 0, width: jW + "px", height: jH + "px", padding: "40px 46px", display: "flex", flexDirection: "column", gap: "24px" });
   const jHead = el("div", "row", jIn); jHead.style.gap = "18px";
   gtile(jHead, "book", 58);
   el("div", "", jHead, "Journal").style.cssText = "font-weight:700;font-size:38px;flex:1";
   el("div", "pill", jHead, "Thursday, 12 November").style.cssText += "background:#eef2f8;color:#4a5872;font-weight:600;font-size:26px;padding:10px 22px";
-  const jText = el("div", "", jIn); jText.style.cssText = "position:relative;flex:1;font-size:42px;font-weight:500;line-height:1.36;color:#111a2b";
+  const jText = el("div", "", jIn); jText.style.cssText = "position:relative;flex:1;font-size:42px;font-weight:500;line-height:1.36;color:#161a2b";
   const jPh = el("div", "", jText, "What happened today? Who did you see?"); jPh.style.cssText = "position:absolute;left:0;top:0;color:#9aa5b8";
   const jType = typer(jText, "Lunch with Neha. She wants Goa on 17 to 19 January. I still have to book the stay.");
   const jFoot = el("div", "row", jIn); jFoot.style.gap = "16px";
@@ -195,7 +195,7 @@ async function init() {
   el("div", "", jFoot).style.flex = "1";
   const jSave = el("div", "btn pri", jFoot, "Save entry"); jSave.style.cssText += "font-size:32px;padding:18px 40px";
   const jToast = el("div", "abs pill", J.r, svg("check", 30, 'fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"') + "Entry saved.");
-  jToast.style.cssText += "background:#111a2b;color:#fff;font-weight:700;font-size:30px;padding:16px 30px 16px 22px;box-shadow:var(--shadow-s)";
+  jToast.style.cssText += "background:#161a2b;color:#fff;font-weight:700;font-size:30px;padding:16px 30px 16px 22px;box-shadow:var(--shadow-s)";
   // The two other entries that join it: a voice note and a video.
   const mkEntry = (kind, label, text) => {
     const c = el("div", "abs card", J.r); css(c, { width: lay(640, 860) + "px", padding: "34px 38px", display: "flex", flexDirection: "column", gap: "22px" });
@@ -207,9 +207,9 @@ async function init() {
       for (let i = 0; i < 34; i++) { const b = el("i", "", wv); const hh = 10 + Math.round(42 * Math.abs(Math.sin(i * 1.7) * Math.sin(i * 0.45 + 1))); css(b, { display: "block", width: "7px", height: hh + "px", borderRadius: "4px", background: i < 13 ? "var(--blue)" : "#c8d6ee" }); }
     } else {
       const th = el("div", "", c); css(th, { height: "170px", borderRadius: "26px", background: "linear-gradient(135deg, #ffd9c4 0%, #ffc1d2 45%, #c9d8ff 100%)", display: "flex", alignItems: "center", justifyContent: "center" });
-      const pb = el("div", "tile", th, svg("play", 34, 'style="color:#3d7be6;stroke:none"')); css(pb, { width: "86px", height: "86px", borderRadius: "50%", background: "rgba(255,255,255,.92)", boxShadow: "var(--shadow-s)" });
+      const pb = el("div", "tile", th, svg("play", 34, 'style="color:#3451d1;stroke:none"')); css(pb, { width: "86px", height: "86px", borderRadius: "50%", background: "rgba(255,255,255,.92)", boxShadow: "var(--shadow-s)" });
     }
-    el("div", "", c, text).style.cssText = "font-size:30px;font-weight:500;line-height:1.35;color:#2a3954";
+    el("div", "", c, text).style.cssText = "font-size:30px;font-weight:500;line-height:1.35;color:#2f3448";
     return c;
   };
   const jVoice = mkEntry("voice", "Voice note, 11 November", "“Mum is coming soon. Clean the spare room first.”");
@@ -250,7 +250,7 @@ async function init() {
   const dots = [0, 1, 2].map(() => { const d = el("i", "", aDots); css(d, { display: "block", width: "18px", height: "18px", borderRadius: "50%", background: "#9aa5b8" }); return d; });
   const aAns = el("div", "abs card", A.r); css(aAns, { width: lay(960, 920) + "px", padding: "38px 44px", display: "flex", flexDirection: "column", gap: "18px" });
   const aHead = el("div", "row", aAns); aHead.style.gap = "16px"; gtile(aHead, "book", 48);
-  el("div", "", aHead, "From your journal").style.cssText = "font-weight:700;font-size:32px;color:#2c5fb8";
+  el("div", "", aHead, "From your journal").style.cssText = "font-weight:700;font-size:32px;color:#3451d1";
   const aLines = ["Book the stay for 17 to 19 January.", "Clean the spare room before Mum comes.", "Talk to Neha and Aarav about the dates."].map((s) => {
     const r = el("div", "row", aAns); r.style.gap = "18px"; r.style.alignItems = "flex-start";
     const dot = el("i", "", r); css(dot, { display: "block", width: "12px", height: "12px", borderRadius: "50%", background: "var(--blue)", marginTop: "20px", flex: "none" });
@@ -263,7 +263,7 @@ async function init() {
   const aEntry = el("div", "abs card", A.r); css(aEntry, { width: lay(640, 860) + "px", padding: "36px 40px", display: "flex", flexDirection: "column", gap: "18px" });
   const aeh = el("div", "row", aEntry); aeh.style.gap = "16px"; gtile(aeh, "doc", 50);
   el("div", "", aeh, "Journal, 12 November").style.cssText = "font-weight:700;font-size:32px";
-  const aeT = el("div", "", aEntry); aeT.style.cssText = "font-size:34px;font-weight:500;line-height:1.42;color:#2a3954";
+  const aeT = el("div", "", aEntry); aeT.style.cssText = "font-size:34px;font-weight:500;line-height:1.42;color:#2f3448";
   aeT.innerHTML = 'Lunch with Neha. She wants Goa on 17 to 19 January. I still have to <span class="hl">book the stay</span>.';
   const hl = aeT.querySelector(".hl"); css(hl, { backgroundRepeat: "no-repeat", backgroundImage: "linear-gradient(#ffe48a, #ffe48a)", backgroundPosition: "0 88%", borderRadius: "6px", padding: "0 4px", margin: "0 -4px" });
   function drawAsk(t) {
@@ -283,7 +283,7 @@ async function init() {
     else place(aAns, { x: lerp(-170, -250, op), y: lerp(380, 205, a), s: 1 - 0.05 * op, o: clamp((u - sc.answer) / 0.15), rx: (1 - a) * 12, ry: 4 * op });
     aAns.style.filter = op > 0.01 ? `brightness(${1 - 0.04 * op})` : "none";
     aLines.forEach((r, i) => { const k = sprS(u - sc.lines[i]); r.style.opacity = clamp((u - sc.lines[i]) / 0.15); r.style.transform = `translateY(${(1 - k) * 30}px)`; });
-    aC.forEach((ch, i) => { const k = popIn(u - sc.chips[i]); ch.style.opacity = k.o; ch.style.transform = `scale(${k.s * (1 - (i === 0 ? 0.1 * bump(u, sc.tap, 0.22) : 0))})`; ch.style.boxShadow = i === 0 && u > sc.tap ? "0 0 0 3px #3d7be6" : "none"; });
+    aC.forEach((ch, i) => { const k = popIn(u - sc.chips[i]); ch.style.opacity = k.o; ch.style.transform = `scale(${k.s * (1 - (i === 0 ? 0.1 * bump(u, sc.tap, 0.22) : 0))})`; ch.style.boxShadow = i === 0 && u > sc.tap ? "0 0 0 3px #3451d1" : "none"; });
     if (V) place(aEntry, { x: lerp(900, 40, op), y: 520, ry: lerp(-40, -6, op), rz: 2, o: clamp(op * 3) });
     else place(aEntry, { x: lerp(1400, 540, op), y: lerp(90, 120, op), ry: lerp(-40, -12, op), rz: lerp(8, 3, op), o: clamp(op * 3) });
     aEntry.style.zIndex = 4;
@@ -295,7 +295,7 @@ async function init() {
   const kc = el("div", "abs card", K.r); css(kc, { width: lay(1080, 930) + "px", padding: "40px 44px", display: "flex", flexDirection: "column", gap: "16px" });
   const kh = el("div", "row", kc); kh.style.gap = "18px"; gtile(kh, "eye", 58);
   const khT = el("div", "", kh); el("div", "", khT, "What Daksha knows").style.cssText = "font-weight:700;font-size:42px";
-  el("div", "", khT, "Each memory shows the entry it came from.").style.cssText = "font-size:27px;color:#6b7890;font-weight:500;margin-top:2px";
+  el("div", "", khT, "Each memory shows the entry it came from.").style.cssText = "font-size:27px;color:#4d5366;font-weight:500;margin-top:2px";
   const mem = [
     ["Neha wants Goa on 17 to 19 January.", "doc", "Journal, 12 November"],
     ["Aarav starts a new job on 1 December.", "video", "Video, 9 November"],
@@ -326,9 +326,9 @@ async function init() {
     // Fix: the third memory is corrected.
     const m3 = mem[2];
     m3.fix.style.transform = `scale(${1 - 0.1 * bump(u, sc.fix, 0.22)})`;
-    m3.fix.style.boxShadow = u > sc.fix && u < sc.fixSaved + 0.4 ? "0 0 0 3px #3d7be6" : "none";
+    m3.fix.style.boxShadow = u > sc.fix && u < sc.fixSaved + 0.4 ? "0 0 0 3px #3451d1" : "none";
     const editing = u > sc.fix + 0.12 && u < sc.fixSaved + 0.2;
-    m3.tx.style.boxShadow = editing ? "0 0 0 3px #3d7be6" : "none"; m3.tx.style.background = editing ? "#fff" : "transparent";
+    m3.tx.style.boxShadow = editing ? "0 0 0 3px #3451d1" : "none"; m3.tx.style.background = editing ? "#fff" : "transparent";
     kTxt3b.style.display = u > sc.fix + 0.2 ? "none" : "";
     kType(typeK(u, sc.fixType), editing && u < sc.fixType[1] + 0.1);
     const sv = popIn(u - sc.fixSaved); kSaved.style.display = u > sc.fixSaved ? "" : "none"; kSaved.style.opacity = sv.o; kSaved.style.transform = `scale(${sv.s})`;
@@ -346,7 +346,7 @@ async function init() {
   const Tk = scene("talk");
   const who = ["debo", "diya", "anaya", "mishti", "kabir"], names = ["Daksha", "Diya", "Anaya", "Mishti", "Kabir"];
   const fsz = lay(196, 150), gap = lay(270, 180);
-  const tCap = el("div", "abs", Tk.r, "Choose who you talk to"); tCap.style.cssText += `font-weight:700;font-size:${lay(52, 50)}px;color:#2a3954;white-space:nowrap`;
+  const tCap = el("div", "abs", Tk.r, "Choose who you talk to"); tCap.style.cssText += `font-weight:700;font-size:${lay(52, 50)}px;color:#2f3448;white-space:nowrap`;
   const faces = who.map((w, i) => {
     const b = el("div", "abs", Tk.r); css(b, { display: "flex", flexDirection: "column", alignItems: "center", gap: "16px" });
     const f = el("div", "face", b); css(f, { width: fsz + "px", height: fsz + "px", boxShadow: "var(--shadow-s)" }); img(f, ART(w));
@@ -371,7 +371,7 @@ async function init() {
         const talking = (u > sc.b1[0] && u < sc.b1[1]) || (u > sc.b3[0] && u < sc.b3[1]);
         const pulse = talking ? 0.03 * Math.abs(Math.sin(u * 13)) : 0;
         place(f.b, { x: lerp(x0, 0, fs), y: lerp(y0, lay(-250, -560), fs), s: k * (1 + 0.08 * bump(u, sc.pick, 0.3)) * lerp(1, lay(0.8, 1), fs) + pulse, o: clamp((u - sc.burst) / 0.06) });
-        f.f.style.boxShadow = u > sc.pick ? "0 0 0 8px #4f8ff2, var(--shadow-s)" : "var(--shadow-s)";
+        f.f.style.boxShadow = u > sc.pick ? "0 0 0 8px #5b73e0, var(--shadow-s)" : "var(--shadow-s)";
         f.n.style.opacity = 1 - fo;
       } else {
         place(f.b, { x: x0, y: y0 + fo * 120, s: k * (1 - 0.4 * fo), o: clamp((u - sc.burst - 0.07 * i) / 0.06) * (1 - fo) });
@@ -394,7 +394,7 @@ async function init() {
 
   // ---------------------------------------------------------------- people
   const P = scene("people");
-  const pHead = el("div", "abs", P.r, "People in your life"); pHead.style.cssText += `font-weight:700;font-size:${lay(46, 46)}px;color:#2a3954;white-space:nowrap`;
+  const pHead = el("div", "abs", P.r, "People in your life"); pHead.style.cssText += `font-weight:700;font-size:${lay(46, 46)}px;color:#2f3448;white-space:nowrap`;
   const ppl = [
     ["N", "#ffb36b", "Neha", "Friend", "cake", "Birthday 21 November"],
     ["M", "#b39bff", "Mum", "Mother", "heart", "Visiting on 20 November"],
@@ -404,8 +404,8 @@ async function init() {
     const av = el("div", "", c, ini); css(av, { width: "92px", height: "92px", borderRadius: "50%", background: col, color: "#fff", fontWeight: 800, fontSize: "42px", display: "flex", alignItems: "center", justifyContent: "center", flex: "none" });
     const mid = el("div", "", c); mid.style.flex = "1";
     el("div", "", mid, name).style.cssText = "font-weight:700;font-size:40px;line-height:1.15";
-    el("div", "", mid, rel).style.cssText = "font-weight:500;font-size:28px;color:#6b7890;margin-top:2px";
-    const pl = el("div", "pill", c); pl.style.cssText += "background:#f5f8fd;padding:10px 20px 10px 10px;font-weight:600;font-size:26px;color:#2a3954";
+    el("div", "", mid, rel).style.cssText = "font-weight:500;font-size:28px;color:#4d5366;margin-top:2px";
+    const pl = el("div", "pill", c); pl.style.cssText += "background:#f5f8fd;padding:10px 20px 10px 10px;font-weight:600;font-size:26px;color:#2f3448";
     gtile(pl, icon, 44, 0.5); el("span", "", pl, note);
     return c;
   });
@@ -452,11 +452,11 @@ async function init() {
     const tl = el("div", "", b); css(tl, { width: "132px", height: "132px", borderRadius: "36px", background: "#fff", boxShadow: "var(--shadow-s)", display: "flex", alignItems: "center", justifyContent: "center", position: "relative" });
     gtile(tl, icon, 84, 0.3);
     const ck = el("div", "tile", tl, svg("check", 22, 'style="stroke-width:3.4"')); css(ck, { position: "absolute", right: "-10px", top: "-10px", width: "42px", height: "42px", borderRadius: "50%", background: "#23b072", boxShadow: "0 0 0 5px #fff" });
-    el("div", "", b, label).style.cssText = "font-weight:700;font-size:28px;color:#2a3954";
+    el("div", "", b, label).style.cssText = "font-weight:700;font-size:28px;color:#2f3448";
     return { b, ck, line, x: Math.cos(ang) * rx, y: cy0 + Math.sin(ang) * ry };
   });
   const xHub = el("div", "abs face", X.r); css(xHub, { width: "200px", height: "200px", boxShadow: "0 0 0 14px rgba(79,143,242,.14), var(--shadow)" }); img(xHub, ART("debo"));
-  const xCap = el("div", "abs", X.r); xCap.style.cssText += `font-weight:700;font-size:${lay(50, 48)}px;color:#2a3954;white-space:nowrap`;
+  const xCap = el("div", "abs", X.r); xCap.style.cssText += `font-weight:700;font-size:${lay(50, 48)}px;color:#2f3448;white-space:nowrap`;
   xCap.innerHTML = "Gmail, Calendar and more";
   function drawApps(t) {
     const sc = X, u = showScene(sc, t); if (u == null) return;
@@ -480,21 +480,21 @@ async function init() {
   const Y = scene("approve");
   const yChip = chip(Y.r, "debo", 116);
   const yc = el("div", "abs card", Y.r); css(yc, { width: lay(880, 880) + "px", padding: "40px 46px", display: "flex", flexDirection: "column", gap: "14px" });
-  el("div", "", yc, "Waiting for your yes").style.cssText = "font-weight:700;font-size:28px;color:#2c5fb8";
+  el("div", "", yc, "Waiting for your yes").style.cssText = "font-weight:700;font-size:28px;color:#3451d1";
   const ych = el("div", "row", yc); ych.style.gap = "18px"; gtile(ych, "calendar", 60);
   el("div", "", ych, "Add to your calendar").style.cssText = "font-weight:700;font-size:46px";
-  el("div", "", yc, "Goa trip, 17 to 19 January").style.cssText = "font-weight:500;font-size:38px;color:#2a3954";
-  el("div", "", yc, "Nothing changes outside Daksha until you say yes.").style.cssText = "font-weight:500;font-size:27px;color:#6b7890";
+  el("div", "", yc, "Goa trip, 17 to 19 January").style.cssText = "font-weight:500;font-size:38px;color:#2f3448";
+  el("div", "", yc, "Nothing changes outside Daksha until you say yes.").style.cssText = "font-weight:500;font-size:27px;color:#4d5366";
   const yb = el("div", "row", yc); css(yb, { gap: "16px", marginTop: "18px" });
   const yOk = el("div", "btn pri", yb, svg("check", 30) + "Approve"); yOk.style.cssText += "font-size:34px;padding:20px 40px;position:relative";
   const yNo = el("div", "btn sec", yb, svg("x", 30) + "Not now"); yNo.style.cssText += "font-size:34px;padding:20px 40px";
-  const yRip = el("i", "", yOk); css(yRip, { position: "absolute", left: "50%", top: "50%", width: "120px", height: "120px", margin: "-60px", borderRadius: "50%", border: "6px solid #3d7be6" });
+  const yRip = el("i", "", yOk); css(yRip, { position: "absolute", left: "50%", top: "50%", width: "120px", height: "120px", margin: "-60px", borderRadius: "50%", border: "6px solid #3451d1" });
   const ts = lay(232, 210), tg = lay(262, 232);
-  const yMonth = el("div", "abs", Y.r, "January"); yMonth.style.cssText += "font-weight:700;font-size:40px;color:#6b7890";
+  const yMonth = el("div", "abs", Y.r, "January"); yMonth.style.cssText += "font-weight:700;font-size:40px;color:#4d5366";
   const tiles = [16, 17, 18, 19].map((d, i) => {
     const w = el("div", "abs", Y.r); css(w, { width: ts + "px", height: ts + "px" });
     const inner = el("div", "", w); css(inner, { position: "absolute", inset: 0 });
-    const front = el("div", "cal face2", inner); el("div", "", front, String(d)).style.cssText = `font-weight:700;font-size:${ts * 0.4}px;color:#111a2b;letter-spacing:-0.02em`;
+    const front = el("div", "cal face2", inner); el("div", "", front, String(d)).style.cssText = `font-weight:700;font-size:${ts * 0.4}px;color:#161a2b;letter-spacing:-0.02em`;
     const back = el("div", "cal face2", inner); css(back, { background: "linear-gradient(160deg,#5b9bff,#3a74e0)" });
     el("div", "", back, String(d)).style.cssText = `font-weight:700;font-size:${ts * 0.4}px;color:#fff;letter-spacing:-0.02em;line-height:1`;
     if (i > 0) { const tag = el("div", "", back, i === 1 ? "Goa trip" : " "); tag.style.cssText = `font-weight:700;font-size:${ts * 0.12}px;color:#fff;margin-top:${ts * 0.06}px;opacity:.95`; if (i > 1) css(tag, { width: "60%", height: "8px", borderRadius: "4px", background: "rgba(255,255,255,.6)", fontSize: "0", marginTop: ts * 0.09 + "px" }); }
@@ -503,14 +503,14 @@ async function init() {
   const yDone = el("div", "abs row", Y.r); css(yDone, { gap: "34px" });
   const dsz = lay(150, 130);
   const ck = document.createElementNS(ns, "svg"); ck.setAttribute("viewBox", "0 0 100 100"); ck.setAttribute("width", dsz); ck.setAttribute("height", dsz); yDone.appendChild(ck);
-  ck.innerHTML = '<circle cx="50" cy="50" r="44" fill="none" stroke="#3d7be6" stroke-width="8" stroke-linecap="round" transform="rotate(-90 50 50)"/><path d="M29 51.5l14 14L72 36" fill="none" stroke="#3d7be6" stroke-width="9" stroke-linecap="round" stroke-linejoin="round"/>';
+  ck.innerHTML = '<circle cx="50" cy="50" r="44" fill="none" stroke="#3451d1" stroke-width="8" stroke-linecap="round" transform="rotate(-90 50 50)"/><path d="M29 51.5l14 14L72 36" fill="none" stroke="#3451d1" stroke-width="9" stroke-linecap="round" stroke-linejoin="round"/>';
   const [ckC, ckP] = ck.children; const cLen = 2 * Math.PI * 44, pLen = 64;
   ckC.setAttribute("stroke-dasharray", cLen); ckP.setAttribute("stroke-dasharray", pLen);
   const dWord = el("div", "row", yDone); css(dWord, { fontWeight: 700, fontSize: lay(200, 170) + "px", letterSpacing: "-0.03em" });
   const dLetters = [..."Done!"].map((c) => el("span", "tok", dWord, c));
   // Confetti: the same seed every time, so every frame is repeatable.
   let seed = 11; const rnd = () => ((seed = (seed * 16807) % 2147483647) / 2147483647);
-  const confCols = ["#4f8ff2", "#ff7a6b", "#ffc94a", "#3ccf8e", "#9b7bff", "#ff8fb0", "#6ad1ff"];
+  const confCols = ["#5b73e0", "#ff7a6b", "#ffc94a", "#3ccf8e", "#9b7bff", "#ff8fb0", "#6ad1ff"];
   const conf = Array.from({ length: 130 }, (_, i) => {
     const e = el("div", "conf", Y.r), w = 10 + rnd() * 14, h = rnd() < 0.3 ? w : w * (0.4 + rnd() * 0.3);
     css(e, { width: w + "px", height: h + "px", background: confCols[i % confCols.length], borderRadius: rnd() < 0.3 ? "50%" : "3px" });
@@ -566,7 +566,7 @@ async function init() {
   const eLogo = el("div", "abs", E.r); css(eLogo, { width: lay(250, 260) + "px", height: lay(250, 260) + "px" }); img(eLogo, "/art/debo.svg").style.cssText = "width:100%;height:100%";
   const eName = el("div", "abs", E.r, "Daksha"); eName.style.cssText += `font-weight:800;font-size:${lay(150, 150)}px;letter-spacing:-0.03em`;
   const eSub = el("div", "abs", E.r, "A friendly assistant that remembers your life."); eSub.style.cssText += `font-weight:500;font-size:${lay(44, 40)}px;color:#4a5872;white-space:nowrap`;
-  const eUrl = el("div", "abs pill", E.r, "www.daksha.life"); eUrl.style.cssText += `background:#111a2b;color:#fff;font-weight:700;font-size:${lay(46, 46)}px;padding:20px 46px 22px;box-shadow:var(--shadow-s)`;
+  const eUrl = el("div", "abs pill", E.r, "www.daksha.life"); eUrl.style.cssText += `background:#161a2b;color:#fff;font-weight:700;font-size:${lay(46, 46)}px;padding:20px 46px 22px;box-shadow:var(--shadow-s)`;
   function drawEnd(t) {
     const sc = E, u = showScene(sc, t); if (u == null) return;
     const l = spr(u - sc.logo, 1.6, 5.5);

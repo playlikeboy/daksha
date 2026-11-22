@@ -40,7 +40,8 @@ const base = `http://127.0.0.1:${server.address().port}/?layout=${layout}`;
 const name = edit === "demo" ? "demo" : edit === "film2" ? "film2-" + layout : "launch-" + layout;
 const frameDir = path.join(out, "frames-" + name);
 fs.mkdirSync(frameDir, { recursive: true });
-const browser = await chromium.launch();
+// UI_SHOTS_CHROMIUM points at a browser when Playwright has none of its own (see docs/MEDIA.md).
+const browser = await chromium.launch(process.env.UI_SHOTS_CHROMIUM ? { executablePath: process.env.UI_SHOTS_CHROMIUM } : {});
 const probe = await (await browser.newContext()).newPage();
 await probe.goto(base); await probe.waitForFunction(() => window.ready);
 const [W, H] = await probe.evaluate(() => window.SIZE);
