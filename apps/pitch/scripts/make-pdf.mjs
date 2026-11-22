@@ -12,7 +12,8 @@ const require = createRequire(process.env.PW_FROM ?? new URL("../../web/package.
 const { chromium } = require("playwright");
 const base = process.argv[2] ?? "http://localhost:3000";
 const out = fileURLToPath(new URL("../public/daksha-pitch-deck.pdf", import.meta.url));
-const browser = await chromium.launch();
+// UI_SHOTS_CHROMIUM points at a browser when Playwright has none of its own (see docs/MEDIA.md).
+const browser = await chromium.launch(process.env.UI_SHOTS_CHROMIUM ? { executablePath: process.env.UI_SHOTS_CHROMIUM } : {});
 const page = await browser.newPage({ viewport: { width: 1100, height: 900 } });
 const sitePublic = fileURLToPath(new URL("../../site/public/", import.meta.url));
 await page.route("https://www.daksha.life/**", (route) => {
