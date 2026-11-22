@@ -182,7 +182,22 @@ export function ConnectAppsSection({ query }: { query: string }) {
         <Skeleton label="Loading your apps" variant="apps" rows={4} />
       </View>
     );
-  if (overview && !overview.configured)
+  if (!overview)
+    return (
+      <View style={{ gap: spacing[3] }}>
+        <Text style={s.heading}>Connect your apps</Text>
+        <ErrorNotice error={error} />
+        <Button
+          onPress={() => {
+            setError("");
+            void refresh();
+          }}
+        >
+          Try again
+        </Button>
+      </View>
+    );
+  if (!overview.configured)
     return (
       <View style={{ gap: spacing[3] }}>
         <Text style={s.heading}>Connect your apps</Text>

@@ -39,9 +39,45 @@ export type CataloguePage = z.infer<typeof CataloguePageSchema>;
 export type ConnectorsOverview = z.infer<typeof OverviewSchema>;
 
 const UNREADABLE = "I couldn't read the list of apps. Try again in a moment.";
+export const APPS_OFFLINE = "I couldn't reach Daksha just now. Check your internet, then press Try again.";
+export const APPS_SLOW = "Daksha is taking too long to answer. Press Try again in a moment.";
+export const APPS_BUSY = "Daksha is busy or restarting. Press Try again in a minute.";
+export const APPS_SIGNED_OUT = "Your sign-in ran out. Sign out, sign in again, then come back to Apps.";
+
+/**
+ * The words to show for a failed Apps request. The server's own plain sentence is kept.
+ * Network failures ("Failed to fetch"), timeouts and bare status codes become a next step.
+ */
+export function plainAppsError(error: unknown): string {
+  const name = error instanceof Error ? error.name : "";
+  const message = error instanceof Error ? error.message : String(error);
+  if (name === "AbortError" || name === "TimeoutError") return APPS_SLOW;
+  if (name === "TypeError" || /failed to fetch|network request failed|load failed|networkerror/i.test(message))
+    return APPS_OFFLINE;
+  const status = /^Request failed \((\d{3})\)/.exec(message)?.[1];
+  if (status === "401") return APPS_SIGNED_OUT;
+  if (status || /unreadable response/i.test(message)) return APPS_BUSY;
+  return message || APPS_BUSY;
+}
+
+/** How long one Apps request may take. Starting a connection asks the provider twice. */
+const LIST_TIMEOUT_MS = 30_000;
+const CONNECT_TIMEOUT_MS = 45_000;
+
+async function ask<T>(api: FuseApi, path: string, timeoutMs: number, body?: unknown, method?: string) {
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), timeoutMs);
+  try {
+    return await api.request<T>(path, body, method, { signal: controller.signal });
+  } catch (error) {
+    throw new Error(plainAppsError(error));
+  } finally {
+    clearTimeout(timer);
+  }
+}
 
 export async function loadConnectors(api: FuseApi): Promise<ConnectorsOverview> {
-  const parsed = OverviewSchema.safeParse(await api.request<unknown>("/api/connectors"));
+  const parsed = OverviewSchema.safeParse(await ask<unknown>(api, "/api/connectors", LIST_TIMEOUT_MS));
   if (!parsed.success) throw new Error(UNREADABLE);
   return parsed.data;
 }
@@ -57,7 +93,7 @@ export async function browseApps(
   params.set("offset", String(options.offset ?? 0));
   params.set("limit", String(options.limit ?? 20));
   const parsed = CataloguePageSchema.safeParse(
-    await api.request<unknown>(`/api/connectors/search?${params}`),
+    await ask<unknown>(api, `/api/connectors/search?${params}`, LIST_TIMEOUT_MS),
   );
   if (!parsed.success) throw new Error(UNREADABLE);
   return parsed.data;
@@ -66,14 +102,14 @@ export async function browseApps(
 /** Asks the server for the app's own sign-in page. `to` says where the page sends people after. */
 export async function startConnect(api: FuseApi, slug: string, to: "web" | "native") {
   const parsed = LinkSchema.safeParse(
-    await api.request<unknown>(`/api/connectors/${encodeURIComponent(slug)}/connect`, { to }),
+    await ask<unknown>(api, `/api/connectors/${encodeURIComponent(slug)}/connect`, CONNECT_TIMEOUT_MS, { to }),
   );
   if (!parsed.success) throw new Error("I couldn't start connecting that app. Try again.");
   return parsed.data;
 }
 
 export async function disconnectApp(api: FuseApi, id: string) {
-  await api.request(`/api/connectors/${encodeURIComponent(id)}`, undefined, "DELETE");
+  await ask(api, `/api/connectors/${encodeURIComponent(id)}`, LIST_TIMEOUT_MS, undefined, "DELETE");
 }
 
 /** The most useful connection for each app: a finished one beats an unfinished one. */

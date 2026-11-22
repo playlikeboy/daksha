@@ -30,8 +30,14 @@ export function setApiAddress(base: string) {
 
 export class FuseApi {
   constructor(readonly token: string) {}
-  async request<T>(path: string, body?: unknown, method?: string): Promise<T> {
+  async request<T>(
+    path: string,
+    body?: unknown,
+    method?: string,
+    init: { signal?: AbortSignal } = {},
+  ): Promise<T> {
     const response = await fetch(`${apiUrl()}${path}`, {
+      signal: init.signal,
       method: method ?? (body === undefined ? "GET" : "POST"),
       headers: {
         Authorization: `Bearer ${this.token}`,
